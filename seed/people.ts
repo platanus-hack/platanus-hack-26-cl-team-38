@@ -8,6 +8,35 @@ type SeedTopic = [name: string, kind: Kind, depth: 1 | 2 | 3, sources: Source[]]
 export type SeedPerson = { slug: string; displayName: string; topics: SeedTopic[] };
 export type SeedRoom = { id: string; code: string; name: string; people: SeedPerson[] };
 
+// Real person (team-38): topics synthesized from what Claude knows about Oscar plus his ChatGPT export.
+// Near-duplicate ChatGPT signals were merged (guitarra eléctrica, gym, gifs) and one-off support questions dropped.
+const oscar: SeedPerson = {
+  slug: "oscar",
+  displayName: "Oscar",
+  topics: [
+    ["fintech", "es", 3, ["claude", "chatgpt"]],
+    ["kubernetes", "sabe", 3, ["claude"]],
+    ["ruby on rails", "sabe", 3, ["claude"]],
+    ["experiencia de desarrollo", "sabe", 3, ["claude", "chatgpt"]],
+    ["agentes de inteligencia artificial", "hace", 3, ["claude"]],
+    ["terraform", "sabe", 2, ["claude"]],
+    ["python", "hace", 2, ["claude"]],
+    ["hackathons", "hace", 2, ["claude"]],
+    ["guitarra eléctrica", "hace", 3, ["claude", "chatgpt"]],
+    ["equipamiento de audio", "sabe", 2, ["chatgpt"]],
+    ["entrenamiento de fuerza", "hace", 3, ["chatgpt"]],
+    ["básquetbol", "hace", 3, ["chatgpt"]],
+    ["decoración del hogar", "le_gusta", 2, ["chatgpt"]],
+    ["edición fotográfica", "le_gusta", 2, ["chatgpt"]],
+    ["animación de gifs", "le_gusta", 2, ["chatgpt"]],
+    ["reparar guitarras eléctricas", "busca", 1, ["chatgpt"]],
+    ["construir muebles a medida", "busca", 1, ["chatgpt"]],
+    ["preparación física para básquetbol", "busca", 1, ["chatgpt"]],
+    ["framework nuxt", "busca", 1, ["chatgpt"]],
+    ["fundar una startup", "quiere_ser", 1, ["claude"]],
+  ],
+};
+
 const mut: SeedPerson[] = [
   // Montaña case from master-idea: Ana and Bruno aporta, Carla busca, all three share photography.
   {
@@ -169,6 +198,7 @@ const mut: SeedPerson[] = [
       ["meditación", "quiere_ser", 1, ["chatgpt"]],
     ],
   },
+  oscar,
 ];
 
 // Negative control (O8): nothing in common, so the engine must return 0 mesas.
@@ -180,8 +210,12 @@ const control: SeedPerson[] = [
   { slug: "valeria", displayName: "Valeria", topics: [["bordado", "hace", 2, ["instagram"]], ["blockchain", "busca", 1, ["claude"]]] },
 ];
 
+// A second room Oscar is in, so "only my rooms" has something to filter. People repeat across events.
+const hack: SeedPerson[] = [oscar, ...mut.filter((p) => ["bruno", "hugo", "lucia", "javier", "sofia"].includes(p.slug))];
+
 export const SEED_ROOMS: SeedRoom[] = [
   { id: "seed-mut", code: "MUT001", name: "Sala de prueba · MUT", people: mut },
+  { id: "seed-hack", code: "HACK26", name: "Platanus Hack 26", people: hack },
   { id: "seed-control", code: "CTRL01", name: "Sala de control (nada en común)", people: control },
 ];
 
@@ -193,5 +227,6 @@ export const SEED_EXPECTATIONS = {
     affinityTheme: "juegos de mesa",
     noObviousMatch: "seed-kevin",
   },
+  "seed-hack": {},
   "seed-control": { mesas: 0 },
 } as const;
