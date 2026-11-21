@@ -1,139 +1,54 @@
 # Solución core
 
-Nodos agénticos por persona que se conectan por cercanía física. Cada persona lleva un agente con su conocimiento; al compartir un lugar, los agentes encuentran lo que tienen en común y dejan nodos compartidos que representan la conexión.
+## El problema
 
-Track: Multiplayer.
+Compartes un lugar con personas con las que tendrías mucho de qué hablar, y no te enteras.
 
-## Las cinco piezas
+En un evento conoces a quien te tocó al lado, no a quien deberías conocer. Lo que cada uno sabe, le interesa y anda buscando es invisible para el resto. Y la salida obvia, publicar todo sobre ti para que te encuentren, nadie la quiere.
 
-| Pieza | Qué es | Quién la ve |
-|---|---|---|
-| **Nodo personal** | Un `.md` con el conocimiento de la persona + su agente | Solo su agente |
-| **Índice** | Lista de tópicos del `.md`, sin contenido | El servicio que calcula la gravedad |
-| **Gravedad** | Atracción entre dos nodos según similitud | Todos (es la forma del grafo) |
-| **Nodo de pareja** | `.md` compartido entre dos personas | Sus dos agentes |
-| **Nodo de grupo** | `.md` compartido entre 3 o más personas, nombrado por tópico | Los agentes de sus miembros |
+## La idea
 
-Regla que sostiene todo: **el `.md` personal nunca se lee desde afuera. El agente es la única puerta.**
+Cada persona lleva un agente que la conoce. Cuando dos personas comparten un lugar, sus agentes conversan entre ellos, descubren lo que tienen en común y se lo cuentan a sus dueños.
 
-## Flujo
+Las personas no llenan perfiles ni revisan listas de asistentes. Reciben solo lo que vale la pena: con quién hablar y de qué.
 
-```mermaid
-flowchart LR
-  A[Persona llega al lugar] --> B[Publica su índice de tópicos]
-  B --> C[Gravedad: se acerca a los parecidos]
-  C --> D[Su agente conversa con los agentes cercanos]
-  D --> E[Nodo de pareja]
-  D --> F[Nodo de grupo si son 3 o más]
-```
+## Lo que buscamos
 
-1. **Llegada.** La persona entra al lugar físico y su nodo publica solo el índice.
-2. **Gravedad.** Se calcula la similitud contra los presentes. Decide con quién vale la pena conversar.
-3. **Conversación.** Los agentes intercambian mensajes: uno pregunta (extraer) o propone (mandar), el otro responde filtrando según las reglas de su dueño.
-4. **Nodo de pareja.** Lo que ambos autorizaron queda en un `.md` común. Es la memoria de esa relación.
-5. **Nodo de grupo.** Si 3 o más comparten un vínculo fuerte, se crea un nodo por tópico al que todos se conectan.
+1. **Que el lugar conecte.** Estar en el mismo espacio es lo que abre la posibilidad. La conexión nace de la cercanía física, no de un buscador.
+2. **Que el agente hable por ti sin exponerte.** Nadie lee tu información. Tu agente decide qué contar, según lo que tú le permitas.
+3. **Lo justo, no todo.** Se revela solo lo que hay en común: suficiente para conectar, sin abrumar a nadie con datos.
+4. **Que los parecidos se encuentren solos.** Mientras más profundo y menos común es lo que dos personas comparten, más se acercan.
+5. **Que también calce quien busca con quien ofrece.** No solo personas similares: también las que se complementan.
+6. **Que cada conexión deje algo.** Entre dos personas, o en un grupo, queda un espacio compartido con lo que tienen en común. La próxima vez no parten de cero.
 
-## Modelo de datos
+## Cómo se vive
 
-**Nodo personal** (`ana.md`). Tópicos con profundidad de 1 a 3, más intención.
+Ana entra a un evento. No conoce a nadie y no hace nada especial: su agente ya sabe que trabaja en pagos y que busca inversión.
 
-```md
-# ana.md
+A los pocos minutos recibe tres cosas:
 
-## Tópicos
-- open-banking · 3
-- fintech · 3
-- running · 2
+- Beto, que está a unos metros, también trabaja en open banking y ofrece asesoría regulatoria.
+- Hay un grupo de tres personas del mismo tema formándose, con un punto de partida para conversar.
+- Mora, a quien conoció en un evento anterior, también está aquí.
 
-## Busca
-- inversión semilla
+Nadie vio el resto de lo que Ana sabe o le interesa. Solo lo que tenía en común con cada uno.
 
-## Ofrece
-- experiencia en pagos
-```
+## Para quién
 
-**Nodo de pareja** (`ana+beto.md`).
+- **Personas en eventos y espacios compartidos:** llegar a las conversaciones correctas sin depender del azar.
+- **Organizadores y comunidades:** que la gente que debería conocerse se conozca.
+- **Comercios:** entender quién llega a su local y adaptar la experiencia, sin saber quién es cada persona.
 
-```md
-# ana+beto.md
+## Qué no es
 
-## En común
-- open-banking · Ana 3 · Beto 2
-- fintech · Ana 3 · Beto 3
+- **No es una red social.** No hay perfil público, ni muro, ni seguidores.
+- **No es un directorio de asistentes.** Nadie recorre una lista para elegir a quién hablarle.
+- **No es un sistema de recomendación central.** La conexión la negocian los agentes de cada persona, no una plataforma que lo sabe todo.
 
-## Busca y ofrece
-- Ana busca: inversión semilla
-- Beto ofrece: asesoría regulatoria
+## Por qué ahora
 
-## Siguiente paso
-- Conversar sobre open-banking
-```
+Mucha gente ya tiene un asistente personal que la conoce bien. Ese conocimiento hoy solo le sirve a ella. La idea es que también sirva para encontrarse con otros, sin que deje de ser suyo.
 
-**Nodo de grupo** (`grupo-open-banking.md`).
+---
 
-```md
-# grupo-open-banking.md
-
-## Miembros
-- Ana, Beto, Mora
-
-## En común (todos)
-- open-banking · mínimo 2
-- fintech · mínimo 2
-
-## Buscan
-- Ana: inversión semilla
-
-## Ofrecen
-- Mora: conocimiento regulatorio
-```
-
-## Reglas
-
-**Similitud entre dos personas** (define la gravedad):
-
-```
-similitud(A, B) = Σ sobre tópicos comunes de  min(prof_A, prof_B) / frecuencia_del_tópico
-```
-
-- `min(prof)`: cuenta lo que sabe el que menos sabe.
-- `frecuencia`: cuántas personas tienen el tópico. Lo raro acerca más que lo masivo.
-
-**Match de intención:** `busca` de uno contra `ofrece` del otro. Es complementariedad, no similitud.
-
-**Nodo de pareja:** se crea cuando dos agentes cierran una conversación.
-
-**Nodo de grupo:**
-
-- Nace cuando 3 o más personas presentes comparten tópicos cuya suma de profundidad mínima es 4 o más.
-- Se nombra por el tópico común más profundo.
-- Alguien nuevo se une solo si tiene todos los tópicos comunes del grupo, para que no se diluya.
-- Nunca se crea un nodo por combinación de personas: el grupo es el tópico.
-
-**Límite de conversaciones:** cada agente conversa con sus vecinos más cercanos, no con toda la sala.
-
-## Privacidad
-
-- Cada tópico del `.md` tiene una sola decisión: se publica en el índice o no.
-- El agente responde con resúmenes, nunca entrega el archivo.
-- Los nodos compartidos contienen solo lo que cada parte autorizó.
-- Un tercero no ve los nodos de pareja ajenos.
-
-## Valores iniciales, no validados
-
-Salieron de una simulación con 14 personas de prueba. Hay que ajustarlos con datos reales.
-
-| Parámetro | Valor |
-|---|---|
-| Profundidad por tópico | 1 a 3 |
-| Umbral de nodo de grupo | suma de mínimos ≥ 4 |
-| Tamaño mínimo de grupo | 3 |
-
-## Fuera del core, por decidir
-
-- **Origen del `.md`:** se extraerá del Claude o ChatGPT personal de cada uno. Al principio va mockeado a mano.
-- **Detección de cercanía:** QR, BLE, geocerca o wifi del lugar.
-- **Tópicos equivalentes:** lista cerrada al inicio; embeddings después para que "pagos" calce con "fintech".
-- **Salida de personas** y disolución de grupos.
-- **Borrado** de un nodo compartido cuando una parte se retira.
-- **Comercios:** un negocio como nodo que ve demanda agregada y le habla al agente, no a la persona.
+El cómo (piezas, formato de los datos y reglas) está en [modelo-tecnico.md](modelo-tecnico.md).
