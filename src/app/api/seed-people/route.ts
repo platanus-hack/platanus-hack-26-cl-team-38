@@ -18,7 +18,6 @@ async function load(): Promise<PublicProjection[]> {
         personId: p.personId,
         displayName: p.displayName,
         topics: p.topics.map((t) => ({ id: t.id, name: t.name, kind: t.kind, depth: t.depth, sources: t.sources })),
-        ...(p.profile && { profile: p.profile }),
       });
   return [...byId.values()];
 }
