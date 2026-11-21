@@ -1,0 +1,30 @@
+{
+  "slug": "benjamin",
+  "displayName": "Benjamín",
+  "rooms": ["seed-hack"],
+  "topics": [
+    ["analítica de producto", "sabe", 3, ["claude"]],
+    ["fintech de pagos", "es", 3, ["claude"]],
+    ["medios de pago", "sabe", 3, ["claude"]],
+    ["product manager", "es", 3, ["claude"]],
+    ["programación con agentes ia", "hace", 3, ["claude"]],
+    ["benchmark de competidores", "hace", 2, ["claude"]],
+    ["bigquery para investigación", "sabe", 2, ["claude"]],
+    ["desarrollo de videojuegos", "hace", 2, ["claude"]],
+    ["diagnósticos de conversión", "ofrece", 2, ["claude"]],
+    ["entrevistas a usuarios", "hace", 2, ["claude"]],
+    ["hackathons", "hace", 2, ["claude"]],
+    ["metodología shape up", "sabe", 2, ["claude"]],
+    ["pagos en cuotas bnpl", "sabe", 2, ["claude"]],
+    ["pruebas a/b de producto", "sabe", 2, ["claude"]],
+    ["revisión de pull requests", "hace", 2, ["claude"]],
+    ["clean code y patrones", "busca", 1, ["claude"]],
+    ["construir agentes personales", "busca", 1, ["claude"]],
+    ["juegos de pelea arcade", "le_gusta", 1, ["claude"]],
+    ["música para videojuegos", "le_gusta", 1, ["claude"]],
+    ["product manager técnico", "quiere_ser", 1, ["claude"]],
+    ["prototipado rápido con ia", "ofrece", 1, ["claude"]],
+    ["publicar un videojuego propio", "quiere_ser", 1, ["claude"]],
+    ["videojuegos roguelike", "le_gusta", 1, ["claude"]]
+  ]
+}

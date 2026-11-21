@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PRIVACY_CATEGORIES, PRIVACY_LEVELS } from "./privacy/taxonomy";
 
 export const KindSchema = z.enum(["es", "sabe", "hace", "le_gusta", "quiere_ser", "busca", "ofrece"]);
 export const SourceSchema = z.enum(["claude", "chatgpt", "gemini", "spotify", "github", "instagram"]);
@@ -13,6 +14,23 @@ export const SignalSchema = z.object({
   evidence: z.string(),
 });
 
+// What a synthesizer may receive. `evidence` is quoted from private conversations, so it has no
+// place in a request that leaves the phone; strict, so sending it is an error.
+export const SynthesisSignalSchema = SignalSchema.omit({ evidence: true }).strict();
+
+export const PrivacyLevelSchema = z.enum(PRIVACY_LEVELS);
+
+// Owner-only, like `evidence`: the verdict of the privacy filter for one topic.
+export const TopicPrivacySchema = z.object({
+  level: PrivacyLevelSchema,
+  category: z.enum(PRIVACY_CATEGORIES).optional(),
+  reason: z.string().optional(),
+  saferName: z.string().optional(),
+  // fingerprint() of the kind and name this verdict was computed for.
+  checkedFor: z.string(),
+  decidedBy: z.enum(["default", "user"]),
+});
+
 export const TopicSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -21,9 +39,12 @@ export const TopicSchema = z.object({
   sources: z.array(SourceSchema).min(1),
   public: z.boolean(),
   embedding: z.array(z.number()).optional(),
+  // Missing means "never went through the filter": such a topic cannot be published.
+  privacy: TopicPrivacySchema.optional(),
 });
 
-export const PublicTopicSchema = TopicSchema.omit({ public: true });
+// Allow-list on purpose: a field added to Topic is not published until someone adds it here.
+export const PublicTopicSchema = TopicSchema.pick({ id: true, name: true, kind: true, depth: true, sources: true, embedding: true }).strict();
 
 export const PersonalNodeSchema = z.object({
   personId: z.string().min(1),
@@ -36,7 +57,7 @@ export const PublicProjectionSchema = z.object({
   personId: z.string().min(1),
   displayName: z.string().min(1),
   topics: z.array(PublicTopicSchema),
-});
+}).strict();
 
 // Not in the architecture note: added so the room screen (front E) can draw themes before
 // the room engine (front C) exists. Theme ids are what Mesa.anchorThemeId points to.
@@ -72,23 +93,57 @@ export const GroupNodeSchema = z.object({
   status: GroupNodeStatusSchema,
 });
 
+// Proximity (src/lib/proximity/). A phone sends its position to the server; what comes back to
+// anyone is distance, bearing and uncertainty, never coordinates. Strict on purpose, in and out.
+export const ProximityJoinSchema = z.object({
+  roomId: z.string().min(1),
+  personId: z.string().min(1),
+  displayName: z.string().min(1).max(40),
+  // Metres. With indoor GPS the effective reach is wider than this: see src/lib/proximity/README.md.
+  radius: z.number().min(5).max(500),
+}).strict();
+
+export const ProximityReportSchema = z.object({
+  lat: z.number().min(-90).max(90),
+  lon: z.number().min(-180).max(180),
+  // What the browser gives in `coords.accuracy`, in metres.
+  accuracy: z.number().min(0).max(100_000),
+  // Chosen by the phone and echoed as `anchor`, so it knows which of its reports the distances are from.
+  stamp: z.number().int().nonnegative(),
+}).strict();
+
+export const ProximityNeighborSchema = z.object({
+  personId: z.string().min(1),
+  displayName: z.string().min(1),
+  distance: z.number().int().nonnegative(),
+  // Degrees clockwise from north, from the recipient towards the neighbour.
+  bearing: z.number().int().min(0).max(359),
+  // ± metres of `distance`. Below about twice this, the distance cannot be told apart from zero.
+  uncertainty: z.number().int().nonnegative(),
+}).strict();
+
+export const ProximityUpdateSchema = z.object({
+  anchor: z.number().int().nonnegative(),
+  enter: z.array(ProximityNeighborSchema),
+  move: z.array(ProximityNeighborSchema),
+  leave: z.array(z.string()),
+}).strict();
+
 export type Kind = z.infer<typeof KindSchema>;
 export type Source = z.infer<typeof SourceSchema>;
 export type Role = z.infer<typeof RoleSchema>;
 export type Signal = z.infer<typeof SignalSchema>;
+export type SynthesisSignal = z.infer<typeof SynthesisSignalSchema>;
 export type Topic = z.infer<typeof TopicSchema>;
+export type PrivacyLevel = z.infer<typeof PrivacyLevelSchema>;
+export type TopicPrivacy = z.infer<typeof TopicPrivacySchema>;
 export type PublicTopic = z.infer<typeof PublicTopicSchema>;
 export type PersonalNode = z.infer<typeof PersonalNodeSchema>;
 export type PublicProjection = z.infer<typeof PublicProjectionSchema>;
 export type Theme = z.infer<typeof ThemeSchema>;
 export type Mesa = z.infer<typeof MesaSchema>;
 export type GroupNode = z.infer<typeof GroupNodeSchema>;
-
-export function toPublicProjection(node: PersonalNode): PublicProjection {
-  return {
-    personId: node.personId,
-    displayName: node.displayName,
-    // zod strips unknown keys, which drops `public` from each topic.
-    topics: node.topics.filter((t) => t.public).map((t) => PublicTopicSchema.parse(t)),
-  };
-}
+export type ProximityJoin = z.infer<typeof ProximityJoinSchema>;
+export type ProximityReport = z.infer<typeof ProximityReportSchema>;
+export type ProximityNeighbor = z.infer<typeof ProximityNeighborSchema>;
+export type ProximityUpdate = z.infer<typeof ProximityUpdateSchema>;
