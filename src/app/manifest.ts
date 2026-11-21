@@ -2,13 +2,16 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "team-38 · Platanus Hack 26",
-    short_name: "team-38",
-    description: "Mesas de 3 o más personas armadas por roles y por agentes que deliberan.",
+    name: "Minga",
+    short_name: "Minga",
+    description: "Tu Agente te presenta a quienes coinciden contigo cerca tuyo.",
+    lang: "es-CL",
     start_url: "/",
+    scope: "/",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#0a0a0a",
+    orientation: "portrait",
+    background_color: "#D9D6D0",
+    theme_color: "#D9D6D0",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
