@@ -27,6 +27,6 @@ export async function embed(texts: string[]): Promise<number[][]> {
 
 // The tokenizer splits some accented words into noisy pieces: "cerámica" scored ≥0.6 against
 // fintech, trekking and crochet, while "ceramica" stays below 0.5.
-function stripAccents(text: string): string {
+export function stripAccents(text: string): string {
   return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }

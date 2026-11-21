@@ -129,6 +129,36 @@ export const ProximityUpdateSchema = z.object({
   leave: z.array(z.string()),
 }).strict();
 
+// Users and connections (src/lib/users/). What a person gets back about someone else: always seen
+// from their own side, only public topics, never a vector.
+const SharedSideSchema = PublicTopicSchema.pick({ name: true, kind: true, depth: true });
+
+// Two topics that match: the same name (cosine 1) or by meaning (cosine >= 0.60).
+export const SharedTopicSchema = z.object({ mine: SharedSideSchema, theirs: SharedSideSchema, cosine: z.number() }).strict();
+
+// What you share with someone you crossed, as last computed. Kept one week.
+export const MatchSchema = z.object({
+  personId: z.string().min(1),
+  displayName: z.string().min(1),
+  shared: z.array(SharedTopicSchema).min(1),
+  computedAt: z.string(),
+}).strict();
+
+// There is no "rechazada" or "retirada": rejecting or withdrawing deletes the connection.
+export const ConnectionStatusSchema = z.enum(["propuesta", "aceptada"]);
+
+export const ConnectionSchema = z.object({
+  personId: z.string().min(1),
+  displayName: z.string().min(1),
+  status: ConnectionStatusSchema,
+  proposedByMe: z.boolean(),
+  acceptedAt: z.object({ mine: z.string().nullable(), theirs: z.string().nullable() }),
+  origin: z.object({ kind: z.enum(["sala", "lugar"]), roomId: z.string().nullable(), label: z.string().min(1) }),
+  // What they had in common when the second one accepted. Empty while it is a proposal.
+  shared: z.array(SharedTopicSchema),
+  createdAt: z.string(),
+}).strict();
+
 export type Kind = z.infer<typeof KindSchema>;
 export type Source = z.infer<typeof SourceSchema>;
 export type Role = z.infer<typeof RoleSchema>;
@@ -147,3 +177,7 @@ export type ProximityJoin = z.infer<typeof ProximityJoinSchema>;
 export type ProximityReport = z.infer<typeof ProximityReportSchema>;
 export type ProximityNeighbor = z.infer<typeof ProximityNeighborSchema>;
 export type ProximityUpdate = z.infer<typeof ProximityUpdateSchema>;
+export type SharedTopic = z.infer<typeof SharedTopicSchema>;
+export type Match = z.infer<typeof MatchSchema>;
+export type ConnectionStatus = z.infer<typeof ConnectionStatusSchema>;
+export type Connection = z.infer<typeof ConnectionSchema>;
