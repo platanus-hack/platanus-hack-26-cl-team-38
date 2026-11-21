@@ -1,4 +1,4 @@
-import type { SynthesisSignal } from "@/lib/types";
+import type { Source, SynthesisSignal } from "@/lib/types";
 import { TOKEN_MINUTES } from "./assistant";
 
 // Where signals wait between the assistant and the phone. The token (inside the copied message)
@@ -12,7 +12,7 @@ export type OpenInbox = { token: string; inbox: string; expiresAt: number };
 
 export function createInboxStore(ttlMs = TOKEN_MINUTES * 60_000) {
   const tokens = new Map<string, { inbox: string; expiresAt: number }>();
-  const inboxes = new Map<string, { signals: Map<string, SynthesisSignal>; expiresAt: number }>();
+  const inboxes = new Map<string, { signals: Map<string, SynthesisSignal>; profiles: Map<Source, string>; expiresAt: number }>();
   const secret = () => crypto.randomUUID().replaceAll("-", "");
 
   function sweep(now: number) {
@@ -27,7 +27,7 @@ export function createInboxStore(ttlMs = TOKEN_MINUTES * 60_000) {
       const inbox = secret();
       const expiresAt = now + ttlMs;
       tokens.set(token, { inbox, expiresAt });
-      inboxes.set(inbox, { signals: new Map(), expiresAt: expiresAt + GRACE_MS });
+      inboxes.set(inbox, { signals: new Map(), profiles: new Map(), expiresAt: expiresAt + GRACE_MS });
       return { token, inbox, expiresAt };
     },
 
@@ -50,6 +50,15 @@ export function createInboxStore(ttlMs = TOKEN_MINUTES * 60_000) {
       return true;
     },
 
+    // One profile per assistant: uploading again replaces what that assistant sent before.
+    deliverProfile(token: string, source: Source, markdown: string, now = Date.now()): boolean {
+      const entry = tokens.get(token);
+      const inbox = entry && now <= entry.expiresAt ? inboxes.get(entry.inbox) : undefined;
+      if (!inbox) return false;
+      inbox.profiles.set(source, markdown);
+      return true;
+    },
+
     // null: the inbox does not exist or expired, and the phone should ask for a new message.
     drain(id: string, now = Date.now()): SynthesisSignal[] | null {
       const inbox = inboxes.get(id);
@@ -57,6 +66,14 @@ export function createInboxStore(ttlMs = TOKEN_MINUTES * 60_000) {
       const signals = [...inbox.signals.values()];
       inbox.signals.clear();
       return signals;
+    },
+
+    drainProfiles(id: string, now = Date.now()): { source: Source; markdown: string }[] | null {
+      const inbox = inboxes.get(id);
+      if (!inbox || now > inbox.expiresAt) return null;
+      const profiles = [...inbox.profiles].map(([source, markdown]) => ({ source, markdown }));
+      inbox.profiles.clear();
+      return profiles;
     },
   };
 }

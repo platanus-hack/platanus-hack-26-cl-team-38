@@ -10,5 +10,5 @@ export async function POST(request: Request) {
 
   const signals = assistantInbox.drain(body.data.inbox);
   if (!signals) return Response.json({ error: "El mensaje venció. Copia uno nuevo." }, { status: 404 });
-  return Response.json({ signals });
+  return Response.json({ signals, profiles: assistantInbox.drainProfiles(body.data.inbox) ?? [] });
 }

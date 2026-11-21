@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { CheckInSchema } from "@/lib/privacy/checkin";
 import { fingerprint } from "@/lib/privacy/taxonomy";
 import type { Kind, PersonalNode, TopicPrivacy } from "@/lib/types";
-import { buildNode, editTopic, setShared, shareGeneral, shareRecommended, type SeedTopic } from "./seed-source";
+import { buildNode, editTopic, setShared, shareGeneral, shareRecommended } from "@/lib/node/node";
+import type { SeedTopic } from "./seed-source";
 import { checkInBody, summarize } from "./summary-model";
 
 // A seed person plus the delicate topics an assistant would also extract. Verdicts are written by
