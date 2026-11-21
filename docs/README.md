@@ -21,6 +21,7 @@ Cuando dos documentos se contradicen, vale el primero de esta lista:
 | [plan-de-construccion](plan-de-construccion.md) | Orden de construcción: P0–P4 y frentes A–E |
 | [modelo-tecnico](modelo-tecnico.md) | Modelo técnico anterior (gravedad, nodos de pareja y grupo) |
 | [mcp-ingestion](mcp-ingestion.md) | Conector MCP `submit_profile` (paso A5) |
+| [conectores-api](conectores-api.md) | Investigación: conectores de GitHub, Spotify y Strava (acceso, auth, mapeo a señales, términos) |
 | [infra-propuestas](infra-propuestas.md) | Propuestas de infra para iterar |
 | [onboarding-privacidad](onboarding-privacidad.md) | Propuesta: onboarding, niveles de tópico (segura, personal, sensible) y verificaciones de la capa privada |
 | [casos-de-uso](casos-de-uso.md) | Propuesta, no manda sobre lo anterior: conexión 1a1 (match total), sala con propósito y modo explorador |
