@@ -1,0 +1,32 @@
+{
+  "slug": "cristobal",
+  "displayName": "Cristóbal",
+  "rooms": ["seed-hack"],
+  "topics": [
+    ["hackathons", "hace", 3, ["claude"]],
+    ["apis rest con fastapi", "sabe", 2, ["claude"]],
+    ["backends en python", "ofrece", 2, ["claude"]],
+    ["docker compose", "sabe", 2, ["claude"]],
+    ["emulación de consolas retro", "le_gusta", 2, ["claude"]],
+    ["ingeniero de software", "es", 2, ["claude"]],
+    ["next.js", "sabe", 2, ["claude"]],
+    ["notas en obsidian", "hace", 2, ["claude"]],
+    ["programar con agentes de ia", "hace", 2, ["claude"]],
+    ["react con typescript", "sabe", 2, ["claude"]],
+    ["transcripción de voz a texto", "sabe", 2, ["claude"]],
+    ["videojuegos metroidvania", "hace", 2, ["claude"]],
+    ["aplicaciones pwa", "hace", 1, ["claude"]],
+    ["c sharp", "sabe", 1, ["claude"]],
+    ["criptografía", "sabe", 1, ["claude"]],
+    ["desarrollo android", "busca", 1, ["claude"]],
+    ["fundar una startup", "quiere_ser", 1, ["claude"]],
+    ["ganar una hackathon", "busca", 1, ["claude"]],
+    ["juegos de granja", "le_gusta", 1, ["claude"]],
+    ["league of legends", "le_gusta", 1, ["claude"]],
+    ["minecraft con mods", "le_gusta", 1, ["claude"]],
+    ["nlp en español", "sabe", 1, ["claude"]],
+    ["reconocimiento de patrones", "sabe", 1, ["claude"]],
+    ["shooters tácticos", "hace", 1, ["claude"]],
+    ["videojuegos roguelike", "le_gusta", 1, ["claude"]]
+  ]
+}
