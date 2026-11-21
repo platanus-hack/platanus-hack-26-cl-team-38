@@ -6,7 +6,8 @@ services:
     plan: standard
     buildCommand: pnpm install --frozen-lockfile && pnpm build
     startCommand: pnpm start
-    healthCheckPath: /manifest.webmanifest
+    # Responde 503 mientras carga el modelo del filtro de privacidad: Render no manda tráfico hasta que esté listo.
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: 22.14.0
