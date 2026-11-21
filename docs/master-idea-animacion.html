@@ -1,0 +1,678 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Conecta</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: una sola escena 16:9 (1920x1080) escalada al viewport, como un video; controles flotantes abajo. */
+:root{
+  --bg:#0B0F26; --bg-2:#121741; --ink:#EEF0FF; --muted:#8F96C8; --line:#2B3266;
+  --ana:#FF6FAE; --bruno:#3CCBF4; --carla:#F7C948;
+  --display:'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --body:'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidden;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));box-sizing:border-box}
+body.rec{padding:0}
+#stage{display:block;width:100%;height:100%}
+#controls{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+  display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:999px;
+  background:rgba(18,23,65,.86);border:1px solid var(--line);backdrop-filter:blur(8px);
+  width:min(640px, calc(100% - 32px));box-sizing:border-box;transition:opacity .4s}
+#controls.idle{opacity:0}
+#controls button{all:unset;cursor:pointer;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;color:var(--ink);flex:none}
+#controls button:hover{background:var(--line)}
+#controls button:focus-visible{outline:2px solid var(--bruno);outline-offset:2px}
+#scrub{flex:1;min-width:0;accent-color:var(--ana)}
+#time{font:500 13px/1 var(--body);color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+body.rec #controls{display:none}
+</style>
+
+<svg id="stage" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Animación que explica Conecta: perfiles como grafos con capa privada y pública, agentes que conectan por proximidad y grafos de lo que las personas tienen en común."></svg>
+
+<div id="controls">
+  <button id="play" aria-label="Pausar"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect id="i1" x="3" y="2" width="3.5" height="12" rx="1"/><rect id="i2" x="9.5" y="2" width="3.5" height="12" rx="1"/></svg></button>
+  <input id="scrub" type="range" min="0" max="78" step="0.01" value="0" aria-label="Línea de tiempo">
+  <span id="time">0:00 / 1:18</span>
+  <button id="restart" aria-label="Repetir desde el inicio"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 8a5 5 0 1 0 1.6-3.7"/><path d="M3 2.5v3h3"/></svg></button>
+</div>
+
+<script>
+(() => {
+const NS = 'http://www.w3.org/2000/svg';
+const DUR = 78;
+const REC = new URLSearchParams(location.search).has('record');
+if (REC) document.body.classList.add('rec');
+
+const C = { bg:'#0B0F26', bg2:'#121741', ink:'#EEF0FF', muted:'#8F96C8', line:'#2B3266', card:'#171D4C', dark:'#070A1C' };
+const PC = { A:'#FF6FAE', B:'#3CCBF4', C:'#F7C948' };
+const CAT = {
+  hobby:{c:'#FF8A5B', n:'Hobbies'},
+  saber:{c:'#7B93FF', n:'Conocimiento'},
+  exp:{c:'#C08CFF', n:'Experiencia'},
+  gusto:{c:'#3BD9A0', n:'Gustos'},
+  priv:{c:'#7A80B0', n:'Personal (privado)'}
+};
+const FD = "'Space Grotesk', ui-sans-serif, system-ui, sans-serif";
+const FB = "'Inter', ui-sans-serif, system-ui, sans-serif";
+
+// ---------- helpers ----------
+const el = (tag, a = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); if (parent) parent.appendChild(e); return e; };
+const tx = (s, a, parent) => { const e = el('text', a, parent); e.textContent = s; return e; };
+const set = (e, a) => { for (const k in a) e.setAttribute(k, a[k]); };
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lin = x => x;
+const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const easeOut = x => 1 - Math.pow(1 - x, 3);
+const back = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const seg = (t, a, b, fn = ease) => fn(clamp((t - a) / (b - a)));
+const fade = (t, a, b, c, d) => seg(t, a, b, lin) * (1 - seg(t, c, d, lin));
+const lerp = (a, b, k) => a + (b - a) * k;
+const lerp2 = (p, q, k) => [lerp(p[0], q[0], k), lerp(p[1], q[1], k)];
+const pop = (t, t0, d = .5) => { const k = clamp((t - t0) / d); return { s: k <= 0 ? 0.001 : back(k), a: clamp(k * 2.2) }; };
+const track = (t, keys) => {
+  if (t <= keys[0][0]) return keys[0][1];
+  for (let i = 1; i < keys.length; i++) if (t <= keys[i][0]) {
+    const [t0, v0] = keys[i - 1], [t1, v1] = keys[i];
+    return v0 + (v1 - v0) * ease((t - t0) / (t1 - t0));
+  }
+  return keys[keys.length - 1][1];
+};
+const TR = (x, y, s = 1) => `translate(${x.toFixed(2)},${y.toFixed(2)}) scale(${Math.max(s, .001).toFixed(4)})`;
+const hexD = r => { let d = ''; for (let i = 0; i < 6; i++) { const a = Math.PI / 180 * (60 * i - 90); d += (i ? 'L' : 'M') + (r * Math.cos(a)).toFixed(2) + ',' + (r * Math.sin(a)).toFixed(2); } return d + 'Z'; };
+const lockIcon = (parent, color, s = 1) => {
+  const g = el('g', { transform: `scale(${s})` }, parent);
+  el('rect', { x: -5.5, y: -1.5, width: 11, height: 8.5, rx: 2, fill: color }, g);
+  el('path', { d: 'M-3.3,-1.5 V-4 a3.3,3.3 0 0 1 6.6,0 V-1.5', fill: 'none', stroke: color, 'stroke-width': 1.8 }, g);
+  return g;
+};
+
+// ---------- data ----------
+const SLOT = { RU: [165, -95], RD: [165, 95], T: [0, -190], B: [0, 190], LU: [-165, -95], LD: [-165, 95] };
+const PRIV_POS = [[-46, 80], [-92, 0], [-46, -80]];
+const ringPos = k => { const a = (-90 + 40 * k) * Math.PI / 180; return [340 * Math.cos(a), 250 * Math.sin(a)]; };
+
+const P = {
+  A: { name: 'Ana', pub: [
+      { label: 'Escalada', cat: 'hobby', slot: 'RU', ring: 1 },
+      { label: 'Python', cat: 'saber', slot: 'T', ring: 0 },
+      { label: 'Jazz', cat: 'gusto', slot: 'RD', ring: 2 },
+      { label: 'Café de grano', cat: 'gusto', slot: 'B', ring: 3 },
+      { label: 'Cocina peruana', cat: 'hobby', slot: 'LD', ring: 5 },
+      { label: 'Diseño UX', cat: 'exp', slot: 'LU', ring: 7 }],
+    priv: [{ label: 'Salud', ring: 4 }, { label: 'Finanzas', ring: 6 }, { label: 'Familia', ring: 8 }] },
+  B: { name: 'Bruno', pub: [
+      { label: 'Trekking', cat: 'hobby', slot: 'LU' },
+      { label: 'Python', cat: 'saber', slot: 'T' },
+      { label: 'Jazz', cat: 'gusto', slot: 'LD' },
+      { label: 'Café de grano', cat: 'gusto', slot: 'B' },
+      { label: 'Ciclismo', cat: 'hobby', slot: 'RD' },
+      { label: 'Startup fintech', cat: 'exp', slot: 'RU' }],
+    priv: [{}, {}, {}] },
+  C: { name: 'Carla', pub: [
+      { label: 'Jazz', cat: 'gusto', slot: 'T' },
+      { label: 'Cocina peruana', cat: 'hobby', slot: 'LU' },
+      { label: 'Diseño UX', cat: 'exp', slot: 'LD' },
+      { label: 'Ciclismo', cat: 'hobby', slot: 'RU' },
+      { label: 'Café de grano', cat: 'gusto', slot: 'RD' },
+      { label: 'Fotografía', cat: 'hobby', slot: 'B' }],
+    priv: [{}, {}, {}] }
+};
+// tiempos de aparición
+P.A.t0 = 6.5; P.B.t0 = 21.5; P.C.t0 = 38.5;
+P.A.layers = 13.5; P.B.layers = 22.0; P.C.layers = 38.8;
+P.A.badge = 16.3; P.B.badge = 22.2; P.C.badge = 39.0;
+P.A.pubT = i => 7.2 + P.A.pub[i].ring * .33;
+P.A.privT = j => 7.2 + P.A.priv[j].ring * .33;
+P.B.pubT = i => 22.2 + i * .28;
+P.C.pubT = i => 39.0 + i * .22;
+
+const S4 = [[-110, -85], [110, -85], [-110, 85], [110, 85]];
+const S3 = [[0, -95], [-105, 80], [105, 80]];
+const S2 = [[0, -72], [0, 72]];
+const G = {
+  AB: { pair: 'AB', hubT: 28.6, slots: S4, linkFade: [35.4, 36.4], nodes: [
+      { label: 'Montaña', cat: 'hobby', src: [['A', 'Escalada'], ['B', 'Trekking']], tag: 'inferido · escalada + trekking', t: 29.4 },
+      { label: 'Python', cat: 'saber', src: [['A', 'Python'], ['B', 'Python']], t: 30.3 },
+      { label: 'Jazz', cat: 'gusto', src: [['A', 'Jazz'], ['B', 'Jazz']], t: 31.2 },
+      { label: 'Café de grano', cat: 'gusto', src: [['A', 'Café de grano'], ['B', 'Café de grano']], t: 32.1 }] },
+  AC: { pair: 'AC', hubT: 44.6, slots: S4, linkFade: [48.6, 49.4], nodes: [
+      { label: 'Cocina peruana', cat: 'hobby', src: [['A', 'Cocina peruana'], ['C', 'Cocina peruana']], t: 45.0 },
+      { label: 'Jazz', cat: 'gusto', src: [['A', 'Jazz'], ['C', 'Jazz']], t: 45.5 },
+      { label: 'Diseño UX', cat: 'exp', src: [['A', 'Diseño UX'], ['C', 'Diseño UX']], t: 46.0 },
+      { label: 'Café de grano', cat: 'gusto', src: [['A', 'Café de grano'], ['C', 'Café de grano']], t: 46.5 }] },
+  BC: { pair: 'BC', hubT: 46.1, slots: S3, linkFade: [48.6, 49.4], nodes: [
+      { label: 'Jazz', cat: 'gusto', src: [['B', 'Jazz'], ['C', 'Jazz']], t: 46.6 },
+      { label: 'Ciclismo', cat: 'hobby', src: [['B', 'Ciclismo'], ['C', 'Ciclismo']], t: 47.1 },
+      { label: 'Café de grano', cat: 'gusto', src: [['B', 'Café de grano'], ['C', 'Café de grano']], t: 47.6 }] },
+  ABC: { pair: 'ABC', hubT: 50.5, slots: S2, linkFade: [55.0, 56.0], nodes: [
+      { label: 'Jazz', cat: 'gusto', src: [['AB', 'Jazz'], ['AC', 'Jazz'], ['BC', 'Jazz']], t: 51.3 },
+      { label: 'Café de grano', cat: 'gusto', src: [['AB', 'Café de grano'], ['AC', 'Café de grano'], ['BC', 'Café de grano']], t: 52.0 }] }
+};
+// pistas de posición (x, y, escala)
+const POS = {
+  A:  { x: [[20, 960], [22.5, 420], [36, 420], [39, 330]], y: [[20, 590], [22.5, 580], [36, 580], [39, 380]], s: [[20, 1.25], [22.5, 1], [36, 1], [39, .62]] },
+  B:  { x: [[21.5, 1640], [23.2, 1500], [36, 1500], [39, 1590]], y: [[36, 580], [39, 380]], s: [[36, 1], [39, .62]] },
+  C:  { x: [[0, 960]], y: [[38.3, 1010], [39.9, 900]], s: [[0, .62]] },
+  AB: { x: [[0, 960]], y: [[36, 580], [39, 380]], s: [[36, 1], [39, .7]] },
+  AC: { x: [[0, 645]], y: [[0, 640]], s: [[0, .7]] },
+  BC: { x: [[0, 1275]], y: [[0, 640]], s: [[0, .7]] },
+  ABC:{ x: [[0, 960]], y: [[0, 600]], s: [[0, .85]] }
+};
+const CHANNELS = [
+  { from: 'A', to: 'AB', t0: 26.8, t1: 28.6 },
+  { from: 'B', to: 'AB', t0: 26.8, t1: 28.6 },
+  { from: 'C', to: 'AC', t0: 42.2, t1: 44.2 },
+  { from: 'A', to: 'AC', t0: 42.9, t1: 44.5 },
+  { from: 'C', to: 'BC', t0: 42.2, t1: 45.0 },
+  { from: 'B', to: 'BC', t0: 44.0, t1: 45.95 },
+  { from: 'C', to: 'ABC', t0: 42.2, t1: 44.0 }
+];
+const HUBLINKS = [{ from: 'AB', t0: 49.0, t1: 50.4 }, { from: 'AC', t0: 49.2, t1: 50.4 }, { from: 'BC', t0: 49.2, t1: 50.4 }];
+const CAPTIONS = [
+  { a: 6.0, b: 12.2, step: 'EL PERFIL', title: 'Cada persona es un grafo', sub: 'Gustos, hobbies, conocimiento y experiencia, conectados alrededor de ti.' },
+  { a: 12.2, b: 20.2, step: 'DOS CAPAS', title: 'Una capa privada y una pública', sub: 'Tú decides qué parte de tu grafo está disponible para conectar.' },
+  { a: 20.2, b: 28.4, step: 'PROXIMIDAD', title: 'Ana y Bruno coinciden en un lugar', sub: 'Cada uno tiene un agente que lo representa.' },
+  { a: 28.4, b: 36.2, step: 'CONEXIÓN', title: 'Sus agentes crean un tercer grafo', sub: 'Comparan solo las capas públicas y guardan lo que tienen en común.' },
+  { a: 36.2, b: 43.0, step: 'UNA PERSONA MÁS', title: 'Llega Carla', sub: 'Su agente despliega una instancia por cada persona cercana.' },
+  { a: 43.0, b: 49.0, step: 'INSTANCIAS', title: 'Una conversación por cada par', sub: 'Carla con Ana y Carla con Bruno generan sus propios grafos en común.' },
+  { a: 49.0, b: 56.2, step: 'GRUPO', title: 'El mínimo común de los tres', sub: 'Una tercera instancia encuentra lo que comparten Ana, Bruno y Carla.' },
+  { a: 56.2, b: 70.2, step: 'LA APP', title: 'Todo lo que compartes, en un lugar', sub: 'Ana ve sus coincidencias con cada conexión y con cada grupo.' }
+];
+
+// ---------- build ----------
+const svg = document.getElementById('stage');
+let measurer;
+const measure = (s, size, weight = 600, family = FB) => { set(measurer, { 'font-size': size, 'font-weight': weight, 'font-family': family }); measurer.textContent = s; return measurer.getComputedTextLength(); };
+
+const R = {}; // referencias
+
+function makePill(parent, label, cat, size = 19) {
+  const g = el('g', {}, parent);
+  const w = Math.round(measure(label, size) + 50), h = size * 2.1;
+  const c = CAT[cat].c;
+  const hl = el('rect', { x: -w / 2 - 6, y: -h / 2 - 6, width: w + 12, height: h + 12, rx: h / 2 + 6, fill: 'none', stroke: c, 'stroke-width': 3, opacity: 0 }, g);
+  el('rect', { x: -w / 2, y: -h / 2, width: w, height: h, rx: h / 2, fill: C.bg }, g);
+  el('rect', { x: -w / 2, y: -h / 2, width: w, height: h, rx: h / 2, fill: c, 'fill-opacity': .14, stroke: c, 'stroke-width': 1.6 }, g);
+  if (cat === 'priv') { const lk = lockIcon(g, c, .95); lk.setAttribute('transform', `translate(${-w / 2 + 20},${0}) scale(.95)`); }
+  else el('circle', { cx: -w / 2 + 19, cy: 0, r: 5.5, fill: c }, g);
+  tx(label, { x: -w / 2 + 33, y: size * .36, 'font-size': size, 'font-weight': 600, 'font-family': FB, fill: C.ink }, g);
+  return { g, hl, w };
+}
+
+function build() {
+  measurer = el('text', { x: -9999, y: -9999, opacity: 0 }, svg);
+  const defs = el('defs', {}, svg);
+  defs.innerHTML = `
+    <radialGradient id="bgGrad" cx="50%" cy="45%" r="75%"><stop offset="0" stop-color="#18205A"/><stop offset=".55" stop-color="#0F1436"/><stop offset="1" stop-color="#090C20"/></radialGradient>
+    <pattern id="dots" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="16" cy="16" r="1.1" fill="#2A3270"/></pattern>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+    <linearGradient id="gAB" x1="0" x2="1"><stop offset="0" stop-color="${PC.A}"/><stop offset="1" stop-color="${PC.B}"/></linearGradient>
+    <linearGradient id="gAC" x1="0" x2="1"><stop offset="0" stop-color="${PC.A}"/><stop offset="1" stop-color="${PC.C}"/></linearGradient>
+    <linearGradient id="gBC" x1="0" x2="1"><stop offset="0" stop-color="${PC.B}"/><stop offset="1" stop-color="${PC.C}"/></linearGradient>`;
+  el('rect', { width: 1920, height: 1080, fill: 'url(#bgGrad)' }, svg);
+  el('rect', { width: 1920, height: 1080, fill: 'url(#dots)', opacity: .55 }, svg);
+
+  R.world = el('g', {}, svg);
+  R.pulses = el('g', {}, R.world);
+  R.channels = el('g', {}, R.world);
+  R.links = el('g', {}, R.world);
+  R.graphs = el('g', {}, R.world);
+  R.inst = el('g', {}, R.world);
+  R.overlay = el('g', {}, svg);
+  R.phoneL = el('g', {}, svg);
+  R.caps = el('g', {}, svg);
+  R.titles = el('g', {}, svg);
+
+  // personas
+  for (const k of 'ABC') {
+    const p = P[k], g = el('g', {}, R.graphs);
+    p.g = g;
+    p.disk = el('circle', { r: 125, fill: '#060818', 'fill-opacity': .7, stroke: '#3A4178', 'stroke-width': 1.6, 'stroke-dasharray': '5 7' }, g);
+    p.ring = el('circle', { r: 190, fill: 'none', stroke: PC[k], 'stroke-opacity': .3, 'stroke-width': 2, 'stroke-dasharray': '2 9', 'stroke-linecap': 'round' }, g);
+    const eg = el('g', {}, g);
+    p.pubE = p.pub.map(n => { n.edge = el('line', { x1: 0, y1: 0, stroke: PC[k], 'stroke-opacity': .4, 'stroke-width': 1.6 }, eg); return n; });
+    p.priv.forEach(n => { n.edge = el('line', { x1: 0, y1: 0, stroke: CAT.priv.c, 'stroke-opacity': .45, 'stroke-width': 1.4, 'stroke-dasharray': '3 4' }, eg); });
+    p.priv.forEach(n => {
+      if (k === 'A') n.pill = makePill(g, n.label, 'priv');
+      n.dot = el('g', {}, g);
+      el('circle', { r: 15, fill: '#1A1F48', stroke: CAT.priv.c, 'stroke-width': 1.5 }, n.dot);
+      lockIcon(n.dot, CAT.priv.c, .85);
+    });
+    p.pub.forEach(n => { n.pill = makePill(g, n.label, n.cat); n.hlT = []; });
+    p.center = el('g', {}, g);
+    el('circle', { r: 66, fill: PC[k], opacity: .25, filter: 'url(#soft)' }, p.center);
+    el('circle', { r: 52, fill: PC[k] }, p.center);
+    tx(p.name, { y: 7.5, 'text-anchor': 'middle', 'font-size': 22, 'font-weight': 700, 'font-family': FD, fill: C.bg }, p.center);
+    p.badgeG = el('g', {}, g);
+    el('path', { d: hexD(17), fill: C.bg, stroke: PC[k], 'stroke-width': 2.5 }, p.badgeG);
+    el('path', { d: hexD(7), fill: PC[k] }, p.badgeG);
+    p.badgePos = [30, -51];
+    // pulsos de proximidad
+    p.pulses = [0, 1, 2].map(() => el('circle', { r: 10, fill: 'none', stroke: PC[k], 'stroke-width': 2.5, opacity: 0 }, R.pulses));
+  }
+
+  // grafos en común
+  for (const key in G) {
+    const c = G[key], g = el('g', {}, R.graphs);
+    c.g = g;
+    const eg = el('g', {}, g);
+    c.nodes.forEach((n, i) => { n.pos = c.slots[i]; n.edge = el('line', { x1: 0, y1: 0, x2: n.pos[0], y2: n.pos[1], stroke: '#C9CDF5', 'stroke-opacity': .28, 'stroke-width': 1.5 }, eg); });
+    c.nodes.forEach(n => { n.pill = makePill(g, n.label, n.cat); n.hlT = []; });
+    const isABC = key === 'ABC';
+    c.hub = el('g', {}, g);
+    c.hl = el('circle', { r: isABC ? 74 : 62, fill: 'none', stroke: '#FFFFFF', 'stroke-width': 3, opacity: 0 }, c.hub);
+    if (isABC) el('circle', { r: 58, fill: '#FFFFFF', opacity: .35, filter: 'url(#glow)' }, c.hub);
+    el('circle', { r: isABC ? 44 : 36, fill: '#141A44', stroke: isABC ? '#FFFFFF' : `url(#g${key})`, 'stroke-width': isABC ? 3.5 : 4 }, c.hub);
+    const t = el('text', { y: isABC ? 6 : 6.5, 'text-anchor': 'middle', 'font-size': isABC ? 17 : 19, 'font-weight': 700, 'font-family': FD }, c.hub);
+    key.split('').forEach((ch, i) => {
+      if (i) { const plus = el('tspan', { fill: C.muted }, t); plus.textContent = '+'; }
+      const s = el('tspan', { fill: PC[ch] }, t); s.textContent = ch;
+    });
+    c.nodes.forEach(n => { if (n.tag) n.tagEl = tx(n.tag, { x: n.pos[0], y: n.pos[1] - 36, 'text-anchor': 'middle', 'font-size': 15, 'font-style': 'italic', 'font-family': FB, fill: C.muted }, g); });
+    if (isABC) c.label = tx('MÍNIMO COMÚN', { y: 128, 'text-anchor': 'middle', 'font-size': 17, 'font-weight': 700, 'letter-spacing': 3, 'font-family': FB, fill: '#FFFFFF' }, g);
+  }
+
+  // enlaces de origen (pill fuente → pill en común)
+  R.srcLinks = [];
+  for (const key in G) G[key].nodes.forEach(n => n.src.forEach(([sk, label]) => {
+    const srcNode = (P[sk] ? P[sk].pub : G[sk].nodes).find(m => m.label === label);
+    srcNode.hlT.push(n.t);
+    R.srcLinks.push({ key, n, sk, srcNode, path: el('path', { fill: 'none', stroke: CAT[n.cat].c, 'stroke-width': 2.2, 'stroke-linecap': 'round', opacity: 0 }, R.links) });
+  }));
+
+  // canales e instancias de agente
+  CHANNELS.forEach(ch => {
+    ch.line = el('line', { stroke: PC[ch.from], 'stroke-width': 2, 'stroke-opacity': .45 }, R.channels);
+    ch.parts = [0, 1, 2].map(() => el('circle', { r: 4, fill: PC[ch.from], opacity: 0 }, R.channels));
+    ch.inst = el('g', {}, R.inst);
+    el('path', { d: hexD(15), fill: PC[ch.from], stroke: C.bg, 'stroke-width': 3 }, ch.inst);
+    el('path', { d: hexD(5.5), fill: C.bg }, ch.inst);
+  });
+  HUBLINKS.forEach(h => {
+    h.line = el('line', { stroke: '#FFFFFF', 'stroke-width': 2, 'stroke-opacity': .4, 'stroke-dasharray': '2 7', 'stroke-linecap': 'round' }, R.channels);
+    h.parts = [0, 1].map(() => el('circle', { r: 3.5, fill: '#FFFFFF', opacity: 0 }, R.channels));
+  });
+
+  // distancia (escena 2)
+  R.dist = el('g', { opacity: 0 }, R.overlay);
+  el('line', { x1: 0, y1: 0, x2: 0, y2: 0, stroke: C.muted, 'stroke-width': 2, 'stroke-dasharray': '6 8' }, R.dist).classList.add('dl');
+  R.distLine = R.dist.querySelector('line');
+  R.distTxt = tx('a 8 metros', { 'text-anchor': 'middle', 'font-size': 22, 'font-weight': 600, 'font-family': FB, fill: C.ink }, R.dist);
+
+  buildLegend(); buildCallouts(); buildCaptions(); buildPhone(); buildTitles();
+}
+
+function buildLegend() {
+  R.legend = el('g', { opacity: 0 }, R.overlay);
+  const items = ['hobby', 'saber', 'exp', 'gusto', 'priv'];
+  const widths = items.map(k => measure(CAT[k].n, 18, 500) + 30);
+  const total = widths.reduce((a, b) => a + b, 0) + 36 * (items.length - 1);
+  let x = 960 - total / 2;
+  items.forEach((k, i) => {
+    if (k === 'priv') { const l = lockIcon(R.legend, CAT[k].c, 1); l.setAttribute('transform', `translate(${x + 7},1018)`); }
+    else el('circle', { cx: x + 7, cy: 1017, r: 7, fill: CAT[k].c }, R.legend);
+    tx(CAT[k].n, { x: x + 24, y: 1023.5, 'font-size': 18, 'font-weight': 500, 'font-family': FB, fill: C.muted }, R.legend);
+    x += widths[i] + 36;
+  });
+}
+
+function callout(x, y, title, lines, icon) {
+  const g = el('g', { opacity: 0 }, R.overlay);
+  const ig = el('g', { transform: `translate(${x + 18},${y - 8})` }, g);
+  icon(ig);
+  tx(title, { x: x + 52, y, 'font-size': 28, 'font-weight': 700, 'font-family': FD, fill: C.ink }, g);
+  lines.forEach((l, i) => tx(l, { x: x + 52, y: y + 36 + i * 28, 'font-size': 20, 'font-family': FB, fill: C.muted }, g));
+  return g;
+}
+function buildCallouts() {
+  R.coPub = callout(1390, 440, 'Capa pública', ['Lo que estás dispuesto', 'a compartir para conectar.'],
+    g => el('circle', { r: 15, fill: 'none', stroke: PC.A, 'stroke-width': 2.5, 'stroke-dasharray': '2 6', 'stroke-linecap': 'round' }, g));
+  R.coAgent = callout(1390, 620, 'Tu agente', ['Te representa ante otros', 'y solo usa tu capa pública.'],
+    g => { el('path', { d: hexD(16), fill: C.bg, stroke: PC.A, 'stroke-width': 2.5 }, g); el('path', { d: hexD(6), fill: PC.A }, g); });
+  R.coPriv = callout(130, 530, 'Capa privada', ['Salud, finanzas, familia:', 'nunca sale de tu grafo.'],
+    g => { el('circle', { r: 17, fill: '#060818', stroke: '#3A4178', 'stroke-width': 1.6, 'stroke-dasharray': '4 4' }, g); lockIcon(g, CAT.priv.c, 1); });
+}
+
+function buildCaptions() {
+  CAPTIONS.forEach(c => {
+    c.g = el('g', { opacity: 0 }, R.caps);
+    tx(c.step, { x: 90, y: 92, 'font-size': 17, 'font-weight': 700, 'letter-spacing': 3.5, 'font-family': FB, fill: PC.A }, c.g);
+    tx(c.title, { x: 88, y: 150, 'font-size': 52, 'font-weight': 700, 'font-family': FD, fill: C.ink, 'letter-spacing': -.5 }, c.g);
+    tx(c.sub, { x: 90, y: 194, 'font-size': 25, 'font-family': FB, fill: C.muted }, c.g);
+  });
+}
+
+function chipRow(parent, chips, x0, y0, maxW, size = 16) {
+  let x = x0, y = y0; const h = 32, gap = 8;
+  chips.forEach(([label, cat, strong]) => {
+    const w = measure(label, size, 600) + 38;
+    if (x + w > x0 + maxW) { x = x0; y += h + gap; }
+    const c = CAT[cat].c;
+    el('rect', { x, y, width: w, height: h, rx: 16, fill: c, 'fill-opacity': strong ? .26 : .14, stroke: c, 'stroke-width': 1.3 }, parent);
+    el('circle', { cx: x + 15, cy: y + 16, r: 4.5, fill: c }, parent);
+    tx(label, { x: x + 26, y: y + 21.5, 'font-size': size, 'font-weight': 600, 'font-family': FB, fill: C.ink }, parent);
+    x += w + gap;
+  });
+  return y + h;
+}
+
+function buildPhone() {
+  const X = 1236, Y = 92;
+  R.phone = el('g', { opacity: 0 }, R.phoneL);
+  R.phoneX = X; R.phoneY = Y;
+  const g = el('g', {}, R.phone);
+  el('rect', { x: -10, y: 20, width: 470, height: 890, rx: 66, fill: '#000', opacity: .35, filter: 'url(#glow)' }, g);
+  el('rect', { width: 450, height: 890, rx: 64, fill: C.dark, stroke: '#3A4280', 'stroke-width': 3 }, g);
+  el('rect', { x: 14, y: 14, width: 422, height: 862, rx: 52, fill: '#10153A' }, g);
+  el('rect', { x: 170, y: 28, width: 110, height: 30, rx: 15, fill: C.dark }, g);
+  tx('9:41', { x: 58, y: 50, 'font-size': 16, 'font-weight': 600, 'font-family': FB, fill: C.ink }, g);
+  // marca
+  const brand = el('g', { transform: 'translate(54,108)' }, g);
+  [[-9, 6, PC.A], [9, 6, PC.B], [0, -9, PC.C]].forEach(([x, y, c]) => el('circle', { cx: x, cy: y, r: 5, fill: c }, brand));
+  el('circle', { r: 3.2, fill: '#fff' }, brand);
+  tx('conecta', { x: 76, y: 115, 'font-size': 23, 'font-weight': 700, 'font-family': FD, fill: C.ink }, g);
+  el('circle', { cx: 396, cy: 106, r: 20, fill: PC.A }, g);
+  tx('A', { x: 396, y: 113, 'text-anchor': 'middle', 'font-size': 19, 'font-weight': 700, 'font-family': FD, fill: C.bg }, g);
+  tx('Hola, Ana', { x: 40, y: 172, 'font-size': 36, 'font-weight': 700, 'font-family': FD, fill: C.ink }, g);
+  tx('3 conexiones cerca de ti hoy', { x: 40, y: 204, 'font-size': 17, 'font-family': FB, fill: C.muted }, g);
+
+  const cards = [
+    { who: ['B'], name: 'Bruno', meta: '4 en común', key: 'AB', chips: [['Montaña', 'hobby'], ['Python', 'saber'], ['Jazz', 'gusto'], ['Café de grano', 'gusto']], t: 59.2 },
+    { who: ['C'], name: 'Carla', meta: '4 en común', key: 'AC', chips: [['Cocina peruana', 'hobby'], ['Jazz', 'gusto'], ['Diseño UX', 'exp'], ['Café de grano', 'gusto']], t: 61.2 },
+    { who: ['A', 'B', 'C'], name: 'Ana, Bruno y Carla', meta: 'mínimo común', key: 'ABC', chips: [['Jazz', 'gusto', 1], ['Café de grano', 'gusto', 1]], t: 63.2, group: true }
+  ];
+  let y = 234;
+  R.cards = cards.map(cd => {
+    const cg = el('g', { opacity: 0 }, R.phone);
+    const inner = el('g', {}, cg);
+    const bgR = el('rect', { x: 28, y, width: 394, height: 100, rx: 24, fill: C.card, stroke: cd.group ? '#FFFFFF' : C.line, 'stroke-opacity': cd.group ? .55 : 1, 'stroke-width': 1.5 }, inner);
+    cd.who.forEach((w, i) => {
+      el('circle', { cx: 64 + i * 18, cy: y + 38, r: 18, fill: PC[w], stroke: C.card, 'stroke-width': 3 }, inner);
+      tx(w, { x: 64 + i * 18, y: y + 44, 'text-anchor': 'middle', 'font-size': 16, 'font-weight': 700, 'font-family': FD, fill: C.bg }, inner);
+    });
+    const nx = 64 + (cd.who.length - 1) * 18 + 30;
+    tx(cd.name, { x: nx, y: y + (cd.group ? 34 : 44), 'font-size': 19, 'font-weight': 600, 'font-family': FB, fill: C.ink }, inner);
+    if (cd.group) tx(cd.meta.toUpperCase(), { x: nx, y: y + 57, 'font-size': 13, 'font-weight': 700, 'letter-spacing': 2, 'font-family': FB, fill: '#FFFFFF' }, inner);
+    else tx(cd.meta, { x: 404, y: y + 44, 'text-anchor': 'end', 'font-size': 14, 'font-weight': 500, 'font-family': FB, fill: C.muted }, inner);
+    const bottom = chipRow(inner, cd.chips, 46, y + (cd.group ? 78 : 72), 358);
+    const h = bottom - y + 20;
+    bgR.setAttribute('height', h);
+    const res = { g: cg, inner, t: cd.t, key: cd.key };
+    y += h + 16;
+    return res;
+  });
+  R.phoneFoot = el('g', { opacity: 0 }, R.phone);
+  const lk = lockIcon(R.phoneFoot, C.muted, 1); lk.setAttribute('transform', 'translate(74,835)');
+  tx('Tu capa privada nunca se comparte', { x: 90, y: 841, 'font-size': 16, 'font-family': FB, fill: C.muted }, R.phoneFoot);
+  R.phoneFoot.T = 65.4;
+}
+
+function makeLogo(parent) {
+  const g = el('g', {}, parent);
+  const pts = [[-92, 52, PC.A], [92, 52, PC.B], [0, -106, PC.C]];
+  const edges = [[0, 1], [1, 2], [2, 0]].map(([a, b]) => el('path', { d: `M${pts[a][0]},${pts[a][1]} L${pts[b][0]},${pts[b][1]}`, pathLength: 1, stroke: '#4A5296', 'stroke-width': 3, fill: 'none', 'stroke-dasharray': 1, 'stroke-dashoffset': 1 }, g));
+  const spokes = pts.map(p => el('path', { d: `M${p[0]},${p[1]} L0,0`, pathLength: 1, stroke: '#FFFFFF', 'stroke-opacity': .55, 'stroke-width': 2.5, fill: 'none', 'stroke-dasharray': 1, 'stroke-dashoffset': 1 }, g));
+  const nodes = pts.map(p => { const n = el('g', {}, g); el('circle', { r: 20, fill: p[2] }, n); n.p = p; return n; });
+  const center = el('g', {}, g);
+  el('circle', { r: 30, fill: '#fff', opacity: .45, filter: 'url(#soft)' }, center);
+  el('circle', { r: 13, fill: '#fff' }, center);
+  return { g, edges, spokes, nodes, center };
+}
+function updateLogo(L, t, t0, x, y, s) {
+  set(L.g, { transform: TR(x, y, s) });
+  L.nodes.forEach((n, i) => { const p = pop(t, t0 + i * .2); set(n, { transform: TR(n.p[0], n.p[1], p.s), opacity: p.a }); });
+  L.edges.forEach((e, i) => e.setAttribute('stroke-dashoffset', 1 - seg(t, t0 + .5 + i * .15, t0 + 1.2 + i * .15)));
+  L.spokes.forEach((e, i) => e.setAttribute('stroke-dashoffset', 1 - seg(t, t0 + 1.2 + i * .1, t0 + 1.8 + i * .1)));
+  const c = pop(t, t0 + 1.7, .6); set(L.center, { transform: TR(0, 0, c.s), opacity: c.a });
+}
+
+function buildTitles() {
+  R.intro = el('g', {}, R.titles);
+  R.introLogo = makeLogo(R.intro);
+  R.introTitle = tx('Conecta', { x: 960, y: 650, 'text-anchor': 'middle', 'font-size': 168, 'font-weight': 700, 'font-family': FD, fill: C.ink, 'letter-spacing': -3 }, R.intro);
+  R.introSub = tx('Conexiones entre personas, mediadas por agentes y grafos.', { x: 960, y: 728, 'text-anchor': 'middle', 'font-size': 34, 'font-family': FB, fill: C.muted }, R.intro);
+
+  R.outro = el('g', { opacity: 0 }, R.titles);
+  R.outroLogo = makeLogo(R.outro);
+  R.outroTitle = tx('Conecta', { x: 960, y: 520, 'text-anchor': 'middle', 'font-size': 140, 'font-weight': 700, 'font-family': FD, fill: C.ink, 'letter-spacing': -3 }, R.outro);
+  R.outroSub = tx('Conecta personas a partir de lo que de verdad comparten.', { x: 960, y: 590, 'text-anchor': 'middle', 'font-size': 32, 'font-family': FB, fill: C.muted }, R.outro);
+  const pill = [
+    { x: 460, title: 'Tu grafo personal', body: ['Con una capa privada', 'y una capa pública.'], icon: g => { el('circle', { r: 30, fill: 'none', stroke: PC.A, 'stroke-width': 2.5, 'stroke-dasharray': '2 7', 'stroke-linecap': 'round' }, g); el('circle', { r: 17, fill: PC.A }, g); } },
+    { x: 960, title: 'Agentes por proximidad', body: ['Conversan por ti cuando', 'alguien está cerca.'], icon: g => { el('path', { d: hexD(26), fill: C.bg, stroke: PC.B, 'stroke-width': 3 }, g); el('path', { d: hexD(10), fill: PC.B }, g); } },
+    { x: 1460, title: 'Grafos de lo común', body: ['De a dos y en grupo,', 'siempre a mano en tu app.'], icon: g => { el('circle', { r: 30, fill: '#fff', opacity: .3, filter: 'url(#soft)' }, g); el('circle', { r: 22, fill: '#141A44', stroke: '#fff', 'stroke-width': 3 }, g); } }
+  ];
+  R.pillars = pill.map(p => {
+    const g = el('g', { opacity: 0 }, R.outro);
+    const ig = el('g', { transform: `translate(${p.x},740)` }, g); p.icon(ig);
+    tx(p.title, { x: p.x, y: 822, 'text-anchor': 'middle', 'font-size': 30, 'font-weight': 700, 'font-family': FD, fill: C.ink }, g);
+    p.body.forEach((l, i) => tx(l, { x: p.x, y: 862 + i * 30, 'text-anchor': 'middle', 'font-size': 21, 'font-family': FB, fill: C.muted }, g));
+    return g;
+  });
+}
+
+// ---------- render ----------
+const st = {};
+function gstate(k, t) { const p = POS[k]; return { x: track(t, p.x), y: track(t, p.y), s: track(t, p.s) }; }
+const wpos = (k, local) => { const s = st[k]; return [s.x + s.s * local[0], s.y + s.s * local[1]]; };
+const pubLocal = (k, n, t) => k === 'A' ? lerp2(ringPos(n.ring), SLOT[n.slot], seg(t, 12.5, 14.6)) : SLOT[n.slot];
+const hlAlpha = (n, t) => n.hlT.reduce((m, h) => Math.max(m, fade(t, h, h + .2, h + .9, h + 1.5)), 0);
+
+function render(t) {
+  for (const k in POS) st[k] = gstate(k, t);
+
+  // transformación global (escena de la app)
+  const wk = seg(t, 56, 58.6);
+  const ws = lerp(1, .6, wk), wx = lerp(0, 24, wk), wy = lerp(0, 256, wk);
+  const worldA = 1 - seg(t, 70, 71.2, lin);
+  set(R.world, { transform: `translate(${wx},${wy}) scale(${ws})`, opacity: worldA });
+  const dimBC = lerp(1, .2, seg(t, 57, 58.6));
+  const dimOther = lerp(1, .55, seg(t, 57, 58.6));
+
+  // personas
+  for (const k of 'ABC') {
+    const p = P[k], s = st[k];
+    const cp = pop(t, p.t0, .55);
+    const alive = t >= p.t0;
+    set(p.g, { transform: TR(s.x, s.y, s.s), opacity: alive ? (k === 'A' ? 1 : dimOther) : 0 });
+    set(p.center, { transform: TR(0, 0, cp.s), opacity: cp.a });
+    const la = seg(t, p.layers, p.layers + 1.3, lin);
+    set(p.disk, { opacity: la, r: 125 * lerp(.6, 1, seg(t, p.layers, p.layers + 1.3, easeOut)) });
+    set(p.ring, { opacity: la });
+    const bp = pop(t, p.badge, .5);
+    set(p.badgeG, { transform: TR(p.badgePos[0], p.badgePos[1], bp.s * (1 + .06 * Math.sin(t * 4))), opacity: bp.a });
+    p.pub.forEach((n, i) => {
+      const lp = pubLocal(k, n, t), pp = pop(t, p.pubT(i));
+      set(n.pill.g, { transform: TR(lp[0], lp[1], pp.s), opacity: pp.a });
+      n.pill.hl.setAttribute('opacity', hlAlpha(n, t));
+      set(n.edge, { x2: lp[0], y2: lp[1], opacity: pp.a });
+    });
+    p.priv.forEach((n, j) => {
+      let lp = PRIV_POS[j], dotA = la;
+      if (k === 'A') {
+        const m = seg(t, 12.5, 14.4);
+        lp = lerp2(ringPos(n.ring), PRIV_POS[j], m);
+        const pp = pop(t, p.privT(j));
+        set(n.pill.g, { transform: TR(lp[0], lp[1], pp.s * lerp(1, .3, m)), opacity: pp.a * (1 - seg(t, 13.2, 14.0, lin)) });
+        dotA = seg(t, 13.6, 14.4, lin);
+        set(n.edge, { x2: lp[0], y2: lp[1], opacity: pp.a });
+      } else set(n.edge, { x2: lp[0], y2: lp[1], opacity: la });
+      set(n.dot, { transform: TR(lp[0], lp[1], 1), opacity: dotA });
+    });
+    // pulsos
+    const starts = k === 'C' ? [40.4, 41.1] : [24.0, 24.8, 25.6];
+    p.pulses.forEach((c, i) => {
+      const t0 = starts[i];
+      if (t0 === undefined || t < t0 || t > t0 + 1.7) { c.setAttribute('opacity', 0); return; }
+      const kk = (t - t0) / 1.7;
+      set(c, { cx: s.x, cy: s.y, r: lerp(60, k === 'C' ? 300 : 380, easeOut(kk)), opacity: (1 - kk) * .7 });
+    });
+  }
+
+  // distancia
+  set(R.dist, { opacity: fade(t, 24.4, 25.0, 26.4, 27.0) });
+  set(R.distLine, { x1: 700, y1: 580, x2: 1220, y2: 580 });
+  set(R.distTxt, { x: 960, y: 566 });
+
+  // grafos en común
+  for (const key in G) {
+    const c = G[key], s = st[key];
+    const hp = pop(t, c.hubT, .6);
+    const dim = key === 'BC' ? dimBC : 1;
+    set(c.g, { transform: TR(s.x, s.y, s.s), opacity: t >= c.hubT ? dim : 0 });
+    set(c.hub, { transform: TR(0, 0, hp.s), opacity: hp.a });
+    c.nodes.forEach(n => {
+      const pp = pop(t, n.t);
+      set(n.pill.g, { transform: TR(n.pos[0], n.pos[1], pp.s), opacity: pp.a });
+      n.pill.hl.setAttribute('opacity', hlAlpha(n, t));
+      n.edge.setAttribute('opacity', pp.a);
+      if (n.tagEl) n.tagEl.setAttribute('opacity', seg(t, n.t + .5, n.t + 1.1, lin));
+    });
+    if (c.label) c.label.setAttribute('opacity', seg(t, 52.6, 53.3, lin));
+    // brillo cuando la app muestra esta conexión
+    const card = R.cards.find(cd => cd.key === key);
+    c.hl.setAttribute('opacity', card ? fade(t, card.t, card.t + .4, card.t + 1.8, card.t + 2.4) * (.6 + .4 * Math.sin(t * 7)) : 0);
+  }
+
+  // enlaces de origen
+  R.srcLinks.forEach(L => {
+    const c = G[L.key];
+    const a = fade(t, L.n.t, L.n.t + .45, c.linkFade[0], c.linkFade[1]);
+    if (a <= 0) { L.path.setAttribute('opacity', 0); return; }
+    const srcLocal = P[L.sk] ? pubLocal(L.sk, L.srcNode, t) : L.srcNode.pos;
+    const p0 = wpos(L.sk, srcLocal), p1 = wpos(L.key, L.n.pos);
+    const k = seg(t, L.n.t, L.n.t + .6, easeOut);
+    const pe = lerp2(p0, p1, k);
+    const mx = (p0[0] + p1[0]) / 2, my = (p0[1] + p1[1]) / 2 - 40;
+    const cx = lerp(p0[0], mx, k), cy = lerp(p0[1], my, k);
+    set(L.path, { d: `M${p0[0].toFixed(1)},${p0[1].toFixed(1)} Q${cx.toFixed(1)},${cy.toFixed(1)} ${pe[0].toFixed(1)},${pe[1].toFixed(1)}`, opacity: a * .75 });
+  });
+
+  // canales, partículas e instancias
+  CHANNELS.forEach(ch => {
+    const hubT = G[ch.to].hubT;
+    const dim = (ch.to === 'BC') ? dimBC : 1;
+    const a = st[ch.from], b = st[ch.to];
+    const badge = wpos(ch.from, P[ch.from].badgePos);
+    const k = seg(t, ch.t0, ch.t1);
+    const end = lerp2([a.x, a.y], [b.x, b.y], k);
+    set(ch.line, { x1: a.x, y1: a.y, x2: end[0], y2: end[1], opacity: t >= ch.t0 ? dim : 0 });
+    ch.parts.forEach((pt, j) => {
+      if (t < hubT) { pt.setAttribute('opacity', 0); return; }
+      const u = ((t - hubT) * .42 + j / 3) % 1;
+      const q = lerp2([a.x, a.y], [b.x, b.y], u);
+      set(pt, { cx: q[0], cy: q[1], opacity: Math.sin(Math.PI * u) * seg(t, hubT, hubT + .5, lin) * dim });
+    });
+    const ip = pop(t, ch.t0, .35);
+    const ipos = lerp2(badge, [b.x, b.y], k);
+    const waiting = t > ch.t1 && t < hubT ? 1 + .14 * Math.sin((t - ch.t1) * 7) : 1;
+    const ia = t < ch.t0 ? 0 : ip.a * (1 - seg(t, hubT, hubT + .35, lin));
+    set(ch.inst, { transform: TR(ipos[0], ipos[1], ip.s * waiting * lerp(1, .5, seg(t, hubT, hubT + .35, lin))), opacity: ia });
+  });
+  HUBLINKS.forEach(h => {
+    const a = st[h.from], b = st.ABC, k = seg(t, h.t0, h.t1);
+    const end = lerp2([a.x, a.y], [b.x, b.y], k);
+    const dim = h.from === 'BC' ? dimBC : 1;
+    set(h.line, { x1: a.x, y1: a.y, x2: end[0], y2: end[1], opacity: t >= h.t0 ? dim : 0 });
+    h.parts.forEach((pt, j) => {
+      const hubT = G.ABC.hubT;
+      if (t < hubT) { pt.setAttribute('opacity', 0); return; }
+      const u = ((t - hubT) * .38 + j / 2) % 1;
+      const q = lerp2([a.x, a.y], [b.x, b.y], u);
+      set(pt, { cx: q[0], cy: q[1], opacity: Math.sin(Math.PI * u) * dim });
+    });
+  });
+
+  // leyenda y llamadas
+  R.legend.setAttribute('opacity', fade(t, 8.6, 9.6, 19.4, 20.2));
+  R.coPub.setAttribute('opacity', fade(t, 15.0, 15.8, 19.4, 20.1));
+  R.coPriv.setAttribute('opacity', fade(t, 15.4, 16.2, 19.4, 20.1));
+  R.coAgent.setAttribute('opacity', fade(t, 16.9, 17.7, 19.4, 20.1));
+
+  // textos de escena
+  CAPTIONS.forEach(c => {
+    const a = fade(t, c.a, c.a + .6, c.b - .5, c.b);
+    const dy = (1 - seg(t, c.a, c.a + .6, easeOut)) * 14;
+    set(c.g, { opacity: a, transform: `translate(0,${dy.toFixed(2)})` });
+  });
+
+  // teléfono
+  const ph = seg(t, 57, 58.6, easeOut);
+  set(R.phone, { opacity: seg(t, 57, 57.8, lin) * (1 - seg(t, 70, 70.8, lin)), transform: `translate(${(R.phoneX + (1 - ph) * 140).toFixed(2)},${R.phoneY})` });
+  R.cards.forEach(cd => {
+    const k = seg(t, cd.t, cd.t + .6, easeOut);
+    set(cd.g, { opacity: clamp((t - cd.t) / .4) });
+    cd.inner.setAttribute('transform', `translate(0,${((1 - k) * 26).toFixed(2)})`);
+  });
+  R.phoneFoot.setAttribute('opacity', seg(t, R.phoneFoot.T, R.phoneFoot.T + .6, lin));
+
+  // títulos
+  updateLogo(R.introLogo, t, .25, 960, 360, 1.3);
+  R.introTitle.setAttribute('opacity', seg(t, 1.0, 2.0, lin));
+  R.introTitle.setAttribute('transform', `translate(0,${((1 - seg(t, 1.0, 2.0, easeOut)) * 20).toFixed(2)})`);
+  R.introSub.setAttribute('opacity', seg(t, 1.8, 2.8, lin));
+  R.intro.setAttribute('opacity', 1 - seg(t, 5.2, 6.0, lin));
+  R.outro.setAttribute('opacity', seg(t, 70.6, 71.4, lin));
+  updateLogo(R.outroLogo, t, 70.8, 960, 285, 1.05);
+  R.outroTitle.setAttribute('opacity', seg(t, 71.4, 72.3, lin));
+  R.outroSub.setAttribute('opacity', seg(t, 72.2, 73.1, lin));
+  R.pillars.forEach((g, i) => {
+    const t0 = 73.3 + i * .55;
+    set(g, { opacity: seg(t, t0, t0 + .6, lin), transform: `translate(0,${((1 - seg(t, t0, t0 + .6, easeOut)) * 18).toFixed(2)})` });
+  });
+}
+
+// ---------- reproducción ----------
+let T = 0, playing = false, last = 0, raf = 0;
+const scrub = document.getElementById('scrub'), timeEl = document.getElementById('time');
+const playBtn = document.getElementById('play'), controls = document.getElementById('controls');
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+function draw() { render(T); scrub.value = T; timeEl.textContent = `${fmt(T)} / ${fmt(DUR)}`; }
+function setIcon() {
+  const [a, b] = [document.getElementById('i1'), document.getElementById('i2')];
+  if (playing) { set(a, { x: 3, width: 3.5 }); set(b, { x: 9.5, width: 3.5 }); b.removeAttribute('style'); playBtn.setAttribute('aria-label', 'Pausar'); }
+  else { set(a, { x: 4, width: 9 }); b.setAttribute('style', 'display:none'); a.setAttribute('style', 'clip-path:polygon(0 0,100% 50%,0 100%)'); playBtn.setAttribute('aria-label', 'Reproducir'); }
+  if (playing) a.removeAttribute('style');
+}
+function loop(now) {
+  const dt = Math.min(.1, (now - last) / 1000); last = now;
+  T += dt;
+  if (T >= DUR) { T = DUR; playing = false; setIcon(); showControls(); }
+  draw();
+  if (playing) raf = requestAnimationFrame(loop);
+}
+function play() { if (T >= DUR) T = 0; playing = true; last = performance.now(); setIcon(); cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); bumpIdle(); }
+function pause() { playing = false; setIcon(); cancelAnimationFrame(raf); showControls(); }
+playBtn.addEventListener('click', () => playing ? pause() : play());
+document.getElementById('restart').addEventListener('click', () => { T = 0; draw(); play(); });
+scrub.addEventListener('input', () => { T = +scrub.value; draw(); });
+addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); }
+  if (e.code === 'ArrowRight') { T = Math.min(DUR, T + 5); draw(); }
+  if (e.code === 'ArrowLeft') { T = Math.max(0, T - 5); draw(); }
+});
+let idleTimer;
+function showControls() { controls.classList.remove('idle'); clearTimeout(idleTimer); }
+function bumpIdle() { showControls(); idleTimer = setTimeout(() => { if (playing) controls.classList.add('idle'); }, 2500); }
+['mousemove', 'touchstart'].forEach(ev => addEventListener(ev, bumpIdle, { passive: true }));
+
+// ---------- arranque ----------
+const fontsReady = Promise.race([
+  Promise.all(['600 19px Inter', '400 20px Inter', '700 52px "Space Grotesk"'].map(f => document.fonts.load(f))).then(() => document.fonts.ready),
+  new Promise(r => setTimeout(r, 3000))
+]);
+window.__ready = fontsReady.then(() => {
+  build();
+  window.__seek = t => render(t);
+  window.__DUR = DUR;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (REC) { render(0); return; }
+  if (reduce) { T = 53; draw(); setIcon(); }
+  else { draw(); play(); }
+});
+})();
+</script>
+</html>
