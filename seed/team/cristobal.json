@@ -30,9 +30,9 @@
     ["nlp en español", "sabe", 1, ["claude"]],
     ["postgres con supabase", "sabe", 1, ["claude"]],
     ["reconocimiento de patrones", "sabe", 1, ["claude"]],
+    ["roguelikes de mazmorras", "le_gusta", 1, ["claude"]],
     ["servidores mcp", "sabe", 1, ["claude"]],
     ["shooters tácticos", "hace", 1, ["claude"]],
-    ["sistemas multiagente", "le_gusta", 1, ["claude"]],
-    ["videojuegos roguelike", "le_gusta", 1, ["claude"]]
+    ["sistemas multiagente", "le_gusta", 1, ["claude"]]
   ]
 }
