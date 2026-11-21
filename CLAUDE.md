@@ -32,6 +32,7 @@ Capas privadas y círculos, peer-to-peer entre teléfonos, reencuentro entre eve
 | `pnpm seed:prod` | Lo mismo contra Supabase en la nube, con las claves de `.env.production.local` |
 | `pnpm seed:build` | Recalcula los embeddings de `seed/people.ts` → `seed/rooms.json` y reporta pares de tópicos sobre 0,60 |
 | `pnpm seed:person <slug> "<Nombre>" <respuesta.json>...` | Agrega a un integrante al seed desde lo que devuelven Claude o ChatGPT con `seed/prompt-perfil.md` (ver `seed/README.md`) |
+| `pnpm privacy:eval` | Mide el filtro de privacidad contra `src/lib/privacy/eval-set.ts`: qué marca cada capa, fugas y latencia. Con `ANTHROPIC_API_KEY` en `.env.local` mide también el juez |
 | `pnpm test` | Vitest |
 | `pnpm typecheck` / `pnpm lint` / `pnpm build` | Deben pasar antes de cada push |
 
@@ -49,9 +50,11 @@ Fuente de verdad: `src/lib/types.ts` (esquemas zod + tipos). Toda salida de LLM 
 | `group_nodes` | Un `GroupNode`; `aceptado` y `comparten` en jsonb | sí |
 | `deliberation_messages` | `agent` (facilitador, miembro, verificador), `content` (jsonb) | sí |
 
-RLS: la clave publicable (teléfono) lee todo, hace check-in y acepta mesas. `mesas` y `deliberation_messages` las escriben solo rutas de servidor con `supabaseAdmin` (`src/lib/supabase/admin.ts`).
+RLS: la clave publicable (teléfono) lee todo, acepta mesas y puede salir de la sala. `room_members`, `mesas` y `deliberation_messages` las escriben solo rutas de servidor con `supabaseAdmin` (`src/lib/supabase/admin.ts`). El check-in es `POST /api/checkin` con `{ roomCode, personId, displayName, topics }` (tópicos sin `embedding`): el servidor vuelve a clasificar cada tópico, calcula los embeddings y responde `{ roomId, accepted, rejected }`.
 
-**Embeddings:** `src/lib/embeddings.ts` (el teléfono los pide a `POST /api/embed`), modelo `Xenova/paraphrase-multilingual-MiniLM-L12-v2` (384 dims, q8) con transformers.js. Corre en Node y en el navegador sin API key. Siempre usar `embed()`, que quita tildes antes de calcular (ver Decisiones).
+**Filtro de privacidad** (`src/lib/privacy/`): todo lo que viene de un asistente o de una fuente pasa por aquí antes de ser público. Un `Topic` solo se publica con `toPublicProjection()` (`projection.ts`), que exige un veredicto vigente en `topic.privacy` y vuelve a pasar el léxico. El veredicto lo da `classifyTopics()` (`classify.ts`): léxico y patrones (`screen()`), anclas por embedding y un juez LLM (`claude-haiku-5-5`); gana el nivel más estricto y, si el juez no responde, el tópico queda en `personal`. El servidor no confía en el teléfono: `POST /api/checkin` (`checkin.ts`) clasifica de nuevo y rechaza lo `sensible` y lo que no tenga veredicto. El teléfono pide veredictos con `POST /api/privacy/classify`, y antes de mandar señales a un sintetizador las pasa por `splitSignals()` (`signals.ts`), que retiene las que bloquea el léxico y quita `evidence`. Detalle en [`docs/onboarding-privacidad.md`](docs/onboarding-privacidad.md).
+
+**Embeddings:** `src/lib/embeddings.ts` (el check-in los calcula en `POST /api/checkin`; para lo demás el teléfono los pide a `POST /api/embed`), modelo `Xenova/paraphrase-multilingual-MiniLM-L12-v2` (384 dims, q8) con transformers.js. Corre en Node y en el navegador sin API key. Siempre usar `embed()`, que quita tildes antes de calcular (ver Decisiones).
 
 ## Frentes
 
@@ -93,6 +96,12 @@ D puede empezar antes que C con mesas escritas a mano sobre las proyecciones del
 - **21-11 · infra:** producción es Supabase en la nube más Render; Supabase en Docker queda solo para desarrollo local. En Render la app corre con `next start` en un proceso siempre encendido (`render.yaml`), no en funciones serverless.
 - **21-11 · infra:** los embeddings se calculan en el servidor (`POST /api/embed`), no en el teléfono: el modelo pesa 118 MB y cada persona lo bajaría por el wifi de la sala. Cargado ocupa unos 710 MB de RAM en Linux; con 512 MB el proceso muere en el primer embedding, así que la instancia de Render es `standard` (2 GB).
 - **21-11 · infra:** `room_members` entra a la publicación de Realtime para que la pantalla de sala vea llegar a la gente.
+
+- **21-11 · privacidad:** se aplicó el contrato de [`docs/onboarding-privacidad.md`](docs/onboarding-privacidad.md): `Topic.privacy` (opcional; sin él el tópico no se publica), `PublicTopicSchema` y `PublicProjectionSchema` como lista blanca estricta (un campo de más es un error), y `toPublicProjection()` se movió de `types.ts` a `src/lib/privacy/projection.ts`. El filtro son tres capas: léxico y patrones, anclas por embedding y un juez `claude-haiku-5-5` en una llamada aparte, por lotes de 4 en paralelo y sin thinking. El juez solo devuelve nivel, categoría y versión general; el motivo que ve la persona es una plantilla por categoría, porque el texto libre era la mitad de la latencia. Medido con `pnpm privacy:eval`: 0 fugas en 125 casos, 3 de 132 tópicos del seed a "Tú decides", y ~1,8 s para un perfil de 46 tópicos.
+- **21-11 · privacidad:** las anclas por embedding solo suben un tópico a `personal`; no bloquean ni se usan en el check-in. Medido con `pnpm privacy:eval`: MiniLM no separa vivir un tema de saberlo ("psiquiatra" como oficio da 0,85 contra "sesiones con mi psiquiatra"; "filosofía política" del seed da 0,74), así que como bloqueo dejaban fuera oficios y, como un nivel nunca baja, el juez no podía corregirlo.
+- **21-11 · privacidad:** `pnpm seed:person` pasa cada tópico por el filtro y solo escribe los `segura`. Pide `ANTHROPIC_API_KEY`; con `--sin-juez` usa solo las capas locales.
+- **21-11 · privacidad:** el check-in pasa por el servidor (`POST /api/checkin`) y la migración `20261121200000_checkin_by_server.sql` quita las políticas `"check in"` y `"update own projection"`. Antes, con la clave publicable que va en cada teléfono, cualquiera insertaba una proyección sin filtro. El servidor guarda en memoria el veredicto por (`kind`, `name`, `sources`), sin persona asociada: repetir la consulta no cambia la respuesta y el check-in después del onboarding no llama al modelo. Si el juez no responde y no hay veredicto guardado, el tópico se rechaza (`sin_revisar`): con la API de Anthropic caída, quien no pasó antes por el onboarding no puede entrar con tópicos.
+- **21-11 · privacidad:** contrato `SynthesisSignalSchema` (una `Signal` sin `evidence`, estricta) para lo que recibe `/api/synthesize`.
 
 ## Estado
 

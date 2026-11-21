@@ -1,21 +1,27 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { config } from "dotenv";
 import { z } from "zod";
 import { SEED_ROOMS } from "../seed/people";
 import { synthesizeSeedTopics } from "../seed/synthesize";
 import { TEAM_DIR, type TeamPerson } from "../seed/team";
 import { embed } from "@/lib/embeddings";
+import { classifyTopics } from "@/lib/privacy/classify";
+import { createAnthropicJudge } from "@/lib/privacy/judge";
 import { cosine } from "@/lib/vector";
 import { SignalSchema } from "@/lib/types";
 
 const THRESHOLD = 0.6;
 const SAME_PERSON_DUPLICATE = 0.75;
 
-const USAGE = `Uso: pnpm seed:person <slug> "<Nombre>" <respuesta.json>... [--mut]
+config({ path: ".env.local", quiet: true });
+
+const USAGE = `Uso: pnpm seed:person <slug> "<Nombre>" <respuesta.json>... [--mut] [--sin-juez]
 
   slug        minúsculas y guiones, p. ej. "cristobal"
   Nombre      como se muestra en la sala
   respuesta   lo que devolvió Claude, ChatGPT o Gemini con seed/prompt-perfil.md
-  --mut       además de la sala HACK26, entrar a la sala MUT (máximo 20 personas)`;
+  --mut       además de la sala HACK26, entrar a la sala MUT (máximo 20 personas)
+  --sin-juez  filtrar solo con las capas locales (léxico y anclas), sin ANTHROPIC_API_KEY`;
 
 const args = process.argv.slice(2);
 const files = args.filter((a) => !a.startsWith("--")).slice(2);
@@ -38,12 +44,36 @@ function readSignals(path: string) {
 }
 
 const signals = files.flatMap(readSignals);
+const synthesized = synthesizeSeedTopics(signals);
+
+// seed/team/*.json is committed to a public repo and loaded into the room: nothing an assistant
+// said about a teammate gets there without going through the privacy filter.
+const hasKey = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
+if (!hasKey && !args.includes("--sin-juez")) {
+  console.error("Falta ANTHROPIC_API_KEY en .env.local para el filtro de privacidad. Con --sin-juez se usan solo las capas locales.");
+  process.exit(1);
+}
+const judgeErrors: unknown[] = [];
+const verdicts = await classifyTopics(
+  synthesized.map(([name, kind, , sources]) => ({ name, kind, sources })),
+  { judge: hasKey ? createAnthropicJudge({ onError: (e) => judgeErrors.push(e) }) : undefined },
+);
+if (judgeErrors.length > 0) {
+  console.error(`El filtro de privacidad no pudo consultar al juez: ${String(judgeErrors[0])}\nNo se escribió nada. Reintenta, o usa --sin-juez.`);
+  process.exit(1);
+}
+const kept = synthesized.filter((_, i) => verdicts[i].privacy.level === "segura" || (!hasKey && verdicts[i].by === "sin_juez"));
+
 const person: TeamPerson = {
   slug,
   displayName,
   rooms: args.includes("--mut") ? ["seed-hack", "seed-mut"] : ["seed-hack"],
-  topics: synthesizeSeedTopics(signals),
+  topics: kept,
 };
+if (kept.length === 0) {
+  console.error("El filtro de privacidad no dejó pasar ningún tópico: no se escribió nada.");
+  process.exit(1);
+}
 
 const target = new URL(`${slug}.json`, TEAM_DIR);
 const existed = existsSync(target);
@@ -62,6 +92,17 @@ writeFileSync(target, body);
 
 const bySource = Object.entries(Object.groupBy(signals, (s) => s.source)).map(([s, list]) => `${list!.length} de ${s}`);
 console.log(`${existed ? "Reescrito" : "Creado"} seed/team/${slug}.json: ${person.topics.length} tópicos desde ${bySource.join(", ")}.`);
+
+const left = synthesized.flatMap((topic, i) => (kept.includes(topic) ? [] : [{ topic, privacy: verdicts[i].privacy }]));
+if (left.length > 0) {
+  console.log(`\nEl filtro de privacidad dejó fuera ${left.length} (no están en el JSON):`);
+  for (const { topic, privacy } of left) {
+    const safer = privacy.saferName ? ` Versión general: "${privacy.saferName}".` : "";
+    console.log(`  ${privacy.level.padEnd(8)} ${topic[1]} · ${topic[0]}: ${privacy.reason ?? ""}${safer}`);
+  }
+  console.log("  Para publicar uno personal, agrégalo a mano al JSON, tal cual o con su versión general.");
+}
+if (!hasKey) console.log("\nSin juez: solo se aplicaron el léxico y las anclas. Revisa el JSON a mano antes de subirlo.");
 
 // Same review done by hand for the first teammate: what will link, and what links only by noise.
 const others = SEED_ROOMS.filter((r) => person.rooms.includes(r.id as TeamPerson["rooms"][number]))
