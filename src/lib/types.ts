@@ -93,6 +93,42 @@ export const GroupNodeSchema = z.object({
   status: GroupNodeStatusSchema,
 });
 
+// Proximity (src/lib/proximity/). A phone sends its position to the server; what comes back to
+// anyone is distance, bearing and uncertainty, never coordinates. Strict on purpose, in and out.
+export const ProximityJoinSchema = z.object({
+  roomId: z.string().min(1),
+  personId: z.string().min(1),
+  displayName: z.string().min(1).max(40),
+  // Metres. With indoor GPS the effective reach is wider than this: see src/lib/proximity/README.md.
+  radius: z.number().min(5).max(500),
+}).strict();
+
+export const ProximityReportSchema = z.object({
+  lat: z.number().min(-90).max(90),
+  lon: z.number().min(-180).max(180),
+  // What the browser gives in `coords.accuracy`, in metres.
+  accuracy: z.number().min(0).max(100_000),
+  // Chosen by the phone and echoed as `anchor`, so it knows which of its reports the distances are from.
+  stamp: z.number().int().nonnegative(),
+}).strict();
+
+export const ProximityNeighborSchema = z.object({
+  personId: z.string().min(1),
+  displayName: z.string().min(1),
+  distance: z.number().int().nonnegative(),
+  // Degrees clockwise from north, from the recipient towards the neighbour.
+  bearing: z.number().int().min(0).max(359),
+  // ± metres of `distance`. Below about twice this, the distance cannot be told apart from zero.
+  uncertainty: z.number().int().nonnegative(),
+}).strict();
+
+export const ProximityUpdateSchema = z.object({
+  anchor: z.number().int().nonnegative(),
+  enter: z.array(ProximityNeighborSchema),
+  move: z.array(ProximityNeighborSchema),
+  leave: z.array(z.string()),
+}).strict();
+
 export type Kind = z.infer<typeof KindSchema>;
 export type Source = z.infer<typeof SourceSchema>;
 export type Role = z.infer<typeof RoleSchema>;
@@ -107,3 +143,7 @@ export type PublicProjection = z.infer<typeof PublicProjectionSchema>;
 export type Theme = z.infer<typeof ThemeSchema>;
 export type Mesa = z.infer<typeof MesaSchema>;
 export type GroupNode = z.infer<typeof GroupNodeSchema>;
+export type ProximityJoin = z.infer<typeof ProximityJoinSchema>;
+export type ProximityReport = z.infer<typeof ProximityReportSchema>;
+export type ProximityNeighbor = z.infer<typeof ProximityNeighborSchema>;
+export type ProximityUpdate = z.infer<typeof ProximityUpdateSchema>;
