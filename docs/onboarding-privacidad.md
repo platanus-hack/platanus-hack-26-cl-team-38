@@ -48,17 +48,29 @@ flowchart LR
 - **Falla cerrado.** Sin respuesta del juez (error, tiempo agotado, negativa, índice faltante o repetido) el tópico queda en `personal`: se puede publicar, pero solo con un toque explícito y nunca como recomendado.
 - **El veredicto vale para un texto.** `checkedFor` guarda la huella de `kind`, `name` y la versión del clasificador. Renombrar el tópico, cambiarle el `kind` o subir `CLASSIFIER_VERSION` lo devuelve a privado.
 
-Medición del 21-11 con `pnpm privacy:eval` (el juez no es determinista: entre corridas cambia a lo más un caso de nivel, nunca hacia `segura`):
+Medición del 21-11 con `pnpm privacy:eval` y el juez por defecto, Haiku 5.5, en tres corridas (no es determinista: entre corridas cambian de nivel 1 a 3 casos, nunca hacia `segura`):
 
 | Qué | Resultado |
 |---|---|
 | Fugas: delicado clasificado como seguro | 0 de 110 |
-| Sensibles (56) | 55 a 56 quedan `sensible`; el resto en `personal` |
+| Sensibles (56) | 54 a 56 quedan `sensible`; el resto en `personal` |
 | Sensibles escritos para engañar al filtro (35): remedios, jerga, inglés, inferencia, texto que le da órdenes al juez | 34 quedan `sensible`, 1 en `personal`. Las capas locales solas marcan 4 |
 | Personales (19) | 16 a 19 quedan `personal`; el resto sube a `sensible` |
-| Seguros cercanos a una categoría (75) | 72 quedan `segura`; "es · psicóloga" y "quiere_ser · psiquiatra" van a "Tú decides" y "le_gusta · arte sacro" queda `sensible` |
-| Seed (132 tópicos) | 129 quedan `segura`; "busca · nuevo trabajo en ia", "le_gusta · filosofía política" y "es · fintech de pagos" van a "Tú decides" |
+| Seguros cercanos a una categoría (75) | 70 a 71 quedan `segura`. Por las anclas, siempre van a "Tú decides" "es · psicóloga" y "quiere_ser · psiquiatra"; el juez retiene además 1 o 2 ("arte sacro", "asesoría previsional") |
+| Seed (132 tópicos) | 129 quedan `segura`; "busca · nuevo trabajo en ia", "le_gusta · filosofía política" y un tópico de fintech que cambia en cada corrida van a "Tú decides" |
 | Latencia de un perfil real (46 tópicos) | 1,5 a 2,0 s. Las capas locales son 7 ms y ~150 ms de eso |
+
+El juez se cambia por deploy con `PRIVACY_JUDGE_MODEL` (`haiku` u `opus`); el servidor escribe al arrancar `[privacy] juez: <modelo>`. Los mismos casos con cada modelo:
+
+| | Haiku 5.5 (3 corridas) | Sonnet 5.5 (2) | Opus 5.5 (3) |
+|---|---|---|---|
+| Delicados que quedan `segura` (de 110) | 0 | 0 | 0 |
+| Sensibles que quedan `sensible` (de 91) | 88 a 90 | 91 | 91 |
+| Seguros que quedan `segura` (de 75) | 70 a 71 | 72 | 72 |
+| Seed que queda `segura` (de 132) | 129 | 129 | 130 |
+| Perfil real de 46 tópicos | 1,7 a 2,0 s | 4,8 a 5,3 s | 2,3 a 2,8 s |
+
+Opus y Sonnet dieron lo mismo en todas sus corridas, y con ellos los únicos seguros retenidos vienen de las anclas. Sonnet no quedó como opción: mismo resultado que Opus y el doble de latencia.
 
 Tres diferencias con lo propuesto más abajo, por medición:
 

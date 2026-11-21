@@ -18,3 +18,6 @@ services:
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
+      # "haiku" (por defecto) u "opus": el modelo del juez de privacidad. Se cambia en el panel de Render.
+      - key: PRIVACY_JUDGE_MODEL
+        sync: false

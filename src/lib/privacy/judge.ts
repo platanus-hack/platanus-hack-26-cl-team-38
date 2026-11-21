@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import type { Kind, Source } from "@/lib/types";
+import { resolveJudge } from "./judge-model";
 import { PERSONAL_CATEGORIES, PRIVACY_CATEGORIES, PRIVACY_LEVELS, SENSITIVE_CATEGORIES } from "./taxonomy";
 import type { PrivacyCategory, PrivacyLevel } from "./taxonomy";
 
@@ -10,11 +11,9 @@ export type JudgeVerdict = { level: PrivacyLevel; category?: PrivacyCategory; sa
 // null means "not judged": the caller must treat the topic as private.
 export type Judge = (topics: JudgeInput[]) => Promise<(JudgeVerdict | null)[]>;
 
-export const JUDGE_MODEL = "claude-haiku-5-5";
 // Output tokens set the latency of each call, so many short calls in parallel beat a few long ones:
 // a 46-topic profile took ~1.8 s in chunks of 4 and ~2.4 s in chunks of 8 or 12.
 const CHUNK_SIZE = 4;
-const TIMEOUT_MS = 6000;
 
 const JudgeOutputSchema = z.object({
   verdicts: z.array(
@@ -89,26 +88,29 @@ function toVerdict(raw: z.infer<typeof JudgeOutputSchema>["verdicts"][number]): 
 
 export function createAnthropicJudge(options: { client?: Anthropic; onError?: (error: unknown) => void } = {}): Judge {
   const client = options.client ?? new Anthropic();
+  const { config } = resolveJudge();
 
   async function judgeChunk(chunk: JudgeInput[]): Promise<(JudgeVerdict | null)[]> {
     try {
-      const response = await client.messages.parse(
-        {
-          model: JUDGE_MODEL,
-          max_tokens: 4096,
-          // A bounded classification with a schema: thinking would only add latency.
-          thinking: { type: "disabled" },
-          output_config: { effort: "low", format: zodOutputFormat(JudgeOutputSchema) },
-          system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
-          messages: [
-            {
-              role: "user",
-              content: JSON.stringify(chunk.map((t, i) => ({ i, kind: t.kind, name: t.name, sources: t.sources ?? [] }))),
-            },
-          ],
-        },
-        { timeout: TIMEOUT_MS, maxRetries: 1 },
-      );
+      const request = {
+        model: config.model,
+        max_tokens: 4096,
+        output_config: { effort: "low" as const, format: zodOutputFormat(JudgeOutputSchema) },
+        system: [{ type: "text" as const, text: SYSTEM, cache_control: { type: "ephemeral" as const } }],
+        messages: [
+          {
+            role: "user" as const,
+            content: JSON.stringify(chunk.map((t, i) => ({ i, kind: t.kind, name: t.name, sources: t.sources ?? [] }))),
+          },
+        ],
+      };
+      const requestOptions = { timeout: config.timeoutMs, maxRetries: 1 };
+      // A bounded classification with a schema: thinking only adds latency, so it is off where the
+      // model allows it. Where a safety classifier can decline the request, the API retries it on
+      // another model instead of leaving the topics unjudged.
+      const response = config.refusalFallback
+        ? await client.beta.messages.parse({ ...request, betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" }, requestOptions)
+        : await client.messages.parse({ ...request, ...(config.canDisableThinking ? { thinking: { type: "disabled" as const } } : {}) }, requestOptions);
       if (response.stop_reason !== "end_turn" || !response.parsed_output) {
         options.onError?.(new Error(`judge stopped with ${response.stop_reason}`));
         return chunk.map(() => null);
