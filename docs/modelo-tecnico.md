@@ -9,7 +9,7 @@ Track: Multiplayer.
 | Pieza | Qué es | Quién la ve |
 |---|---|---|
 | **Nodo personal** | Un `.md` con el conocimiento de la persona + su agente | Solo su agente |
-| **Índice** | Lista de tópicos del `.md`, sin contenido | El servicio que calcula la gravedad |
+| **Índice** | Lista de tópicos del `.md` con un embedding por tópico, sin contenido | El servicio que calcula la gravedad |
 | **Gravedad** | Atracción entre dos nodos según similitud | Todos (es la forma del grafo) |
 | **Nodo de pareja** | `.md` compartido entre dos personas | Sus dos agentes |
 | **Nodo de grupo** | `.md` compartido entre 3 o más personas, nombrado por tópico | Los agentes de sus miembros |
@@ -60,6 +60,7 @@ flowchart LR
 ## En común
 - open-banking · Ana 3 · Beto 2
 - fintech · Ana 3 · Beto 3
+- pagos ≈ riesgo (0.61) · Ana 3 · Beto 3
 
 ## Busca y ofrece
 - Ana busca: inversión semilla
@@ -68,6 +69,8 @@ flowchart LR
 ## Siguiente paso
 - Conversar sobre open-banking
 ```
+
+Una línea con `≈` es un cruce por significado: dos tópicos distintos que calzan por embedding, con su coseno entre paréntesis.
 
 **Nodo de grupo** (`grupo-open-banking.md`).
 
@@ -90,24 +93,38 @@ flowchart LR
 
 ## Reglas
 
-**Similitud entre dos personas** (define la gravedad):
+**Representación:** un embedding por tópico, no uno por persona. Un solo vector por persona diría cuánto se parecen dos nodos pero no en qué, y lo valioso es poder nombrar lo común.
+
+**Calce entre tópicos:** dos tópicos calzan si el coseno de sus embeddings supera un umbral. Tópicos idénticos tienen coseno 1.
+
+**Similitud entre dos personas** (define la gravedad). Cada tópico de A busca su mejor par en B:
 
 ```
-similitud(A, B) = Σ sobre tópicos comunes de  min(prof_A, prof_B) / frecuencia_del_tópico
+calce(k, B)     = tópico t de B con mayor coseno(k, t), solo si coseno ≥ umbral
+aporte(k)       = coseno(k, t) × min(prof_A(k), prof_B(t)) / frecuencia(k)
+similitud(A, B) = promedio de [ Σ aportes de A hacia B ,  Σ aportes de B hacia A ]
 ```
 
+- `coseno`: un calce exacto pesa más que uno aproximado.
 - `min(prof)`: cuenta lo que sabe el que menos sabe.
 - `frecuencia`: cuántas personas tienen el tópico. Lo raro acerca más que lo masivo.
+- Con umbral 1 la fórmula se reduce al match exacto de tópicos.
 
-**Match de intención:** `busca` de uno contra `ofrece` del otro. Es complementariedad, no similitud.
+**Gravedad:** la similitud es la fuerza de atracción entre dos nodos. No es lo único que los mueve: todos los nodos se repelen para no amontonarse, un par que ya tiene nodo de pareja se atrae 1,5 veces más, y cada nodo de grupo tira de sus miembros.
 
-**Nodo de pareja:** se crea cuando dos agentes cierran una conversación.
+**Match de intención:** `busca` de uno contra `ofrece` del otro. Es complementariedad, no similitud: no sale de comparar embeddings y hoy no influye en la gravedad, solo en lo que conversan los agentes.
 
-**Nodo de grupo:**
+**Nodo de pareja:** se crea cuando dos agentes cierran una conversación. Guarda cada calce, marcando con `≈` los que son por significado.
 
-- Nace cuando 3 o más personas presentes comparten tópicos cuya suma de profundidad mínima es 4 o más.
-- Se nombra por el tópico común más profundo.
-- Alguien nuevo se une solo si tiene todos los tópicos comunes del grupo, para que no se diluya.
+**Nodo de grupo.** Al llegar una persona, por cada tópico suyo:
+
+- **Candidatos:** los presentes que tienen algún tópico que calce con ese.
+- **Comunes:** los tópicos de quien llega para los que todos los candidatos tienen un calce.
+- **Fuerza:** suma, sobre los comunes, del menor `coseno × min(prof)` entre los miembros.
+- Nace si hay 3 o más candidatos y la fuerza es 4 o más.
+- No se crea si ya existe un grupo que difiere en a lo más una persona.
+- Se nombra por el tópico común más fuerte.
+- Alguien nuevo se une solo si tiene calce para todos los tópicos comunes del grupo, para que no se diluya.
 - Nunca se crea un nodo por combinación de personas: el grupo es el tópico.
 
 **Límite de conversaciones:** cada agente conversa con sus vecinos más cercanos, no con toda la sala.
@@ -126,14 +143,32 @@ Salieron de una simulación con 14 personas de prueba. Hay que ajustarlos con da
 | Parámetro | Valor |
 |---|---|
 | Profundidad por tópico | 1 a 3 |
-| Umbral de nodo de grupo | suma de mínimos ≥ 4 |
+| Umbral de calce entre tópicos (coseno) | 0,60 |
+| Umbral de nodo de grupo | fuerza ≥ 4 |
 | Tamaño mínimo de grupo | 3 |
+| Refuerzo de gravedad con nodo de pareja | × 1,5 |
+
+**Los embeddings de la simulación no vienen de un modelo.** Son vectores de 8 dimensiones armados a mano por tópico. Sirven para ver la mecánica; los números de abajo no dicen nada sobre qué tópicos se parecen de verdad.
+
+Efecto del umbral de calce en la simulación (91 parejas posibles):
+
+| Umbral | Parejas conectadas | Solo por significado | Grupos |
+|---|---|---|---|
+| 1,00 (solo idénticos) | 75 | 0 | 3 |
+| 0,60 | 89 | 14 | 4 |
+| 0,40 | 91 | 16 | 3 |
+
+Observaciones de la simulación, por validar con embeddings reales:
+
+- **El umbral es la decisión de producto.** Muy alto pierde conexiones razonables; muy bajo conecta a todos con todos y la gravedad deja de separar.
+- **Los grupos se inflan antes que las parejas.** Con 0,60 un grupo pasó de 3 a 6 personas porque tres tópicos cercanos quedaron como equivalentes. Idea a considerar: un umbral más estricto para grupos que para parejas.
+- **El resultado depende del orden de llegada.** Los grupos se evalúan cuando alguien entra, así que otro orden puede dar grupos distintos. Idea a considerar: recalcular cada cierto tiempo.
 
 ## Fuera del core, por decidir
 
 - **Origen del `.md`:** se extraerá del Claude o ChatGPT personal de cada uno. Al principio va mockeado a mano.
 - **Detección de cercanía:** QR, BLE, geocerca o wifi del lugar.
-- **Tópicos equivalentes:** lista cerrada al inicio; embeddings después para que "pagos" calce con "fintech".
+- **Embeddings reales:** elegir el modelo, calcular un vector por tópico una sola vez y guardarlo en el índice. La lógica de calce no cambia.
 - **Salida de personas** y disolución de grupos.
 - **Borrado** de un nodo compartido cuando una parte se retira.
 - **Comercios:** un negocio como nodo que ve demanda agregada y le habla al agente, no a la persona.
