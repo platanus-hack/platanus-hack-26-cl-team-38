@@ -8,7 +8,7 @@ Documento vivo del fin de semana. Cada decisión nueva va en [Decisiones](#decis
 
 Cuando 3 o más personas están en la misma sala, cada una trae un **nodo personal** armado desde lo que ya saben de ella sus asistentes y apps (Claude, ChatGPT, Spotify, GitHub, Instagram). La sala agrupa los tópicos públicos en **temas**, asigna **roles** (aporta, busca, comparte) y arma **mesas** de 3 a 5 personas. Los agentes deliberan un plan concreto con punto de encuentro, y la mesa se activa cuando la aceptan 3 o más.
 
-Diseño completo y algoritmos: vault del equipo, `07-hack/arquitectura-por-capas.md`. Orden de construcción: `07-hack/plan-de-construccion.md`.
+Diseño completo y algoritmos: [`docs/arquitectura-por-capas.md`](docs/arquitectura-por-capas.md). Orden de construcción: [`docs/plan-de-construccion.md`](docs/plan-de-construccion.md). Índice de docs: [`docs/README.md`](docs/README.md).
 
 ## Guion de demo
 
