@@ -30,6 +30,7 @@ Capas privadas y círculos, peer-to-peer entre teléfonos, reencuentro entre eve
 | `pnpm db:start` / `pnpm db:stop` | Supabase local (Docker), sin los servicios que no usamos. `pnpm exec supabase status` da las claves para `.env.local` (no excluir `gotrue`: sin él no imprime las claves) |
 | `pnpm seed` | Carga la sala de seed y la sala de control en Supabase (borra y recrea) |
 | `pnpm seed:build` | Recalcula los embeddings de `seed/people.ts` → `seed/rooms.json` y reporta pares de tópicos sobre 0,60 |
+| `pnpm seed:person <slug> "<Nombre>" <respuesta.json>...` | Agrega a un integrante al seed desde lo que devuelven Claude o ChatGPT con `seed/prompt-perfil.md` (ver `seed/README.md`) |
 | `pnpm test` | Vitest |
 | `pnpm typecheck` / `pnpm lint` / `pnpm build` | Deben pasar antes de cada push |
 

@@ -9,6 +9,7 @@
     "lint": "eslint",
     "seed:build": "tsx scripts/build-seed.mts",
     "seed": "tsx scripts/load-seed.mts",
+    "seed:person": "tsx scripts/add-person.mts",
     "test": "vitest run",
     "typecheck": "next typegen && tsc --noEmit",
     "db:start": "supabase start -x storage-api,imgproxy,edge-runtime,logflare,vector,mailpit,supavisor",
