@@ -25,7 +25,12 @@ export function Explorer() {
       .then(({ data, error }) => {
         if (error) return setError(`No se pudieron leer las salas (${error.message})`);
         setRooms(data);
-        setRoomId((current) => current ?? data[0]?.id);
+        // /mi-nodo lands here after the check-in with ?sala=<code>&persona=<personId>.
+        const params = new URLSearchParams(window.location.search);
+        const wanted = data.find((r) => r.code === params.get("sala"))?.id;
+        setRoomId((current) => current ?? wanted ?? data[0]?.id);
+        const persona = params.get("persona");
+        if (wanted && persona) setSelected(persona);
       });
   }, []);
 
