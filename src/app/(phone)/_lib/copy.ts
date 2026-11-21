@@ -14,7 +14,7 @@ export const COPY = {
     placeholder: "Resuelve y coordina con tu red de contactos",
     intentHelp: "Solo la ve tu Agente. La usa para elegir con quién conectarte.",
     saved: "Tu Agente lo sabe",
-    tagline: "Coordinación entre personas potenciadas por Agentes",
+    tagline: "Conexión y coordinación entre personas potenciadas por Agentes",
     coincidence: "Coincidencia",
     locationOff: "Activar Ubicación",
     locating: "Buscando…",
