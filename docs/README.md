@@ -22,6 +22,7 @@ Cuando dos documentos se contradicen, vale el primero de esta lista:
 | [modelo-tecnico](modelo-tecnico.md) | Modelo técnico anterior (gravedad, nodos de pareja y grupo) |
 | [mcp-ingestion](mcp-ingestion.md) | Conector MCP `submit_profile` (paso A5) |
 | [infra-propuestas](infra-propuestas.md) | Propuestas de infra para iterar |
+| [onboarding-privacidad](onboarding-privacidad.md) | Propuesta: onboarding, niveles de tópico (segura, personal, sensible) y verificaciones de la capa privada |
 | [casos-de-uso](casos-de-uso.md) | Propuesta, no manda sobre lo anterior: conexión 1a1 (match total), sala con propósito y modo explorador |
 
 ## Glosario
