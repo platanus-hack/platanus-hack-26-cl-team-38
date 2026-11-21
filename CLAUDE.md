@@ -29,6 +29,7 @@ Capas privadas y círculos, peer-to-peer entre teléfonos, reencuentro entre eve
 | `pnpm dev` | Servidor local |
 | `pnpm db:start` / `pnpm db:stop` | Supabase local (Docker), sin los servicios que no usamos. `pnpm exec supabase status` da las claves para `.env.local` (no excluir `gotrue`: sin él no imprime las claves) |
 | `pnpm seed` | Carga la sala de seed y la sala de control en Supabase (borra y recrea) |
+| `pnpm seed:prod` | Lo mismo contra Supabase en la nube, con las claves de `.env.production.local` |
 | `pnpm seed:build` | Recalcula los embeddings de `seed/people.ts` → `seed/rooms.json` y reporta pares de tópicos sobre 0,60 |
 | `pnpm seed:person <slug> "<Nombre>" <respuesta.json>...` | Agrega a un integrante al seed desde lo que devuelven Claude o ChatGPT con `seed/prompt-perfil.md` (ver `seed/README.md`) |
 | `pnpm test` | Vitest |
@@ -43,14 +44,14 @@ Fuente de verdad: `src/lib/types.ts` (esquemas zod + tipos). Toda salida de LLM 
 | Tabla | Contenido | Realtime |
 |---|---|---|
 | `rooms` | `id`, `code` (el del QR), `name` | — |
-| `room_members` | `projection` (jsonb) es una `PublicProjection` | — |
+| `room_members` | `projection` (jsonb) es una `PublicProjection` | sí |
 | `mesas` | `members` (jsonb) es `Mesa["members"]` | sí |
 | `group_nodes` | Un `GroupNode`; `aceptado` y `comparten` en jsonb | sí |
 | `deliberation_messages` | `agent` (facilitador, miembro, verificador), `content` (jsonb) | sí |
 
 RLS: la clave publicable (teléfono) lee todo, hace check-in y acepta mesas. `mesas` y `deliberation_messages` las escriben solo rutas de servidor con `supabaseAdmin` (`src/lib/supabase/admin.ts`).
 
-**Embeddings:** `src/lib/embeddings.ts`, modelo `Xenova/paraphrase-multilingual-MiniLM-L12-v2` (384 dims, q8) con transformers.js. Corre en Node y en el navegador sin API key. Siempre usar `embed()`, que quita tildes antes de calcular (ver Decisiones).
+**Embeddings:** `src/lib/embeddings.ts` (el teléfono los pide a `POST /api/embed`), modelo `Xenova/paraphrase-multilingual-MiniLM-L12-v2` (384 dims, q8) con transformers.js. Corre en Node y en el navegador sin API key. Siempre usar `embed()`, que quita tildes antes de calcular (ver Decisiones).
 
 ## Frentes
 
@@ -89,11 +90,15 @@ D puede empezar antes que C con mesas escritas a mano sobre las proyecciones del
 - **21-11 · P1:** los temas se calculan en memoria en el servidor (los embeddings viajan dentro de `projection`), así que no se usa pgvector.
 - **21-11 · P1:** se agregó `Theme` a los contratos para que E dibuje los temas sin esperar a C.
 - **21-11 · seed:** Oscar entra al seed con tópicos sintetizados desde Claude y su export de ChatGPT (señales casi iguales juntadas, preguntas de soporte descartadas), en `seed-mut` y en una sala nueva `seed-hack` (HACK26), para probar los filtros por persona. Varios nombres se cambiaron por otros más específicos ("emprender", "agentes de ia", "nuxt", "diseño de interiores") porque pasaban 0,60 contra tópicos sin relación (escalada, trekking, fintech, diseño ux).
+- **21-11 · infra:** producción es Supabase en la nube más Render; Supabase en Docker queda solo para desarrollo local. En Render la app corre con `next start` en un proceso siempre encendido (`render.yaml`), no en funciones serverless.
+- **21-11 · infra:** los embeddings se calculan en el servidor (`POST /api/embed`), no en el teléfono: el modelo pesa 118 MB y cada persona lo bajaría por el wifi de la sala. Cargado ocupa unos 710 MB de RAM en Linux; con 512 MB el proceso muere en el primer embedding, así que la instancia de Render es `standard` (2 GB).
+- **21-11 · infra:** `room_members` entra a la publicación de Realtime para que la pantalla de sala vea llegar a la gente.
 
 ## Estado
 
 - [x] P0 · Next.js + Tailwind + shadcn, manifest PWA, migración de Supabase, `/api/health`
 - [x] P1 · Contratos (`src/lib/types.ts`) y seed (18 personas + sala de control)
 - [x] Vistas de la sala sin motor: `/explorar` (plano de mesas por tema) y `/grafo` (grafo de fuerzas por tópico, con filtros "soy", mis salas, mis conexiones y tipo de enlace)
-- [ ] Supabase en la nube + deploy en Vercel desde el espejo personal
+- [x] Supabase en la nube: migraciones aplicadas y seed cargado (`pnpm seed:prod`)
+- [ ] Deploy en Render (`render.yaml`)
 - [ ] Frentes A–E
