@@ -75,6 +75,7 @@ describe("buildAssistantPrompt", () => {
     expect(prompt).toContain('https://app.test/api/onboarding/signals, con el encabezado "Authorization: Bearer tok"');
     expect(prompt).toContain("https://app.test/c#tok/SOURCE/SEÑALES");
     expect(prompt).toContain("vence en 15 minutos");
+    expect(prompt).toContain('la herramienta "subir_senales"), úsala con token "tok"');
   });
 
   it("gives an example link that the parser and the schema accept", () => {

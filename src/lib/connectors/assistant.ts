@@ -113,6 +113,8 @@ Manda solo las señales, sin citas ni explicaciones. Si dudas de algo, déjalo f
 CÓMO ENTREGARLO
 El destino es el servidor de ${APP_NAME}. El código de abajo es un permiso temporal que ${APP_NAME} creó para mí: solo sirve para dejar este borrador en mi teléfono, no da acceso a nada y vence en ${minutes} minutos.
 
+Si en esta conversación tienes el conector de ${APP_NAME} (la herramienta "subir_senales"), úsala con token "${token}" y las señales, y no sigas con las vías de abajo. Si no lo tienes:
+
 A) Si aquí puedes ejecutar comandos o hacer peticiones HTTP (por ejemplo en Claude Code), envía por POST a ${origin}/api/onboarding/signals, con el encabezado "Authorization: Bearer ${token}", un arreglo JSON como este:
 [{"source":"claude","kind":"sabe","label":"…","strength":0.8}]
 En el JSON escribe los labels normales, con espacios y tildes. Si la respuesta trae un error, corrígelo y vuelve a intentar.
