@@ -23,7 +23,8 @@ Cuando dos documentos se contradicen, vale el primero de esta lista:
 | [mcp-ingestion](mcp-ingestion.md) | Conector MCP `submit_profile` (paso A5) |
 | [conectores-api](conectores-api.md) | Investigación: conectores de GitHub, Spotify y Strava (acceso, auth, mapeo a señales, términos) |
 | [infra-propuestas](infra-propuestas.md) | Propuestas de infra para iterar |
-| [onboarding-privacidad](onboarding-privacidad.md) | Propuesta: onboarding, niveles de tópico (segura, personal, sensible) y verificaciones de la capa privada |
+| [onboarding-privacidad](onboarding-privacidad.md) | Niveles de tópico (segura, personal, sensible) y verificaciones de la capa privada: el filtro ya está construido, el onboarding sigue como propuesta |
+| [revision-filtro-privacidad](revision-filtro-privacidad.md) | Guía para revisar el filtro de privacidad: flujo, orden de lectura, cómo verificarlo y decisiones a cuestionar |
 | [casos-de-uso](casos-de-uso.md) | Propuesta, no manda sobre lo anterior: conexión 1a1 (match total), sala con propósito y modo explorador |
 
 ## Glosario
