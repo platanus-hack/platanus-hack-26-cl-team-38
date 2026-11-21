@@ -41,6 +41,9 @@ export default function Home() {
       <Link href="/explorar" className="text-sm font-medium underline underline-offset-4">
         Ver cómo se arma una sala
       </Link>
+      <Link href="/grafo" className="text-sm font-medium underline underline-offset-4">
+        Ver el grafo de la sala
+      </Link>
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium">Salas</h2>
         <Suspense fallback={<p className="text-sm text-muted-foreground">Cargando salas…</p>}>
