@@ -3,7 +3,7 @@ import seed from "../seed/rooms.json" with { type: "json" };
 import { createAdminClient } from "@/lib/supabase/create-admin-client";
 import { PublicProjectionSchema } from "@/lib/types";
 
-config({ path: ".env.local" });
+config({ path: process.env.ENV_FILE ?? ".env.local" });
 const db = createAdminClient();
 
 async function run(label: string, query: PromiseLike<{ error: { message: string } | null }>) {

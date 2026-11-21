@@ -29,8 +29,10 @@ Capas privadas y círculos, peer-to-peer entre teléfonos, reencuentro entre eve
 | `pnpm dev` | Servidor local |
 | `pnpm db:start` / `pnpm db:stop` | Supabase local (Docker), sin los servicios que no usamos. `pnpm exec supabase status` da las claves para `.env.local` (no excluir `gotrue`: sin él no imprime las claves) |
 | `pnpm seed` | Carga la sala de seed y la sala de control en Supabase (borra y recrea) |
+| `pnpm seed:prod` | Lo mismo contra Supabase en la nube, con las claves de `.env.production.local` |
 | `pnpm seed:build` | Recalcula los embeddings de `seed/people.ts` → `seed/rooms.json` y reporta pares de tópicos sobre 0,60 |
 | `pnpm seed:person <slug> "<Nombre>" <respuesta.json>...` | Agrega a un integrante al seed desde lo que devuelven Claude o ChatGPT con `seed/prompt-perfil.md` (ver `seed/README.md`) |
+| `pnpm privacy:eval` | Mide el filtro de privacidad contra `src/lib/privacy/eval-set.ts`: qué marca cada capa, fugas y latencia. Con `ANTHROPIC_API_KEY` en `.env.local` mide también el juez |
 | `pnpm test` | Vitest |
 | `pnpm typecheck` / `pnpm lint` / `pnpm build` | Deben pasar antes de cada push |
 
@@ -43,14 +45,18 @@ Fuente de verdad: `src/lib/types.ts` (esquemas zod + tipos). Toda salida de LLM 
 | Tabla | Contenido | Realtime |
 |---|---|---|
 | `rooms` | `id`, `code` (el del QR), `name` | — |
-| `room_members` | `projection` (jsonb) es una `PublicProjection` | — |
+| `room_members` | `projection` (jsonb) es una `PublicProjection` | sí |
 | `mesas` | `members` (jsonb) es `Mesa["members"]` | sí |
 | `group_nodes` | Un `GroupNode`; `aceptado` y `comparten` en jsonb | sí |
 | `deliberation_messages` | `agent` (facilitador, miembro, verificador), `content` (jsonb) | sí |
 
-RLS: la clave publicable (teléfono) lee todo, hace check-in y acepta mesas. `mesas` y `deliberation_messages` las escriben solo rutas de servidor con `supabaseAdmin` (`src/lib/supabase/admin.ts`).
+RLS: la clave publicable (teléfono) lee todo, acepta mesas y puede salir de la sala. `room_members`, `mesas` y `deliberation_messages` las escriben solo rutas de servidor con `supabaseAdmin` (`src/lib/supabase/admin.ts`). El check-in es `POST /api/checkin` con `{ roomCode, personId, displayName, topics }` (tópicos sin `embedding`): el servidor vuelve a clasificar cada tópico, calcula los embeddings y responde `{ roomId, accepted, rejected }`.
 
-**Embeddings:** `src/lib/embeddings.ts`, modelo `Xenova/paraphrase-multilingual-MiniLM-L12-v2` (384 dims, q8) con transformers.js. Corre en Node y en el navegador sin API key. Siempre usar `embed()`, que quita tildes antes de calcular (ver Decisiones).
+**Filtro de privacidad** (`src/lib/privacy/`): todo lo que viene de un asistente o de una fuente pasa por aquí antes de ser público. Un `Topic` solo se publica con `toPublicProjection()` (`projection.ts`), que exige un veredicto vigente en `topic.privacy` y vuelve a pasar el léxico. El veredicto lo da `classifyTopics()` (`classify.ts`): léxico y patrones (`screen()`), anclas por embedding y un juez LLM (`claude-haiku-5-5`); gana el nivel más estricto y, si el juez no responde, el tópico queda en `personal`. El servidor no confía en el teléfono: `POST /api/checkin` (`checkin.ts`) clasifica de nuevo y rechaza lo `sensible` y lo que no tenga veredicto. El teléfono pide veredictos con `POST /api/privacy/classify`, y antes de mandar señales a un sintetizador las pasa por `splitSignals()` (`signals.ts`), que retiene las que bloquea el léxico y quita `evidence`. Detalle en [`docs/onboarding-privacidad.md`](docs/onboarding-privacidad.md).
+
+**Conector de asistente** (`src/lib/connectors/`, pantalla en `/onboarding`): el teléfono pide un permiso con `POST /api/onboarding/token` → `{ token, inbox, expiresAt }` y arma con `buildAssistantPrompt()` el mensaje que la persona pega en su asistente. El `token` va dentro del mensaje, dura 15 minutos y solo escribe; el `inbox` se queda en el teléfono y solo lee. El asistente entrega señales sin `evidence` (`IncomingSignalsSchema`) por una de tres vías: `POST /api/onboarding/signals` con `Authorization: Bearer <token>` (Claude Code), un enlace `/c#<token>/<source>/<kind>.<label>.<fuerza>/…` que la persona toca y que `/c` manda a `POST /api/onboarding/link` (chat), o el JSON como texto, que la persona pega en `/onboarding`. Las tres pasan por el filtro de privacidad al entrar (`admitSignals()`): cada señal va como `{ kind, name: label, sources: [source] }` a `classifyOnServer()` (las dos rutas) o a `POST /api/privacy/classify` (el texto pegado), y lo que sale `sensible` o sin veredicto se descarta antes de guardar nada; `personal` se conserva porque es un borrador privado. La salida mantiene el formato de entrada, `SynthesisSignal[]`, solo que filtrada. El permiso se valida antes de filtrar, para que nadie sin un token vigente haga correr al juez. El teléfono las recoge con `POST /api/onboarding/inbox` `{ inbox }`, que vacía el buzón, y las guarda como `Signal[]` en `localStorage` (`team38.signals.v1`), de donde las toma el frente B.
+
+**Embeddings:** `src/lib/embeddings.ts` (el check-in los calcula en `POST /api/checkin`; para lo demás el teléfono los pide a `POST /api/embed`), modelo `Xenova/paraphrase-multilingual-MiniLM-L12-v2` (384 dims, q8) con transformers.js. Corre en Node y en el navegador sin API key. Siempre usar `embed()`, que quita tildes antes de calcular (ver Decisiones).
 
 ## Frentes
 
@@ -77,7 +83,7 @@ D puede empezar antes que C con mesas escritas a mano sobre las proyecciones del
 ## Convenciones
 
 - Código e identificadores en inglés; UI y copy en español de Chile. Los términos del dominio (`mesa`, `aporta`, `cita`, `comparten`) se quedan en español porque así están en los contratos.
-- Modelos: `claude-sonnet-5-5` para el facilitador y `claude-haiku-5-5` para los agentes de miembro.
+- Modelos: `claude-sonnet-5-5` para el facilitador y `claude-haiku-5-5` para los agentes de miembro. El juez de privacidad se elige por deploy con `PRIVACY_JUDGE_MODEL` (`haiku` por defecto, u `opus`).
 - Next.js 16 con Cache Components: leer `node_modules/next/dist/docs/` antes de usar APIs que no conozcas.
 - Sin secretos en el repo (es público). Variables en `.env.example`.
 - Commits chicos; `main` siempre desplegable.
@@ -89,11 +95,24 @@ D puede empezar antes que C con mesas escritas a mano sobre las proyecciones del
 - **21-11 · P1:** los temas se calculan en memoria en el servidor (los embeddings viajan dentro de `projection`), así que no se usa pgvector.
 - **21-11 · P1:** se agregó `Theme` a los contratos para que E dibuje los temas sin esperar a C.
 - **21-11 · seed:** Oscar entra al seed con tópicos sintetizados desde Claude y su export de ChatGPT (señales casi iguales juntadas, preguntas de soporte descartadas), en `seed-mut` y en una sala nueva `seed-hack` (HACK26), para probar los filtros por persona. Varios nombres se cambiaron por otros más específicos ("emprender", "agentes de ia", "nuxt", "diseño de interiores") porque pasaban 0,60 contra tópicos sin relación (escalada, trekking, fintech, diseño ux).
+- **21-11 · infra:** producción es Supabase en la nube más Render; Supabase en Docker queda solo para desarrollo local. En Render la app corre con `next start` en un proceso siempre encendido (`render.yaml`), no en funciones serverless.
+- **21-11 · infra:** los embeddings se calculan en el servidor (`POST /api/embed`), no en el teléfono: el modelo pesa 118 MB y cada persona lo bajaría por el wifi de la sala. Cargado ocupa unos 710 MB de RAM en Linux; con 512 MB el proceso muere en el primer embedding, así que la instancia de Render es `standard` (2 GB).
+- **21-11 · infra:** `room_members` entra a la publicación de Realtime para que la pantalla de sala vea llegar a la gente.
+
+- **21-11 · privacidad:** se aplicó el contrato de [`docs/onboarding-privacidad.md`](docs/onboarding-privacidad.md): `Topic.privacy` (opcional; sin él el tópico no se publica), `PublicTopicSchema` y `PublicProjectionSchema` como lista blanca estricta (un campo de más es un error), y `toPublicProjection()` se movió de `types.ts` a `src/lib/privacy/projection.ts`. El filtro son tres capas: léxico y patrones, anclas por embedding y un juez `claude-haiku-5-5` en una llamada aparte, por lotes de 4 en paralelo y sin thinking. El juez solo devuelve nivel, categoría y versión general; el motivo que ve la persona es una plantilla por categoría, porque el texto libre era la mitad de la latencia. Medido con `pnpm privacy:eval`: 0 fugas en 125 casos, 3 de 132 tópicos del seed a "Tú decides", y ~1,8 s para un perfil de 46 tópicos.
+- **21-11 · privacidad:** las anclas por embedding solo suben un tópico a `personal`; no bloquean ni se usan en el check-in. Medido con `pnpm privacy:eval`: MiniLM no separa vivir un tema de saberlo ("psiquiatra" como oficio da 0,85 contra "sesiones con mi psiquiatra"; "filosofía política" del seed da 0,74), así que como bloqueo dejaban fuera oficios y, como un nivel nunca baja, el juez no podía corregirlo.
+- **21-11 · privacidad:** `pnpm seed:person` pasa cada tópico por el filtro y solo escribe los `segura`. Pide `ANTHROPIC_API_KEY`; con `--sin-juez` usa solo las capas locales.
+- **21-11 · privacidad:** el check-in pasa por el servidor (`POST /api/checkin`) y la migración `20261121200000_checkin_by_server.sql` quita las políticas `"check in"` y `"update own projection"`. Antes, con la clave publicable que va en cada teléfono, cualquiera insertaba una proyección sin filtro. El servidor guarda en memoria el veredicto por (`kind`, `name`, `sources`), sin persona asociada: repetir la consulta no cambia la respuesta y el check-in después del onboarding no llama al modelo. Si el juez no responde y no hay veredicto guardado, el tópico se rechaza (`sin_revisar`): con la API de Anthropic caída, quien no pasó antes por el onboarding no puede entrar con tópicos.
+- **21-11 · privacidad:** contrato `SynthesisSignalSchema` (una `Signal` sin `evidence`, estricta) para lo que recibe `/api/synthesize`.
+- **21-11 · privacidad:** el modelo del juez se elige con la variable `PRIVACY_JUDGE_MODEL`: `haiku` (por defecto) u `opus` (`claude-opus-5-5`). Al arrancar, el servidor escribe en el log `[privacy] juez: <modelo>`; un valor que no reconoce cae a Haiku y el log lo dice. Medido con `pnpm privacy:eval`: ninguno deja pasar un caso delicado como seguro. Haiku deja 1 a 3 de 91 sensibles en "Tú decides" y cambia entre corridas; Opus no deja ninguno y da lo mismo en cada corrida, a cambio de ~0,6 s más por perfil (2,4 s contra 1,8 s) y 40 veces el precio por token. Sonnet 5.5 clasifica igual que Opus pero tarda ~5 s, así que no es una opción. Con Opus la llamada lleva `fallbacks: "default"`: si un clasificador de seguridad rechaza el pedido, la API lo reintenta en otro modelo.
+- **21-11 · onboarding:** el perfil se carga con un solo mensaje que la persona copia en `/onboarding` y pega en su asistente (ver Conector de asistente en Contratos), en vez del conector MCP de [`docs/mcp-ingestion.md`](docs/mcp-ingestion.md). Motivo: funciona desde el celular sin instalar nada y sirve en el chat y en Claude Code; el conector MCP en claude.ai pide configurarlo desde la web y un plugin solo cubre Claude Code. El chat no puede llamar a una API, pero sí escribir un enlace. El buzón vive en memoria del proceso, como el caché de veredictos. Las señales pasan por el mismo filtro de privacidad que el check-in (`classifyOnServer()`: léxico, anclas y juez) en el momento en que entran al backend, y lo `sensible` se descarta antes de guardarlo; llegan sin `evidence` y un pedido que la traiga se rechaza. Medido con Claude real y una memoria inventada llena de datos sensibles (sueldo, terapia, pareja, cliente, RUT, correo): 0 datos sensibles en las 24 entregas recibidas, sumando las versiones del mensaje que se probaron. Con herramientas (como Claude Code) llegó por la API 10 de 10. Sin herramientas (como el chat), Sonnet 5.5 entregó el enlace 3 de 3; Haiku 5.5 suele preferir no poner datos en una URL y entrega el JSON para pegar (4 de 5 con la redacción final), y en 1 de 5 se negó. Sin probar: el chat real de claude.ai en el celular, ChatGPT y Gemini. `APP_NAME` ("Nodos") es provisorio.
 
 ## Estado
 
 - [x] P0 · Next.js + Tailwind + shadcn, manifest PWA, migración de Supabase, `/api/health`
 - [x] P1 · Contratos (`src/lib/types.ts`) y seed (18 personas + sala de control)
 - [x] Vistas de la sala sin motor: `/explorar` (plano de mesas por tema) y `/grafo` (grafo de fuerzas por tópico, con filtros "soy", mis salas, mis conexiones y tipo de enlace)
-- [ ] Supabase en la nube + deploy en Vercel desde el espejo personal
-- [ ] Frentes A–E
+- [x] Supabase en la nube: migraciones aplicadas y seed cargado (`pnpm seed:prod`)
+- [x] Deploy en Render (`render.yaml`): https://team-38-r60w.onrender.com, desde `main` del espejo `oerlandsen/platanus-hack-26-cl-team-38`
+- [x] A · Conector de asistente: `/onboarding` entrega `Signal[]` desde Claude (chat o Claude Code) con un mensaje y un permiso de 15 minutos
+- [ ] Frentes A–E (resto)

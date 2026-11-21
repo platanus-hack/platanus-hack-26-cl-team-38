@@ -2,7 +2,7 @@
 
 *Cómo se decide qué parte del nodo personal es pública, qué recomendamos compartir y qué verificaciones impiden que lo privado llegue a una sala.*
 
-**Estado:** propuesta (21-11). Detalla los pasos B1, B3 y B4 de [plan-de-construccion](plan-de-construccion.md) y la línea "Datos sensibles: lista fija de exclusión más un clasificador" de [arquitectura-por-capas](arquitectura-por-capas.md). No cambia la decisión "solo capa pública": lo privado sigue sin usarse para calzar, y este documento define cómo se garantiza. Los cambios de contrato de [Contrato](#contrato) no están aplicados; al aceptarlos van a `CLAUDE.md` · Decisiones.
+**Estado:** propuesta (21-11). Detalla los pasos B1, B3 y B4 de [plan-de-construccion](plan-de-construccion.md) y la línea "Datos sensibles: lista fija de exclusión más un clasificador" de [arquitectura-por-capas](arquitectura-por-capas.md). No cambia la decisión "solo capa pública": lo privado sigue sin usarse para calzar, y este documento define cómo se garantiza. El filtro y el contrato ya están en el código (ver [Qué está construido](#qué-está-construido)); el onboarding, el auditor y el check-in por servidor siguen como propuesta.
 
 ## La regla
 
@@ -13,6 +13,74 @@ Tres consecuencias que ordenan todo el diseño:
 1. **La sala no puede filtrar lo que no tiene.** Lo privado vive en el teléfono (IndexedDB) y no se sube. La única puerta de salida es `toPublicProjection()`.
 2. **Recomendar no es publicar.** Los modelos clasifican y sugieren; solo un toque de la persona publica. Un modelo puede **subir** el nivel de cuidado de un tópico, nunca bajarlo.
 3. **Publicar aquí es proyectar.** La sala se muestra en un proyector con tu nombre. La pregunta que guía el onboarding es: *¿lo dirías en voz alta frente a la sala?*
+
+## Qué está construido
+
+`src/lib/privacy/`, con tests junto a cada archivo. Los pasos 1, 2 y 5 de [Qué se construye en el hack](#qué-se-construye-en-el-hack), y la parte de anclas del paso 8.
+
+| Archivo | Qué hace | Verificación |
+|---|---|---|
+| `screen.ts` | `screen()`: patrones de dato de contacto y léxico por categoría. Pura y síncrona, para teléfono, servidor y tests | V1, V4, V6 |
+| `anchors.ts` | Frases ancla por categoría, comparadas por embedding | apoyo de V2 |
+| `judge.ts` | Juez `claude-haiku-5-5` con salida estructurada, sin thinking, en lotes de 4 en paralelo. Recibe `kind`, `name` y `sources`; nunca `evidence`. Devuelve nivel, categoría y versión general | V2 |
+| `classify.ts` | `classifyTopics()`: junta las tres capas y devuelve el `privacy` de cada tópico | V2 |
+| `signals.ts` | `splitSignals()`: antes de sintetizar, retiene las señales que bloquea el léxico y quita `evidence` de las demás | V1 |
+| `projection.ts` | `toPublicProjection()` y `projectNode()`: la única salida del teléfono | V4 |
+| `checkin.ts` + `/api/checkin` | El servidor clasifica de nuevo lo que recibe (léxico, anclas y juez), rechaza lo `sensible` y lo que no tiene veredicto, calcula los embeddings y escribe con la clave de servicio | V6 |
+| `server.ts` + `/api/privacy/classify` | Veredictos para el teléfono, con caché en memoria por (`kind`, `name`, `sources`) compartida con el check-in | V2, V3 |
+| `canary.test.ts` | Peor caso: un juez que aprueba todo, un dueño que comparte todo y un teléfono que se salta sus controles. Lo que bloquea el léxico igual no llega a la sala, y `evidence` no sale | V8 |
+| `eval-set.ts` | Lista de prueba con nivel esperado: sensibles obvios, sensibles dichos con otras palabras, personales y seguros cercanos a una categoría | Tests y `pnpm privacy:eval` |
+
+Cómo se combinan las capas:
+
+```mermaid
+flowchart LR
+  T["Tópico<br/>kind + name + sources"] --> L{"Léxico y patrones"}
+  L -- "calza" --> S["sensible<br/>no se envía a ningún modelo"]
+  L -- "pasa" --> J["Juez LLM"]
+  L -- "pasa" --> A["Anclas por embedding"]
+  J --> C["Nivel más estricto"]
+  A --> C
+  C --> V["privacy del tópico<br/>con huella de kind y name"]
+```
+
+- **Nunca baja.** El juez puede subir un nivel; no puede bajar lo que marcó una capa local.
+- **Falla cerrado.** Sin respuesta del juez (error, tiempo agotado, negativa, índice faltante o repetido) el tópico queda en `personal`: se puede publicar, pero solo con un toque explícito y nunca como recomendado.
+- **El veredicto vale para un texto.** `checkedFor` guarda la huella de `kind`, `name` y la versión del clasificador. Renombrar el tópico, cambiarle el `kind` o subir `CLASSIFIER_VERSION` lo devuelve a privado.
+
+Medición del 21-11 con `pnpm privacy:eval` y el juez por defecto, Haiku 5.5, en tres corridas (no es determinista: entre corridas cambian de nivel 1 a 3 casos, nunca hacia `segura`):
+
+| Qué | Resultado |
+|---|---|
+| Fugas: delicado clasificado como seguro | 0 de 110 |
+| Sensibles (56) | 54 a 56 quedan `sensible`; el resto en `personal` |
+| Sensibles escritos para engañar al filtro (35): remedios, jerga, inglés, inferencia, texto que le da órdenes al juez | 34 quedan `sensible`, 1 en `personal`. Las capas locales solas marcan 4 |
+| Personales (19) | 16 a 19 quedan `personal`; el resto sube a `sensible` |
+| Seguros cercanos a una categoría (75) | 70 a 71 quedan `segura`. Por las anclas, siempre van a "Tú decides" "es · psicóloga" y "quiere_ser · psiquiatra"; el juez retiene además 1 o 2 ("arte sacro", "asesoría previsional") |
+| Seed (132 tópicos) | 129 quedan `segura`; "busca · nuevo trabajo en ia", "le_gusta · filosofía política" y un tópico de fintech que cambia en cada corrida van a "Tú decides" |
+| Latencia de un perfil real (46 tópicos) | 1,5 a 2,0 s. Las capas locales son 7 ms y ~150 ms de eso |
+
+El juez se cambia por deploy con `PRIVACY_JUDGE_MODEL` (`haiku` u `opus`); el servidor escribe al arrancar `[privacy] juez: <modelo>`. Los mismos casos con cada modelo:
+
+| | Haiku 5.5 (3 corridas) | Sonnet 5.5 (2) | Opus 5.5 (3) |
+|---|---|---|---|
+| Delicados que quedan `segura` (de 110) | 0 | 0 | 0 |
+| Sensibles que quedan `sensible` (de 91) | 88 a 90 | 91 | 91 |
+| Seguros que quedan `segura` (de 75) | 70 a 71 | 72 | 72 |
+| Seed que queda `segura` (de 132) | 129 | 129 | 130 |
+| Perfil real de 46 tópicos | 1,7 a 2,0 s | 4,8 a 5,3 s | 2,3 a 2,8 s |
+
+Opus y Sonnet dieron lo mismo en todas sus corridas, y con ellos los únicos seguros retenidos vienen de las anclas. Sonnet no quedó como opción: mismo resultado que Opus y el doble de latencia.
+
+Tres diferencias con lo propuesto más abajo, por medición:
+
+- **Las anclas suben a `personal`, no bloquean, y no se usan en el check-in.** El modelo de embeddings no separa vivir un tema de saberlo: "psiquiatra" como oficio da 0,85 contra "sesiones con mi psiquiatra" y "filosofía política" del seed da 0,74. Con cualquier umbral que atrape algo, bloquear deja fuera oficios, y como un nivel nunca baja el juez no puede corregirlo. Como alerta sí sirven: con umbral 0,66 marcan la mitad de los sensibles dichos con otras palabras, a cambio de mandar a "Tú decides" 2 de 50 seguros de la lista y 1 de 132 tópicos del seed. Tampoco se aplican a `sabe` y `ofrece`.
+- **El motivo (`reason`) es una plantilla por categoría, no texto del modelo.** Pedirle la frase al juez duplicaba los tokens de salida, que son lo que fija la latencia: un perfil de 30 bajó de ~3 s a ~1,3 s al quitarla.
+- **Un dato de contacto (correo, teléfono, RUT, usuario, URL) es `sensible`, no `personal`.** Nunca es un tópico válido.
+
+De [Lo que hay que corregir en el repo](#lo-que-hay-que-corregir-en-el-repo) están hechos los puntos 1, 2 (migración `20261121200000_checkin_by_server.sql`) y 4 (`SynthesisSignalSchema`). Falta `motivo` por código (punto 3), que depende del frente D, y el auditor del conjunto público (V5).
+
+El servidor admite los tópicos `personal`: publicarlos es decisión del dueño, y esa decisión se exige en el teléfono (`decidedBy: "user"` en `projectNode()`). El servidor no puede comprobar el toque, solo que el tópico no sea `sensible`.
 
 ## Tres niveles
 

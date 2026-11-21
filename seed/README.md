@@ -23,6 +23,8 @@
 
    El script junta las señales con el mismo nombre, calcula la profundidad con los topes del sintetizador y escribe `seed/team/cristobal.json` sin la evidencia. Además lista con qué tópicos de la sala se va a enlazar cada uno.
 
+   Antes de escribir, cada tópico pasa por el filtro de privacidad (`src/lib/privacy/`): solo entran los que quedan como seguros, y el script lista los que dejó fuera con el motivo. Necesita `ANTHROPIC_API_KEY` en `.env.local`; con `--sin-juez` usa solo el léxico y las anclas, y en ese caso revisa el JSON con más cuidado.
+
 3. Revisa esa lista. Si un par no tiene relación (en el seed de Oscar, "nuxt" quedaba pegado a escalada y fintech), cambia el nombre del tópico en el JSON por uno más específico. También puedes juntar a mano tópicos casi iguales o borrar los que no quieras publicar.
 
 4. Carga y sube:

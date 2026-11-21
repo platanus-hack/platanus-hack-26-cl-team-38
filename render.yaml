@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: team-38
+    runtime: node
+    region: virginia
+    plan: standard
+    buildCommand: pnpm install --frozen-lockfile && pnpm build
+    startCommand: pnpm start
+    healthCheckPath: /manifest.webmanifest
+    envVars:
+      - key: NODE_VERSION
+        value: 22.14.0
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # "haiku" (por defecto) u "opus": el modelo del juez de privacidad. Se cambia en el panel de Render.
+      - key: PRIVACY_JUDGE_MODEL
+        sync: false

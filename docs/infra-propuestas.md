@@ -1,6 +1,6 @@
 # Propuestas de infra
 
-Documento de trabajo. Lista lo que falta decidir sobre **qué corre dónde**, a partir del estado del repo en `cfa7c67` (P0 y P1). Nada de esto está implementado ni acordado por el equipo.
+Documento de trabajo. Lista lo que falta decidir sobre **qué corre dónde**, a partir del estado del repo en `cfa7c67` (P0 y P1). Lo implementado o aceptado está marcado en el resumen; el resto no está acordado por el equipo.
 
 ## Cómo iterar
 
@@ -16,13 +16,13 @@ Documento de trabajo. Lista lo que falta decidir sobre **qué corre dónde**, a 
 | [I1](#i1--intención-de-hoy-en-supabase) | Intención de hoy en una tabla que solo lee el servidor | propuesta | D, E1, seed |
 | [I2](#i2--aceptar-una-mesa-por-función-de-base-de-datos) | Aceptar una mesa por función de base de datos | propuesta | E1 |
 | [I3](#i3--claim-de-deliberación-e-id-de-mesa-determinista) | Claim de deliberación e id de mesa determinista | propuesta | C5, D4 |
-| [I4](#i4--temas-guardados-y-realtime-en-rooms-y-room_members) | Temas guardados y Realtime en `rooms` y `room_members` | propuesta | C5, E2 |
-| [I5](#i5--embeddings-en-el-servidor) | Embeddings en el servidor | propuesta | B4 |
+| [I4](#i4--temas-guardados-y-realtime-en-rooms-y-room_members) | Temas guardados y Realtime en `rooms` y `room_members` | parcial: `room_members` en Realtime implementado | C5, E2 |
+| [I5](#i5--embeddings-en-el-servidor) | Embeddings en el servidor | implementada | B4 |
 | [I6](#i6--recálculo-sin-cron) | Recálculo sin cron | propuesta | C5, E |
-| [I7](#i7--un-proceso-node-siempre-encendido) | Un proceso Node siempre encendido | propuesta | D4, deploy |
+| [I7](#i7--un-proceso-node-siempre-encendido) | Un proceso Node siempre encendido | aceptada | D4, deploy |
 | [I8](#i8--buzón-para-el-conector-mcp) | Buzón para el conector MCP | propuesta | A5 |
 
-I1, I2, I3, I4 e I8 son una sola [migración](#migración), ya probada. Se pueden aplicar por separado.
+I1, I2, I3, I4 e I8 son una sola [migración](#migración), ya probada (falta aplicarla; lo de `room_members` en Realtime ya salió aparte). Se pueden aplicar por separado.
 
 ## Flujo con todas las propuestas
 
@@ -99,7 +99,7 @@ Se elimina la política de `update` directo.
 
 ## I4 · Temas guardados y Realtime en `rooms` y `room_members`
 
-**Estado:** propuesta
+**Estado:** parcial. 21-11: `room_members` ya está en Realtime (`supabase/migrations/20261121180000_room_members_realtime.sql`). Siguen como propuesta `rooms.themes`, `rooms.computed_at` y `rooms` en Realtime.
 
 **Problema.** El motor devuelve `{ themes, mesas }`, pero `Theme` (`src/lib/types.ts:43`) no tiene tabla: la pantalla de sala no tiene de dónde leer los temas. Tampoco se entera cuando llega alguien, porque `room_members` no está en la publicación de Realtime (`…initial_schema.sql:60`).
 
@@ -111,7 +111,9 @@ Se elimina la política de `update` directo.
 
 ## I5 · Embeddings en el servidor
 
-**Estado:** propuesta
+**Estado:** implementada el 21-11 (`src/app/api/embed/route.ts`). Recibe `{ texts }` (1 a 100) y devuelve `{ embeddings }`.
+
+**Medido** (Linux, `next start`): el modelo cargado ocupa unos 710 MB de RAM; la primera llamada tarda 0,8 s con el modelo ya en disco y las siguientes 20–100 ms por lote. Con 512 MB el proceso muere en la primera llamada.
 
 **Problema.** `CLAUDE.md` deja abierto calcular los embeddings en el teléfono. El modelo (`src/lib/embeddings.ts:6`, `model_quantized.onnx`) pesa 118 MB: cada persona lo descargaría en el wifi de la sala antes de poder hacer check-in.
 
@@ -136,7 +138,7 @@ Se elimina la política de `update` directo.
 
 ## I7 · Un proceso Node siempre encendido
 
-**Estado:** propuesta
+**Estado:** aceptada el 21-11. El deploy va en Render (`render.yaml`), plan `standard` (2 GB) por la memoria del modelo (ver I5). Vercel se descartó.
 
 **Propuesta.** Correr la app con `next start` en un proceso que no se apaga (Render, Fly o una máquina), no en funciones serverless. Dos motivos:
 
@@ -172,7 +174,7 @@ alter table rooms
 -- Set once by the route that deliberates a mesa, so concurrent recomputes never deliberate it twice.
 alter table mesas add column deliberation_started_at timestamptz;
 
-alter publication supabase_realtime add table rooms, room_members;
+alter publication supabase_realtime add table rooms;
 
 -- Read only by server routes: RLS is on and there are no policies.
 create table member_intents (
