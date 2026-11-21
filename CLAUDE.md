@@ -81,7 +81,7 @@ D puede empezar antes que C con mesas escritas a mano sobre las proyecciones del
 ## Convenciones
 
 - Código e identificadores en inglés; UI y copy en español de Chile. Los términos del dominio (`mesa`, `aporta`, `cita`, `comparten`) se quedan en español porque así están en los contratos.
-- Modelos: `claude-sonnet-5-5` para el facilitador y `claude-haiku-5-5` para los agentes de miembro.
+- Modelos: `claude-sonnet-5-5` para el facilitador y `claude-haiku-5-5` para los agentes de miembro. El juez de privacidad se elige por deploy con `PRIVACY_JUDGE_MODEL` (`haiku` por defecto, u `opus`).
 - Next.js 16 con Cache Components: leer `node_modules/next/dist/docs/` antes de usar APIs que no conozcas.
 - Sin secretos en el repo (es público). Variables en `.env.example`.
 - Commits chicos; `main` siempre desplegable.
@@ -102,6 +102,7 @@ D puede empezar antes que C con mesas escritas a mano sobre las proyecciones del
 - **21-11 · privacidad:** `pnpm seed:person` pasa cada tópico por el filtro y solo escribe los `segura`. Pide `ANTHROPIC_API_KEY`; con `--sin-juez` usa solo las capas locales.
 - **21-11 · privacidad:** el check-in pasa por el servidor (`POST /api/checkin`) y la migración `20261121200000_checkin_by_server.sql` quita las políticas `"check in"` y `"update own projection"`. Antes, con la clave publicable que va en cada teléfono, cualquiera insertaba una proyección sin filtro. El servidor guarda en memoria el veredicto por (`kind`, `name`, `sources`), sin persona asociada: repetir la consulta no cambia la respuesta y el check-in después del onboarding no llama al modelo. Si el juez no responde y no hay veredicto guardado, el tópico se rechaza (`sin_revisar`): con la API de Anthropic caída, quien no pasó antes por el onboarding no puede entrar con tópicos.
 - **21-11 · privacidad:** contrato `SynthesisSignalSchema` (una `Signal` sin `evidence`, estricta) para lo que recibe `/api/synthesize`.
+- **21-11 · privacidad:** el modelo del juez se elige con la variable `PRIVACY_JUDGE_MODEL`: `haiku` (por defecto) u `opus` (`claude-opus-5-5`). Al arrancar, el servidor escribe en el log `[privacy] juez: <modelo>`; un valor que no reconoce cae a Haiku y el log lo dice. Medido con `pnpm privacy:eval`: ninguno deja pasar un caso delicado como seguro. Haiku deja 1 a 3 de 91 sensibles en "Tú decides" y cambia entre corridas; Opus no deja ninguno y da lo mismo en cada corrida, a cambio de ~0,6 s más por perfil (2,4 s contra 1,8 s) y 40 veces el precio por token. Sonnet 5.5 clasifica igual que Opus pero tarda ~5 s, así que no es una opción. Con Opus la llamada lleva `fallbacks: "default"`: si un clasificador de seguridad rechaza el pedido, la API lo reintenta en otro modelo.
 
 ## Estado
 

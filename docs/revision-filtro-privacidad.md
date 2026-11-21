@@ -29,7 +29,7 @@ Cada tópico recibe un nivel: `segura` (se puede recomendar), `personal` (el due
 |---|---|---|---|
 | Léxico y patrones | `screen.ts` | Determinista y testeable. Bloquea datos de contacto y términos por categoría | Atrapar lo dicho con otras palabras: marca 4 de 35 casos difíciles |
 | Anclas por embedding | `anchors.ts` | Alerta local sin costo; marca la mitad de los sensibles sutiles | Bloquear: solo sube a `personal` |
-| Juez `claude-haiku-5-5` | `judge.ts` | La precisión: 0 fugas en 110 casos delicados | Bajar un nivel que puso otra capa |
+| Juez LLM (`claude-haiku-5-5`, o `claude-opus-5-5` con `PRIVACY_JUDGE_MODEL=opus`) | `judge.ts`, `judge-model.ts` | La precisión: 0 fugas en 110 casos delicados | Bajar un nivel que puso otra capa |
 
 ## Orden de lectura
 
@@ -52,21 +52,22 @@ Unas 850 líneas de código, 460 de tests y una lista de prueba de 185 casos. En
 ## Cómo verificarlo
 
 ```bash
-pnpm test            # 223 tests; los del filtro están en src/lib/privacy/
+pnpm test            # 233 tests; los del filtro están en src/lib/privacy/
 pnpm privacy:eval    # precisión y latencia; con ANTHROPIC_API_KEY en .env.local mide el juez
+PRIVACY_JUDGE_MODEL=opus pnpm privacy:eval    # lo mismo con Opus 5.5
 ```
 
-`pnpm privacy:eval` sale con error si algún caso delicado queda como `segura` o si el juez no respondió. Resultado del 21-11:
+`pnpm privacy:eval` sale con error si algún caso delicado queda como `segura` o si el juez no respondió. Resultado del 21-11, tres corridas por modelo:
 
-| Qué | Resultado |
-|---|---|
-| Delicados clasificados como seguros (de 110) | 0 |
-| Sensibles que quedan `sensible` (de 91) | 89; los otros 2 quedan en `personal` |
-| Seguros cercanos a una categoría que quedan `segura` (de 75) | 72 |
-| Tópicos del seed que quedan `segura` (de 132) | 130 |
-| Latencia de un perfil real de 46 tópicos | 1,5 a 2,0 s |
+| Qué | Haiku 5.5 | Opus 5.5 |
+|---|---|---|
+| Delicados clasificados como seguros (de 110) | 0 | 0 |
+| Sensibles que quedan `sensible` (de 91) | 88 a 90; el resto en `personal` | 91 |
+| Seguros cercanos a una categoría que quedan `segura` (de 75) | 70 a 71 | 72 |
+| Tópicos del seed que quedan `segura` (de 132) | 129 | 130 |
+| Latencia de un perfil real de 46 tópicos | 1,7 a 2,0 s | 2,3 a 2,8 s |
 
-El juez no es determinista: entre corridas uno o dos casos cambian entre `sensible` y `personal`. En ninguna corrida un caso delicado quedó `segura`.
+Haiku no es determinista: entre corridas 1 a 3 casos cambian entre `sensible` y `personal`. Opus dio lo mismo las tres veces. En ninguna corrida de ningún modelo un caso delicado quedó `segura`.
 
 Para probar el check-in a mano, con Supabase local arriba y las claves en `.env.local`:
 
@@ -104,4 +105,5 @@ Debe aceptar `p.jazz` y rechazar `p.sertralina` con `reason: "sensible"`. Ese t�
 
 1. Aplicar la migración en Supabase local (`pnpm exec supabase migration up`) y en la nube. Sin ella el filtro del servidor se puede saltar con un insert directo.
 2. Confirmar que `ANTHROPIC_API_KEY` está definida en Render: `render.yaml` ya la declara. Sin ella el check-in rechaza todo tópico que no bloquee el léxico.
-3. El teléfono (frente E) tiene que hacer check-in con `POST /api/checkin` y no con un insert a `room_members`; ya no necesita llamar a `/api/embed` para eso.
+3. Para usar Opus, definir `PRIVACY_JUDGE_MODEL=opus` en el panel de Render. Sin la variable corre Haiku. El log de arranque dice cuál quedó: `[privacy] juez: claude-opus-5-5`.
+4. El teléfono (frente E) tiene que hacer check-in con `POST /api/checkin` y no con un insert a `room_members`; ya no necesita llamar a `/api/embed` para eso.
