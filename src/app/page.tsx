@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +38,9 @@ export default function Home() {
         <p className="text-sm text-muted-foreground">Base del repo (P0 + P1). Las pantallas del frente E reemplazan esta página.</p>
       </header>
       <HealthCheck />
+      <Link href="/explorar" className="text-sm font-medium underline underline-offset-4">
+        Ver cómo se arma una sala
+      </Link>
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-medium">Salas</h2>
         <Suspense fallback={<p className="text-sm text-muted-foreground">Cargando salas…</p>}>

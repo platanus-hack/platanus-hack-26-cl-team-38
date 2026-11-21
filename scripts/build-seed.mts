@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { SEED_ROOMS } from "../seed/people";
-import { cosine, embed, EMBEDDING_MODEL } from "@/lib/embeddings";
+import { embed, EMBEDDING_MODEL } from "@/lib/embeddings";
+import { cosine } from "@/lib/vector";
 import { PublicProjectionSchema, type PublicProjection } from "@/lib/types";
 
 const THEME_THRESHOLD = 0.6;

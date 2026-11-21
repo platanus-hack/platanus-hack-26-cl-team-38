@@ -30,10 +30,3 @@ export async function embed(texts: string[]): Promise<number[][]> {
 function stripAccents(text: string): string {
   return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
-
-// embed() normalizes, so cosine is the plain dot product.
-export function cosine(a: number[], b: number[]): number {
-  let dot = 0;
-  for (let i = 0; i < a.length; i++) dot += a[i] * b[i];
-  return dot;
-}
