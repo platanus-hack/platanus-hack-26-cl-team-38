@@ -2,6 +2,7 @@ import { embed } from "@/lib/embeddings";
 import { admitCheckIn } from "@/lib/privacy/checkin";
 import { classifyOnServer } from "@/lib/privacy/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { bearerKey, saveProfile } from "@/lib/users/profile";
 
 export async function POST(request: Request) {
   const admitted = await admitCheckIn(await request.json().catch(() => null), { classify: classifyOnServer, embed });
@@ -16,6 +17,10 @@ export async function POST(request: Request) {
     .from("room_members")
     .upsert({ room_id: room.data.id, person_id: projection.personId, display_name: projection.displayName, projection });
   if (write.error) return Response.json({ error: write.error.message }, { status: 500 });
+
+  // The same projection as the person's profile, across rooms. A phone that sends its device key
+  // claims the profile here. Not fatal: the room works without it (say, migration not applied yet).
+  await saveProfile(supabaseAdmin, projection, bearerKey(request.headers.get("authorization"))).catch((error) => console.error("perfil:", error));
 
   return Response.json({ roomId: room.data.id, accepted: projection.topics.map((t) => t.id), rejected });
 }
