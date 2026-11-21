@@ -12,7 +12,7 @@ import { hasIdentifier } from "@/lib/privacy/screen";
 import type { PersonalNode, Topic } from "@/lib/types";
 import { ConnectAssistant, useAssistantInbox } from "./connect-assistant";
 import { NodePreview } from "./node-preview";
-import { rememberMe, usePerson, useSignals, useStoredNode } from "./store";
+import { rememberMe, usePerson, useProfiles, useSignals, useStoredNode } from "./store";
 
 const STEPS = ["Trae tu info", "Elige qué es público", "Entra a la sala"] as const;
 
@@ -25,6 +25,7 @@ const CheckInResponseSchema = z.object({
 export function OnboardingFlow() {
   const signals = useSignals();
   const inbox = useAssistantInbox();
+  const profiles = useProfiles();
   const [person, setPerson] = usePerson();
   const [node, setNode] = useStoredNode();
   const [step, setStep] = useState(() => (node && node.topics.length > 0 ? 1 : 0));
@@ -90,7 +91,7 @@ export function OnboardingFlow() {
 
       {step === 0 && (
         <>
-          <ConnectAssistant signals={signals} inbox={inbox} />
+          <ConnectAssistant signals={signals} profiles={profiles} inbox={inbox} />
           <Button size="lg" disabled={!node?.topics.length} onClick={() => setStep(1)}>
             {reviewing ? "Revisando tus temas…" : "Siguiente: elegir qué es público"}
           </Button>

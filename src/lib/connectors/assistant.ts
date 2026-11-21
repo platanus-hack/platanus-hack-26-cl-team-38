@@ -61,6 +61,18 @@ export function parseAssistantLink(fragment: string): { token: string; signals: 
 
 const KINDS = KindSchema.options.join('" | "');
 
+// Shared by every message that asks an assistant for something about the person: the first barrier
+// of the privacy filter is the assistant never writing it down.
+export const LEAVE_OUT = `QUÉ DEJAR FUERA, SIEMPRE
+Aunque lo sepas, no incluyas:
+- salud física o mental, terapia, diagnósticos;
+- familia, hijos, pareja, vida sentimental u orientación sexual;
+- política y religión;
+- dinero personal: sueldo, deudas, patrimonio, inversiones propias;
+- problemas legales o conflictos laborales;
+- datos de contacto o de identificación: correo, teléfono, dirección, RUT, cuentas;
+- nombres de otras personas, de clientes y de empresas, y cualquier detalle confidencial de mi trabajo: código, credenciales, proyectos internos, cifras.`;
+
 // Written in the person's voice and explicit about what the app is, what the code allows and what
 // happens with the result, so the assistant does not have to guess whether sending is safe.
 export function buildAssistantPrompt({ origin, token, minutes = TOKEN_MINUTES }: { origin: string; token: string; minutes?: number }): string {
@@ -95,15 +107,7 @@ Reglas:
 QUÉ INCLUIR
 Lo que yo contaría al presentarme en un evento: mi oficio y mi experiencia, lo que estoy aprendiendo, mis proyectos o emprendimientos dichos en general (el rubro, no el nombre), y mis hobbies e intereses, como deportes, arte, música o juegos.
 
-QUÉ DEJAR FUERA, SIEMPRE
-Aunque lo sepas, no incluyas:
-- salud física o mental, terapia, diagnósticos;
-- familia, hijos, pareja, vida sentimental u orientación sexual;
-- política y religión;
-- dinero personal: sueldo, deudas, patrimonio, inversiones propias;
-- problemas legales o conflictos laborales;
-- datos de contacto o de identificación: correo, teléfono, dirección, RUT, cuentas;
-- nombres de otras personas, de clientes y de empresas, y cualquier detalle confidencial de mi trabajo: código, credenciales, proyectos internos, cifras.
+${LEAVE_OUT}
 Manda solo las señales, sin citas ni explicaciones. Si dudas de algo, déjalo fuera.
 
 CÓMO ENTREGARLO

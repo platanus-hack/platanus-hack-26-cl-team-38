@@ -5,8 +5,9 @@ import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { admitSignals, buildAssistantPrompt, IncomingSignalsSchema, parsePastedSignals, type ClassifySignals } from "@/lib/connectors/assistant";
+import { buildProfilePrompt, PROFILE_MAX_CHARS } from "@/lib/connectors/profile";
 import { SynthesisSignalSchema, type Signal } from "@/lib/types";
-import { addSignals, writeSignals } from "./store";
+import { addProfiles, addSignals, ProfilesSchema, removeProfileLine, writeSignals, type Profile } from "./store";
 
 // Pasted text goes through the same privacy filter as the other two ways in. Only kind and name
 // travel to the server, as in the rest of the onboarding.
@@ -31,8 +32,11 @@ export function useAssistantInbox() {
       const response = await fetch("/api/onboarding/inbox", { method: "POST", body: JSON.stringify({ inbox: ticket.inbox }) }).catch(() => null);
       if (!response) return; // offline for a moment: try again on the next tick
       if (!response.ok) return setTicket(null);
-      const arrived = z.array(SynthesisSignalSchema).catch([]).parse((await response.json()).signals);
+      const body = await response.json();
+      const arrived = z.array(SynthesisSignalSchema).catch([]).parse(body.signals);
       if (arrived.length > 0) addSignals(arrived);
+      const profiles = ProfilesSchema.catch([]).parse(body.profiles);
+      if (profiles.length > 0) addProfiles(profiles);
     }, 2000);
     return () => clearInterval(poll);
   }, [ticket]);
@@ -48,8 +52,20 @@ export function useAssistantInbox() {
   }
 
   const message = async () => buildAssistantPrompt({ origin: window.location.origin, token: await liveToken() });
+  const profileMessage = async () => buildProfilePrompt({ origin: window.location.origin, token: await liveToken() });
 
-  return { message };
+  // The file the person got from a chat goes in through the same door as an assistant's upload, so
+  // it gets the same filter; what passes comes back through the inbox.
+  async function uploadProfile(source: Profile["source"], markdown: string): Promise<string> {
+    const response = await fetch(`/api/onboarding/profile?source=${source}`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${await liveToken()}`, "content-type": "text/markdown" },
+      body: markdown,
+    });
+    return response.text();
+  }
+
+  return { message, profileMessage, uploadProfile };
 }
 
 export type AssistantInbox = ReturnType<typeof useAssistantInbox>;
@@ -145,6 +161,105 @@ function AssistantCard({ assistant, arrived, message }: { assistant: Assistant; 
   );
 }
 
+const PROFILE_SOURCES = [
+  ["claude", "Claude"],
+  ["chatgpt", "ChatGPT"],
+  ["gemini", "Gemini"],
+] as const;
+
+// Proof of concept: signals are a few words each; this brings the detail an agent needs to plan
+// with a group, as a markdown file the assistant writes.
+function DetailedProfile({ profiles, inbox }: { profiles: Profile[]; inbox: Pick<AssistantInbox, "profileMessage" | "uploadProfile"> }) {
+  const { status: copyStatus, text, copy } = useCopy(inbox.profileMessage, "tu asistente");
+  const [source, setSource] = useState<(typeof PROFILE_SOURCES)[number][0]>("claude");
+  const [pasted, setPasted] = useState("");
+  const [status, setStatus] = useState("");
+
+  async function upload(markdown: string) {
+    if (markdown.trim() === "") return;
+    if (markdown.length > PROFILE_MAX_CHARS) return setStatus("El archivo es muy largo. Pídele a tu asistente una versión más corta.");
+    setStatus("Revisando que no haya datos sensibles…");
+    try {
+      setStatus(await inbox.uploadProfile(source, markdown));
+      setPasted("");
+    } catch {
+      setStatus("No se pudo subir. Revisa tu conexión e intenta de nuevo.");
+    }
+  }
+
+  return (
+    <section className="flex flex-col gap-2 rounded-lg border p-4">
+      <h3 className="font-medium">Perfil detallado</h3>
+      <p className="text-sm text-muted-foreground">
+        Tu asistente escribe un archivo con tus gustos y tu forma de planear, para que tu agente te represente en un grupo. Claude Code lo sube solo. Desde el chat te
+        entrega el archivo y lo subes aquí. Pasa línea por línea por el filtro de privacidad.
+      </p>
+      <Button onClick={copy}>Copiar mensaje del perfil detallado</Button>
+      <p role="status" className="text-sm text-muted-foreground">
+        {copyStatus}
+      </p>
+      <MessagePreview text={text} />
+
+      <details className="text-sm">
+        <summary className="cursor-pointer font-medium">Subir el archivo que me dio mi asistente</summary>
+        <div className="mt-2 flex flex-col gap-2">
+          <label className="flex items-center gap-2">
+            <span className="text-muted-foreground">Viene de</span>
+            <select value={source} onChange={(event) => setSource(event.target.value as typeof source)} className="rounded-lg border bg-background p-1">
+              {PROFILE_SOURCES.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <input
+            type="file"
+            accept=".md,.markdown,.txt,text/markdown,text/plain"
+            aria-label="Archivo del perfil"
+            className="text-xs"
+            onChange={async (event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (file) await upload(await file.text());
+            }}
+          />
+          <label className="flex flex-col gap-1">
+            <span className="text-muted-foreground">O pega aquí su contenido.</span>
+            <textarea value={pasted} onChange={(event) => setPasted(event.target.value)} rows={5} spellCheck={false} className="rounded-lg border bg-background p-2 font-mono text-xs" />
+          </label>
+          <Button variant="outline" onClick={() => upload(pasted)}>
+            Subir
+          </Button>
+        </div>
+      </details>
+      <p role="status" className="text-sm text-muted-foreground">
+        {status}
+      </p>
+
+      {profiles.map((profile) => (
+        <details key={profile.source} className="text-sm">
+          <summary className="cursor-pointer font-medium">
+            Llegó de {PROFILE_SOURCES.find(([value]) => value === profile.source)?.[1] ?? profile.source}: {profile.markdown.split("\n").filter((line) => line.startsWith("- ")).length} líneas
+          </summary>
+          <ul className="mt-2 flex flex-col gap-1">
+            {profile.markdown.split("\n").map((line, i) =>
+              line.trim() === "" ? null : (
+                <li key={`${i}:${line}`} className={`flex items-start justify-between gap-2 ${line.startsWith("#") ? "mt-2 font-medium" : "text-muted-foreground"}`}>
+                  <span>{line.replace(/^(?:#+|-)\s+/, "")}</span>
+                  <button type="button" aria-label={`Quitar: ${line}`} className="shrink-0 underline underline-offset-4" onClick={() => removeProfileLine(profile.source, i)}>
+                    Quitar
+                  </button>
+                </li>
+              ),
+            )}
+          </ul>
+        </details>
+      ))}
+    </section>
+  );
+}
+
 function PasteFallback() {
   const [pasted, setPasted] = useState("");
   const [status, setStatus] = useState("");
@@ -190,7 +305,7 @@ function PasteFallback() {
   );
 }
 
-export function ConnectAssistant({ signals, inbox }: { signals: Signal[]; inbox: AssistantInbox }) {
+export function ConnectAssistant({ signals, profiles, inbox }: { signals: Signal[]; profiles: Profile[]; inbox: AssistantInbox }) {
   const from = (source: Signal["source"]) => signals.filter((s) => s.source === source).length;
   return (
     <div className="flex flex-col gap-4">
@@ -201,6 +316,7 @@ export function ConnectAssistant({ signals, inbox }: { signals: Signal[]; inbox:
         (salud, pareja, dinero, política…) se descarta.
       </p>
       <PasteFallback />
+      <DetailedProfile profiles={profiles} inbox={inbox} />
       {signals.length > 0 && (
         <p className="text-sm text-muted-foreground">
           Llegaron {signals.length} temas. Nada es público todavía.{" "}

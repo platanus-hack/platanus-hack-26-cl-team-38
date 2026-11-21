@@ -1,12 +1,13 @@
 import { useState, useSyncExternalStore } from "react";
 import { z } from "zod";
-import { PersonalNodeSchema, SignalSchema, type PersonalNode, type Signal, type SynthesisSignal } from "@/lib/types";
+import { PersonalNodeSchema, SignalSchema, SourceSchema, type PersonalNode, type Signal, type SynthesisSignal } from "@/lib/types";
 
 // Everything the onboarding knows lives on this phone. The server forgets signals as soon as the
 // phone collects them, so they are saved here before anything else: a reload must not lose them.
 const SIGNALS_KEY = "team38.signals.v1";
 const NODE_KEY = "team38.node.v1";
 const PERSON_KEY = "team38.person.v1";
+const PROFILES_KEY = "team38.profiles.v1";
 // Same key as /grafo's "Soy": checking in as someone makes the other views open as them.
 export const ME_KEY = "team38.me";
 
@@ -72,6 +73,30 @@ export function addSignals(arrived: SynthesisSignal[]) {
   const merged = new Map(readSignals().map((signal) => [keyOf(signal), signal]));
   for (const signal of arrived) merged.set(keyOf(signal), { ...signal, evidence: "" });
   writeSignals([...merged.values()]);
+}
+
+// The detailed profile each assistant wrote, already through the privacy filter. One per assistant.
+const ProfileSchema = z.object({ source: SourceSchema, markdown: z.string() });
+export const ProfilesSchema = z.array(ProfileSchema);
+export type Profile = z.infer<typeof ProfileSchema>;
+
+const profileStore = stored<Profile[]>(PROFILES_KEY, ProfilesSchema, []);
+export const useProfiles = profileStore.use;
+
+export function addProfiles(arrived: Profile[]) {
+  const bySource = new Map(profileStore.get().map((profile) => [profile.source, profile]));
+  for (const profile of arrived) bySource.set(profile.source, profile);
+  profileStore.set([...bySource.values()]);
+}
+
+// Taking a line out needs no review: the owner can only make the profile say less.
+export function removeProfileLine(source: Profile["source"], index: number) {
+  profileStore.set(
+    profileStore
+      .get()
+      .map((profile) => (profile.source === source ? { ...profile, markdown: profile.markdown.split("\n").filter((_, i) => i !== index).join("\n") } : profile))
+      .filter((profile) => profile.markdown.trim() !== ""),
+  );
 }
 
 const PersonSchema = z.object({ personId: z.string().min(1).max(80), displayName: z.string().max(40) });
