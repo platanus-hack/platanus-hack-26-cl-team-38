@@ -100,5 +100,5 @@ D puede empezar antes que C con mesas escritas a mano sobre las proyecciones del
 - [x] P1 · Contratos (`src/lib/types.ts`) y seed (18 personas + sala de control)
 - [x] Vistas de la sala sin motor: `/explorar` (plano de mesas por tema) y `/grafo` (grafo de fuerzas por tópico, con filtros "soy", mis salas, mis conexiones y tipo de enlace)
 - [x] Supabase en la nube: migraciones aplicadas y seed cargado (`pnpm seed:prod`)
-- [ ] Deploy en Render (`render.yaml`)
+- [x] Deploy en Render (`render.yaml`): https://team-38-r60w.onrender.com, desde `main` del espejo `oerlandsen/platanus-hack-26-cl-team-38`
 - [ ] Frentes A–E
