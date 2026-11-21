@@ -38,6 +38,9 @@ export default function Home() {
         <p className="text-sm text-muted-foreground">Base del repo (P0 + P1). Las pantallas del frente E reemplazan esta página.</p>
       </header>
       <HealthCheck />
+      <Link href="/onboarding" className="text-sm font-medium underline underline-offset-4">
+        Armar mi perfil con mi asistente
+      </Link>
       <Link href="/explorar" className="text-sm font-medium underline underline-offset-4">
         Ver cómo se arma una sala
       </Link>
