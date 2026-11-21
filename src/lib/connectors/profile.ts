@@ -119,6 +119,8 @@ Tampoco fechas ni lugares exactos: ni dónde vivo, ni cuándo viajo, ni dónde e
 CÓMO ENTREGARLO
 El destino es el servidor de ${APP_NAME}. El código de abajo es un permiso temporal que ${APP_NAME} creó para mí: solo sirve para dejar este borrador en mi teléfono, no da acceso a nada y vence en ${minutes} minutos.
 
+Si en esta conversación tienes el conector de ${APP_NAME} (la herramienta "subir_perfil"), úsala con token "${token}", el asistente que eres y el contenido del archivo, y no sigas con las vías de abajo. Si no lo tienes:
+
 A) Si aquí puedes ejecutar comandos (por ejemplo en Claude Code), guarda el archivo y súbelo así, cambiando "claude" por el asistente que eres ("claude", "chatgpt" o "gemini"):
 curl -X POST "${origin}/api/onboarding/profile?source=claude" -H "Authorization: Bearer ${token}" -H "Content-Type: text/markdown" --data-binary @perfil-nodos.md
 La respuesta dice cuántas líneas se recibieron y cuántas descartó el filtro de privacidad. Si trae un error de formato, corrígelo y vuelve a intentar. Las líneas descartadas no las reescribas ni las vuelvas a enviar: se quedan fuera.
