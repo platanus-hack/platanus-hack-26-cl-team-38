@@ -1,13 +1,18 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { describe, expect, it, vi } from "vitest";
-import { createAnthropicJudge, JUDGE_MODEL, type JudgeInput } from "./judge";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { createAnthropicJudge, type JudgeInput } from "./judge";
+import { describeJudge, resolveJudge } from "./judge-model";
 
 type RawVerdict = { i: number; level: string; category: string; saferName: string };
 
 function clientAnswering(answer: (items: { i: number; name: string }[]) => unknown) {
-  const parse = vi.fn(async (params: { messages: { content: string }[] }) => answer(JSON.parse(params.messages[0].content)));
-  return { client: { messages: { parse } } as unknown as Anthropic, parse };
+  const respond = async (params: { messages: { content: string }[] }) => answer(JSON.parse(params.messages[0].content));
+  const parse = vi.fn(respond);
+  const betaParse = vi.fn(respond);
+  return { client: { messages: { parse }, beta: { messages: { parse: betaParse } } } as unknown as Anthropic, parse, betaParse };
 }
+
+afterEach(() => vi.unstubAllEnvs());
 
 const ok = (verdicts: RawVerdict[]) => ({ stop_reason: "end_turn", parsed_output: { verdicts } });
 const safe = (i: number): RawVerdict => ({ i, level: "segura", category: "ninguna", saferName: "" });
@@ -17,10 +22,22 @@ describe("createAnthropicJudge", () => {
   it("sends kind, name and sources only, to the fast model, without thinking", async () => {
     const { client, parse } = clientAnswering((items) => ok(items.map((item) => safe(item.i))));
     await createAnthropicJudge({ client })([{ kind: "sabe", name: "python", sources: ["github"] }]);
-    const [params] = parse.mock.calls[0] as unknown as [Record<string, unknown>];
-    expect(params.model).toBe(JUDGE_MODEL);
+    const [params, requestOptions] = parse.mock.calls[0] as unknown as [Record<string, unknown>, Record<string, unknown>];
+    expect(params.model).toBe("claude-haiku-5-5");
     expect(params.thinking).toEqual({ type: "disabled" });
+    expect(requestOptions.timeout).toBe(6000);
     expect(JSON.parse((params.messages as { content: string }[])[0].content)).toEqual([{ i: 0, kind: "sabe", name: "python", sources: ["github"] }]);
+  });
+
+  it("runs on Opus when the deploy asks for it, with a refusal fallback and a longer timeout", async () => {
+    vi.stubEnv("PRIVACY_JUDGE_MODEL", "opus");
+    const { client, parse, betaParse } = clientAnswering((items) => ok(items.map((item) => safe(item.i))));
+    expect(await createAnthropicJudge({ client })(topics(1))).toEqual([{ level: "segura", category: undefined, saferName: undefined }]);
+    expect(parse).not.toHaveBeenCalled();
+    const [params, requestOptions] = betaParse.mock.calls[0] as unknown as [Record<string, unknown>, Record<string, unknown>];
+    expect(params).toMatchObject({ model: "claude-opus-5-5", fallbacks: "default", betas: ["server-side-fallback-2026-07-01"] });
+    expect(params).not.toHaveProperty("thinking");
+    expect(requestOptions.timeout).toBe(12000);
   });
 
   it("splits a long list into parallel chunks and keeps the order", async () => {
@@ -63,5 +80,30 @@ describe("createAnthropicJudge", () => {
     const { client } = clientAnswering(answer);
     expect(await createAnthropicJudge({ client, onError })(topics(2))).toEqual([null, null]);
     expect(onError).toHaveBeenCalledOnce();
+  });
+});
+
+describe("resolveJudge", () => {
+  it.each([
+    [undefined, "claude-haiku-5-5", true],
+    ["", "claude-haiku-5-5", true],
+    ["haiku", "claude-haiku-5-5", true],
+    ["opus", "claude-opus-5-5", true],
+    [" Opus ", "claude-opus-5-5", true],
+    ["claude-opus-5-5", "claude-opus-5-5", true],
+    ["opus-5.5", "claude-haiku-5-5", false],
+    ["gpt-5", "claude-haiku-5-5", false],
+  ])("reads PRIVACY_JUDGE_MODEL=%j as %s", (value, model, recognized) => {
+    expect(resolveJudge(value)).toMatchObject({ config: { model }, recognized });
+  });
+
+  it("says in one line which model is running, or why it is not the one asked for", () => {
+    vi.stubEnv("ANTHROPIC_API_KEY", "test-key");
+    expect(describeJudge("opus")).toBe("[privacy] juez: claude-opus-5-5");
+    expect(describeJudge(undefined)).toBe("[privacy] juez: claude-haiku-5-5");
+    expect(describeJudge("opus-5.5")).toContain('PRIVACY_JUDGE_MODEL="opus-5.5" no es "haiku" ni "opus": el juez corre con claude-haiku-5-5');
+    vi.stubEnv("ANTHROPIC_API_KEY", "");
+    vi.stubEnv("ANTHROPIC_AUTH_TOKEN", "");
+    expect(describeJudge("opus")).toContain("sin ANTHROPIC_API_KEY");
   });
 });

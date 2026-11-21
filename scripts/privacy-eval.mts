@@ -3,7 +3,8 @@ import { SEED_ROOMS } from "../seed/people";
 import { screenByAnchors } from "@/lib/privacy/anchors";
 import { classifyTopics } from "@/lib/privacy/classify";
 import { EVAL_SET, PERSONAL, SAFE, SAFE_HARD, SENSITIVE_HARD, SENSITIVE_OBVIOUS, SENSITIVE_SUBTLE, type EvalCase } from "@/lib/privacy/eval-set";
-import { createAnthropicJudge, JUDGE_MODEL } from "@/lib/privacy/judge";
+import { createAnthropicJudge } from "@/lib/privacy/judge";
+import { resolveJudge } from "@/lib/privacy/judge-model";
 import { screen } from "@/lib/privacy/screen";
 import { PRIVACY_LEVELS } from "@/lib/privacy/taxonomy";
 
@@ -52,7 +53,7 @@ if (!process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN) {
 const errors: unknown[] = [];
 const judge = createAnthropicJudge({ onError: (e) => errors.push(e) });
 
-console.log(`\nFiltro completo con ${JUDGE_MODEL}\n`);
+console.log(`\nFiltro completo con ${resolveJudge().config.model}\n`);
 const [results, totalMs] = await timed(() => classifyTopics(EVAL_SET, { judge }));
 let unjudged = results.filter((r) => r.by === "sin_juez").length;
 
