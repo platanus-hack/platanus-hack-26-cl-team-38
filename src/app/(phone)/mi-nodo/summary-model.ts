@@ -33,13 +33,4 @@ export const WITHHELD_COPY: Record<WithheldReason, string> = {
   sensible: "No se puede compartir.",
 };
 
-export function checkInBody(node: PersonalNode, roomCode: string) {
-  const { projection } = projectNode({ ...node, topics: node.topics.filter((t) => t.privacy?.level !== "sensible") });
-  return {
-    roomCode,
-    personId: projection.personId,
-    displayName: projection.displayName,
-    // The server computes embeddings at check-in and rejects any extra field.
-    topics: projection.topics.map((t) => ({ id: t.id, name: t.name, kind: t.kind, depth: t.depth, sources: t.sources })),
-  };
-}
+export { checkInBody } from "@/lib/node/node";
