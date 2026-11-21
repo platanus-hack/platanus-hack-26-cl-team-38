@@ -135,10 +135,8 @@ function RoomSwitch({ rooms, roomId, onChange }: { rooms: Room[]; roomId?: strin
           className="flex cursor-pointer flex-col rounded-lg px-3 py-2 text-sm transition-colors has-checked:bg-white has-checked:shadow-[0_1px_2px_rgba(24,33,47,0.12)] has-focus-visible:outline-2 has-focus-visible:outline-[#2F7FD1]"
         >
           <input type="radio" name="room" className="sr-only" checked={room.id === roomId} onChange={() => onChange(room.id)} />
-          <span className="font-medium">{room.id === "seed-control" ? "Sala de control" : "Sala de prueba"}</span>
-          <span className="text-xs text-[#18212F]/55">
-            {room.id === "seed-control" ? "Nada en común" : "Seed del MUT"}, código {room.code}
-          </span>
+          <span className="font-medium">{room.name}</span>
+          <span className="text-xs text-[#18212F]/55">código {room.code}</span>
         </label>
       ))}
     </fieldset>

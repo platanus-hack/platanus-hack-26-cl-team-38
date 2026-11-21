@@ -30,6 +30,7 @@ Capas privadas y círculos, peer-to-peer entre teléfonos, reencuentro entre eve
 | `pnpm db:start` / `pnpm db:stop` | Supabase local (Docker), sin los servicios que no usamos. `pnpm exec supabase status` da las claves para `.env.local` (no excluir `gotrue`: sin él no imprime las claves) |
 | `pnpm seed` | Carga la sala de seed y la sala de control en Supabase (borra y recrea) |
 | `pnpm seed:build` | Recalcula los embeddings de `seed/people.ts` → `seed/rooms.json` y reporta pares de tópicos sobre 0,60 |
+| `pnpm seed:person <slug> "<Nombre>" <respuesta.json>...` | Agrega a un integrante al seed desde lo que devuelven Claude o ChatGPT con `seed/prompt-perfil.md` (ver `seed/README.md`) |
 | `pnpm test` | Vitest |
 | `pnpm typecheck` / `pnpm lint` / `pnpm build` | Deben pasar antes de cada push |
 
@@ -87,10 +88,12 @@ D puede empezar antes que C con mesas escritas a mano sobre las proyecciones del
 - **21-11 · P0/P1:** `embed()` quita tildes. "cerámica" daba ≥0,6 contra fintech, trekking y crochet; "ceramica" queda bajo 0,5.
 - **21-11 · P1:** los temas se calculan en memoria en el servidor (los embeddings viajan dentro de `projection`), así que no se usa pgvector.
 - **21-11 · P1:** se agregó `Theme` a los contratos para que E dibuje los temas sin esperar a C.
+- **21-11 · seed:** Oscar entra al seed con tópicos sintetizados desde Claude y su export de ChatGPT (señales casi iguales juntadas, preguntas de soporte descartadas), en `seed-mut` y en una sala nueva `seed-hack` (HACK26), para probar los filtros por persona. Varios nombres se cambiaron por otros más específicos ("emprender", "agentes de ia", "nuxt", "diseño de interiores") porque pasaban 0,60 contra tópicos sin relación (escalada, trekking, fintech, diseño ux).
 
 ## Estado
 
 - [x] P0 · Next.js + Tailwind + shadcn, manifest PWA, migración de Supabase, `/api/health`
 - [x] P1 · Contratos (`src/lib/types.ts`) y seed (18 personas + sala de control)
+- [x] Vistas de la sala sin motor: `/explorar` (plano de mesas por tema) y `/grafo` (grafo de fuerzas por tópico, con filtros "soy", mis salas, mis conexiones y tipo de enlace)
 - [ ] Supabase en la nube + deploy en Vercel desde el espejo personal
 - [ ] Frentes A–E

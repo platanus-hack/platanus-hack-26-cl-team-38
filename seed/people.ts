@@ -1,10 +1,11 @@
 import type { Kind, Source } from "@/lib/types";
+import { team } from "./team";
 
 // Hand-written source of truth for the seed. `pnpm seed:build` adds embeddings and writes rooms.json.
 // Topics are already post-synthesis: passive taste (spotify, instagram likes) never exceeds depth 2,
 // and depth 3 always has sabe/hace evidence.
 
-type SeedTopic = [name: string, kind: Kind, depth: 1 | 2 | 3, sources: Source[]];
+export type SeedTopic = [name: string, kind: Kind, depth: 1 | 2 | 3, sources: Source[]];
 export type SeedPerson = { slug: string; displayName: string; topics: SeedTopic[] };
 export type SeedRoom = { id: string; code: string; name: string; people: SeedPerson[] };
 
@@ -169,6 +170,7 @@ const mut: SeedPerson[] = [
       ["meditación", "quiere_ser", 1, ["chatgpt"]],
     ],
   },
+  ...team.filter((p) => p.rooms.includes("seed-mut")),
 ];
 
 // Negative control (O8): nothing in common, so the engine must return 0 mesas.
@@ -180,8 +182,15 @@ const control: SeedPerson[] = [
   { slug: "valeria", displayName: "Valeria", topics: [["bordado", "hace", 2, ["instagram"]], ["blockchain", "busca", 1, ["claude"]]] },
 ];
 
+// The team's own room: every teammate in seed/team plus a few synthetic people, who repeat across events.
+const hack: SeedPerson[] = [
+  ...team.filter((p) => p.rooms.includes("seed-hack")),
+  ...mut.filter((p) => ["bruno", "hugo", "lucia", "javier", "sofia"].includes(p.slug)),
+];
+
 export const SEED_ROOMS: SeedRoom[] = [
   { id: "seed-mut", code: "MUT001", name: "Sala de prueba · MUT", people: mut },
+  { id: "seed-hack", code: "HACK26", name: "Platanus Hack 26", people: hack },
   { id: "seed-control", code: "CTRL01", name: "Sala de control (nada en común)", people: control },
 ];
 
@@ -193,5 +202,6 @@ export const SEED_EXPECTATIONS = {
     affinityTheme: "juegos de mesa",
     noObviousMatch: "seed-kevin",
   },
+  "seed-hack": {},
   "seed-control": { mesas: 0 },
 } as const;
