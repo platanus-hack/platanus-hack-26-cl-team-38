@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { admitSignals, buildAssistantPrompt, IncomingSignalsSchema, parseAssistantLink, parsePastedSignals } from "./assistant";
 
 const signal = (label: string, extra: Record<string, unknown> = {}) => ({ source: "claude", kind: "sabe", label, strength: 0.8, ...extra });
@@ -17,10 +17,25 @@ describe("IncomingSignalsSchema", () => {
   });
 });
 
+// Stands in for the privacy filter: the level of each topic is looked up by name.
+const classifier = (levels: Record<string, string>) => vi.fn(async (topics: { name: string }[]) => topics.map((t) => ({ privacy: { level: (levels[t.name] ?? "segura") as "segura" | "personal" | "sensible" } })));
+
 describe("admitSignals", () => {
-  it("drops what the lexicon blocks and keeps the rest, lowercased", () => {
-    const parsed = IncomingSignalsSchema.parse([signal("Open Banking"), signal("sesiones con mi psiquiatra", { kind: "hace" }), signal("ana@ejemplo.cl", { kind: "es" })]);
-    expect(admitSignals(parsed)).toEqual({ accepted: [signal("open banking")], held: 2 });
+  it("hands every signal to the privacy filter in the shape it already takes", async () => {
+    const classify = classifier({});
+    await admitSignals(IncomingSignalsSchema.parse([signal("Open Banking", { source: "chatgpt", kind: "es" })]), classify);
+    expect(classify).toHaveBeenCalledWith([{ kind: "es", name: "open banking", sources: ["chatgpt"] }]);
+  });
+
+  it("drops what the filter calls sensible, keeps safe and personal, and returns the same shape", async () => {
+    const parsed = IncomingSignalsSchema.parse([signal("Open Banking"), signal("mi tratamiento", { kind: "hace" }), signal("riesgo en banco x")]);
+    const result = await admitSignals(parsed, classifier({ "mi tratamiento": "sensible", "riesgo en banco x": "personal" }));
+    expect(result).toEqual({ accepted: [signal("open banking"), signal("riesgo en banco x")], held: 1 });
+  });
+
+  it("fails closed: a signal the filter gave no verdict for is not admitted", async () => {
+    const result = await admitSignals(IncomingSignalsSchema.parse([signal("pagos"), signal("running")]), async () => [{ privacy: { level: "segura" } }]);
+    expect(result).toEqual({ accepted: [signal("pagos")], held: 1 });
   });
 });
 

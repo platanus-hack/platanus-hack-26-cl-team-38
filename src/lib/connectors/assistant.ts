@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { screen } from "@/lib/privacy/screen";
-import { KindSchema, SynthesisSignalSchema, type SynthesisSignal } from "@/lib/types";
+import type { PrivacyLevel } from "@/lib/privacy/taxonomy";
+import { KindSchema, SynthesisSignalSchema, type Kind, type Source, type SynthesisSignal } from "@/lib/types";
 
 // Assistant connector: the person copies one message into the assistant they already use. The
 // message carries a short-lived token; the assistant answers by POSTing signals to our API or,
@@ -20,11 +20,18 @@ export const IncomingSignalsSchema = z
   .min(1)
   .max(40);
 
-// Second barrier after the prompt: what the lexicon blocks is dropped here and never stored.
-export function admitSignals(signals: SynthesisSignal[]): { accepted: SynthesisSignal[]; held: number } {
-  const accepted = signals
-    .map((signal) => ({ ...signal, label: signal.label.toLowerCase() }))
-    .filter((signal) => !screen({ kind: signal.kind, name: signal.label }));
+// The shape the privacy filter already takes (`classifyOnServer`, `POST /api/privacy/classify`).
+export type ClassifySignals = (topics: { kind: Kind; name: string; sources: Source[] }[]) => Promise<{ privacy: { level: PrivacyLevel } }[]>;
+
+// Second barrier after the prompt: every signal goes through the repo's privacy filter (lexicon,
+// anchors and judge) as it comes in, and what it calls `sensible` is dropped before anything is
+// stored. `personal` stays: this is a private draft and publishing it is the owner's call. The
+// output keeps the shape of the input, only shorter.
+export async function admitSignals(signals: SynthesisSignal[], classify: ClassifySignals): Promise<{ accepted: SynthesisSignal[]; held: number }> {
+  const lowered = signals.map((signal) => ({ ...signal, label: signal.label.toLowerCase() }));
+  const classified = await classify(lowered.map((signal) => ({ kind: signal.kind, name: signal.label, sources: [signal.source] })));
+  // A signal with no verdict is dropped too: the filter fails closed.
+  const accepted = lowered.filter((_, i) => classified[i]?.privacy.level === "segura" || classified[i]?.privacy.level === "personal");
   return { accepted, held: signals.length - accepted.length };
 }
 

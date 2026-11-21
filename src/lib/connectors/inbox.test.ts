@@ -33,6 +33,8 @@ describe("createInboxStore", () => {
     const store = createInboxStore(15 * MINUTE);
     const { token, inbox } = store.open(0);
     store.deliver(token, [signal("pagos")], 14 * MINUTE);
+    expect(store.has(token, 15 * MINUTE)).toBe(true);
+    expect(store.has(token, 15 * MINUTE + 1)).toBe(false);
     expect(store.deliver(token, [signal("running")], 15 * MINUTE + 1)).toBe(false);
     expect(store.drain(inbox, 19 * MINUTE)).toEqual([signal("pagos")]);
     expect(store.drain(inbox, 21 * MINUTE)).toBeNull();

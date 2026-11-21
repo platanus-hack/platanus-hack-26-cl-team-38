@@ -31,6 +31,11 @@ export function createInboxStore(ttlMs = TOKEN_MINUTES * 60_000) {
       return { token, inbox, expiresAt };
     },
 
+    has(token: string, now = Date.now()): boolean {
+      const entry = tokens.get(token);
+      return entry !== undefined && now <= entry.expiresAt;
+    },
+
     // The token works several times inside its window, so the same message can be pasted into a
     // chat and into Claude Code. A repeated signal keeps its strongest reading.
     deliver(token: string, signals: SynthesisSignal[], now = Date.now()): boolean {

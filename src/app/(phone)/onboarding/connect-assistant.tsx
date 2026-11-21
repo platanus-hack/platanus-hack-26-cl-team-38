@@ -4,7 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { admitSignals, buildAssistantPrompt, IncomingSignalsSchema, parsePastedSignals } from "@/lib/connectors/assistant";
+import { admitSignals, buildAssistantPrompt, IncomingSignalsSchema, parsePastedSignals, type ClassifySignals } from "@/lib/connectors/assistant";
 import { SignalSchema, SynthesisSignalSchema, type Kind, type Signal, type SynthesisSignal } from "@/lib/types";
 
 // The signals live on the phone. The server forgets them as soon as the phone collects them, so
@@ -67,6 +67,15 @@ const KIND_LABEL: Record<Kind, string> = {
   ofrece: "Ofrezco",
 };
 
+// Pasted text goes through the same privacy filter as the other two ways in. Only kind and name
+// travel to the server, as in the rest of the onboarding.
+const classifyOnApi: ClassifySignals = async (topics) => {
+  const response = await fetch("/api/privacy/classify", { method: "POST", body: JSON.stringify({ topics }) });
+  if (!response.ok) throw new Error("classify");
+  const { verdicts } = z.object({ verdicts: z.array(z.object({ level: z.enum(["segura", "personal", "sensible"]) })) }).parse(await response.json());
+  return verdicts.map((privacy) => ({ privacy }));
+};
+
 type Ticket = { inbox: string; expiresAt: number };
 
 export function ConnectAssistant() {
@@ -120,14 +129,19 @@ export function ConnectAssistant() {
     }
   }
 
-  // Stays on the phone: the same checks the server runs, without sending anything.
-  function loadPasted() {
+  async function loadPasted() {
     const parsed = IncomingSignalsSchema.safeParse(parsePastedSignals(pasted));
     if (!parsed.success) return setPasteStatus("No pude leer ese texto. Copia el bloque completo, desde el [ hasta el ].");
-    const { accepted, held } = admitSignals(parsed.data);
-    addSignals(accepted);
-    setPasted("");
-    setPasteStatus(`Cargué ${accepted.length} temas.${held ? ` Dejé fuera ${held} que parecían datos sensibles.` : ""}`);
+    setPasteStatus("Revisando que no haya datos sensibles…");
+    try {
+      const { accepted, held } = await admitSignals(parsed.data, classifyOnApi);
+      addSignals(accepted);
+      setPasted("");
+      setPasteStatus(`Cargué ${accepted.length} temas.${held ? ` Dejé fuera ${held} por ser datos sensibles.` : ""}`);
+    } catch {
+      // Without the filter nothing is loaded: better to ask again than to keep something unreviewed.
+      setPasteStatus("No pude revisar la privacidad ahora, así que no cargué nada. Intenta de nuevo.");
+    }
   }
 
   const secondsLeft = ticket ? Math.round((ticket.expiresAt - now) / 1000) : 0;
