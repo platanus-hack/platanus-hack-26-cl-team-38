@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 !.env.example
+
+# Helvetica Neue is a licensed font: kept local, not published in this public repo.
+/public/fonts/helvetica-neue/
