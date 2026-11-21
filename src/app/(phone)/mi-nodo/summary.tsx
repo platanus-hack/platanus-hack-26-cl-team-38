@@ -5,42 +5,26 @@ import { useRef, useState, type ReactNode } from "react";
 import { z } from "zod";
 import { KIND_LABEL, ROLE, SOURCE_LABEL } from "@/app/explorar/palette";
 import { rolesOf } from "@/app/explorar/preview";
-import { KindSchema, TopicPrivacySchema, type Kind, type PersonalNode, type Source, type Topic, type TopicPrivacy } from "@/lib/types";
-import { buildNode, editTopic, setShared, shareGeneral, shareRecommended, type SeedPerson } from "./seed-source";
+import { fetchVerdicts, type ClassifyInput } from "@/lib/privacy/client";
+import { KindSchema, type Kind, type PersonalNode, type Topic, type TopicPrivacy } from "@/lib/types";
+import { buildNode, editTopic, setShared, shareGeneral, shareRecommended } from "@/lib/node/node";
+import type { SeedPerson } from "./seed-source";
 import { checkInBody, summarize, WITHHELD_COPY, type Summary as SummaryData } from "./summary-model";
 
 // Same key as /grafo's "Soy": checking in as someone makes the other views open as them.
 const ME_KEY = "team38.me";
-// Limits of POST /api/privacy/classify and POST /api/checkin.
-const MAX_TOPICS_PER_REQUEST = 60;
+// Limit of POST /api/checkin.
 const MAX_NAME_LENGTH = 80;
 
 const FOCUS = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2F7FD1]";
 
-type ClassifyInput = { kind: Kind; name: string; sources?: Source[] };
 type Notice = { tone: "info" | "error"; text: string };
 
-const VerdictsSchema = z.object({ verdicts: z.array(TopicPrivacySchema) });
 const CheckInResponseSchema = z.object({
   roomId: z.string(),
   accepted: z.array(z.string()),
   rejected: z.array(z.object({ topicId: z.string(), reason: z.string() })),
 });
-
-async function fetchVerdicts(topics: ClassifyInput[]): Promise<TopicPrivacy[]> {
-  const verdicts: TopicPrivacy[] = [];
-  for (let i = 0; i < topics.length; i += MAX_TOPICS_PER_REQUEST) {
-    const response = await fetch("/api/privacy/classify", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ topics: topics.slice(i, i + MAX_TOPICS_PER_REQUEST) }),
-    });
-    if (!response.ok) throw new Error(`classify respondió ${response.status}`);
-    verdicts.push(...VerdictsSchema.parse(await response.json()).verdicts);
-  }
-  if (verdicts.length !== topics.length) throw new Error("classify devolvió otra cantidad de veredictos");
-  return verdicts;
-}
 
 const normalizeName = (name: string) => name.trim().toLowerCase().replace(/\s+/g, " ");
 
