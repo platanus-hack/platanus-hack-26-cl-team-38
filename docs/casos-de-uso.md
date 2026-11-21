@@ -28,7 +28,7 @@ Dos personas acercan sus teléfonos, como al compartir un contacto, y sus agente
 | # | La persona | Los agentes | En pantalla |
 |---|---|---|---|
 | 1 | Acerca el teléfono | Nada todavía | Dos burbujas frente a frente |
-| 2 | Acepta "¿Presentarte con Beto?" | — | "Así te voy a presentar" y cuántos datos privados no salen |
+| 2 | Acepta "¿Conectar con Beto?" | — | "Así te voy a presentar" y cuántos datos privados no salen |
 | 3 | Espera menos de 1 s | Se cruzan las proyecciones públicas, sin modelo | Temas y contexto en común, con el primer porcentaje |
 | 4 | Mira unos 30 s | Un agente pregunta y el otro responde, hasta 6 mensajes | Los turnos en vivo; cada complemento confirmado suma puntos |
 | 5 | Decide con un toque si propone verse en persona | El agente envía la propuesta solo si su dueño dice que sí | Una tarjeta de autorización |
@@ -131,7 +131,7 @@ La persona está en un espacio delimitado (un evento, un cowork, un networking) 
 | Complementos | Solo cuántos son | El detalle de quién busca y quién ofrece |
 | De qué conversar y contacto | No | Sí, lo que cada uno autorice |
 
-**De burbuja a conexión:** tocas la burbuja, pides la presentación y, si la otra persona acepta, corre la conexión 1a1 desde el paso 3. Si no responde, la solicitud caduca con el espacio; no se muestra un rechazo.
+**De burbuja a conexión:** tocas la burbuja, pides la conexión y, si la otra persona acepta, corre la conexión 1a1 desde el paso 3. Si no responde, la solicitud caduca con el espacio; no se muestra un rechazo.
 
 **Sobre la cercanía:** la web no puede medir la distancia entre dos teléfonos ni detectar que alguien está cerca sin que abra la app. En el demo, "cerca" significa "en el mismo espacio" y las burbujas se ordenan por afinidad.
 
