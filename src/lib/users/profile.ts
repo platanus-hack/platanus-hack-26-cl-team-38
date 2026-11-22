@@ -20,6 +20,8 @@ export async function call(db: Db, fn: string, args: Record<string, unknown>): P
 
 const sha256 = (text: string) => createHash("sha256").update(text).digest("hex");
 
+const SEED_PREFIX = "seed-";
+
 // The phone makes this up once and keeps it next to its personId. Long enough not to be guessed.
 const KeySchema = z.string().min(32).max(200);
 
@@ -30,10 +32,16 @@ export function bearerKey(authorization: string | null): string | undefined {
 // Who is calling: the personId they claim, proven by the device key. The first key seen for a
 // person becomes theirs; after that any other key is refused.
 // shortcut: trust on first use and no recovery, a wiped phone is a new person. Real accounts when login is in scope.
-export async function authenticate(db: Db, personId: unknown, authorization: string | null): Promise<string | null> {
+//
+// A seed profile is a demo identity the team opens from several browsers, each with its own key, so
+// any device gets in. `ownerOnly` keeps the first-key rule for what is personal data.
+export async function authenticate(db: Db, personId: unknown, authorization: string | null, { ownerOnly = false } = {}): Promise<string | null> {
   const key = bearerKey(authorization);
   if (typeof personId !== "string" || !personId || !key) return null;
-  return (await call(db, "claim_key", { p_id: personId, p_key_hash: sha256(key) })) === true ? personId : null;
+  // true: the key is theirs. false: they hold another key. null: nobody has that id.
+  const claimed = await call(db, "claim_key", { p_id: personId, p_key_hash: sha256(key) });
+  if (claimed === true) return personId;
+  return claimed === false && !ownerOnly && personId.startsWith(SEED_PREFIX) ? personId : null;
 }
 
 // For what a person can do before their first check-in: creates the user with their key. Someone

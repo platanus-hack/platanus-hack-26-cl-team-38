@@ -32,15 +32,24 @@ export async function createPlan(intent: string, memberIds: string[], restrictio
   }
 }
 
+export type LoadedGraph = PlanGraph & { error?: string };
+
+// A 401 after a check-in means another device claimed this personId first: the check-in itself
+// never rejects a key, so this is the first place the phone finds out.
+const unreadable = (status?: number): LoadedGraph => ({
+  connections: [],
+  error: status !== 401 ? C.graphFailed : getPhone().room ? C.otherDevice : C.noUser,
+});
+
 /** Who you can plan with (undefined while loading, null in demo mode). */
-export function usePlanGraph(): PlanGraph | null | undefined {
-  const [graph, setGraph] = useState<PlanGraph | null | undefined>(DEMO ? null : undefined);
+export function usePlanGraph(): LoadedGraph | null | undefined {
+  const [graph, setGraph] = useState<LoadedGraph | null | undefined>(DEMO ? null : undefined);
   useEffect(() => {
     if (DEMO) return;
     let alive = true;
     api(`/api/plans/graph?personId=${me()}`)
-      .then(async (r) => (r.ok ? PlanGraphSchema.parse(await r.json()) : { connections: [] }))
-      .catch(() => ({ connections: [] }))
+      .then(async (r): Promise<LoadedGraph> => (r.ok ? PlanGraphSchema.parse(await r.json()) : unreadable(r.status)))
+      .catch(() => unreadable())
       .then((g) => alive && setGraph(g));
     return () => {
       alive = false;
