@@ -43,7 +43,7 @@ type Reply = { status: 200; info: UserInfo | null } | { status: 400 | 401; error
 const DENIED: Reply = { status: 401, error: "Falta la clave del dispositivo, o no es la de esa persona" };
 
 export async function readOwnInfo(db: Db, personId: unknown, authorization: string | null): Promise<Reply> {
-  const me = await authenticate(db, personId, authorization);
+  const me = await authenticate(db, personId, authorization, { ownerOnly: true });
   return me ? { status: 200, info: await getUserInfo(db, me) } : DENIED;
 }
 
@@ -56,6 +56,6 @@ export async function saveOwnInfo(db: Db, body: unknown, authorization: string |
     if (hasIdentifier(displayName)) return { status: 400, error: "displayName no puede llevar un dato de contacto" };
     await ensureUser(db, personId, displayName, key);
   }
-  const me = await authenticate(db, personId, authorization);
+  const me = await authenticate(db, personId, authorization, { ownerOnly: true });
   return me ? { status: 200, info: await saveUserInfo(db, me, info) } : DENIED;
 }
