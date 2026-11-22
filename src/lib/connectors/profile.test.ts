@@ -114,6 +114,6 @@ describe("buildProfilePrompt", () => {
     expect(prompt).toContain("Authorization: Bearer tok");
     expect(prompt).toContain("vence en 15 minutos");
     expect(prompt).toContain("salud física o mental");
-    expect(prompt).toContain('la herramienta "subir_perfil"), úsala con token "tok"');
+    expect(prompt).toContain('la herramienta "subir_perfil"), úsala con el asistente que eres y el contenido del archivo');
   });
 });

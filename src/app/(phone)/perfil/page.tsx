@@ -68,6 +68,7 @@ export default function PerfilPage() {
         <div className="sec u">{C.account}</div>
         <div className="rows">
           <ListRow title={C.myNode} data={`${interests.length} · ${kept}`} href="/nodo" chevron />
+          <ListRow title={COPY.conectar.row} href="/conectar" chevron />
           <ListRow title={C.wipe} onClick={wipe} className="danger" />
         </div>
         {DEMO && (
