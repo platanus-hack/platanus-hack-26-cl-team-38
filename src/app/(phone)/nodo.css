@@ -3036,6 +3036,7 @@ html:has(.nodo .graph-screen) body {
 /* everyone still writing, side by side in one row */
 .nodo .writing-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   animation: nodo-fade 0.3s ease-out;
@@ -3053,6 +3054,7 @@ html:has(.nodo .graph-screen) body {
   padding: 8px 14px;
 }
 .nodo .writing-row > .mono {
+  flex-basis: 100%;
   font-size: 11px;
 }
 .nodo .plan-drafting {

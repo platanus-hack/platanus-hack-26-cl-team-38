@@ -162,8 +162,8 @@ function Sources({ content }: { content: PlanContent }) {
   );
 }
 
-/** A proposal where the orchestrator made it: open while it is the one being answered, folded after. */
-function ProposalCard({ step, open }: { step: Extract<Step, { kind: "proposal" }>; open: boolean }) {
+/** A proposal, folded: only the final plan opens in full. */
+function ProposalCard({ step }: { step: Extract<Step, { kind: "proposal" }> }) {
   const { content, version } = step.proposal;
   const head = (
     <div className="ai-head">
@@ -171,15 +171,6 @@ function ProposalCard({ step, open }: { step: Extract<Step, { kind: "proposal" }
       {C.orchestrator} · {C.proposal} {version}
     </div>
   );
-  if (open)
-    return (
-      <section className="plan-card ai proposal">
-        {head}
-        <p className="plan-summary">{content.resumen}</p>
-        <Decisions content={content} previous={step.previous} />
-        <Sources content={content} />
-      </section>
-    );
   return (
     <details className="plan-card ai proposal old">
       <summary>
@@ -307,7 +298,6 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
   const names = new Map(plan.members.map((m) => [m.personId, m.displayName]));
   const others = plan.members.filter((m) => m.personId !== me);
   const thread = threadOf(plan);
-  const lastProposal = thread.steps.findLastIndex((s) => s.kind === "proposal" && !s.proposal.final);
 
   return (
     <div className="app with-tabs">
@@ -326,7 +316,7 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
           <PlanNetwork plan={plan} me={me} confirmed={confirmed} W={340} H={300} compact />
         </div>
         <Mono className={cx("plan-status", closed && "done")}>{statusOf(plan)}</Mono>
-        {thread.steps.map((step, i) => (
+        {thread.steps.map((step) => (
           <Fragment key={step.kind === "opening" ? "opening" : `v${step.proposal.version}`}>
             {step.kind === "opening" ? (
               <StepHeader label={C.opening} hint={step.current ? C.openingHint : undefined} />
@@ -338,7 +328,7 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
                   label={`${C.proposal} ${step.proposal.version}`}
                   hint={step.current ? C.answeringHint : undefined}
                 />
-                <ProposalCard step={step} open={!closed && i === lastProposal} />
+                <ProposalCard step={step} />
               </>
             )}
             {step.messages.map((m) => (
