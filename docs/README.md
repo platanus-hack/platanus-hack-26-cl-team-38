@@ -26,6 +26,7 @@ Cuando dos documentos se contradicen, vale el primero de esta lista:
 | [onboarding-privacidad](onboarding-privacidad.md) | Niveles de tópico (segura, personal, sensible) y verificaciones de la capa privada: el filtro ya está construido, el onboarding sigue como propuesta |
 | [revision-filtro-privacidad](revision-filtro-privacidad.md) | Guía para revisar el filtro de privacidad: flujo, orden de lectura, cómo verificarlo y decisiones a cuestionar |
 | [casos-de-uso](casos-de-uso.md) | Propuesta, no manda sobre lo anterior: conexión 1a1 (match total), sala con propósito y modo explorador |
+| [casos-de-uso-potenciales](casos-de-uso-potenciales.md) | Exploración, no manda sobre nada: 120 casos potenciales en 15 tipos de problema, con las capacidades que usa cada uno |
 | [modelo-de-datos](modelo-de-datos.md) | Diagrama de Usuario, Conexión, Mesa y Log sobre las tablas que existen: Usuario y Conexión implementados en la rama, Mesa y Log como propuesta |
 
 ## Glosario
