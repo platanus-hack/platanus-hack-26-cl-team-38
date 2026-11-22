@@ -202,7 +202,7 @@ function SourcesStep({ s, inbox, next }: { s: PhoneState; inbox: AssistantInbox;
 /** One message for any assistant: it carries the permission, and the assistant delivers on its own. */
 function AssistantSheet({ source, inbox, arrived }: { source: Source; inbox: AssistantInbox; arrived: number }) {
   const label = SOURCE_META[source].label;
-  const { status, text, copy } = useCopy(inbox.message, label);
+  const { status, text, copy, copied } = useCopy(inbox.message, label);
   const [raw, setRaw] = useState("");
   const [note, setNote] = useState<string>();
   const [error, setError] = useState<string>();
@@ -217,7 +217,7 @@ function AssistantSheet({ source, inbox, arrived }: { source: Source; inbox: Ass
     setBusy(true);
     setError(undefined);
     try {
-      logOutbox("Filtro de privacidad de Minga", `El nombre y el tipo de ${parsed.data.length} temas, sin tu nombre`);
+      logOutbox(COPY.outbox.filter, COPY.outbox.filtered(parsed.data.length));
       const { accepted, held } = await admitSignals(parsed.data, classifyOnApi);
       mergeSignals(accepted);
       setRaw("");
@@ -239,8 +239,8 @@ function AssistantSheet({ source, inbox, arrived }: { source: Source; inbox: Ass
         {C.pasteHint}
       </p>
       <button className="btn ghost" onClick={copy}>
-        <Icon name={status.startsWith("Copiado") ? "check" : "copy"} />
-        {status.startsWith("Copiado") ? C.copied : C.copy}
+        <Icon name={copied ? "check" : "copy"} />
+        {copied ? C.copied : C.copy}
       </button>
       <p role="status" className="mute" style={{ margin: "8px 0 0", minHeight: 20 }}>
         {arrived > 0 ? C.arrived(arrived) : status}
@@ -363,7 +363,7 @@ function BuildingStep({ sync, asTeammate, next }: { sync: NodeSync; asTeammate: 
         <MingaMark />
       </div>
       <h1 className="t-title">{C.building}</h1>
-      <Mono className="mute">{s?.signals.length ?? 0} señales</Mono>
+      <Mono className="mute">{C.topicCount(new Set(s?.signals.map((x) => `${x.kind}:${x.label}`)).size)}</Mono>
       {problem && (
         <>
           <div className="err">{problem}</div>
@@ -432,7 +432,7 @@ function ShareStep({ s }: { s: PhoneState }) {
       </div>
       <div className="foot">
         <p className="mono mute" style={{ textAlign: "center", margin: "0 0 16px" }}>
-          {shared} públicos · {topics.length - shared} contigo
+          {COPY.nodo.count(shared, topics.length - shared)}
         </p>
         {error && <div className="err" style={{ textAlign: "center", margin: "0 0 12px" }}>{error}</div>}
         {rejected > 0 && <p className="mute" style={{ textAlign: "center", margin: "0 0 12px" }}>{C.rejected(rejected)}</p>}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type CSSProperties, type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Topic } from "@/lib/types";
 import { Icon } from "./icons";
+import { COPY } from "../_lib/copy";
 
 /** Back arrow: returns to the screen you came from; opened from a link, it goes to `fallback`. */
 export function BackLink({ fallback, className, style }: { fallback: string; className?: string; style?: CSSProperties }) {
@@ -14,7 +15,7 @@ export function BackLink({ fallback, className, style }: { fallback: string; cla
       href={fallback}
       className={className}
       style={style}
-      aria-label="Volver"
+      aria-label={COPY.back}
       onClick={(e) => {
         if (window.history.length > 1) {
           e.preventDefault();
@@ -149,7 +150,7 @@ export function Field({
       ) : (
         <input aria-label={label} value={value} placeholder={placeholder} maxLength={maxLength} onChange={(e) => onChange(e.target.value)} />
       )}
-      <button type="submit" className={`go${ready ? " on" : ""}${done ? " done" : ""}`} aria-label={done ? "Enviado" : "Enviar"} disabled={!ready}>
+      <button type="submit" className={`go${ready ? " on" : ""}${done ? " done" : ""}`} aria-label={done ? COPY.sent : COPY.send} disabled={!ready}>
         <Icon name={send ? "send" : done ? "check" : "arrow"} />
       </button>
     </form>
@@ -202,7 +203,7 @@ export function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boo
       type="button"
       role="switch"
       aria-checked={on}
-      aria-label={`${label}: ${on ? "público" : "solo tú"}`}
+      aria-label={`${label}: ${on ? COPY.isPublic : COPY.onlyYou}`}
       className={`toggle${on ? " on" : ""}`}
       onClick={() => onChange(!on)}
     >
@@ -230,7 +231,7 @@ export function Why({ text }: { text: string }) {
   const [open, setOpen] = useState(false);
   return (
     <span className="why">
-      <button type="button" className="q" aria-expanded={open} aria-label="¿Qué es esto?" onClick={() => setOpen(!open)}>
+      <button type="button" className="q" aria-expanded={open} aria-label={COPY.whatIsThis} onClick={() => setOpen(!open)}>
         ?
       </button>
       {open && <span className="hint">{text}</span>}

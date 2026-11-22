@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DeliverLink } from "./deliver-link";
 
-export const metadata: Metadata = { title: "Cargando tu perfil · team-38", robots: { index: false } };
+export const metadata: Metadata = { title: "Cargando tu perfil · Minga", robots: { index: false } };
 
 // Landing for the link an assistant writes in a chat. The profile travels after the #, which the
 // browser does not send when it opens the page: it only leaves the phone in the POST below.

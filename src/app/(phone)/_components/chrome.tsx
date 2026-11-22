@@ -20,7 +20,7 @@ const TABS: { href: string; label: string; icon: IconName; also?: string[] }[] =
 export function TabBar() {
   const path = usePathname();
   return (
-    <nav className="tabbar" aria-label="Secciones">
+    <nav className="tabbar" aria-label={COPY.sections}>
       {TABS.map((t) => {
         const cur = path === t.href || (t.href !== "/" && path.startsWith(`${t.href}/`)) || !!t.also?.includes(path);
         return (
@@ -94,7 +94,7 @@ export function Sheet({
       <div className={`sheet ${size}`} ref={sheet} role="dialog" aria-modal="true" aria-label={label}>
         <div className="sheet-top" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
           <div className="grab" />
-          <button type="button" className="sheet-x" aria-label="Cerrar" onClick={onClose}>
+          <button type="button" className="sheet-x" aria-label={COPY.close} onClick={onClose}>
             <Icon name="x" />
           </button>
         </div>

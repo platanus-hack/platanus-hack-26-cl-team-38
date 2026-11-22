@@ -8,7 +8,7 @@ import { KindSchema, SynthesisSignalSchema, type Kind, type Source, type Synthes
 // declines both can hand over the JSON, which the person pastes into the app.
 
 // Provisional: the product has no name yet.
-export const APP_NAME = "Nodos";
+export const APP_NAME = "Minga";
 export const TOKEN_MINUTES = 15;
 
 export const AssistantSourceSchema = z.enum(["claude", "chatgpt", "gemini"]);

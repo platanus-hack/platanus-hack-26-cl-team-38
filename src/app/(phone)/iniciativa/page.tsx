@@ -138,7 +138,7 @@ export default function IniciativaPage() {
               <Icon name="search" />
               <input type="search" value={query} placeholder={C.search} aria-label={C.search} enterKeyHint="search" onChange={(e) => setQuery(e.target.value)} />
               {query && (
-                <button type="button" aria-label="Borrar búsqueda" onClick={() => setQuery("")}>
+                <button type="button" aria-label={COPY.clearSearch} onClick={() => setQuery("")}>
                   <Icon name="x" />
                 </button>
               )}
@@ -148,7 +148,7 @@ export default function IniciativaPage() {
               <>
                 <div className="sec">
                   {C.suggested}
-                  <Why text="Tu Agente los sugiere porque saben de lo que quieres hacer o ya comparten algo contigo." />
+                  <Why text={C.suggestedWhy} />
                 </div>
                 <div className="rows">
                   {shownSuggested.map(({ c, why }) => (

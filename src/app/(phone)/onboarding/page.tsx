@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { OnboardingFlow } from "./client-only";
 
-export const metadata: Metadata = { title: "Arma tu nodo · team-38" };
+export const metadata: Metadata = { title: "Arma tu nodo · Minga" };
 
 export default function OnboardingPage() {
   return (

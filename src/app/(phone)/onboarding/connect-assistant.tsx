@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { admitSignals, buildAssistantPrompt, IncomingSignalsSchema, parsePastedSignals, type ClassifySignals } from "@/lib/connectors/assistant";
+import { admitSignals, APP_NAME, buildAssistantPrompt, IncomingSignalsSchema, parsePastedSignals, type ClassifySignals } from "@/lib/connectors/assistant";
 import { buildProfilePrompt, PROFILE_MAX_CHARS } from "@/lib/connectors/profile";
 import { SynthesisSignalSchema, type Signal, type SynthesisSignal } from "@/lib/types";
 import { addProfiles, addSignals, ProfilesSchema, removeProfileLine, writeSignals, type Profile } from "./store";
@@ -78,8 +78,10 @@ export type AssistantInbox = ReturnType<typeof useAssistantInbox>;
 export function useCopy(message: () => Promise<string>, pasteInto: string) {
   const [status, setStatus] = useState("");
   const [text, setText] = useState("");
+  const [copied, setCopied] = useState(false);
 
   async function copy() {
+    setCopied(false);
     setStatus("Preparando el mensaje…");
     const pending = message().then((prompt) => {
       setText(prompt);
@@ -94,13 +96,14 @@ export function useCopy(message: () => Promise<string>, pasteInto: string) {
         await navigator.clipboard.writeText(await pending);
       }
       setStatus(`Copiado. Pégalo en ${pasteInto}.`);
+      setCopied(true);
     } catch {
       const ready = await pending.then(() => true, () => false);
       setStatus(ready ? "No se pudo copiar solo. Abre “Ver el mensaje” y cópialo a mano." : "No se pudo preparar el mensaje. Revisa tu conexión e intenta de nuevo.");
     }
   }
 
-  return { status, text, copy };
+  return { status, text, copy, copied };
 }
 
 function MessagePreview({ text }: { text: string }) {
@@ -320,7 +323,7 @@ function ConnectorSetup() {
       <ol className="mt-2 list-decimal pl-5 text-muted-foreground">
         <li>En claude.ai, desde el computador: Settings → Connectors → Add custom connector.</li>
         <li>
-          Ponle de nombre Nodos y pega esta dirección: <code className="break-all select-all">{url}</code>
+          Ponle de nombre {APP_NAME} y pega esta dirección: <code className="break-all select-all">{url}</code>
         </li>
         <li>Actívalo en el chat y pega el mensaje como siempre. Sirve también en el teléfono.</li>
       </ol>

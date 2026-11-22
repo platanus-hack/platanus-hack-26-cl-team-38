@@ -59,7 +59,7 @@ export async function checkIn(roomCode = getPhone().room?.code ?? DEFAULT_ROOM, 
       room: { code: roomCode, id: result.roomId, at: new Date().toISOString() },
       node: p.node && result.rejected.reduce((n, r) => setShared(n, r.topicId, false), p.node),
     }));
-    if (!quiet) logOutbox(`Sala ${roomCode}`, `Tu nombre y ${result.accepted.length} Intereses públicos`);
+    if (!quiet) logOutbox(COPY.outbox.server, COPY.outbox.published(result.accepted.length));
     return { ok: true, shared: result.accepted.length, rejected: result.rejected.length };
   } catch {
     return { ok: false, error: `${C.failed}. ${C.retry}` };

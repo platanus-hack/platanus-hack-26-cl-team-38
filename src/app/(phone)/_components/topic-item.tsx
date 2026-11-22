@@ -45,11 +45,11 @@ export function TopicItem({ topic, editDepth }: { topic: Topic; editDepth?: bool
         </span>
       </span>
       {locked ? (
-        <span className="toggle" title="Nunca se comparte" aria-label="Nunca se comparte">
+        <span className="toggle" title={COPY.nodo.sensitive} aria-label={COPY.nodo.sensitive}>
           <Icon name="lock" />
         </span>
       ) : (
-        <Toggle on={topic.public} label={topic.name} onChange={(v) => (setPublic(topic.id, v), scheduleCheckIn(), toast(`${cap(topic.name)}: ${v ? "público" : "solo tú"}`))} />
+        <Toggle on={topic.public} label={topic.name} onChange={(v) => (setPublic(topic.id, v), scheduleCheckIn(), toast(`${cap(topic.name)}: ${v ? COPY.isPublic : COPY.onlyYou}`))} />
       )}
     </div>
   );
