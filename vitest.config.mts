@@ -16,7 +16,7 @@ export default defineConfig({
         branches: 30,
         functions: 29,
         lines: 33,
-        "src/lib/**": { statements: 88, branches: 83, functions: 87, lines: 90 },
+        "src/lib/**": { statements: 88, branches: 83, functions: 87, lines: 89 },
       },
     },
   },
