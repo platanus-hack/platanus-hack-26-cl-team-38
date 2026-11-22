@@ -136,9 +136,11 @@ function withRelation(s: PhoneState, e: Encounter): Encounter {
 
 export function coincidences(s: PhoneState, encounters: Encounter[]): Coincidence[] {
   const mine = myInterests(s);
+  // With "Cercanía" off, everyone you crossed paths with counts, at any distance.
+  const near = s.nearOnly ?? true;
   return encounters
     .map((e) => withRelation(s, e))
-    .filter((e) => e.person.personId !== s.personId && e.distanceM <= Math.min(clampRadius(s.radiusM), e.radiusM))
+    .filter((e) => e.person.personId !== s.personId && (!near || e.distanceM <= Math.min(clampRadius(s.radiusM), e.radiusM)))
     .map((e) => ({ ...e, ...matchTopics(mine, e.person.topics) }))
     .filter((c) => c.items.length > 0)
     .sort((a, b) => b.score - a.score || a.distanceM - b.distanceM);

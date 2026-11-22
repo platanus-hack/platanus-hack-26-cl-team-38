@@ -9,9 +9,10 @@ import { setFocus } from "./_components/match-graph";
 import { MingaMark } from "./_components/minga-mark";
 import { Typewriter } from "./_components/typewriter";
 import { Icon } from "./_components/icons";
-import { Field } from "./_components/ui";
+import { Field, ListRow, Mono } from "./_components/ui";
+import { allConversations, buildInitiative } from "./_lib/conversations";
 import { COPY } from "./_lib/copy";
-import { affinities, cap, type Coincidence, coincidences, RELATION, useEncounters } from "./_lib/people";
+import { affinities, byTopic, cap, type Coincidence, coincidences, DEMO, RANGE, RELATION, relTime, useEncounters } from "./_lib/people";
 import { setPhone } from "./_lib/store";
 
 const C = COPY.inicio;
@@ -27,8 +28,17 @@ export default function Home() {
   const [how, setHow] = useState(false);
 
   if (!s) return <Splash />;
-  const coins = encounters ? coincidences(s, encounters) : undefined;
+  // "Cerca" on Inicio is always about who was near, whatever Coincidencias shows.
+  const coins = encounters ? coincidences({ ...s, nearOnly: true }, encounters) : undefined;
   const contacts = encounters ? affinities(s, encounters) : [];
+  // Recientes: your Iniciativas first, then the latest Conversaciones (at most three).
+  const logged = encounters && DEMO ? coincidences({ ...s, nearOnly: true, radiusM: RANGE.max }, encounters) : [];
+  const recent = [
+    ...(s.initiatives ?? []).map((i) => buildInitiative(s.displayName, i, contacts)),
+    ...allConversations(s.displayName, logged, byTopic(logged)),
+  ]
+    .sort((a, b) => b.at.localeCompare(a.at))
+    .slice(0, 3);
   const text = draft ?? s.intent;
   const saved = draft === null ? !!s.intent : draft.trim() === s.intent;
 
@@ -58,8 +68,32 @@ export default function Home() {
         </div>
         {coins && coins.length === 0 ? (
           <p className="mute" style={{ margin: "8px 0 0" }}>
-            {C.nearEmpty}
+            {C.nearEmpty}{" "}
+            {!s.locationOn && (
+              <Link href="/perfil" className="link">
+                {C.nearHint}
+              </Link>
+            )}
           </p>
+        ) : coins && coins.length < 3 ? (
+          // One or two people read better as rows than as a carousel with empty space.
+          <div className="rows near-rows">
+            {coins.map((c) => (
+              <ListRow
+                key={c.person.personId}
+                lead={<Avatar id={c.person.personId} className={kind(c)} />}
+                title={c.person.displayName}
+                sub={
+                  <>
+                    <span className={`rel ${kind(c)}`}>{kind(c) === "coincidencia" ? C.coincidence : RELATION[c.relation].label}</span> · {cap(c.items[0]?.topic ?? "")}
+                  </>
+                }
+                data={`${c.distanceM} m`}
+                onClick={() => open(c)}
+                chevron
+              />
+            ))}
+          </div>
         ) : (
           <div className="near">
             {(coins ?? []).slice(0, 6).map((c) => (
@@ -139,6 +173,35 @@ export default function Home() {
             <use href="#i-chev" />
           </svg>
         </Link>
+
+        {recent.length > 0 && (
+          <>
+            <div className="sec">
+              {C.recent}
+              <Link href="/conversaciones" className="more">
+                {C.seeAll}
+              </Link>
+            </div>
+            <div className="rows">
+              {recent.map((cv) => (
+                <ListRow
+                  key={cv.id}
+                  lead={
+                    <span className="stack">
+                      {cv.members.slice(0, 2).map((m) => (
+                        <Avatar key={m.person.personId} id={m.person.personId} />
+                      ))}
+                    </span>
+                  }
+                  title={cv.kind === "grupo" ? cv.theme : cv.members[0]?.person.displayName}
+                  sub={cv.label ?? (cv.kind === "grupo" ? "Temática" : "Conversación")}
+                  data={<Mono>{relTime(cv.at).replace("hace ", "")}</Mono>}
+                  href={`/conversaciones/${encodeURIComponent(cv.id)}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </section>
       <TabBar />
     </div>

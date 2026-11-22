@@ -9,6 +9,7 @@ import { COPY } from "../_lib/copy";
 import { isLocked, KIND_LABEL } from "../_lib/node";
 import { cap } from "../_lib/people";
 import { setDepth, setPublic } from "../_lib/store";
+import { toast } from "../_lib/toast";
 
 const DOTS = ["", "●○○", "●●○", "●●●"];
 
@@ -17,7 +18,7 @@ export function TopicItem({ topic, editDepth }: { topic: Topic; editDepth?: bool
   const locked = isLocked(topic);
   const meta = `${KIND_LABEL[topic.kind]} · ${topic.sources.map((s) => SOURCE_META[s].label).join(", ")}`;
   return (
-    <div className="row">
+    <div className="row topic-row">
       <span className="lead">
         <BrandLogo source={topic.sources[0]} />
       </span>
@@ -48,7 +49,7 @@ export function TopicItem({ topic, editDepth }: { topic: Topic; editDepth?: bool
           <Icon name="lock" />
         </span>
       ) : (
-        <Toggle on={topic.public} label={topic.name} onChange={(v) => (setPublic(topic.id, v), scheduleCheckIn())} />
+        <Toggle on={topic.public} label={topic.name} onChange={(v) => (setPublic(topic.id, v), scheduleCheckIn(), toast(`${cap(topic.name)}: ${v ? "público" : "solo tú"}`))} />
       )}
     </div>
   );

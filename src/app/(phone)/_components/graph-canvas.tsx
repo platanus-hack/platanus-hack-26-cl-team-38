@@ -281,36 +281,45 @@ export function GraphCanvas({
           return n?.kind === "person" ? <PersonLabel key={`l:${id}`} n={n} p={P[id]} /> : null;
         })}
       </svg>
-      {Object.keys(P).map((id) => {
+      {Object.keys(P).map((id, i) => {
         const c = E[id];
         if (!c || c.kind !== "chip") return null;
         const p = P[id];
-        const style = { left: `${(p.x / W) * 100}%`, top: `${(p.y / H) * 100}%`, opacity: p.o, scale: String(p.s), ["--x" as string]: (p.x / W).toFixed(4) };
-        return c.onClick ? (
-          <button key={id} type="button" className={`gchip ${c.cls}`} style={style} onClick={c.onClick} aria-pressed={c.cls.includes("sel")}>
-            {c.icon}
-            {c.label}
-            {c.n !== undefined && <span className="n">{c.n}</span>}
-            {c.faces && c.faces.length > 0 && (
+        // --d staggers the float, so chips never bob in step.
+        const style = {
+          left: `${(p.x / W) * 100}%`,
+          top: `${(p.y / H) * 100}%`,
+          opacity: p.o,
+          scale: String(p.s),
+          ["--x" as string]: (p.x / W).toFixed(4),
+          ["--d" as string]: `${(-i * 0.73) % 4}s`,
+        };
+        const faces = c.faces && c.faces.length > 0;
+        const body = (
+          <>
+            <span className="gchip-row">
+              {c.icon}
+              {c.label}
+              {c.n !== undefined && !faces && <span className="n">{c.n}</span>}
+            </span>
+            {faces && (
               <span className="faces">
-                {c.faces.map((f) => (
+                {c.faces!.map((f) => (
                   <Avatar key={f} id={f} />
                 ))}
+                {c.n !== undefined && <span className="n">+{c.n}</span>}
               </span>
             )}
+          </>
+        );
+        const cls = `gchip ${c.cls}${faces ? " stacked" : ""}`;
+        return c.onClick ? (
+          <button key={id} type="button" className={cls} style={style} onClick={c.onClick} aria-pressed={c.cls.includes("sel")}>
+            {body}
           </button>
         ) : (
-          <div key={id} className={`gchip ${c.cls}`} style={style}>
-            {c.icon}
-            {c.label}
-            {c.n !== undefined && <span className="n">{c.n}</span>}
-            {c.faces && c.faces.length > 0 && (
-              <span className="faces">
-                {c.faces.map((f) => (
-                  <Avatar key={f} id={f} />
-                ))}
-              </span>
-            )}
+          <div key={id} className={cls} style={style}>
+            {body}
           </div>
         );
       })}

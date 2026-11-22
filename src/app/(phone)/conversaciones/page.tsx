@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Avatar } from "../_components/avatar";
 import { Splash, TabBar, useOnboardedPhone } from "../_components/chrome";
 import { LargeTitle, ListRow } from "../_components/ui";
@@ -9,8 +10,10 @@ import { affinities, byTopic, coincidences, DEMO, RANGE, relTime, useEncounters 
 
 const C = COPY.conversaciones;
 
-function Row({ cv }: { cv: Conversation }) {
-  const last = cv.messages[cv.messages.length - 1].text;
+function Row({ cv, replies }: { cv: Conversation; replies?: { text: string }[] }) {
+  // The most useful line: what you or your Agente said last, else (one to one) what they found in
+  // common, not the closing "De acuerdo".
+  const last = replies?.length ? replies[replies.length - 1].text : (cv.kind === "persona" ? cv.messages[cv.messages.length - 3] : cv.messages[cv.messages.length - 1])?.text ?? "";
   const when = relTime(cv.at).replace("hace ", "");
   const href = `/conversaciones/${encodeURIComponent(cv.id)}`;
   if (cv.kind === "grupo")
@@ -55,7 +58,13 @@ export default function ConversacionesPage() {
       <LargeTitle title={C.title} />
       <div className="content">
         {encounters !== undefined && all.length === 0 ? (
-          <p className="mute">{DEMO ? C.empty : C.noBackend}</p>
+          <div className="empty-state">
+            <p className="mute">{DEMO ? C.empty : C.noBackend}</p>
+            <p className="mute">{C.startOne}</p>
+            <Link href="/" className="btn">
+              {C.startCta}
+            </Link>
+          </div>
         ) : (
           <>
             {grupos.length > 0 && (
@@ -65,7 +74,7 @@ export default function ConversacionesPage() {
                 </div>
                 <div className="rows">
                   {grupos.map((cv) => (
-                    <Row key={cv.id} cv={cv} />
+                    <Row key={cv.id} cv={cv} replies={s.replies?.[cv.id]} />
                   ))}
                 </div>
               </>
@@ -73,7 +82,7 @@ export default function ConversacionesPage() {
             <div className="sec u">{C.people}</div>
             <div className="rows">
               {personas.map((cv) => (
-                <Row key={cv.id} cv={cv} />
+                <Row key={cv.id} cv={cv} replies={s.replies?.[cv.id]} />
               ))}
             </div>
           </>
