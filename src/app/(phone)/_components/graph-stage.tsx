@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import type { Source } from "@/lib/types";
 import { BrandLogo, SOON_META, SoonLogo, type SoonSource, SOURCE_META } from "./brand";
 import { type Edge, type Entity, GraphCanvas, onEllipse, pose } from "./graph-canvas";
-import { Icon } from "./icons";
 import { AffinityGraph } from "./affinity-graph";
 import { MatchGraph } from "./match-graph";
 import { PlanStage } from "./plan-network";
@@ -20,6 +19,14 @@ import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 const W = 880;
 const H = 600;
 const SOURCES: Source[] = ["claude", "chatgpt", "gemini", "google", "spotify", "github"];
+/** The only Fuentes the demo shows as ready; the rest carry a "pronto" on top. */
+const READY: Source[] = ["claude", "chatgpt"];
+const PER_ROW = 4;
+// In graph units (880 wide): 160 keeps the widest chip (Letterboxd, 115 px) clear of its neighbour
+// in a 652 px panel, and narrower panels shrink the chips (nodo.css); 96 leaves room for the
+// "pronto" above the second row.
+const PITCH = 160;
+const ROW_GAP = 96;
 /** Shown like in the onboarding: coming soon, never connected. */
 const SOON: SoonSource[] = ["strava", "letterboxd"];
 
@@ -37,6 +44,8 @@ function nodeScene(phase: Phase, s: PhoneState) {
   const me = s.personId;
   const sources = connectedSources(s);
   E[me] = { kind: "person", name: s.displayName || "Tú", me: true, silo: sources.length === 0, pose: pose({ x: 440, y: 320 }, 1, 1.3) };
+  // Eight Fuentes in two rows of four: in one row they overlap once the panel is narrower than ~900 px.
+  const slot = (i: number) => ({ x: W / 2 + ((i % PER_ROW) - (PER_ROW - 1) / 2) * PITCH, y: 52 + Math.floor(i / PER_ROW) * ROW_GAP });
   SOURCES.forEach((src, i) => {
     const on = sources.includes(src);
     E[`src:${src}`] = {
@@ -44,7 +53,8 @@ function nodeScene(phase: Phase, s: PhoneState) {
       cls: `ghost${on ? " on" : ""}`,
       icon: <BrandLogo source={src} />,
       label: SOURCE_META[src].label,
-      pose: pose({ x: W / 2 + (i - (SOURCES.length - 1) / 2) * 130, y: 44 }, on || phase !== "compartir" ? 1 : 0.35),
+      badge: READY.includes(src) ? undefined : COPY.bienvenida.soon,
+      pose: pose(slot(i), on || phase !== "compartir" ? 1 : 0.35),
     };
     if (on) edges.push({ a: `src:${src}`, b: me, kind: "soft", pulse: phase === "fuentes" ? i : undefined });
   });
@@ -54,8 +64,8 @@ function nodeScene(phase: Phase, s: PhoneState) {
       cls: "ghost",
       icon: <SoonLogo source={src} />,
       label: SOON_META[src].label,
-      // coming soon: a second row under the ones you can connect
-      pose: pose({ x: W / 2 + (i - (SOON.length - 1) / 2) * 170, y: 92 }, phase !== "compartir" ? 1 : 0.35),
+      badge: COPY.bienvenida.soon,
+      pose: pose(slot(SOURCES.length + i), phase !== "compartir" ? 1 : 0.35),
     };
   });
   if (phase === "compartir") {
@@ -66,7 +76,6 @@ function nodeScene(phase: Phase, s: PhoneState) {
       E[`t:${t.id}`] = {
         kind: "chip",
         cls: shared ? "" : "off",
-        icon: shared ? undefined : <Icon name="lock" />,
         label: cap(t.name),
         from: me,
         pose: pose(onEllipse(i, list.length, 330 * k, 200 * k, 440, 340, -35, 215)),

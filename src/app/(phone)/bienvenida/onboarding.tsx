@@ -321,6 +321,8 @@ function GoogleSheet({ arrived }: { arrived: number }) {
 
 /* ---------- armando (a breath between steps, while the filter reviews) ---------- */
 
+const SHOW_NODE_MS = 1500;
+
 function BuildingStep({ sync, asTeammate, next }: { sync: NodeSync; asTeammate: boolean; next: () => void }) {
   const router = useRouter();
   const s = usePhone();
@@ -329,7 +331,7 @@ function BuildingStep({ sync, asTeammate, next }: { sync: NodeSync; asTeammate: 
   const entering = useRef(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setBreathed(true), 1600);
+    const t = setTimeout(() => setBreathed(true), 800);
     return () => clearTimeout(t);
   }, []);
 
@@ -350,8 +352,10 @@ function BuildingStep({ sync, asTeammate, next }: { sync: NodeSync; asTeammate: 
   const ready = breathed && !sync.reviewing && !sync.error && !!s?.node;
   useEffect(() => {
     if (!ready) return;
-    if (asTeammate) enter();
-    else next();
+    // The Nodo stays on the desktop graph for a moment before moving on, already as it will be shared.
+    if (asTeammate) setPhone((p) => (p.node ? { node: shareEverything(p.node) } : {}));
+    const t = setTimeout(() => (asTeammate ? enter() : next()), SHOW_NODE_MS);
+    return () => clearTimeout(t);
     // enter() only reads refs and stable setters; re-running it on every render would check in twice.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, asTeammate]);
