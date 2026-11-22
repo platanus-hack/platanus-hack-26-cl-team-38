@@ -8,8 +8,8 @@ import { Icon } from "../_components/icons";
 import { Mono, Why } from "../_components/ui";
 import { intentWords, relevantTopic } from "../_lib/conversations";
 import { COPY } from "../_lib/copy";
-import { cap, contactsOf, type Coincidence, DEMO, RELATION, useEncounters } from "../_lib/people";
-import { connectionEncounters, createPlan, usePlanGraph } from "../_lib/plans";
+import { cap, type Coincidence, DEMO, RELATION, useEncounters } from "../_lib/people";
+import { connectionsOf, createPlan, usePlanGraph } from "../_lib/plans";
 import { type Initiative, setPhone } from "../_lib/store";
 import { toast } from "../_lib/toast";
 
@@ -58,7 +58,7 @@ export default function IniciativaPage() {
 
   const words = intentWords(intent);
   const network = new Map(graph?.connections.map((c) => [c.personId, c.contacts]));
-  const contacts = contactsOf(s, graph ? connectionEncounters(graph, encounters) : encounters).sort((a, b) => RANK[a.relation] - RANK[b.relation]);
+  const contacts = connectionsOf(s, graph, encounters).sort((a, b) => RANK[a.relation] - RANK[b.relation]);
   // Your Agente's picks: first who knows about it, then close people you already share topics with.
   const withReason = contacts.map((c) => {
     const topic = relevantTopic(c, words);
