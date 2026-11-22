@@ -109,7 +109,7 @@ const PurposeSchema = z.object({
 export const NetworkV2Schema = z.object({
   version: z.literal(2),
   description: z.string(),
-  // Teammates live in seed/team/<slug>.json; they appear here only through connections.
+  // Teammates live in seed/team/<slug>.json; here they appear in connections, rooms, roles and helpers.
   team: z.array(PersonIdSchema),
   people: z.array(PersonSchema).min(50),
   connections: z.array(SeedConnectionSchema),

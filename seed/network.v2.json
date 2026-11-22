@@ -1,7 +1,7 @@
 {
   "version": 2,
   "description": "Red social sintética para la demo: 3 casos de coordinación (matrimonio, viaje familiar, arriendo con roomies), ordenada según dónde va cada dato en el modelo de datos (ver seed/network.ts). Es la fuente de verdad; seed/network.v1.json es el original escrito a mano y se reconstruye con toV1().",
-  "team": ["seed-martin", "seed-oscar", "seed-jose"],
+  "team": ["seed-martin", "seed-oscar", "seed-jose", "seed-cristobal", "seed-benjamin"],
   "people": [
     {
       "personId": "seed-javiera-munoz",
@@ -3745,6 +3745,226 @@
         "closeness": 3,
         "detail": {"seed-tomas-fuentes": "mamá", "seed-veronica-araneda": "hijo"}
       }
+    },
+    {
+      "a": "seed-benjamin",
+      "b": "seed-cristobal",
+      "origin": {"place": "trabajo"},
+      "pending": {
+        "relation": "trabajo",
+        "closeness": 2,
+        "detail": {"seed-benjamin": "compañero de equipo en el hackathon", "seed-cristobal": "compañero de equipo en el hackathon"}
+      }
+    },
+    {
+      "a": "seed-benjamin",
+      "b": "seed-jose",
+      "origin": {"place": "trabajo"},
+      "pending": {
+        "relation": "trabajo",
+        "closeness": 2,
+        "detail": {"seed-benjamin": "compañero de equipo en el hackathon", "seed-jose": "compañero de equipo en el hackathon"}
+      }
+    },
+    {
+      "a": "seed-benjamin",
+      "b": "seed-martin",
+      "origin": {"place": "trabajo"},
+      "pending": {
+        "relation": "trabajo",
+        "closeness": 2,
+        "detail": {"seed-benjamin": "compañero de equipo en el hackathon", "seed-martin": "compañero de equipo en el hackathon"}
+      }
+    },
+    {
+      "a": "seed-benjamin",
+      "b": "seed-oscar",
+      "origin": {"place": "trabajo"},
+      "pending": {
+        "relation": "trabajo",
+        "closeness": 2,
+        "detail": {"seed-benjamin": "compañero de equipo en el hackathon", "seed-oscar": "compañero de equipo en el hackathon"}
+      }
+    },
+    {
+      "a": "seed-cristobal",
+      "b": "seed-jose",
+      "origin": {"place": "trabajo"},
+      "pending": {
+        "relation": "trabajo",
+        "closeness": 2,
+        "detail": {"seed-cristobal": "compañero de equipo en el hackathon", "seed-jose": "compañero de equipo en el hackathon"}
+      }
+    },
+    {
+      "a": "seed-cristobal",
+      "b": "seed-martin",
+      "origin": {"place": "trabajo"},
+      "pending": {
+        "relation": "trabajo",
+        "closeness": 2,
+        "detail": {"seed-cristobal": "compañero de equipo en el hackathon", "seed-martin": "compañero de equipo en el hackathon"}
+      }
+    },
+    {
+      "a": "seed-cristobal",
+      "b": "seed-oscar",
+      "origin": {"place": "trabajo"},
+      "pending": {
+        "relation": "trabajo",
+        "closeness": 2,
+        "detail": {"seed-cristobal": "compañero de equipo en el hackathon", "seed-oscar": "compañero de equipo en el hackathon"}
+      }
+    },
+    {
+      "a": "seed-cristobal",
+      "b": "seed-nicolas-bravo",
+      "origin": {"place": "trabajo"},
+      "pending": {
+        "relation": "trabajo",
+        "closeness": 2,
+        "detail": {"seed-cristobal": "colega, los dos hacen backends en python", "seed-nicolas-bravo": "colega, los dos hacen backends en python"}
+      }
+    },
+    {
+      "a": "seed-cristobal",
+      "b": "seed-isidora-paredes",
+      "origin": {"place": "conocidos"},
+      "pending": {
+        "relation": "conocido",
+        "closeness": 1,
+        "detail": {"seed-cristobal": "diseñadora de su equipo en una hackathon anterior", "seed-isidora-paredes": "programador de su equipo en una hackathon anterior"}
+      }
+    },
+    {
+      "a": "seed-cristobal",
+      "b": "seed-francisco-leiva",
+      "origin": {"place": "estudios"},
+      "pending": {
+        "relation": "estudios",
+        "closeness": 2,
+        "detail": {"seed-cristobal": "compañero de universidad", "seed-francisco-leiva": "compañero de universidad"}
+      }
+    },
+    {
+      "a": "seed-cristobal",
+      "b": "seed-sebastian-perez",
+      "origin": {"place": "amistad"},
+      "pending": {
+        "relation": "amistad",
+        "closeness": 2,
+        "detail": {"seed-cristobal": "amigo con el que juega en línea", "seed-sebastian-perez": "amigo con el que juega en línea"}
+      }
+    },
+    {
+      "a": "seed-andres-gonzalez",
+      "b": "seed-cristobal",
+      "origin": {"place": "conocidos"},
+      "pending": {
+        "relation": "conocido",
+        "closeness": 1,
+        "detail": {"seed-cristobal": "lo conoció en una salida de astrofotografía en el norte", "seed-andres-gonzalez": "lo conoció en una salida de astrofotografía en el norte"}
+      }
+    },
+    {
+      "a": "seed-benjamin",
+      "b": "seed-javiera-munoz",
+      "origin": {"place": "trabajo"},
+      "pending": {
+        "relation": "trabajo",
+        "closeness": 2,
+        "detail": {"seed-benjamin": "excompañera de producto en la banca digital", "seed-javiera-munoz": "excompañero de producto en la banca digital"}
+      }
+    },
+    {
+      "a": "seed-benjamin",
+      "b": "seed-tamara-quezada",
+      "origin": {"place": "amistad"},
+      "pending": {
+        "relation": "amistad",
+        "closeness": 2,
+        "detail": {"seed-benjamin": "compañera de pádel", "seed-tamara-quezada": "compañero de pádel"}
+      }
+    },
+    {
+      "a": "seed-benjamin",
+      "b": "seed-ignacia-silva",
+      "origin": {"place": "conocidos"},
+      "pending": {
+        "relation": "conocido",
+        "closeness": 1,
+        "detail": {"seed-benjamin": "conocida de la comunidad de product managers", "seed-ignacia-silva": "conocido de la comunidad de product managers"}
+      }
+    },
+    {
+      "a": "seed-benjamin",
+      "b": "seed-esteban-lagos",
+      "origin": {"place": "estudios"},
+      "pending": {
+        "relation": "estudios",
+        "closeness": 2,
+        "detail": {"seed-benjamin": "compañero de universidad", "seed-esteban-lagos": "compañero de universidad"}
+      }
+    },
+    {
+      "a": "seed-martin",
+      "b": "seed-tomas-fuentes",
+      "origin": {"place": "amistad"},
+      "pending": {
+        "relation": "amistad",
+        "closeness": 2,
+        "detail": {"seed-martin": "amigo con el que hace cerveza artesanal", "seed-tomas-fuentes": "amigo con el que hace cerveza artesanal"}
+      }
+    },
+    {
+      "a": "seed-martin",
+      "b": "seed-matias-caceres",
+      "origin": {"place": "amistad"},
+      "pending": {
+        "relation": "amistad",
+        "closeness": 1,
+        "detail": {"seed-martin": "compañero de fútbol de los jueves", "seed-matias-caceres": "compañero de fútbol de los jueves"}
+      }
+    },
+    {
+      "a": "seed-ignacio-munoz",
+      "b": "seed-oscar",
+      "origin": {"place": "conocidos"},
+      "pending": {
+        "relation": "conocido",
+        "closeness": 1,
+        "detail": {"seed-oscar": "ingeniero de sonido al que le presta equipos", "seed-ignacio-munoz": "músico que le presta equipos de audio"}
+      }
+    },
+    {
+      "a": "seed-constanza-vidal",
+      "b": "seed-oscar",
+      "origin": {"place": "conocidos"},
+      "pending": {
+        "relation": "conocido",
+        "closeness": 1,
+        "detail": {"seed-oscar": "compañera de un curso de edición fotográfica", "seed-constanza-vidal": "compañero de un curso de edición fotográfica"}
+      }
+    },
+    {
+      "a": "seed-ignacia-silva",
+      "b": "seed-jose",
+      "origin": {"place": "amistad"},
+      "pending": {
+        "relation": "amistad",
+        "closeness": 1,
+        "detail": {"seed-jose": "compañera de running de los domingos", "seed-ignacia-silva": "compañero de running de los domingos"}
+      }
+    },
+    {
+      "a": "seed-jose",
+      "b": "seed-tamara-quezada",
+      "origin": {"place": "trabajo"},
+      "pending": {
+        "relation": "trabajo",
+        "closeness": 1,
+        "detail": {"seed-jose": "conocida de una fintech de seguros", "seed-tamara-quezada": "conocido de una fintech de seguros"}
+      }
     }
   ],
   "rooms": [
@@ -3768,7 +3988,9 @@
         "seed-sebastian-perez",
         "seed-constanza-vidal",
         "seed-valentina-herrera",
-        "seed-lucas-moreira"
+        "seed-lucas-moreira",
+        "seed-martin",
+        "seed-benjamin"
       ]
     },
     {
@@ -3844,7 +4066,12 @@
         "seed-agustina-mora",
         "seed-ignacia-silva",
         "seed-esteban-lagos",
-        "seed-francisco-leiva"
+        "seed-francisco-leiva",
+        "seed-martin",
+        "seed-oscar",
+        "seed-jose",
+        "seed-cristobal",
+        "seed-benjamin"
       ]
     }
   ],
@@ -3872,7 +4099,9 @@
         {"personId": "seed-sebastian-perez", "role": "dj"},
         {"personId": "seed-constanza-vidal", "role": "fotógrafa"},
         {"personId": "seed-valentina-herrera", "role": "invitada"},
-        {"personId": "seed-lucas-moreira", "role": "invitado desde Brasil"}
+        {"personId": "seed-lucas-moreira", "role": "invitado desde Brasil"},
+        {"personId": "seed-martin", "role": "invitado, amigo de la universidad de la novia"},
+        {"personId": "seed-benjamin", "role": "invitado, excolega de la novia"}
       ],
       "decisions": [
         {
@@ -3921,7 +4150,8 @@
         {"personId": "seed-monica-soto", "degree": 2, "why": "Puede alojar a seis personas de Concepción en Maipú."},
         {"personId": "seed-paula-gonzalez", "degree": 2, "why": "Enfermera: puede orientar a Hernán sobre la recuperación de una cirugía de cadera."},
         {"personId": "seed-rocio-araya", "degree": 2, "why": "Se casó en Pirque con 110 invitados: sabe el costo real, lo de la carpa y cómo resolvió lo de la abuela."},
-        {"personId": "seed-alonso-vergara", "degree": 3, "why": "Banquetería con cocina sin gluten y protocolo sin mariscos, pero no trabaja en Casablanca."}
+        {"personId": "seed-alonso-vergara", "degree": 3, "why": "Banquetería con cocina sin gluten y protocolo sin mariscos, pero no trabaja en Casablanca."},
+        {"personId": "seed-oscar", "degree": 2, "why": "Tocó en una banda con el dj y tiene equipos de audio: puede cubrir el sonido si algo falla."}
       ]
     },
     {
@@ -3984,7 +4214,9 @@
         {"personId": "seed-felipe-navarro", "degree": 2, "why": "Fue a Chiloé con niños chicos: tiempos reales de viaje y de transbordador."},
         {"personId": "seed-soledad-pizarro", "degree": 2, "why": "Prima de Luis con casa para 10 en Vicuña, a 650 msnm."},
         {"personId": "seed-lorena-figueroa", "degree": 3, "why": "Arrienda cabañas en Castro."},
-        {"personId": "seed-valentina-herrera", "degree": 3, "why": "Celíaca: sabe qué preguntarle al alojamiento por la cocina de Marcela."}
+        {"personId": "seed-valentina-herrera", "degree": 3, "why": "Celíaca: sabe qué preguntarle al alojamiento por la cocina de Marcela."},
+        {"personId": "seed-oscar", "degree": 2, "why": "Tiene carpa y equipo de camping que puede prestar: resuelve la cama número 11 en el Elqui."},
+        {"personId": "seed-cristobal", "degree": 2, "why": "Hace astrofotografía: puede armar una noche de cielo para Martina sin pagar un tour."}
       ]
     },
     {
@@ -4062,7 +4294,9 @@
         {"personId": "seed-tamara-quezada", "degree": 2, "why": "Seguro de arriendo que evalúa a los tres juntos."},
         {"personId": "seed-benjamin-torres", "degree": 3, "why": "Corredor: precios de marzo y el 3D1B de Toesca."},
         {"personId": "seed-camila-rojas", "degree": 3, "why": "Deja un 3D2B en Ñuñoa que acepta mascotas."},
-        {"personId": "seed-pedro-alarcon", "degree": 3, "why": "Abogado: garantía, codeudores y cláusulas del contrato."}
+        {"personId": "seed-pedro-alarcon", "degree": 3, "why": "Abogado: garantía, codeudores y cláusulas del contrato."},
+        {"personId": "seed-jose", "degree": 2, "why": "Amigo de la universidad de Matías; conoce a Camila, que deja el 3D2B de Ñuñoa."},
+        {"personId": "seed-benjamin", "degree": 2, "why": "Sabe de medios de pago: cómo pagar arriendo y gastos comunes desde una cuenta compartida sin que uno adelante todo."}
       ]
     }
   ]

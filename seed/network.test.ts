@@ -39,9 +39,11 @@ describe("seed/network.v2.json", () => {
   it("has at least 50 people whose ids don't collide with the rest of the seed", () => {
     expect(network.people.length).toBeGreaterThanOrEqual(50);
     expect(new Set(network.people.map((p) => p.personId)).size).toBe(network.people.length);
-    // Person ids are seed-<slug> in every room, so a repeated slug would merge two people.
-    const others = SEED_ROOMS.filter((r) => ["seed-mut", "seed-hack", "seed-control"].includes(r.id)).flatMap((r) => r.people.map((p) => `seed-${p.slug}`));
-    for (const p of network.people) expect(others, p.personId).not.toContain(p.personId);
+    // Person ids are seed-<slug> in every room, so a repeated slug would merge two people. The hack room
+    // brings some network people on purpose: those must be the same person, with the same topics.
+    const others = SEED_ROOMS.filter((r) => ["seed-mut", "seed-hack", "seed-control"].includes(r.id)).flatMap((r) => r.people);
+    for (const p of network.people)
+      for (const other of others.filter((o) => `seed-${o.slug}` === p.personId)) expect(other.topics.map(([name]) => name), p.personId).toEqual(p.topics.map((t) => t.name));
   });
 
   it("only names teammates that exist in seed/team", () => {
@@ -115,8 +117,9 @@ describe("seed/network.v2.json", () => {
       for (const id of purpose.organizers) expect(inRoom).toContain(id);
     });
 
-    it("gives every participant something only their agent reads for this case", () => {
-      for (const id of inRoom) {
+    // Teammates come from seed/team, which has no agentOnly: they join a case as guests, not as the ones it's about.
+    it("gives every synthetic participant something only their agent reads for this case", () => {
+      for (const id of inRoom.filter((id) => !network.team.includes(id))) {
         const person = network.people.find((p) => p.personId === id)!;
         expect(person.agentOnly.constraints.some((c) => c.appliesTo.includes(purpose.type)), id).toBe(true);
       }

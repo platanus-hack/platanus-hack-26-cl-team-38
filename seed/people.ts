@@ -185,18 +185,23 @@ const control: SeedPerson[] = [
   { slug: "valeria", displayName: "Valeria", topics: [["bordado", "hace", 2, ["instagram"]], ["blockchain", "busca", 1, ["claude"]]] },
 ];
 
-// The team's own room: every teammate in seed/team plus a few synthetic people, who repeat across events.
+// The three coordination cases of seed/network.v2.json: one room per case and one with all 53 people and
+// the team, so the helpers outside each case (reached through connections) are loaded too. Teammates
+// take part as guests or helpers, so the rooms resolve them from seed/team. Only the public part goes
+// into rooms: the detailed profile, agentOnly and connections are loaded apart (scripts/load-seed.mts).
+const networkPeople = new Map<string, SeedPerson>([
+  ...network.people.map((p): [string, SeedPerson] => [p.personId, { slug: slugOf(p.personId), displayName: p.displayName, topics: p.topics.map((t): SeedTopic => [t.name, t.kind, t.depth, t.sources]) }]),
+  ...team.map((p): [string, SeedPerson] => [`seed-${p.slug}`, p]),
+]);
+
+// The team's own room: every teammate in seed/team, a few synthetic people who repeat across events, and
+// the tech people of the network the team already knows (colleagues, a past hackathon, running, pádel).
 const hack: SeedPerson[] = [
   ...team.filter((p) => p.rooms.includes("seed-hack")),
   ...mut.filter((p) => ["bruno", "hugo", "lucia", "javier", "sofia"].includes(p.slug)),
+  ...["nicolas-bravo", "francisco-leiva", "sebastian-perez", "isidora-paredes", "tamara-quezada", "ignacia-silva"].map((slug) => networkPeople.get(`seed-${slug}`)!),
 ];
 
-// The three coordination cases of seed/network.v2.json: one room per case and one with all 53 people,
-// so the helpers outside each case (reached through connections) are loaded too. Only the public part
-// goes into rooms: the detailed profile, agentOnly and connections are loaded apart (scripts/load-seed.mts).
-const networkPeople = new Map<string, SeedPerson>(
-  network.people.map((p) => [p.personId, { slug: slugOf(p.personId), displayName: p.displayName, topics: p.topics.map((t): SeedTopic => [t.name, t.kind, t.depth, t.sources]) }]),
-);
 const networkRooms: SeedRoom[] = network.rooms.map((room) => ({ id: room.id, code: room.code, name: room.name, people: room.members.map((id) => networkPeople.get(id)!) }));
 
 export const SEED_ROOMS: SeedRoom[] = [
