@@ -165,7 +165,7 @@ export function GraphCanvas({
         const c = E[id];
         if (!c || c.kind !== "chip") return null;
         const p = P[id];
-        const style = { left: `${(p.x / W) * 100}%`, top: `${(p.y / H) * 100}%`, opacity: p.o, scale: String(p.s) };
+        const style = { left: `${(p.x / W) * 100}%`, top: `${(p.y / H) * 100}%`, opacity: p.o, scale: String(p.s), ["--x" as string]: (p.x / W).toFixed(4) };
         return c.onClick ? (
           <button key={id} type="button" className={`gchip ${c.cls}`} style={style} onClick={c.onClick} aria-pressed={c.cls.includes("sel")}>
             {c.icon}
