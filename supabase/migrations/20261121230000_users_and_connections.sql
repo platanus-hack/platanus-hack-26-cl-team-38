@@ -2,7 +2,8 @@
 -- Only the public layer lives here: every topic went through the privacy filter at check-in.
 -- A vector depends on the topic name alone, so it is stored once per name, and which names match
 -- (cosine >= 0.60) is computed once, when a name first appears. Crossing two people is then an
--- index join: no vector is read or compared.
+-- index join: no vector is read or compared, and the result is not stored. Measured with 200
+-- people: 1 to 3 ms against the whole room, while writing the results took 5 to 58 ms.
 
 create extension if not exists vector with schema extensions;
 
@@ -43,19 +44,6 @@ create table user_topics (
   primary key (user_id, topic_id)
 );
 
--- What two people share, as last computed. Recomputed on every crossing (it is cheap); kept one
--- week so lists do not recompute, and dropped as soon as either profile changes.
-create table user_matches (
-  user_a text not null references users (id) on delete cascade,
-  user_b text not null references users (id) on delete cascade,
-  shared jsonb not null,
-  computed_at timestamptz not null default now(),
-  primary key (user_a, user_b),
-  check (user_a < user_b)
-);
-create index on user_matches (user_b);
-create index on user_matches (computed_at);
-
 -- One row per pair, whoever proposed. Rejecting or withdrawing deletes the row.
 create table connections (
   user_a text not null references users (id) on delete cascade,
@@ -63,9 +51,10 @@ create table connections (
   proposed_by text not null,
   accepted_a timestamptz,
   accepted_b timestamptz,
-  origin_kind text not null check (origin_kind in ('sala', 'lugar')),
+  origin_kind text not null check (origin_kind in ('sala', 'lugar', 'mesa')),
   origin_room_id text references rooms (id) on delete set null,
-  -- Room or place name, copied: rooms are wiped when they close.
+  origin_mesa_id text references mesas (id) on delete set null,
+  -- Room, place or mesa theme name, copied: rooms and their mesas are wiped when they close.
   origin_label text not null,
   -- What they had in common when the second one accepted: names, kind, depth, cosine. No vectors.
   shared jsonb not null default '[]',
@@ -87,7 +76,6 @@ alter table users enable row level security;
 alter table topic_vectors enable row level security;
 alter table topic_matches enable row level security;
 alter table user_topics enable row level security;
-alter table user_matches enable row level security;
 alter table connections enable row level security;
 
 -- p_topics: [{ id, name, nameKey, kind, depth, sources, embedding }]. True when the profile changed.
@@ -139,8 +127,6 @@ begin
   from jsonb_array_elements(p_topics) t
   on conflict do nothing;
 
-  -- Something may have been unpublished: nothing computed from the old profile stays readable.
-  delete from user_matches where p_id in (user_a, user_b);
   return true;
 end
 $$;
@@ -156,11 +142,11 @@ $$;
 -- The crossing. Each element names both sides by user id, so the same JSON serves either of them:
 -- { cosine, topics: { <user id>: { name, kind, depth }, <other id>: { name, kind, depth } } }.
 create function shared_topics(p_me text, p_others text[])
-returns table (other_id text, shared jsonb)
+returns table (other_id text, other_name text, shared jsonb)
 language sql
 stable
 as $$
-  select b.user_id,
+  select b.user_id, o.display_name,
     jsonb_agg(
       jsonb_build_object(
         'cosine', round(m.cosine::numeric, 2),
@@ -174,38 +160,9 @@ as $$
   from user_topics a
   join topic_matches m on m.name_a = a.name_key
   join user_topics b on b.name_key = m.name_b
+  join users o on o.id = b.user_id
   where a.user_id = p_me and b.user_id = any(p_others) and b.user_id <> p_me
-  group by b.user_id
-$$;
-
-create type match_view as (other_id text, other_name text, shared jsonb, computed_at timestamptz);
-
--- Recomputes what p_me shares with each of p_others, refreshes the one-week cache and returns it.
--- Whoever shares nothing gets no row.
-create function match_users(p_me text, p_others text[])
-returns setof match_view
-language plpgsql
-as $$
-begin
-  delete from user_matches where computed_at < now() - interval '7 days';
-  delete from user_matches
-  where (user_a = p_me and user_b = any(p_others)) or (user_b = p_me and user_a = any(p_others));
-  insert into user_matches (user_a, user_b, shared)
-  select least(p_me, s.other_id), greatest(p_me, s.other_id), s.shared from shared_topics(p_me, p_others) s;
-  return query select * from matches_of(p_me) m where m.other_id = any(p_others);
-end
-$$;
-
-create function matches_of(p_me text)
-returns setof match_view
-language sql
-stable
-as $$
-  select o.id, o.display_name, m.shared, m.computed_at
-  from user_matches m
-  join users o on o.id = case when m.user_a = p_me then m.user_b else m.user_a end
-  where p_me in (m.user_a, m.user_b) and m.computed_at >= now() - interval '7 days'
-  order by m.computed_at desc
+  group by b.user_id, o.display_name
 $$;
 
 create type connection_view as (
@@ -217,6 +174,7 @@ create type connection_view as (
   their_accepted_at timestamptz,
   origin_kind text,
   origin_room_id text,
+  origin_mesa_id text,
   origin_label text,
   shared jsonb,
   created_at timestamptz
@@ -231,7 +189,7 @@ as $$
   select o.id, o.display_name, c.status, c.proposed_by = p_me,
     case when c.user_a = p_me then c.accepted_a else c.accepted_b end,
     case when c.user_a = p_me then c.accepted_b else c.accepted_a end,
-    c.origin_kind, c.origin_room_id, c.origin_label, c.shared, c.created_at
+    c.origin_kind, c.origin_room_id, c.origin_mesa_id, c.origin_label, c.shared, c.created_at
   from connections c
   join users o on o.id = case when c.user_a = p_me then c.user_b else c.user_a end
   where p_me in (c.user_a, c.user_b) and (p_other is null or o.id = p_other)
@@ -255,21 +213,34 @@ end
 $$;
 
 -- Proposing to someone who already proposed to you is accepting. Proposing twice changes nothing.
--- The origin is a room (its name is copied) or, without one, the place name the phone sends.
-create function propose_connection(p_me text, p_other text, p_room_id text default null, p_place text default null)
+-- The origin is a mesa both are in (its theme is copied), a room (its name is copied) or, without
+-- either, the place name the phone sends. A room or mesa that does not exist leaves no label, and
+-- the insert fails.
+create function propose_connection(p_me text, p_other text, p_room_id text default null, p_place text default null, p_mesa_id text default null)
 returns setof connection_view
 language plpgsql
 as $$
 declare
   v_room_id text;
-  v_room_name text;
+  v_mesa_id text;
+  v_label text;
 begin
-  select id, name into v_room_id, v_room_name from rooms where id = p_room_id;
-  insert into connections (user_a, user_b, proposed_by, accepted_a, accepted_b, origin_kind, origin_room_id, origin_label)
+  if p_mesa_id is not null then
+    select m.id, m.room_id,
+      coalesce((select g.theme from group_nodes g where g.mesa_id = m.id order by g.created_at desc limit 1), m.anchor_theme_id)
+    into v_mesa_id, v_room_id, v_label
+    from mesas m
+    where m.id = p_mesa_id
+      and m.members @> jsonb_build_array(jsonb_build_object('personId', p_me), jsonb_build_object('personId', p_other));
+  else
+    select id, name into v_room_id, v_label from rooms where id = p_room_id;
+  end if;
+  insert into connections (user_a, user_b, proposed_by, accepted_a, accepted_b, origin_kind, origin_room_id, origin_mesa_id, origin_label)
   values (
     least(p_me, p_other), greatest(p_me, p_other), p_me,
     case when p_me < p_other then now() end, case when p_me > p_other then now() end,
-    case when v_room_id is null then 'lugar' else 'sala' end, v_room_id, coalesce(v_room_name, p_place)
+    case when v_mesa_id is not null then 'mesa' when v_room_id is not null then 'sala' else 'lugar' end,
+    v_room_id, v_mesa_id, coalesce(v_label, p_place)
   )
   on conflict (user_a, user_b) do nothing;
   -- Not inserted: the row was already there. If it is the other's proposal, this accepts it.
@@ -293,11 +264,11 @@ $$;
 -- Supabase grants execute on new functions to the phone's roles by default.
 revoke execute on function
   save_profile(text, text, jsonb, text, text), claim_key(text, text), shared_topics(text, text[]),
-  match_users(text, text[]), matches_of(text), connections_of(text, text), accept_connection(text, text),
-  propose_connection(text, text, text, text), close_connection(text, text)
+  connections_of(text, text), accept_connection(text, text),
+  propose_connection(text, text, text, text, text), close_connection(text, text)
 from public, anon, authenticated;
 grant execute on function
   save_profile(text, text, jsonb, text, text), claim_key(text, text), shared_topics(text, text[]),
-  match_users(text, text[]), matches_of(text), connections_of(text, text), accept_connection(text, text),
-  propose_connection(text, text, text, text), close_connection(text, text)
+  connections_of(text, text), accept_connection(text, text),
+  propose_connection(text, text, text, text, text), close_connection(text, text)
 to service_role;

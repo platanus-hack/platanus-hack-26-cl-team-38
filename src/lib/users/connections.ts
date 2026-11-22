@@ -14,8 +14,14 @@ export const ConnectionRequestSchema = z
     personId: PersonId,
     otherId: PersonId,
     action: z.enum(["propose", "accept", "close"]),
-    // Where it was born, for a proposal: the room both are in, or the place name the phone shows.
-    origin: z.union([z.object({ roomId: z.string().min(1).max(80) }).strict(), z.object({ place: z.string().min(1).max(80) }).strict()]).optional(),
+    // Where it was born, for a proposal: the mesa or room both are in, or the place name the phone shows.
+    origin: z
+      .union([
+        z.object({ mesaId: z.string().min(1).max(80) }).strict(),
+        z.object({ roomId: z.string().min(1).max(80) }).strict(),
+        z.object({ place: z.string().min(1).max(80) }).strict(),
+      ])
+      .optional(),
   })
   .strict();
 
@@ -30,6 +36,7 @@ type Row = {
   their_accepted_at: string | null;
   origin_kind: string;
   origin_room_id: string | null;
+  origin_mesa_id: string | null;
   origin_label: string;
   shared: unknown;
   created_at: string;
@@ -42,7 +49,7 @@ const toConnection = (me: string) => (row: Row): Connection =>
     status: row.status,
     proposedByMe: row.proposed_by_me,
     acceptedAt: { mine: row.my_accepted_at, theirs: row.their_accepted_at },
-    origin: { kind: row.origin_kind, roomId: row.origin_room_id, label: row.origin_label },
+    origin: { kind: row.origin_kind, roomId: row.origin_room_id, mesaId: row.origin_mesa_id, label: row.origin_label },
     shared: toShared(row.shared, me, row.other_id),
     createdAt: row.created_at,
   });
@@ -72,17 +79,23 @@ export async function runConnectionAction(db: Db, { personId: me, otherId: other
     return connection ? { status: 200, connection } : { status: 409, error: "No hay una propuesta de esa persona por aceptar" };
   }
 
-  if (!origin) return { status: 400, error: "Una propuesta necesita origin: { roomId } o { place }" };
+  if (!origin) return { status: 400, error: "Una propuesta necesita origin: { mesaId }, { roomId } o { place }" };
   const place = "place" in origin ? origin.place : null;
   // The other person will read it: same rule as displayName.
   if (place && hasIdentifier(place)) return { status: 400, error: "place no puede llevar un dato de contacto" };
   try {
-    const rows = await call(db, "propose_connection", { p_me: me, p_other: other, p_room_id: "roomId" in origin ? origin.roomId : null, p_place: place });
+    const rows = await call(db, "propose_connection", {
+      p_me: me,
+      p_other: other,
+      p_room_id: "roomId" in origin ? origin.roomId : null,
+      p_place: place,
+      p_mesa_id: "mesaId" in origin ? origin.mesaId : null,
+    });
     return { status: 200, connection: one(rows) };
   } catch (error) {
     const code = (error as { code?: string }).code;
     if (code === FOREIGN_KEY) return { status: 404, error: "Esa persona todavía no tiene perfil" };
-    if (code === NOT_NULL) return { status: 404, error: "No existe esa sala" };
+    if (code === NOT_NULL) return { status: 404, error: "No existe esa sala, o esa mesa no los tiene a los dos" };
     throw error;
   }
 }

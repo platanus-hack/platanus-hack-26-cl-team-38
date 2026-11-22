@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { EMBEDDING_DIM } from "@/lib/embeddings";
 import type { Kind, PublicProjection } from "@/lib/types";
 import { ConnectionRequestSchema, listConnections, runConnectionAction } from "./connections";
-import { authenticate, listMatches, matchUsers, saveProfile, type Db } from "./profile";
+import { authenticate, matchUsers, saveProfile, type Db } from "./profile";
 import { createTestDb } from "./test-db";
 
 let pg: PGlite;
@@ -77,39 +77,23 @@ describe("cruce", () => {
       {
         personId: "x-beto",
         displayName: "Beto",
-        computedAt: expect.any(String),
         shared: [
           { mine: { name: "escalada", kind: "sabe", depth: 3 }, theirs: { name: "escalada", kind: "busca", depth: 1 }, cosine: 1 },
           { mine: { name: "escalada", kind: "sabe", depth: 3 }, theirs: { name: "trekking", kind: "hace", depth: 2 }, cosine: 0.8 },
         ],
       },
     ]);
-    expect(JSON.stringify(await pg.query("select * from user_matches"))).not.toContain("embedding");
+    expect(JSON.stringify(matches)).not.toContain("embedding");
 
-    const [fromBeto] = await listMatches(db, "x-beto");
+    const [fromBeto] = await matchUsers(db, "x-beto", ["x-ana"]);
     expect(fromBeto.personId).toBe("x-ana");
     expect(fromBeto.shared[0]).toEqual({ mine: { name: "escalada", kind: "busca", depth: 1 }, theirs: { name: "escalada", kind: "sabe", depth: 3 }, cosine: 1 });
-    expect(await listMatches(db, "x-caro")).toEqual([]);
+    expect(await matchUsers(db, "x-caro", ["x-ana", "x-beto"])).toEqual([]);
   });
 
-  it("guarda una fila por pareja aunque se crucen muchas veces y desde los dos lados", async () => {
-    await matchUsers(db, "x-ana", ["x-beto"]);
-    await matchUsers(db, "x-beto", ["x-ana"]);
-    expect(await count("user_matches where 'x-ana' in (user_a, user_b)")).toBe(1);
-  });
-
-  it("lo calculado vale una semana", async () => {
-    await matchUsers(db, "x-ana", ["x-beto"]);
-    await pg.query("update user_matches set computed_at = now() - interval '8 days' where user_a = 'x-ana'");
-    expect(await listMatches(db, "x-ana")).toEqual([]);
-    await matchUsers(db, "x-caro", ["x-ana"]);
-    expect(await count("user_matches where user_a = 'x-ana'")).toBe(0);
-  });
-
-  it("olvida lo calculado cuando una de las dos personas cambia lo que publica", async () => {
+  it("no guarda el resultado: siempre responde con lo que cada persona publica en ese momento", async () => {
     expect(await matchUsers(db, "x-ana", ["x-beto"])).toHaveLength(1);
     await saveProfile(db, person("x-beto", "Beto", [["trompeta", "hace", 2, vec({ 34: 1 })]]));
-    expect(await listMatches(db, "x-ana")).toEqual([]);
     expect(await matchUsers(db, "x-ana", ["x-beto"])).toEqual([]);
   });
 });
@@ -147,6 +131,11 @@ describe("conexiones", () => {
     await saveProfile(db, person("c-caro", "Caro", [["vela", "hace", 2, vec({ 40: 1 })]]));
     await saveProfile(db, person("c-dani", "Dani", []));
     await pg.query("insert into rooms (id, code, name) values ('c-sala', 'CSALA', 'Sala de prueba')");
+    await pg.query("insert into rooms (id, code, name) values ('c-sala-mesa', 'CMESA', 'Sala de la mesa')");
+    await pg.query(
+      "insert into mesas (id, room_id, anchor_theme_id, members, score) values ('c-mesa', 'c-sala-mesa', 'tema-vela', $1, 1)",
+      [JSON.stringify(["c-beto", "c-caro", "c-dani"].map((personId) => ({ personId, role: "comparte", themeId: "tema-vela", topicId: `${personId}.vela` })))],
+    );
   });
 
   it("queda aceptada solo cuando aceptan los dos, con quién aceptó y cuándo", async () => {
@@ -204,12 +193,14 @@ describe("conexiones", () => {
   it("la clave publicable del teléfono no lee ninguna tabla nueva ni ejecuta sus funciones", async () => {
     await pg.exec("set role anon");
     try {
-      for (const table of ["users", "user_topics", "topic_vectors", "topic_matches", "user_matches", "connections"]) {
+      for (const table of ["users", "user_topics", "topic_vectors", "topic_matches", "connections", "logs"]) {
         expect(await count(table), table).toBe(0);
       }
       await expect(pg.query("insert into connections (user_a, user_b, proposed_by, accepted_a, origin_kind, origin_label) values ('c-ana', 'c-dani', 'c-ana', now(), 'lugar', 'x')")).rejects.toThrow(/row-level security/);
       await expect(pg.query("select * from connections_of('c-ana')")).rejects.toThrow(/permission denied/);
-      await expect(pg.query("select * from match_users('c-ana', array['c-beto'])")).rejects.toThrow(/permission denied/);
+      await expect(pg.query("select * from shared_topics('c-ana', array['c-beto'])")).rejects.toThrow(/permission denied/);
+      await expect(pg.query("select write_log('motor', 'mesa_creada', '{}', 'c-ana')")).rejects.toThrow(/permission denied/);
+      await expect(pg.query("select * from logs_of('c-ana')")).rejects.toThrow(/permission denied/);
       await expect(pg.query("select claim_key('c-dani', 'x')")).rejects.toThrow(/permission denied/);
     } finally {
       await pg.exec("reset role");
@@ -231,10 +222,21 @@ describe("conexiones", () => {
   });
 
   it("guarda dónde nació: la sala, con su nombre aunque la sala se borre, o el lugar", async () => {
-    expect(await act("c-dani", "c-caro", "propose", { roomId: "c-sala" })).toMatchObject({ connection: { origin: { kind: "sala", roomId: "c-sala", label: "Sala de prueba" } } });
+    expect(await act("c-dani", "c-caro", "propose", { roomId: "c-sala" })).toMatchObject({ connection: { origin: { kind: "sala", roomId: "c-sala", mesaId: null, label: "Sala de prueba" } } });
     await pg.query("delete from rooms where id = 'c-sala'");
     expect(await listConnections(db, "c-dani")).toMatchObject([{ origin: { kind: "sala", roomId: null, label: "Sala de prueba" } }]);
-    expect((await listConnections(db, "c-ana")).find((c) => c.personId === "c-caro")?.origin).toEqual({ kind: "lugar", roomId: null, label: "MUT, Las Condes" });
+    expect((await listConnections(db, "c-ana")).find((c) => c.personId === "c-caro")?.origin).toEqual({ kind: "lugar", roomId: null, mesaId: null, label: "MUT, Las Condes" });
+  });
+
+  it("puede nacer en una mesa, solo entre dos de sus miembros, y sobrevive a la mesa con el nombre del tema", async () => {
+    // Ana is not in the mesa.
+    expect(await act("c-ana", "c-dani", "propose", { mesaId: "c-mesa" })).toMatchObject({ status: 404 });
+    expect(await act("c-beto", "c-caro", "propose", { mesaId: "c-mesa" })).toMatchObject({
+      connection: { origin: { kind: "mesa", roomId: "c-sala-mesa", mesaId: "c-mesa", label: "tema-vela" } },
+    });
+    // Deleting the room takes its mesas with it; the connection stays.
+    await pg.query("delete from rooms where id = 'c-sala-mesa'");
+    expect((await listConnections(db, "c-beto")).find((c) => c.personId === "c-caro")?.origin).toEqual({ kind: "mesa", roomId: null, mesaId: null, label: "tema-vela" });
   });
 
   it("no acepta una propuesta sin origen, con un dato de contacto en el lugar, a una sala o persona que no existe, ni a uno mismo", async () => {

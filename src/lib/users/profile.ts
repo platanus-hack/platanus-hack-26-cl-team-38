@@ -58,18 +58,13 @@ export function toShared(stored: unknown, me: string, other: string): SharedTopi
   return (stored as StoredShared[]).map((s) => ({ mine: s.topics[me], theirs: s.topics[other], cosine: s.cosine })) as SharedTopic[];
 }
 
-type MatchRow = { other_id: string; other_name: string; shared: unknown; computed_at: string };
+type MatchRow = { other_id: string; other_name: string; shared: unknown };
 
-const toMatch = (me: string) => (row: MatchRow): Match =>
-  MatchSchema.parse({ personId: row.other_id, displayName: row.other_name, shared: toShared(row.shared, me, row.other_id), computedAt: row.computed_at });
-
-// The crossing: what `me` shares with each of `others`, computed now (an index join, no vectors)
-// and kept for a week. Whoever shares nothing is left out.
+// The crossing: what `me` shares with each of `others`. Computed on every call (an index join, no
+// vectors) and not stored: against 200 people it takes 1 to 3 ms, less than writing the result.
+// Whoever shares nothing is left out.
 export async function matchUsers(db: Db, me: string, others: string[]): Promise<Match[]> {
-  return ((await call(db, "match_users", { p_me: me, p_others: others })) as MatchRow[]).map(toMatch(me));
-}
-
-// Everyone `me` crossed in the last week and still shares something with, without recomputing.
-export async function listMatches(db: Db, me: string): Promise<Match[]> {
-  return ((await call(db, "matches_of", { p_me: me })) as MatchRow[]).map(toMatch(me));
+  return ((await call(db, "shared_topics", { p_me: me, p_others: others })) as MatchRow[]).map((row) =>
+    MatchSchema.parse({ personId: row.other_id, displayName: row.other_name, shared: toShared(row.shared, me, row.other_id) }),
+  );
 }
