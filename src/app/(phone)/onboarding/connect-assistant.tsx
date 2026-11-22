@@ -305,6 +305,24 @@ function PasteFallback() {
   );
 }
 
+// The chat cannot reach our API from its sandbox; a connector can. Added once per account, from the
+// web or the desktop app, and after that the same messages deliver on their own, on the phone too.
+function ConnectorSetup() {
+  const url = `${window.location.origin}/api/mcp`;
+  return (
+    <details className="text-sm">
+      <summary className="cursor-pointer font-medium">Que Claude lo envíe solo desde el chat</summary>
+      <ol className="mt-2 list-decimal pl-5 text-muted-foreground">
+        <li>En claude.ai, desde el computador: Settings → Connectors → Add custom connector.</li>
+        <li>
+          Ponle de nombre Nodos y pega esta dirección: <code className="break-all select-all">{url}</code>
+        </li>
+        <li>Actívalo en el chat y pega el mensaje como siempre. Sirve también en el teléfono.</li>
+      </ol>
+    </details>
+  );
+}
+
 export function ConnectAssistant({ signals, profiles, inbox }: { signals: Signal[]; profiles: Profile[]; inbox: AssistantInbox }) {
   const from = (source: Signal["source"]) => signals.filter((s) => s.source === source).length;
   return (
@@ -317,6 +335,7 @@ export function ConnectAssistant({ signals, profiles, inbox }: { signals: Signal
       </p>
       <PasteFallback />
       <DetailedProfile profiles={profiles} inbox={inbox} />
+      <ConnectorSetup />
       {signals.length > 0 && (
         <p className="text-sm text-muted-foreground">
           Llegaron {signals.length} temas. Nada es público todavía.{" "}

@@ -1,6 +1,7 @@
 import "server-only";
 import { classifyOnServer } from "@/lib/privacy/server";
 import { createInboxStore, type InboxStore } from "./inbox";
+import { createConnectorServer } from "./mcp";
 import { receiveProfile } from "./profile";
 import { receiveSignals } from "./receive";
 
@@ -19,3 +20,5 @@ export async function receiveProfileOnServer(token: string | undefined, source: 
   const { status, message } = await receiveProfile(token, source, markdown, { inbox: assistantInbox, classify: classifyOnServer });
   return new Response(message, { status });
 }
+
+export const connectorServer = () => createConnectorServer({ inbox: assistantInbox, classify: classifyOnServer });
