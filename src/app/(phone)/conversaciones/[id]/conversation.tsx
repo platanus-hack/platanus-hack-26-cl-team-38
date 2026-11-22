@@ -5,10 +5,9 @@ import { Avatar } from "../../_components/avatar";
 import { Splash, TabBar, useOnboardedPhone } from "../../_components/chrome";
 import { Icon } from "../../_components/icons";
 import { LargeTitle, Mono } from "../../_components/ui";
-import { allConversations, buildConversation, buildInitiative } from "../../_lib/conversations";
+import { buildInitiative } from "../../_lib/conversations";
 import { COPY } from "../../_lib/copy";
-import { matchPhrase } from "../../_lib/matches";
-import { affinities, byTopic, coincidences, DEMO, RANGE, useEncounters } from "../../_lib/people";
+import { affinities, DEMO, useEncounters } from "../../_lib/people";
 import { isPlanId } from "../../_lib/plans";
 import { PlanConversation } from "./plan";
 import { setPhone } from "../../_lib/store";
@@ -34,28 +33,20 @@ export function Conversation({ params }: { params: Promise<{ id: string }> }) {
   if (s && !DEMO && isPlanId(id)) return <PlanConversation id={id} me={s.personId} />;
   if (!s || !encounters) return <Splash />;
 
-  const coins = DEMO ? coincidences({ ...s, radiusM: RANGE.max }, encounters) : [];
-  // Someone from Afinidades you share nothing with yet still gets a Conversación when you start one.
-  const contact = DEMO ? affinities(s, encounters).find((c) => c.person.personId === id) : undefined;
   const init = s.initiatives?.find((i) => i.id === id);
-  const cv = init
-    ? buildInitiative(s.displayName, init, affinities(s, encounters))
-    : (allConversations(s.displayName, coins, byTopic(coins)).find((c) => c.id === id) ?? (contact && buildConversation(s.displayName, contact)));
+  const cv = init && buildInitiative(s.displayName, init, affinities(s, encounters));
   const names = Object.fromEntries((cv?.members ?? []).map((m) => [m.person.personId, m.person.displayName]));
-  const group = cv?.kind === "grupo";
   const messages = cv ? [...cv.messages, ...(s.replies?.[cv.id] ?? [])] : [];
 
   return (
     <div className="app with-tabs">
       <LargeTitle
-        title={!cv ? COPY.conversaciones.title : group ? (cv.theme ?? "") : cv.members[0].person.displayName}
+        title={cv ? cv.theme : COPY.conversaciones.title}
         back="/conversaciones"
         sub={
           cv && (
             <Mono className="mute">
-              {group
-                ? `${cv.label ?? "Temática"} · ${cv.members.length + 1} Agentes · ${cv.members.map((m) => m.person.displayName).join(", ")}`
-                : [`${cv.members[0].distanceM} m`, cv.members[0].place, ...cv.members[0].items.map(matchPhrase)].join(" · ")}
+              {COPY.plan.label} · {cv.members.length + 1} Agentes · {cv.members.map((m) => m.person.displayName).join(", ")}
             </Mono>
           )
         }
@@ -76,8 +67,8 @@ export function Conversation({ params }: { params: Promise<{ id: string }> }) {
                     <span className="who">{C.yourself}</span>
                     {m.text}
                   </div>
-                ) : mine || !group ? (
-                  <div className={`bubble${mine ? " me" : ""}`}>{m.text}</div>
+                ) : mine ? (
+                  <div className="bubble me">{m.text}</div>
                 ) : (
                   <div className="msg">
                     <Avatar id={m.from} />

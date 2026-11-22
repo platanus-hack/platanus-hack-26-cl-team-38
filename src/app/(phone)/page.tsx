@@ -28,6 +28,7 @@ export default function Home() {
   const everyone = encounters ? affinities(s, encounters) : [];
   const contacts = known ?? [];
   const initiatives = (s.initiatives ?? []).map((i) => buildInitiative(s.displayName, i, everyone));
+  const invited = contacts.find((c) => c.person.personId === s.invite);
   const text = draft ?? s.intent;
   const saved = draft === null ? !!s.intent : draft.trim() === s.intent;
 
@@ -71,6 +72,14 @@ export default function Home() {
             router.push("/iniciativa");
           }}
         />
+        {invited && (
+          <p className="hint">
+            {C.with(invited.person.displayName)}{" "}
+            <button type="button" className="link" onClick={() => setPhone({ invite: null })}>
+              {C.withRemove}
+            </button>
+          </p>
+        )}
         {initiatives.length > 0 && (
           <>
             <div className="sec">{C.initiatives}</div>

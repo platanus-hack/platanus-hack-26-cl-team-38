@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AffinityGraph } from "../_components/affinity-graph";
 import { AiCard, MoreTopics } from "../_components/ai-card";
 import { Avatar } from "../_components/avatar";
@@ -19,6 +19,7 @@ const C = COPY.afinidades;
 
 export default function AfinidadesPage() {
   const s = useOnboardedPhone();
+  const router = useRouter();
   const known = useContacts(s);
   if (!s) return <Splash />;
 
@@ -108,10 +109,20 @@ export default function AfinidadesPage() {
             {person.items.length ? <p style={{ margin: 0 }}>{person.items.map(matchPhrase).join(" · ")}</p> : <p className="mute">{C.nothing}</p>}
             <div className="sec">{C.rest}</div>
             <MoreTopics key={`m-${person.person.personId}`} topics={person.person.topics.filter((t) => !person.items.some((i) => i.topic === t.name))} />
-            <Link className="btn" href={`/conversaciones/${encodeURIComponent(person.person.personId)}`} style={{ marginTop: 32 }}>
-              <Icon name="chat" />
-              {COPY.startConversation}
-            </Link>
+            {/* There is no one-to-one chat: with one person it is still an Iniciativa, of two. */}
+            <button
+              type="button"
+              className="btn"
+              style={{ marginTop: 32 }}
+              onClick={() => {
+                setPhone({ invite: person.person.personId });
+                setFocus({ person: null });
+                router.push("/iniciativa");
+              }}
+            >
+              <Icon name="sparkle" />
+              {COPY.startInitiative}
+            </button>
           </>
         )}
       </Sheet>
