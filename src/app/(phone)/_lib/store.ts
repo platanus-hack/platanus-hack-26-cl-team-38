@@ -42,7 +42,11 @@ export type PhoneState = {
   affinityQuery: string;
   /** Group Conversaciones you started from Inicio, newest first. */
   initiatives: Initiative[];
+  /** Perfil → Información. Owner-only: stays in this phone, never sent anywhere. */
+  info: ProfileInfo | null;
 };
+
+export type ProfileInfo = { email: string; age: number; gender: string; phone: string; occupation: string };
 
 const KEY = "nodo.phone.v1";
 // One identity for the whole app: /onboarding and /mi-nodo read team38.person.v1, /grafo and
@@ -88,6 +92,7 @@ function fresh(personId = `p-${randomHex(6)}`): PhoneState {
     relations: {},
     affinityQuery: "",
     initiatives: [],
+    info: null,
   };
 }
 

@@ -12,8 +12,8 @@ import { TopicItem } from "../_components/topic-item";
 import { ListRow, Mono } from "../_components/ui";
 import { COPY } from "../_lib/copy";
 import { useLocation } from "../_lib/location";
-import { DEMO, myInterests } from "../_lib/people";
-import { connectedSources, resetPhone, setPhone, signOut } from "../_lib/store";
+import { cap, DEMO, myInterests } from "../_lib/people";
+import { connectedSources, type PhoneState, resetPhone, setPhone, signOut } from "../_lib/store";
 
 const C = COPY.perfil;
 const time = new Intl.DateTimeFormat("es-CL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" });
@@ -52,6 +52,8 @@ export default function PerfilPage() {
           <Avatar id={s.personId} className="lg-face" />
           <h1 className="t-title">{s.displayName}</h1>
         </div>
+
+        <InfoForm s={s} />
 
         <div className="sec u">{C.interests}</div>
         {interests.length ? <MoreTopics topics={interests} limit={10} /> : <p className="mute">{C.noInterests}</p>}
@@ -170,5 +172,59 @@ function SwitchRow({ label, on, busy, onChange }: { label: string; on: boolean; 
       <span className="main">{label}</span>
       <button type="button" role="switch" aria-checked={on} aria-label={label} aria-busy={busy} className="switch" onClick={() => onChange(!on)} />
     </div>
+  );
+}
+
+/** Mail, Edad, Género and Teléfono are required; Oficio is optional and starts from what the Fuentes say you are. */
+function InfoForm({ s }: { s: PhoneState }) {
+  const [saved, setSaved] = useState(false);
+  const info = s.info;
+  const suggested = info?.occupation ? "" : cap(s.node?.topics.find((t) => t.kind === "es")?.name ?? "");
+
+  function save(form: HTMLFormElement) {
+    const f = new FormData(form);
+    const text = (k: string) => String(f.get(k) ?? "").trim();
+    setPhone({ info: { email: text("email"), age: Number(f.get("age")), gender: text("gender"), phone: text("phone"), occupation: text("occupation") } });
+    setSaved(true);
+  }
+
+  return (
+    <form className="info" onSubmit={(e) => (e.preventDefault(), save(e.currentTarget))} onChange={() => setSaved(false)}>
+      <div className="sec u">
+        {C.info}
+        <Mono className="mute">{info ? C.infoHelp : C.infoMissing}</Mono>
+      </div>
+      <label className="field">
+        <span>{C.email}</span>
+        <input name="email" type="email" required autoComplete="email" maxLength={120} defaultValue={info?.email} />
+      </label>
+      <label className="field">
+        <span>{C.age}</span>
+        <input name="age" type="number" required inputMode="numeric" min={13} max={120} defaultValue={info?.age} />
+      </label>
+      <label className="field">
+        <span>{C.gender}</span>
+        <select name="gender" required defaultValue={info?.gender ?? ""}>
+          <option value="" disabled>
+            {C.choose}
+          </option>
+          {C.genderOptions.map((g) => (
+            <option key={g}>{g}</option>
+          ))}
+        </select>
+      </label>
+      <label className="field">
+        <span>{C.phone}</span>
+        <input name="phone" type="tel" required autoComplete="tel" pattern="\+?[0-9 ]{8,16}" placeholder="+56 9 1234 5678" defaultValue={info?.phone} />
+      </label>
+      <label className="field">
+        <span>{C.occupation}</span>
+        <input name="occupation" maxLength={60} defaultValue={info?.occupation || suggested} />
+      </label>
+      {suggested && <p className="hint">{C.occupationSuggested}</p>}
+      <button type="submit" className="btn ghost" style={{ marginTop: 16 }} disabled={saved}>
+        {saved ? C.saved : C.save}
+      </button>
+    </form>
   );
 }
