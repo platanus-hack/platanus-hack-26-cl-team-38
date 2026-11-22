@@ -165,7 +165,11 @@ export default function IniciativaPage() {
                 </div>
               </>
             )}
-            {shownSuggested.length + rest.length === 0 && <p className="mute">{contacts.length === 0 ? (graph ? COPY.plan.noConnections : C.noContacts) : C.none}</p>}
+            {shownSuggested.length + rest.length === 0 && (
+              <p className="mute" role={graph?.error ? "alert" : undefined}>
+                {graph?.error ?? (contacts.length === 0 ? (graph ? COPY.plan.noConnections : C.noContacts) : C.none)}
+              </p>
+            )}
             {tooMany && <p className="mute">{COPY.plan.tooMany}</p>}
           </>
         ) : (

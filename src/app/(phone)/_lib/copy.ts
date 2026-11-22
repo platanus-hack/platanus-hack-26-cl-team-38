@@ -80,6 +80,8 @@ export const COPY = {
     contacts: "contactos en su red",
     oneContact: "contacto en su red",
     noConnections: "Una Iniciativa se arma con tus conexiones. Todavía no tienes ninguna.",
+    otherDevice: "Este perfil ya se abrió en otro dispositivo, y tus conexiones solo se leen desde ese.",
+    graphFailed: "No pudimos cargar tus conexiones. Intenta de nuevo.",
     tooMany: "Hasta 5 personas por Iniciativa.",
     onlyConnections: "Una Iniciativa se arma solo con tus conexiones aceptadas.",
     noUser: "Entra a una sala antes de crear una Iniciativa.",

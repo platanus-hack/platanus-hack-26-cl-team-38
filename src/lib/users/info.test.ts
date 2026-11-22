@@ -49,6 +49,13 @@ describe("información del perfil", () => {
     expect((await getUserInfo(db, "i-ana"))?.email).toBe("ana@correo.cl");
   });
 
+  it("en un perfil del seed tampoco: otro dispositivo entra al perfil, pero no a su información", async () => {
+    await saveProfile(db, { personId: "seed-i-ana", displayName: "Ana", topics: [] }, KEY_A);
+    expect(await saveOwnInfo(db, { personId: "seed-i-ana", info }, bearer(KEY_A))).toMatchObject({ status: 200 });
+    expect(await readOwnInfo(db, "seed-i-ana", bearer(KEY_B))).toMatchObject({ status: 401 });
+    expect(await saveOwnInfo(db, { personId: "seed-i-ana", info: { ...info, email: "otro@correo.cl" } }, bearer(KEY_B))).toMatchObject({ status: 401 });
+  });
+
   it("no sale en lo que recibe otra persona: ni en el cruce ni en las conexiones", async () => {
     await runConnectionAction(db, { personId: "i-ana", otherId: "i-beto", action: "propose", origin: { place: "MUT" } });
     const seen = JSON.stringify([await listConnections(db, "i-beto"), await matchUsers(db, "i-beto", ["i-ana"])]);
