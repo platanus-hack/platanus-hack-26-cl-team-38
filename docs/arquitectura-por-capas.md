@@ -96,7 +96,7 @@ Tipos compartidos por todas las capas. Los nombres de código van en inglés. En
 
 ```ts
 type Kind = "es" | "sabe" | "hace" | "le_gusta" | "quiere_ser" | "busca" | "ofrece";
-type Source = "claude" | "chatgpt" | "gemini" | "spotify" | "github" | "instagram";
+type Source = "claude" | "chatgpt" | "gemini" | "spotify" | "github" | "instagram" | "google";
 type Role = "aporta" | "busca" | "comparte";
 
 type Signal = {

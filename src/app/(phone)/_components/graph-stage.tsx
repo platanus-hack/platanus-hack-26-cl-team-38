@@ -9,7 +9,7 @@ import { AffinityGraph } from "./affinity-graph";
 import { MatchGraph } from "./match-graph";
 import { COPY } from "../_lib/copy";
 import { isPublished } from "../_lib/node";
-import { affinities, byTopic, cap, clampRadius, coincidences, searchTopics, useEncounters } from "../_lib/people";
+import { byTopic, cap, clampRadius, coincidences, contactsOf, searchTopics, useEncounters } from "../_lib/people";
 import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 
 // The graph behind the phone, on slate: your Fuentes and topics while you build your Nodo, then
@@ -17,9 +17,9 @@ import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 
 const W = 880;
 const H = 600;
-const SOURCES: Source[] = ["claude", "chatgpt", "gemini", "spotify", "github"];
+const SOURCES: Source[] = ["claude", "chatgpt", "gemini", "google", "spotify", "github"];
 /** Shown like in the onboarding: coming soon, never connected. */
-const SOON: SoonSource[] = ["gcalendar", "strava", "letterboxd"];
+const SOON: SoonSource[] = ["strava", "letterboxd"];
 
 type Phase = "inicio" | "fuentes" | "compartir" | "coincidencias";
 
@@ -42,7 +42,7 @@ function nodeScene(phase: Phase, s: PhoneState) {
       cls: `ghost${on ? " on" : ""}`,
       icon: <BrandLogo source={src} />,
       label: SOURCE_META[src].label,
-      pose: pose({ x: W / 2 + (i - (SOURCES.length - 1) / 2) * 150, y: 44 }, on || phase !== "compartir" ? 1 : 0.35),
+      pose: pose({ x: W / 2 + (i - (SOURCES.length - 1) / 2) * 130, y: 44 }, on || phase !== "compartir" ? 1 : 0.35),
     };
     if (on) edges.push({ a: `src:${src}`, b: me, kind: "soft", pulse: phase === "fuentes" ? i : undefined });
   });
@@ -111,10 +111,7 @@ export function GraphStage() {
             <i className="dot conocido" />
             {L.conocidos}
           </li>
-          <li>
-            <i className="dot cercania" />
-            {L.cercania}
-          </li>
+          <li className="mute">{L.close}</li>
           <li className="mute">{L.size}</li>
           <li className="mute">{L.drag}</li>
         </ul>
@@ -136,9 +133,9 @@ export function GraphStage() {
             W={W}
             H={H}
             me={{ id: s.personId }}
-            contacts={encounters ? affinities(s, encounters) : []}
+            contacts={encounters ? contactsOf(s, encounters) : []}
             focus={s.focus.person}
-            match={encounters ? (searchTopics(affinities(s, encounters), s.affinityQuery ?? "")?.ids ?? null) : null}
+            match={encounters ? (searchTopics(contactsOf(s, encounters), s.affinityQuery ?? "")?.ids ?? null) : null}
           />
         ) : phase === "coincidencias" ? (
           <MatchGraph W={W} H={H} me={{ id: s.personId, name: s.displayName }} groups={groups} focus={s.focus} />
@@ -147,7 +144,7 @@ export function GraphStage() {
         )}
       </div>
       <p className="status" role="status">
-        {affinity ? "Afinidades · Amigos, Conocidos y Cercanía" : status}
+        {affinity ? "Contactos · Amigos y Conocidos" : status}
       </p>
     </section>
   );

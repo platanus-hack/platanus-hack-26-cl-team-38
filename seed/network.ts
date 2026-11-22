@@ -109,7 +109,7 @@ const PurposeSchema = z.object({
 export const NetworkV2Schema = z.object({
   version: z.literal(2),
   description: z.string(),
-  // Teammates live in seed/team/<slug>.json; they appear here only through connections.
+  // Teammates live in seed/team/<slug>.json; here they appear in connections, rooms, roles and helpers.
   team: z.array(PersonIdSchema),
   people: z.array(PersonSchema).min(50),
   connections: z.array(SeedConnectionSchema),
@@ -152,6 +152,24 @@ export function renderProfile(person: SeedNetworkPerson): string {
     .filter(([, lines]) => lines.length > 0)
     .map(([title, lines]) => [`## ${title}`, ...lines.map((l) => `- ${l}`)].join("\n"))
     .join("\n\n");
+}
+
+// What goes to `user_context` for each person: the profile, which the agents of their connections
+// can also read ("red"), and what only their own agent reads ("propio").
+export function contextOf(person: SeedNetworkPerson): { red: { section: string; text: string }[]; propio: { section: string; text: string }[] } {
+  let section = "";
+  const red: { section: string; text: string }[] = [];
+  for (const line of renderProfile(person).split("\n")) {
+    if (line.startsWith("## ")) section = line.slice(3);
+    else if (line.startsWith("- ")) red.push({ section, text: line.slice(2) });
+  }
+  return {
+    red,
+    propio: [
+      ...(person.agentOnly.allergies ?? []).map((allergy) => ({ section: "Condición dura", text: `Alergia: ${allergy}` })),
+      ...person.agentOnly.constraints.map((c) => ({ section: c.hard ? "Condición dura" : "Preferencia", text: c.detail })),
+    ],
+  };
 }
 
 // Undirected connection graph over people and teammates.

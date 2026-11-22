@@ -16,7 +16,7 @@ const TABS: { href: string; label: string; icon: IconName; also?: string[] }[] =
   { href: "/perfil", label: COPY.tabs.perfil, icon: "person", also: ["/nodo"] },
 ];
 
-/** Floating bar of four rounded buttons; the active one is white. */
+/** Floating bar of four rounded buttons, icons only; the active one is white. */
 export function TabBar() {
   const path = usePathname();
   return (
@@ -26,7 +26,7 @@ export function TabBar() {
         return (
           <Link key={t.href} href={t.href} className={`tb${cur ? " cur" : ""}`} aria-current={cur ? "page" : undefined}>
             <Icon name={t.icon} />
-            <span>{t.label}</span>
+            <span className="sr">{t.label}</span>
           </Link>
         );
       })}

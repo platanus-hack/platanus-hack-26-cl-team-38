@@ -4,32 +4,71 @@
     {
       "slug": "martin",
       "friends": [
-        {"slug": "oscar", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
-        {"slug": "jose", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
-        {"slug": "javiera-munoz", "relation": "estudios", "detail": "amiga de la universidad", "closeness": 3},
+        {"slug": "antonia-reyes", "relation": "trabajo", "detail": "colega en la healthtech", "closeness": 1},
         {"slug": "esteban-lagos", "relation": "amistad", "detail": "compañero de running", "closeness": 2},
         {"slug": "ignacia-silva", "relation": "trabajo", "detail": "colega en la healthtech", "closeness": 2},
-        {"slug": "antonia-reyes", "relation": "trabajo", "detail": "colega en la healthtech", "closeness": 1}
+        {"slug": "javiera-munoz", "relation": "estudios", "detail": "amiga de la universidad", "closeness": 3},
+        {"slug": "jose", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "oscar", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "benjamin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "cristobal", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "tomas-fuentes", "relation": "amistad", "detail": "amigo con el que hace cerveza artesanal", "closeness": 2},
+        {"slug": "matias-caceres", "relation": "amistad", "detail": "compañero de fútbol de los jueves", "closeness": 1}
       ]
     },
     {
       "slug": "oscar",
       "friends": [
-        {"slug": "martin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
         {"slug": "jose", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "martin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
         {"slug": "rodrigo-sepulveda", "relation": "amistad", "detail": "compañero de básquetbol", "closeness": 2},
+        {"slug": "sebastian-perez", "relation": "estudios", "detail": "tocaban juntos en una banda en la universidad", "closeness": 2},
         {"slug": "tamara-quezada", "relation": "trabajo", "detail": "excolega de la fintech", "closeness": 1},
-        {"slug": "sebastian-perez", "relation": "estudios", "detail": "tocaban juntos en una banda en la universidad", "closeness": 2}
+        {"slug": "benjamin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "cristobal", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "ignacio-munoz", "relation": "conocido", "detail": "ingeniero de sonido al que le presta equipos", "closeness": 1},
+        {"slug": "constanza-vidal", "relation": "conocido", "detail": "compañera de un curso de edición fotográfica", "closeness": 1}
       ]
     },
     {
       "slug": "jose",
       "friends": [
+        {"slug": "felipe-navarro", "relation": "amistad", "detail": "compañero del club de running de Puente Alto", "closeness": 1},
+        {"slug": "francisco-leiva", "relation": "trabajo", "detail": "compañero de trabajo", "closeness": 2},
+        {"slug": "martin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "matias-caceres", "relation": "estudios", "detail": "compañero de universidad", "closeness": 3},
+        {"slug": "oscar", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "benjamin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "cristobal", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "ignacia-silva", "relation": "amistad", "detail": "compañera de running de los domingos", "closeness": 1},
+        {"slug": "tamara-quezada", "relation": "trabajo", "detail": "conocida de una fintech de seguros", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "cristobal",
+      "friends": [
+        {"slug": "benjamin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "jose", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
         {"slug": "martin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
         {"slug": "oscar", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
-        {"slug": "matias-caceres", "relation": "estudios", "detail": "compañero de universidad", "closeness": 3},
-        {"slug": "felipe-navarro", "relation": "amistad", "detail": "compañero del club de running de Puente Alto", "closeness": 1},
-        {"slug": "francisco-leiva", "relation": "trabajo", "detail": "compañero de trabajo", "closeness": 2}
+        {"slug": "nicolas-bravo", "relation": "trabajo", "detail": "colega, los dos hacen backends en python", "closeness": 2},
+        {"slug": "isidora-paredes", "relation": "conocido", "detail": "diseñadora de su equipo en una hackathon anterior", "closeness": 1},
+        {"slug": "francisco-leiva", "relation": "estudios", "detail": "compañero de universidad", "closeness": 2},
+        {"slug": "sebastian-perez", "relation": "amistad", "detail": "amigo con el que juega en línea", "closeness": 2},
+        {"slug": "andres-gonzalez", "relation": "conocido", "detail": "lo conoció en una salida de astrofotografía en el norte", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "benjamin",
+      "friends": [
+        {"slug": "cristobal", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "jose", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "martin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "oscar", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "javiera-munoz", "relation": "trabajo", "detail": "excompañera de producto en la banca digital", "closeness": 2},
+        {"slug": "tamara-quezada", "relation": "amistad", "detail": "compañera de pádel", "closeness": 2},
+        {"slug": "ignacia-silva", "relation": "conocido", "detail": "conocida de la comunidad de product managers", "closeness": 1},
+        {"slug": "esteban-lagos", "relation": "estudios", "detail": "compañero de universidad", "closeness": 2}
       ]
     }
   ],
@@ -86,7 +125,8 @@
         {"slug": "ignacio-munoz", "relation": "familia", "detail": "hermano", "closeness": 3},
         {"slug": "francisca-lagos", "relation": "amistad", "detail": "amiga del colegio", "closeness": 3},
         {"slug": "constanza-vidal", "relation": "estudios", "detail": "amiga de la universidad", "closeness": 2},
-        {"slug": "valentina-herrera", "relation": "amistad", "detail": "amiga", "closeness": 2}
+        {"slug": "valentina-herrera", "relation": "amistad", "detail": "amiga", "closeness": 2},
+        {"slug": "benjamin", "relation": "trabajo", "detail": "excompañero de producto en la banca digital", "closeness": 2}
       ]
     },
     {
@@ -139,7 +179,8 @@
         {"slug": "catalina-fuentes", "relation": "familia", "detail": "hermana", "closeness": 3},
         {"slug": "joaquin-salas", "relation": "amistad", "detail": "mejor amigo y padrino", "closeness": 3},
         {"slug": "sebastian-perez", "relation": "amistad", "detail": "amigo del ciclismo", "closeness": 2},
-        {"slug": "lucas-moreira", "relation": "estudios", "detail": "amigo del magíster en Barcelona", "closeness": 2}
+        {"slug": "lucas-moreira", "relation": "estudios", "detail": "amigo del magíster en Barcelona", "closeness": 2},
+        {"slug": "martin", "relation": "amistad", "detail": "amigo con el que hace cerveza artesanal", "closeness": 2}
       ]
     },
     {
@@ -251,7 +292,8 @@
         {"slug": "javiera-munoz", "relation": "familia", "detail": "hermana", "closeness": 3},
         {"slug": "hernan-munoz", "relation": "familia", "detail": "papá", "closeness": 3},
         {"slug": "patricia-soto", "relation": "familia", "detail": "mamá", "closeness": 3},
-        {"slug": "daniel-farias", "relation": "amistad", "detail": "amigo", "closeness": 2}
+        {"slug": "daniel-farias", "relation": "amistad", "detail": "amigo", "closeness": 2},
+        {"slug": "oscar", "relation": "conocido", "detail": "músico que le presta equipos de audio", "closeness": 1}
       ]
     },
     {
@@ -518,7 +560,8 @@
       "friends": [
         {"slug": "oscar", "relation": "estudios", "detail": "tocaban juntos en una banda en la universidad", "closeness": 2},
         {"slug": "tomas-fuentes", "relation": "amistad", "detail": "amigo del ciclismo", "closeness": 2},
-        {"slug": "joaquin-salas", "relation": "amistad", "detail": "amigo", "closeness": 1}
+        {"slug": "joaquin-salas", "relation": "amistad", "detail": "amigo", "closeness": 1},
+        {"slug": "cristobal", "relation": "amistad", "detail": "amigo con el que juega en línea", "closeness": 2}
       ]
     },
     {
@@ -557,7 +600,8 @@
       ],
       "friends": [
         {"slug": "javiera-munoz", "relation": "estudios", "detail": "amiga de la universidad", "closeness": 2},
-        {"slug": "paula-gonzalez", "relation": "amistad", "detail": "compañera de surf", "closeness": 2}
+        {"slug": "paula-gonzalez", "relation": "amistad", "detail": "compañera de surf", "closeness": 2},
+        {"slug": "oscar", "relation": "conocido", "detail": "compañero de un curso de edición fotográfica", "closeness": 1}
       ]
     },
     {
@@ -1043,7 +1087,8 @@
         {"slug": "gloria-espinoza", "relation": "familia", "detail": "mamá", "closeness": 3},
         {"slug": "marcela-rivas", "relation": "pareja", "detail": "esposa", "closeness": 3},
         {"slug": "paula-gonzalez", "relation": "familia", "detail": "hermana", "closeness": 2},
-        {"slug": "cristian-moya", "relation": "estudios", "detail": "compañero del liceo", "closeness": 2}
+        {"slug": "cristian-moya", "relation": "estudios", "detail": "compañero del liceo", "closeness": 2},
+        {"slug": "cristobal", "relation": "conocido", "detail": "lo conoció en una salida de astrofotografía en el norte", "closeness": 1}
       ]
     },
     {
@@ -1330,7 +1375,8 @@
       "friends": [
         {"slug": "jose", "relation": "estudios", "detail": "compañero de universidad", "closeness": 3},
         {"slug": "nicolas-bravo", "relation": "amistad", "detail": "amigo", "closeness": 2},
-        {"slug": "pedro-alarcon", "relation": "amistad", "detail": "compañero de fútbol", "closeness": 1}
+        {"slug": "pedro-alarcon", "relation": "amistad", "detail": "compañero de fútbol", "closeness": 1},
+        {"slug": "martin", "relation": "amistad", "detail": "compañero de fútbol de los jueves", "closeness": 1}
       ]
     },
     {
@@ -1362,7 +1408,8 @@
       ],
       "friends": [
         {"slug": "antonia-reyes", "relation": "familia", "detail": "prima", "closeness": 3},
-        {"slug": "gonzalo-paredes", "relation": "familia", "detail": "papá", "closeness": 3}
+        {"slug": "gonzalo-paredes", "relation": "familia", "detail": "papá", "closeness": 3},
+        {"slug": "cristobal", "relation": "conocido", "detail": "programador de su equipo en una hackathon anterior", "closeness": 1}
       ]
     },
     {
@@ -1390,7 +1437,8 @@
         {"slug": "antonia-reyes", "relation": "amistad", "detail": "compañera de escalada", "closeness": 2},
         {"slug": "matias-caceres", "relation": "amistad", "detail": "amigo", "closeness": 2},
         {"slug": "josefa-lillo", "relation": "vecindad", "detail": "administradora de su edificio", "closeness": 1},
-        {"slug": "agustina-mora", "relation": "amistad", "detail": "compañera de escalada", "closeness": 1}
+        {"slug": "agustina-mora", "relation": "amistad", "detail": "compañera de escalada", "closeness": 1},
+        {"slug": "cristobal", "relation": "trabajo", "detail": "colega, los dos hacen backends en python", "closeness": 2}
       ]
     },
     {
@@ -1571,7 +1619,9 @@
       "friends": [
         {"slug": "oscar", "relation": "trabajo", "detail": "excolega de la fintech", "closeness": 1},
         {"slug": "ignacia-silva", "relation": "amistad", "detail": "amiga", "closeness": 2},
-        {"slug": "barbara-nunez", "relation": "amistad", "detail": "amiga de las catas de vino natural", "closeness": 1}
+        {"slug": "barbara-nunez", "relation": "amistad", "detail": "amiga de las catas de vino natural", "closeness": 1},
+        {"slug": "benjamin", "relation": "amistad", "detail": "compañero de pádel", "closeness": 2},
+        {"slug": "jose", "relation": "trabajo", "detail": "conocido de una fintech de seguros", "closeness": 1}
       ]
     },
     {
@@ -1669,7 +1719,9 @@
         {"slug": "valentina-herrera", "relation": "amistad", "detail": "compañera de running", "closeness": 1},
         {"slug": "antonia-reyes", "relation": "trabajo", "detail": "colega", "closeness": 2},
         {"slug": "tamara-quezada", "relation": "amistad", "detail": "amiga", "closeness": 2},
-        {"slug": "sergio-pino", "relation": "familia", "detail": "tío", "closeness": 2}
+        {"slug": "sergio-pino", "relation": "familia", "detail": "tío", "closeness": 2},
+        {"slug": "benjamin", "relation": "conocido", "detail": "conocido de la comunidad de product managers", "closeness": 1},
+        {"slug": "jose", "relation": "amistad", "detail": "compañero de running de los domingos", "closeness": 1}
       ]
     },
     {
@@ -1687,7 +1739,8 @@
         {"slug": "martin", "relation": "amistad", "detail": "compañero de running", "closeness": 2},
         {"slug": "francisca-lagos", "relation": "familia", "detail": "hermana", "closeness": 3},
         {"slug": "soledad-pizarro", "relation": "conocido", "detail": "productora del pisco que compra", "closeness": 1},
-        {"slug": "benjamin-torres", "relation": "amistad", "detail": "compañero de tenis", "closeness": 1}
+        {"slug": "benjamin-torres", "relation": "amistad", "detail": "compañero de tenis", "closeness": 1},
+        {"slug": "benjamin", "relation": "estudios", "detail": "compañero de universidad", "closeness": 2}
       ]
     },
     {
@@ -1703,7 +1756,8 @@
       "constraints": [],
       "friends": [
         {"slug": "jose", "relation": "trabajo", "detail": "compañero de trabajo", "closeness": 2},
-        {"slug": "camila-rojas", "relation": "vecindad", "detail": "vecina", "closeness": 1}
+        {"slug": "camila-rojas", "relation": "vecindad", "detail": "vecina", "closeness": 1},
+        {"slug": "cristobal", "relation": "estudios", "detail": "compañero de universidad", "closeness": 2}
       ]
     }
   ],
@@ -1731,7 +1785,9 @@
         {"slug": "sebastian-perez", "role": "dj"},
         {"slug": "constanza-vidal", "role": "fotógrafa"},
         {"slug": "valentina-herrera", "role": "invitada"},
-        {"slug": "lucas-moreira", "role": "invitado desde Brasil"}
+        {"slug": "lucas-moreira", "role": "invitado desde Brasil"},
+        {"slug": "martin", "role": "invitado, amigo de la universidad de la novia"},
+        {"slug": "benjamin", "role": "invitado, excolega de la novia"}
       ],
       "decisions": [
         {
@@ -1797,7 +1853,8 @@
         {"slug": "monica-soto", "degree": 2, "why": "Puede alojar a seis personas de Concepción en Maipú."},
         {"slug": "paula-gonzalez", "degree": 2, "why": "Enfermera: puede orientar a Hernán sobre la recuperación de una cirugía de cadera."},
         {"slug": "rocio-araya", "degree": 2, "why": "Se casó en Pirque con 110 invitados: sabe el costo real, lo de la carpa y cómo resolvió lo de la abuela."},
-        {"slug": "alonso-vergara", "degree": 3, "why": "Banquetería con cocina sin gluten y protocolo sin mariscos, pero no trabaja en Casablanca."}
+        {"slug": "alonso-vergara", "degree": 3, "why": "Banquetería con cocina sin gluten y protocolo sin mariscos, pero no trabaja en Casablanca."},
+        {"slug": "oscar", "degree": 2, "why": "Tocó en una banda con el dj y tiene equipos de audio: puede cubrir el sonido si algo falla."}
       ]
     },
     {
@@ -1854,7 +1911,9 @@
         {"slug": "felipe-navarro", "degree": 2, "why": "Fue a Chiloé con niños chicos: tiempos reales de viaje y de transbordador."},
         {"slug": "soledad-pizarro", "degree": 2, "why": "Prima de Luis con casa para 10 en Vicuña, a 650 msnm."},
         {"slug": "lorena-figueroa", "degree": 3, "why": "Arrienda cabañas en Castro."},
-        {"slug": "valentina-herrera", "degree": 3, "why": "Celíaca: sabe qué preguntarle al alojamiento por la cocina de Marcela."}
+        {"slug": "valentina-herrera", "degree": 3, "why": "Celíaca: sabe qué preguntarle al alojamiento por la cocina de Marcela."},
+        {"slug": "oscar", "degree": 2, "why": "Tiene carpa y equipo de camping que puede prestar: resuelve la cama número 11 en el Elqui."},
+        {"slug": "cristobal", "degree": 2, "why": "Hace astrofotografía: puede armar una noche de cielo para Martina sin pagar un tour."}
       ]
     },
     {
@@ -1922,7 +1981,9 @@
         {"slug": "tamara-quezada", "degree": 2, "why": "Seguro de arriendo que evalúa a los tres juntos."},
         {"slug": "benjamin-torres", "degree": 3, "why": "Corredor: precios de marzo y el 3D1B de Toesca."},
         {"slug": "camila-rojas", "degree": 3, "why": "Deja un 3D2B en Ñuñoa que acepta mascotas."},
-        {"slug": "pedro-alarcon", "degree": 3, "why": "Abogado: garantía, codeudores y cláusulas del contrato."}
+        {"slug": "pedro-alarcon", "degree": 3, "why": "Abogado: garantía, codeudores y cláusulas del contrato."},
+        {"slug": "jose", "degree": 2, "why": "Amigo de la universidad de Matías; conoce a Camila, que deja el 3D2B de Ñuñoa."},
+        {"slug": "benjamin", "degree": 2, "why": "Sabe de medios de pago: cómo pagar arriendo y gastos comunes desde una cuenta compartida sin que uno adelante todo."}
       ]
     }
   ]

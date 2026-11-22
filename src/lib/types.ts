@@ -2,8 +2,8 @@ import { z } from "zod";
 import { PRIVACY_CATEGORIES, PRIVACY_LEVELS } from "./privacy/taxonomy";
 
 export const KindSchema = z.enum(["es", "sabe", "hace", "le_gusta", "quiere_ser", "busca", "ofrece"]);
-// "manual": a topic the person wrote themselves in Perfil, not delivered by an assistant or an app.
-export const SourceSchema = z.enum(["claude", "chatgpt", "gemini", "spotify", "github", "instagram", "manual"]);
+// "google": Takeout (YouTube and Calendar). "manual": a topic the person wrote themselves in Perfil.
+export const SourceSchema = z.enum(["claude", "chatgpt", "gemini", "spotify", "github", "instagram", "google", "manual"]);
 export const RoleSchema = z.enum(["aporta", "busca", "comparte"]);
 
 export const SignalSchema = z.object({
@@ -230,6 +230,118 @@ export const LogSchema = z.object({
   createdAt: z.string(),
 }).strict();
 
+// Plans (src/lib/plans/). A person, a few of their accepted connections, one agent each and an
+// orchestrator. Every text below is public to the participants: it went through the lexicon, and
+// what an agent brings from its network never names the contact it came from.
+export const PlanStatusSchema = z.enum(["deliberando", "consenso", "decidido"]);
+// `codigo`: the orchestrator could not be reached, and the server closed with what there was.
+export const PlanDecidedBySchema = z.enum(["consenso", "orquestador", "codigo"]);
+export const PLAN_MAX_ROUNDS = 5;
+
+const PlanLine = z.string().min(1).max(240);
+
+export const PlanContentSchema = z.object({
+  resumen: z.string().min(1).max(600),
+  decisiones: z.array(z.object({ tema: z.string().min(1).max(80), valor: PlanLine, porque: z.string().max(240) }).strict()),
+  pasos: z.array(z.object({ que: PlanLine, responsable: z.string().min(1) }).strict()),
+  // What is still unsolved, as full sentences: they are also what the network is searched with.
+  abiertos: z.array(PlanLine),
+  // Who did not get what they asked for. Only a decided plan has them.
+  desacuerdos: z.array(z.object({ personId: z.string().min(1), tema: z.string().min(1).max(80), detalle: PlanLine }).strict()),
+}).strict();
+
+// Something an agent brought to the table, citing the line it comes from. `contactId` is who of
+// its network said it: stored so the owner can see it, removed for everyone else.
+export const PlanAporteSchema = z.object({
+  lineId: z.string().min(1),
+  texto: PlanLine,
+  origen: z.enum(["propio", "red"]),
+  contactId: z.string().min(1).optional(),
+}).strict();
+
+export const PlanMessageSchema = z.discriminatedUnion("agent", [
+  // The proposal itself lives once, in `plan_versions`.
+  z.object({ agent: z.literal("orquestador"), content: z.object({ version: z.number().int().positive(), final: z.boolean() }).strict() }).strict(),
+  z.object({
+    agent: z.literal("miembro"),
+    personId: z.string().min(1),
+    content: z.discriminatedUnion("tipo", [
+      z.object({
+        tipo: z.literal("postura"),
+        postura: PlanLine,
+        // The condition as the plan needs it, never its cause.
+        condiciones: z.array(z.object({ texto: PlanLine, dura: z.boolean() }).strict()),
+        aportes: z.array(PlanAporteSchema),
+      }).strict(),
+      z.object({
+        tipo: z.literal("respuesta"),
+        decision: z.enum(["accept", "adjust", "block"]),
+        motivo: PlanLine,
+        ajustes: z.array(z.object({ tema: z.string().min(1).max(80), pide: PlanLine }).strict()),
+        aportes: z.array(PlanAporteSchema),
+      }).strict(),
+    ]),
+  }).strict(),
+  z.object({
+    agent: z.literal("verificador"),
+    personId: z.string().min(1).optional(),
+    content: z.object({
+      descartado: z.enum(["aporte", "texto", "turno", "plan"]),
+      razon: z.enum(["cita_inventada", "privacidad", "nombra_contacto", "sin_respuesta", "orquestador_caido"]),
+    }).strict(),
+  }).strict(),
+]);
+
+// What one participant reads of a plan. An aporte from someone's network says whose contact it
+// was; the contact's name is there only for that participant.
+const PlanAporteViewSchema = z.object({ texto: PlanLine, origen: z.enum(["propio", "red"]), contacto: z.string().optional() }).strict();
+const PlanMemberSchema = z.object({ personId: z.string().min(1), displayName: z.string().min(1) }).strict();
+
+export const PlanMessageViewSchema = z.object({
+  id: z.number().int(),
+  round: z.number().int().nonnegative(),
+  agent: z.enum(["orquestador", "miembro", "verificador"]),
+  personId: z.string().nullable(),
+  // One readable line per message, written by the server from the structured content.
+  text: z.string(),
+  decision: z.enum(["accept", "adjust", "block"]).optional(),
+  aportes: z.array(PlanAporteViewSchema),
+  createdAt: z.string(),
+}).strict();
+
+export const PlanViewSchema = z.object({
+  id: z.string().min(1),
+  ownerId: z.string().min(1),
+  intent: z.string().min(1),
+  status: PlanStatusSchema,
+  round: z.number().int().nonnegative(),
+  maxRounds: z.number().int().positive(),
+  members: z.array(PlanMemberSchema),
+  myRestrictions: z.array(z.string()),
+  // The plan in force: the decided version, or the latest proposal while they deliberate.
+  plan: z.object({ version: z.number().int().positive(), content: PlanContentSchema, decidedBy: PlanDecidedBySchema.nullable() }).strict().nullable(),
+  messages: z.array(PlanMessageViewSchema),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+}).strict();
+
+export const PlanSummarySchema = z.object({
+  id: z.string().min(1),
+  ownerId: z.string().min(1),
+  intent: z.string().min(1),
+  status: PlanStatusSchema,
+  round: z.number().int().nonnegative(),
+  maxRounds: z.number().int().positive(),
+  members: z.array(PlanMemberSchema),
+  resumen: z.string().nullable(),
+  updatedAt: z.string(),
+}).strict();
+
+// Who a plan can be made with (level 2) and whose knowledge their agents can bring (level 3).
+export const PlanGraphSchema = z.object({
+  connections: z.array(PlanMemberSchema.extend({ contacts: z.number().int().nonnegative() }).strict()),
+}).strict();
+
 export type Kind = z.infer<typeof KindSchema>;
 export type Source = z.infer<typeof SourceSchema>;
 export type Role = z.infer<typeof RoleSchema>;
@@ -257,3 +369,12 @@ export type UserInfo = z.infer<typeof UserInfoSchema>;
 export type MesaDecision = z.infer<typeof MesaDecisionSchema>;
 export type LogEntry = z.input<typeof LogEntrySchema>;
 export type Log = z.infer<typeof LogSchema>;
+export type PlanStatus = z.infer<typeof PlanStatusSchema>;
+export type PlanDecidedBy = z.infer<typeof PlanDecidedBySchema>;
+export type PlanContent = z.infer<typeof PlanContentSchema>;
+export type PlanAporte = z.infer<typeof PlanAporteSchema>;
+export type PlanMessage = z.infer<typeof PlanMessageSchema>;
+export type PlanMessageView = z.infer<typeof PlanMessageViewSchema>;
+export type PlanView = z.infer<typeof PlanViewSchema>;
+export type PlanSummary = z.infer<typeof PlanSummarySchema>;
+export type PlanGraph = z.infer<typeof PlanGraphSchema>;

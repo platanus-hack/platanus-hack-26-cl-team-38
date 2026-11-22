@@ -4,7 +4,7 @@
 |---|---|
 | `people.ts` | Las salas y las personas sintéticas, escritas a mano |
 | `team/<slug>.json` | Los integrantes del equipo, con tópicos sacados de sus asistentes |
-| `network.v2.json` | 53 personas sintéticas para tres casos de coordinación (matrimonio, viaje familiar, arriendo con roomies), ordenadas según dónde va cada dato en el modelo (ver `network.ts`). `network.v1.json` es el original escrito a mano: no se edita, y `network.test.ts` comprueba que la v2 lo reconstruye. `pnpm seed:graphs` dibuja un grafo por caso en `docs/red-de-casos.html` |
+| `network.v2.json` | 53 personas sintéticas para tres casos de coordinación (matrimonio, viaje familiar, arriendo con roomies), ordenadas según dónde va cada dato en el modelo (ver `network.ts`). Los cinco integrantes del equipo están en `team` y entran a los casos por sus conexiones, como invitados o ayudantes. `network.v1.json` es el original escrito a mano y solo se toca para seguir a la v2 (al sumar al equipo se le agregaron conexiones, invitados y ayudantes); `network.test.ts` comprueba que la v2 lo reconstruye. `pnpm seed:graphs` dibuja un grafo por caso en `docs/red-de-casos.html` |
 | `rooms.json` | Lo que se carga en Supabase: lo anterior con embeddings (`pnpm seed:build`) |
 
 ## Agregar tu perfil

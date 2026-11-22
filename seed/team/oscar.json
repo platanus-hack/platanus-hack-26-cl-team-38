@@ -15,6 +15,7 @@
     ["equipamiento de audio", "sabe", 2, ["chatgpt"]],
     ["entrenamiento de fuerza", "hace", 3, ["chatgpt"]],
     ["básquetbol", "hace", 3, ["chatgpt"]],
+    ["camping", "hace", 2, ["chatgpt"]],
     ["decoración del hogar", "le_gusta", 2, ["chatgpt"]],
     ["edición fotográfica", "le_gusta", 2, ["chatgpt"]],
     ["animación de gifs", "le_gusta", 2, ["chatgpt"]],

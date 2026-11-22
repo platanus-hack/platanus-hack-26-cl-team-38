@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import type { PublicTopic } from "@/lib/types";
 import { AiCard, MoreTopics } from "../_components/ai-card";
 import { Avatar } from "../_components/avatar";
@@ -31,6 +32,7 @@ const C = COPY.coincidencias;
 export default function CoincidenciasPage() {
   const s = useOnboardedPhone();
   const encounters = useEncounters();
+  const [view, setView] = useState<"personas" | "temas">("personas");
   if (!s) return <Splash />;
 
   const radius = clampRadius(s.radiusM);
@@ -45,8 +47,14 @@ export default function CoincidenciasPage() {
     <div className="app with-tabs">
       <div className="graph-screen">
         <div className="head">
-          <h1 className="t-title">{C.title}</h1>
-          <p className="desc">{C.desc}</p>
+          <h1 className="sr">{C.title}</h1>
+          <div className="segbar" role="radiogroup" aria-label={C.title}>
+            {(["personas", "temas"] as const).map((v) => (
+              <button key={v} type="button" role="radio" aria-checked={view === v} onClick={() => (setView(v), close())}>
+                {v === "personas" ? C.people : C.topics}
+              </button>
+            ))}
+          </div>
           <div className="near-row">
             <Mono className="mute">
               {coins.length} · {near ? `${radius} m` : C.anyDistance}
@@ -70,6 +78,23 @@ export default function CoincidenciasPage() {
                 </button>
               )}
             </div>
+          </div>
+        ) : view === "personas" ? (
+          <div className="rows glist">
+            {coins.map((c) => (
+              <ListRow
+                key={c.person.personId}
+                lead={<Avatar id={c.person.personId} className={c.relation} />}
+                title={c.person.displayName}
+                sub={
+                  <>
+                    <span className={`rel ${c.relation}`}>{RELATION[c.relation].label}</span> · {c.items.map((i) => cap(i.topic)).join(" · ")}
+                  </>
+                }
+                data={`${c.distanceM} m`}
+                onClick={() => setFocus({ topic: null, person: c.person.personId })}
+              />
+            ))}
           </div>
         ) : (
           <div className="gwrap">

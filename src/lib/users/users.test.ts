@@ -113,6 +113,15 @@ describe("clave del dispositivo", () => {
     expect(await authenticate(db, "k-nadie", bearer(KEY_A))).toBeNull();
   });
 
+  it("a un perfil del seed entra cualquier dispositivo, salvo a lo que es solo de su dueño", async () => {
+    await saveProfile(db, person("seed-k-ana", "Ana", []), KEY_A);
+    expect(await authenticate(db, "seed-k-ana", bearer(KEY_B))).toBe("seed-k-ana");
+    expect(await authenticate(db, "seed-k-ana", bearer(KEY_B), { ownerOnly: true })).toBeNull();
+    expect(await authenticate(db, "seed-k-ana", bearer(KEY_A), { ownerOnly: true })).toBe("seed-k-ana");
+    expect(await authenticate(db, "seed-k-ana", null)).toBeNull();
+    expect(await authenticate(db, "seed-k-nadie", bearer(KEY_B))).toBeNull();
+  });
+
   it("el check-in con clave la deja tomada desde el primer momento", async () => {
     await saveProfile(db, person("k-beto", "Beto", []), KEY_B);
     expect(await authenticate(db, "k-beto", bearer(KEY_A))).toBeNull();

@@ -9,6 +9,8 @@ import { allConversations, buildConversation, buildInitiative } from "../../_lib
 import { COPY } from "../../_lib/copy";
 import { matchPhrase } from "../../_lib/matches";
 import { affinities, byTopic, coincidences, DEMO, RANGE, useEncounters } from "../../_lib/people";
+import { isPlanId } from "../../_lib/plans";
+import { PlanConversation } from "./plan";
 import { setPhone } from "../../_lib/store";
 import { toast } from "../../_lib/toast";
 
@@ -29,6 +31,7 @@ export function Conversation({ params }: { params: Promise<{ id: string }> }) {
   const id = decodeURIComponent(use(params).id);
   const s = useOnboardedPhone();
   const encounters = useEncounters();
+  if (s && !DEMO && isPlanId(id)) return <PlanConversation id={id} me={s.personId} />;
   if (!s || !encounters) return <Splash />;
 
   const coins = DEMO ? coincidences({ ...s, radiusM: RANGE.max }, encounters) : [];

@@ -11,16 +11,32 @@ import { Sheet, Splash, TabBar, useOnboardedPhone } from "../_components/chrome"
 import { Icon } from "../_components/icons";
 import { TopicItem } from "../_components/topic-item";
 import { ListRow, Mono } from "../_components/ui";
+import { UserInfoSchema } from "@/lib/types";
+import { api } from "../_lib/api";
 import { COPY } from "../_lib/copy";
 import { useLocation } from "../_lib/location";
-import { DEMO, myInterests } from "../_lib/people";
-import { connectedSources, resetPhone, setPhone, signOut } from "../_lib/store";
+import { cap, DEMO, myInterests } from "../_lib/people";
+import { connectedSources, type PhoneState, resetPhone, setPhone, signOut } from "../_lib/store";
 import { toast } from "../_lib/toast";
 import { AddTopic } from "./add-topic";
-import { InfoSection } from "./info";
 import { useNodeSync } from "../_lib/node-sync";
 
 const C = COPY.perfil;
+
+/** Your photo: center-cropped to a 256 px square JPEG, small enough to live in localStorage. */
+async function pickPhoto(file: File | undefined) {
+  if (!file) return;
+  try {
+    const bmp = await createImageBitmap(file);
+    const side = Math.min(bmp.width, bmp.height);
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 256;
+    canvas.getContext("2d")!.drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, 256, 256);
+    setPhone({ photo: canvas.toDataURL("image/jpeg", 0.85) });
+  } catch {
+    toast(C.photoFailed);
+  }
+}
 const time = new Intl.DateTimeFormat("es-CL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" });
 
 export default function PerfilPage() {
@@ -59,9 +75,22 @@ export default function PerfilPage() {
     <div className="app with-tabs">
       <div className="content" style={{ paddingTop: 48 }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-          <Avatar id={s.personId} className="lg-face" />
+          <Avatar id={s.personId} className="lg-face" photo={s.photo} />
           <h1 className="t-title">{s.displayName}</h1>
+          <div style={{ display: "flex", gap: 16 }}>
+            <label className="link" style={{ cursor: "pointer" }}>
+              {C.photo}
+              <input type="file" accept="image/*" className="sr" onChange={(e) => (pickPhoto(e.target.files?.[0]), (e.target.value = ""))} />
+            </label>
+            {s.photo && (
+              <button type="button" className="link" onClick={() => setPhone({ photo: null })}>
+                {C.photoRemove}
+              </button>
+            )}
+          </div>
         </div>
+
+        <InfoForm s={s} />
 
         <div className="sec u">{C.interests}</div>
         {interests.length ? <MoreTopics topics={interests} limit={10} /> : <p className="mute">{C.noInterests}</p>}
@@ -96,8 +125,6 @@ export default function PerfilPage() {
             {topics.length > 4 && <Mono className="mute">+{topics.length - 4}</Mono>}
           </button>
         </div>
-
-        <InfoSection s={s} />
 
         <div className="sec u">{C.account}</div>
         <div className="rows">
@@ -188,5 +215,75 @@ function SwitchRow({ label, on, busy, onChange }: { label: string; on: boolean; 
       <span className="main">{label}</span>
       <button type="button" role="switch" aria-checked={on} aria-label={label} aria-busy={busy} className="switch" onClick={() => onChange(!on)} />
     </div>
+  );
+}
+
+/** Mail, Edad, Género and Teléfono are required; Oficio is optional and starts from what the Fuentes say you are. */
+function InfoForm({ s }: { s: PhoneState }) {
+  const [saved, setSaved] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const info = s.info;
+  const suggested = info?.occupation ? "" : cap(s.node?.topics.find((t) => t.kind === "es")?.name ?? "");
+
+  function save(form: HTMLFormElement) {
+    const f = new FormData(form);
+    const text = (k: string) => String(f.get(k) ?? "").trim();
+    const parsed = UserInfoSchema.safeParse({ email: text("email"), age: Number(f.get("age")), gender: text("gender"), phone: text("phone"), occupation: text("occupation") });
+    if (!parsed.success) return;
+    const info = parsed.data;
+    // The phone keeps its copy first: a server that is down must not lose what you typed.
+    setPhone({ info });
+    setSaved(true);
+    setFailed(false);
+    if (DEMO) return;
+    // displayName lets the server create the user if this phone never checked in.
+    api("/api/users/info", { method: "POST", body: JSON.stringify({ personId: s.personId, displayName: s.displayName, info }) })
+      .then((r) => setFailed(!r.ok))
+      .catch(() => setFailed(true));
+  }
+
+  return (
+    <form className="info" onSubmit={(e) => (e.preventDefault(), save(e.currentTarget))} onChange={() => setSaved(false)}>
+      <div className="sec u">
+        {C.info}
+        <Mono className="mute">{info ? C.infoHelp : C.infoMissing}</Mono>
+      </div>
+      <label className="field">
+        <span>{C.email}</span>
+        <input name="email" type="email" required autoComplete="email" maxLength={120} defaultValue={info?.email} />
+      </label>
+      <label className="field">
+        <span>{C.age}</span>
+        <input name="age" type="number" required inputMode="numeric" min={13} max={120} defaultValue={info?.age} />
+      </label>
+      <label className="field">
+        <span>{C.gender}</span>
+        <select name="gender" required defaultValue={info?.gender ?? ""}>
+          <option value="" disabled>
+            {C.choose}
+          </option>
+          {C.genderOptions.map((g) => (
+            <option key={g}>{g}</option>
+          ))}
+        </select>
+      </label>
+      <label className="field">
+        <span>{C.phone}</span>
+        <input name="phone" type="tel" required autoComplete="tel" pattern="\+?[0-9 ]{8,16}" placeholder="+56 9 1234 5678" defaultValue={info?.phone} />
+      </label>
+      <label className="field">
+        <span>{C.occupation}</span>
+        <input name="occupation" maxLength={60} defaultValue={info?.occupation || suggested} />
+      </label>
+      {suggested && <p className="hint">{C.occupationSuggested}</p>}
+      {failed && (
+        <p className="err" role="alert">
+          {C.infoLocal}
+        </p>
+      )}
+      <button type="submit" className="btn ghost" style={{ marginTop: 16 }} disabled={saved && !failed}>
+        {saved ? C.infoSaved : C.save}
+      </button>
+    </form>
   );
 }
