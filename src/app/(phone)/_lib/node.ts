@@ -1,5 +1,5 @@
 import { withheld } from "@/lib/privacy/projection";
-import type { Kind, Role, Signal, Topic } from "@/lib/types";
+import type { Kind, Signal, Topic } from "@/lib/types";
 
 // What Minga needs on top of the node operations in src/lib/node/node.ts: labels, roles, and which
 // topics the room can see. The node itself is built there, with the privacy filter's verdicts.
@@ -28,18 +28,6 @@ export const KIND_LABEL: Record<Kind, string> = {
   busca: "busca",
   ofrece: "ofrece",
 };
-
-export const ROLE_LABEL: Record<Role, { you: string; them: string; hint: string }> = {
-  aporta: { you: "Aportas", them: "Aporta", hint: "sabes o haces el tema" },
-  busca: { you: "Buscas", them: "Busca", hint: "quieres aprenderlo o hacerlo" },
-  comparte: { you: "Compartes", them: "Comparte", hint: "te gusta, sin más" },
-};
-
-export function roleFor(topic: Pick<Topic, "kind" | "depth">): Role {
-  if (topic.kind === "busca" || topic.kind === "quiere_ser") return "busca";
-  if ((topic.kind === "sabe" || topic.kind === "hace" || topic.kind === "es" || topic.kind === "ofrece") && topic.depth >= 2) return "aporta";
-  return "comparte";
-}
 
 /** Signals to try the flow without pasting anything. */
 export const EXAMPLE_SIGNALS: Signal[] = [

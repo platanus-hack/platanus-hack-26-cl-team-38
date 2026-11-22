@@ -10,7 +10,8 @@ export const MAX_DOTS = 7;
 
 type Opening = PlanMessageView & { agent: "miembro" };
 
-const openingOf = (plan: PlanView, personId: string) => plan.messages.find((m): m is Opening => m.agent === "miembro" && m.round === 0 && m.personId === personId);
+const openingOf = (plan: PlanView, personId: string) =>
+  plan.messages.find((m): m is Opening => m.agent === "miembro" && m.round === 0 && m.personId === personId);
 
 /** Who confirms the plan once it closes: everyone whose Agente did not say they cannot be part of it. */
 export function going(plan: PlanView): string[] {
@@ -26,10 +27,16 @@ export function paced(raw: PlanView, shown: number): PlanView {
   const messages = raw.messages.slice(0, shown);
   const proposal = messages.findLast((m) => m.proposal)?.proposal;
   const round = messages.reduce((max, m) => Math.max(max, m.round), 0);
-  return { ...raw, status: "deliberando", round, messages, plan: proposal ? { version: proposal.version, content: proposal.content, decidedBy: null } : null };
+  return {
+    ...raw,
+    status: "deliberando",
+    round,
+    messages,
+    plan: proposal ? { version: proposal.version, content: proposal.content, decidedBy: null } : null,
+  };
 }
 
-export type NetStatus = "esperando" | "va" | "no_va";
+type NetStatus = "esperando" | "va" | "no_va";
 export type NetMember = {
   personId: string;
   name: string;
@@ -63,7 +70,9 @@ export function networkOf(plan: PlanView, me: string, confirmed: string[] = []):
     const opening = openingOf(plan, m.personId);
     const mine = plan.messages.filter((x) => x.agent === "miembro" && x.personId === m.personId);
     const dots = Math.min(m.contacts, MAX_DOTS);
-    const sources = new Set(mine.flatMap((x) => x.aportes.flatMap((a) => (a.origen === "red" && a.fuente ? [a.fuente] : []))));
+    const sources = new Set(
+      mine.flatMap((x) => x.aportes.flatMap((a) => (a.origen === "red" && a.fuente ? [a.fuente] : []))),
+    );
     return {
       personId: m.personId,
       name: first(m.displayName),
@@ -94,15 +103,25 @@ export type Placed = { at: Point; dots: Point[] };
  * Where everyone goes: the owner in the middle, the rest on a ring around, and each one's contacts
  * fanned outward behind them (the owner's, close around the middle).
  */
-export function layout(members: Pick<NetMember, "personId" | "owner" | "dots">[], W: number, H: number): Record<string, Placed> {
+export function layout(
+  members: Pick<NetMember, "personId" | "owner" | "dots">[],
+  W: number,
+  H: number,
+): Record<string, Placed> {
   const c = { x: W / 2, y: H / 2 };
-  const on = (deg: number, rx: number, ry: number): Point => ({ x: c.x + Math.cos((deg * Math.PI) / 180) * rx, y: c.y + Math.sin((deg * Math.PI) / 180) * ry });
+  const on = (deg: number, rx: number, ry: number): Point => ({
+    x: c.x + Math.cos((deg * Math.PI) / 180) * rx,
+    y: c.y + Math.sin((deg * Math.PI) / 180) * ry,
+  });
   const others = members.filter((m) => !m.owner);
   const step = 360 / Math.max(others.length, 1);
   const out: Record<string, Placed> = {};
   for (const m of members) {
     if (m.owner) {
-      out[m.personId] = { at: c, dots: Array.from({ length: m.dots }, (_, i) => on(-90 + step / 2 + (i * 360) / m.dots, W * 0.105, H * 0.095)) };
+      out[m.personId] = {
+        at: c,
+        dots: Array.from({ length: m.dots }, (_, i) => on(-90 + step / 2 + (i * 360) / m.dots, W * 0.105, H * 0.095)),
+      };
       continue;
     }
     const deg = -90 + others.indexOf(m) * step;
@@ -110,7 +129,9 @@ export function layout(members: Pick<NetMember, "personId" | "owner" | "dots">[]
     const span = Math.min(step * 0.7, 13 * Math.max(m.dots - 1, 0));
     out[m.personId] = {
       at: on(deg, W * 0.25, H * 0.22),
-      dots: Array.from({ length: m.dots }, (_, i) => on(deg + (m.dots > 1 ? -span / 2 + (span * i) / (m.dots - 1) : 0), W * 0.43, H * 0.4)),
+      dots: Array.from({ length: m.dots }, (_, i) =>
+        on(deg + (m.dots > 1 ? -span / 2 + (span * i) / (m.dots - 1) : 0), W * 0.43, H * 0.4),
+      ),
     };
   }
   return out;

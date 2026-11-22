@@ -67,7 +67,11 @@ export default function ConectarPage() {
             <Mono>{C.expires(left)}</Mono>
           </p>
         )}
-        <button className="btn ghost" style={{ marginTop: 24 }} onClick={() => (setError(false), setTicket(null), setAttempt((n) => n + 1))}>
+        <button
+          className="btn ghost"
+          style={{ marginTop: 24 }}
+          onClick={() => (setError(false), setTicket(null), setAttempt((n) => n + 1))}
+        >
           {C.again}
         </button>
         <p className="mute" style={{ marginTop: 32 }}>

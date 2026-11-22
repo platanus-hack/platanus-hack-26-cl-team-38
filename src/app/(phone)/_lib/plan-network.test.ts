@@ -2,7 +2,16 @@ import { describe, expect, it } from "vitest";
 import type { PlanMessageView, PlanView } from "@/lib/types";
 import { going, layout, MAX_DOTS, networkOf, paced } from "./plan-network";
 
-const message = (id: number, round: number, extra: Partial<PlanMessageView>): PlanMessageView => ({ id, round, agent: "miembro", personId: null, text: "…", aportes: [], createdAt: "2026-11-22T12:00:00Z", ...extra });
+const message = (id: number, round: number, extra: Partial<PlanMessageView>): PlanMessageView => ({
+  id,
+  round,
+  agent: "miembro",
+  personId: null,
+  text: "…",
+  aportes: [],
+  createdAt: "2026-11-22T12:00:00Z",
+  ...extra,
+});
 const red = (fuente: number) => ({ texto: "Un dato", origen: "red" as const, fuente });
 
 const content = { resumen: "Sábado en la viña", decisiones: [], pasos: [], abiertos: [], desacuerdos: [] };
@@ -23,7 +32,11 @@ const plan: PlanView = {
   plan: { version: 1, content, decidedBy: "consenso" },
   messages: [
     message(1, 0, { personId: "yo", participa: true }),
-    message(2, 0, { personId: "ana", participa: true, aportes: [red(1), red(9), { texto: "Algo suyo", origen: "propio" }] }),
+    message(2, 0, {
+      personId: "ana",
+      participa: true,
+      aportes: [red(1), red(9), { texto: "Algo suyo", origen: "propio" }],
+    }),
     message(3, 0, { personId: "beto", participa: false }),
     message(4, 0, { personId: "carla" }),
     message(5, 1, { agent: "orquestador", proposal: { version: 1, final: false, content } }),
@@ -84,6 +97,7 @@ describe("la red de un plan", () => {
     expect(at.ana.dots).toHaveLength(MAX_DOTS);
     for (const dot of at.ana.dots) expect(dot.y).toBeLessThan(at.ana.at.y);
     expect(at.beto.dots).toEqual([]);
-    for (const { at: p, dots } of Object.values(at)) for (const q of [p, ...dots]) expect(q.x >= 0 && q.x <= 600 && q.y >= 0 && q.y <= 600).toBe(true);
+    for (const { at: p, dots } of Object.values(at))
+      for (const q of [p, ...dots]) expect(q.x >= 0 && q.x <= 600 && q.y >= 0 && q.y <= 600).toBe(true);
   });
 });

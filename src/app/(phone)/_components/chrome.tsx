@@ -24,7 +24,7 @@ export function TabBar() {
       {TABS.map((t) => {
         const cur = path === t.href || (t.href !== "/" && path.startsWith(`${t.href}/`)) || !!t.also?.includes(path);
         return (
-          <Link key={t.href} href={t.href} className={`tb${cur ? " cur" : ""}`} aria-current={cur ? "page" : undefined}>
+          <Link key={t.href} href={t.href} className={`tb${cur ? "cur" : ""}`} aria-current={cur ? "page" : undefined}>
             <Icon name={t.icon} />
             <span className="sr">{t.label}</span>
           </Link>

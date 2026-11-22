@@ -16,7 +16,11 @@ const msg = (round: number, agent: PlanMessageView["agent"], personId: string | 
   aportes: [],
   createdAt: "2026-11-22T00:00:00Z",
 });
-const plan = (messages: PlanMessageView[], status: PlanView["status"] = "deliberando") => ({ status, members, messages });
+const plan = (messages: PlanMessageView[], status: PlanView["status"] = "deliberando") => ({
+  status,
+  members,
+  messages,
+});
 
 describe("quién está escribiendo", () => {
   it("al partir escriben todos los agentes", () => {
@@ -25,13 +29,19 @@ describe("quién está escribiendo", () => {
 
   it("cada agente deja de escribir cuando llega su respuesta, o el aviso de que no respondió", () => {
     expect(writing(plan([msg(0, "miembro", "ana")]))).toEqual({ members: ["yo", "beto"], orchestrator: false });
-    expect(writing(plan([msg(0, "miembro", "ana"), msg(0, "verificador", "beto")]))).toEqual({ members: ["yo"], orchestrator: false });
+    expect(writing(plan([msg(0, "miembro", "ana"), msg(0, "verificador", "beto")]))).toEqual({
+      members: ["yo"],
+      orchestrator: false,
+    });
   });
 
   it("cuando respondieron todos escribe el orquestador, y después su propuesta abre otra ronda", () => {
     const opening = members.map((m) => msg(0, "miembro", m.personId));
     expect(writing(plan(opening))).toEqual({ members: [], orchestrator: true });
-    expect(writing(plan([...opening, msg(1, "orquestador", null), msg(1, "miembro", "yo")]))).toEqual({ members: ["ana", "beto"], orchestrator: false });
+    expect(writing(plan([...opening, msg(1, "orquestador", null), msg(1, "miembro", "yo")]))).toEqual({
+      members: ["ana", "beto"],
+      orchestrator: false,
+    });
   });
 
   it("un plan cerrado no espera a nadie", () => {

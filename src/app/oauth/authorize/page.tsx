@@ -12,8 +12,8 @@ export default function AuthorizePage() {
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">Conecta tu asistente con Minga</h1>
         <p className="text-sm text-muted-foreground">
-          Así tu asistente puede dejar tu perfil en tu teléfono cuando se lo pidas. Solo puede escribir ahí, como borrador privado: no lee nada de Minga y nada se publica sin que lo
-          decidas tú.
+          Así tu asistente puede dejar tu perfil en tu teléfono cuando se lo pidas. Solo puede escribir ahí, como
+          borrador privado: no lee nada de Minga y nada se publica sin que lo decidas tú.
         </p>
       </header>
       <Suspense>

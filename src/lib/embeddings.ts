@@ -5,7 +5,7 @@ import type { FeatureExtractionPipeline } from "@huggingface/transformers";
 // at ~0.75, which would merge every topic into one theme.
 export const EMBEDDING_MODEL = "Xenova/paraphrase-multilingual-MiniLM-L12-v2";
 // Seed embeddings were computed with q8; mixing dtypes shifts cosines slightly.
-export const EMBEDDING_DTYPE = "q8";
+const EMBEDDING_DTYPE = "q8";
 export const EMBEDDING_DIM = 384;
 
 // On globalThis: instrumentation.ts warms the model from its own bundle, and a second copy of
@@ -30,5 +30,8 @@ export async function embed(texts: string[]): Promise<number[][]> {
 // The tokenizer splits some accented words into noisy pieces: "cerámica" scored ≥0.6 against
 // fintech, trekking and crochet, while "ceramica" stays below 0.5.
 export function stripAccents(text: string): string {
-  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 }

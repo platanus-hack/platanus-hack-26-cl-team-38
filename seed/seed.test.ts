@@ -7,8 +7,14 @@ import seed from "./rooms.json";
 describe("seed/rooms.json", () => {
   it("was built from the current people.ts with the current model", () => {
     expect(seed.embeddingModel).toBe(EMBEDDING_MODEL);
-    const built = seed.rooms.map((r) => ({ id: r.id, topics: r.projections.map((p) => p.topics.map((t) => [t.name, t.kind, t.depth])) }));
-    const source = SEED_ROOMS.map((r) => ({ id: r.id, topics: r.people.map((p) => p.topics.map(([n, k, d]) => [n, k, d])) }));
+    const built = seed.rooms.map((r) => ({
+      id: r.id,
+      topics: r.projections.map((p) => p.topics.map((t) => [t.name, t.kind, t.depth])),
+    }));
+    const source = SEED_ROOMS.map((r) => ({
+      id: r.id,
+      topics: r.people.map((p) => p.topics.map(([n, k, d]) => [n, k, d])),
+    }));
     expect(built).toEqual(source);
   });
 

@@ -78,7 +78,8 @@ const PERSONAL = new Set<string>(PERSONAL_CATEGORIES);
 function toVerdict(raw: z.infer<typeof JudgeOutputSchema>["verdicts"][number]): JudgeVerdict {
   // A category the model placed under the wrong level still counts: the stricter reading wins.
   const level: PrivacyLevel = SENSITIVE.has(raw.category) ? "sensible" : raw.level;
-  const categoryFits = level === "sensible" ? SENSITIVE.has(raw.category) : level === "personal" && PERSONAL.has(raw.category);
+  const categoryFits =
+    level === "sensible" ? SENSITIVE.has(raw.category) : level === "personal" && PERSONAL.has(raw.category);
   return {
     level,
     category: categoryFits ? (raw.category as PrivacyCategory) : undefined,
@@ -109,8 +110,14 @@ export function createAnthropicJudge(options: { client?: Anthropic; onError?: (e
       // model allows it. Where a safety classifier can decline the request, the API retries it on
       // another model instead of leaving the topics unjudged.
       const response = config.refusalFallback
-        ? await client.beta.messages.parse({ ...request, betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" }, requestOptions)
-        : await client.messages.parse({ ...request, ...(config.canDisableThinking ? { thinking: { type: "disabled" as const } } : {}) }, requestOptions);
+        ? await client.beta.messages.parse(
+            { ...request, betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" },
+            requestOptions,
+          )
+        : await client.messages.parse(
+            { ...request, ...(config.canDisableThinking ? { thinking: { type: "disabled" as const } } : {}) },
+            requestOptions,
+          );
       if (response.stop_reason !== "end_turn" || !response.parsed_output) {
         options.onError?.(new Error(`judge stopped with ${response.stop_reason}`));
         return chunk.map(() => null);

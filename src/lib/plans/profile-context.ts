@@ -18,7 +18,10 @@ export function profileLines(markdown: string): { section: string; text: string 
       section = heading[1].trim();
       continue;
     }
-    const text = raw.replace(/^\s*(?:[-*+]|\d+\.)\s+/, "").replace(/[*_`]/g, "").trim();
+    const text = raw
+      .replace(/^\s*(?:[-*+]|\d+\.)\s+/, "")
+      .replace(/[*_`]/g, "")
+      .trim();
     if (text) lines.push({ section, text: text.slice(0, LINE_MAX) });
   }
   return lines;
@@ -27,10 +30,27 @@ export function profileLines(markdown: string): { section: string; text: string 
 type Deps = { classify: ClassifyLines; embed: (texts: string[]) => Promise<number[][]> };
 type AssistantSource = Extract<Source, "claude" | "chatgpt" | "gemini">;
 
-export async function storeProfile(db: Db, userId: string, source: AssistantSource, markdown: string, deps: Deps): Promise<{ kept: number; held: number; unreviewed: number }> {
+export async function storeProfile(
+  db: Db,
+  userId: string,
+  source: AssistantSource,
+  markdown: string,
+  deps: Deps,
+): Promise<{ kept: number; held: number; unreviewed: number }> {
   const admitted = await admitProfile(markdown, source, deps.classify);
   const lines = profileLines(admitted.markdown);
   const vectors = await deps.embed(lines.map((line) => line.text));
-  await saveContext(db, userId, "red", source, lines.map((line, i) => ({ lineId: `${source}-${i + 1}`, section: line.section, text: line.text, embedding: vectors[i] })));
+  await saveContext(
+    db,
+    userId,
+    "red",
+    source,
+    lines.map((line, i) => ({
+      lineId: `${source}-${i + 1}`,
+      section: line.section,
+      text: line.text,
+      embedding: vectors[i],
+    })),
+  );
   return { kept: lines.length, held: admitted.held, unreviewed: admitted.unreviewed };
 }

@@ -2,9 +2,12 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { authenticate, matchUsers } from "@/lib/users/profile";
 
-const denied = () => Response.json({ error: "Falta la clave del dispositivo, o no es la de esa persona" }, { status: 401 });
+const denied = () =>
+  Response.json({ error: "Falta la clave del dispositivo, o no es la de esa persona" }, { status: 401 });
 
-const BodySchema = z.object({ personId: z.string().min(1).max(80), otherIds: z.array(z.string().min(1).max(80)).min(1).max(100) }).strict();
+const BodySchema = z
+  .object({ personId: z.string().min(1).max(80), otherIds: z.array(z.string().min(1).max(80)).min(1).max(100) })
+  .strict();
 
 // POST /api/matches { personId, otherIds } → { matches }: the crossing with the people the phone
 // has in front of it, computed now. Only public topics are compared, so it reveals nothing the

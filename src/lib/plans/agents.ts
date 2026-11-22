@@ -7,10 +7,10 @@ import type { Agents, Measured, MemberTurn, OrchestratorTurn } from "./deliberat
 // The five agents of a plan: one per participant and the orchestrator. They only write; the loop
 // in deliberate.ts cuts, checks and stores what they say.
 
-export const MEMBER_MODEL = "claude-haiku-5-5";
-export const ORCHESTRATOR_MODEL = "claude-sonnet-5-5";
+const MEMBER_MODEL = "claude-haiku-5-5";
+const ORCHESTRATOR_MODEL = "claude-sonnet-5-5";
 // An experiment: the orchestrator searches the web for what is still open. Off unless set.
-export const WEB_SEARCH = process.env.PLANS_WEB_SEARCH === "1";
+const WEB_SEARCH = process.env.PLANS_WEB_SEARCH === "1";
 const WEB_SEARCH_TOOL: Anthropic.Beta.BetaWebSearchTool20260209 = {
   type: "web_search_20260209",
   name: "web_search",
@@ -41,10 +41,13 @@ const ProposalSchema = z.object({
   abiertos: z.array(z.string()),
   desacuerdos: z.array(z.object({ miembro: z.string(), tema: z.string(), detalle: z.string() })),
 });
-const ProposalWithSourcesSchema = ProposalSchema.extend({ fuentes: z.array(z.object({ dato: z.string(), url: z.string() })) });
+const ProposalWithSourcesSchema = ProposalSchema.extend({
+  fuentes: z.array(z.object({ dato: z.string(), url: z.string() })),
+});
 
 const first = (name: string) => name.split(" ")[0];
-const listOf = (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} y ${items.at(-1)}`);
+const listOf = (items: string[]) =>
+  items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} y ${items.at(-1)}`;
 
 function memberRules(name: string): string {
   const n = first(name);
@@ -81,7 +84,8 @@ function memberSystem(turn: MemberTurn): Anthropic.TextBlockParam[] {
   const own = context.lines.filter((l) => l.origen === "propio");
   const network = context.lines.filter((l) => l.origen === "red");
   const byContact = new Map<number, AgentLine[]>();
-  for (const line of network) byContact.set(line.contact!.number, [...(byContact.get(line.contact!.number) ?? []), line]);
+  for (const line of network)
+    byContact.set(line.contact!.number, [...(byContact.get(line.contact!.number) ?? []), line]);
   const n = first(me.displayName);
   return [
     {
@@ -158,7 +162,9 @@ Búsqueda en internet:
 - Lo que uses de internet va en "fuentes": el dato en una frase (menos de 140 caracteres, con la fecha o la cifra si la trae) y la dirección de la página donde lo leíste. Solo lo que leíste en un resultado; si no encontraste nada, deja "fuentes" vacío.`;
 
 function orchestratorMessage(turn: OrchestratorTurn): string {
-  const members = turn.members.map((m) => `${m.key} = ${m.displayName}${m.owner ? " (propone el plan)" : ""}`).join("\n");
+  const members = turn.members
+    .map((m) => `${m.key} = ${m.displayName}${m.owner ? " (propone el plan)" : ""}`)
+    .join("\n");
   const task = turn.final
     ? `Se cumplieron las ${turn.maxRounds} rondas sin consenso. Entrega la decisión final.`
     : turn.previous
@@ -176,7 +182,12 @@ ${turn.transcript || "(nadie ha dicho nada)"}
 ${turn.previous ? `ÚLTIMA PROPUESTA\n${turn.previous}\n\n` : ""}${task}${WEB_SEARCH ? " Si falta un lugar, un precio o un horario, búscalo en internet antes de proponer." : ""}`;
 }
 
-const usage = (u: { input_tokens: number; output_tokens: number; cache_read_input_tokens?: number | null; cache_creation_input_tokens?: number | null }) => ({
+const usage = (u: {
+  input_tokens: number;
+  output_tokens: number;
+  cache_read_input_tokens?: number | null;
+  cache_creation_input_tokens?: number | null;
+}) => ({
   tokensIn: u.input_tokens + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0),
   tokensOut: u.output_tokens,
 });
@@ -196,8 +207,12 @@ export function createAnthropicAgents(options: { client?: Anthropic } = {}): Age
       },
       { timeout: 60_000, maxRetries: 1 },
     );
-    if (response.stop_reason !== "end_turn" || !response.parsed_output) throw new Error(`el agente de miembro se detuvo con ${response.stop_reason}`);
-    return { output: response.parsed_output, meta: { model: response.model, ms: Date.now() - started, ...usage(response.usage) } };
+    if (response.stop_reason !== "end_turn" || !response.parsed_output)
+      throw new Error(`el agente de miembro se detuvo con ${response.stop_reason}`);
+    return {
+      output: response.parsed_output,
+      meta: { model: response.model, ms: Date.now() - started, ...usage(response.usage) },
+    };
   }
 
   return {
@@ -221,8 +236,17 @@ export function createAnthropicAgents(options: { client?: Anthropic } = {}): Age
             betas: ["server-side-fallback-2026-07-01"],
             fallbacks: "default",
             // At low effort it proposed without searching, even when told to.
-            output_config: { effort: turn.final || WEB_SEARCH ? "medium" : "low", format: zodOutputFormat(WEB_SEARCH ? ProposalWithSourcesSchema : ProposalSchema) },
-            system: [{ type: "text", text: WEB_SEARCH ? ORCHESTRATOR_SYSTEM + WEB_RULES : ORCHESTRATOR_SYSTEM, cache_control: { type: "ephemeral" } }],
+            output_config: {
+              effort: turn.final || WEB_SEARCH ? "medium" : "low",
+              format: zodOutputFormat(WEB_SEARCH ? ProposalWithSourcesSchema : ProposalSchema),
+            },
+            system: [
+              {
+                type: "text",
+                text: WEB_SEARCH ? ORCHESTRATOR_SYSTEM + WEB_RULES : ORCHESTRATOR_SYSTEM,
+                cache_control: { type: "ephemeral" },
+              },
+            ],
             ...(WEB_SEARCH ? { tools: [WEB_SEARCH_TOOL] } : {}),
             messages,
           },
@@ -236,8 +260,18 @@ export function createAnthropicAgents(options: { client?: Anthropic } = {}): Age
           messages.push({ role: "assistant", content: response.content as Anthropic.Beta.BetaContentBlockParam[] });
           continue;
         }
-        if (response.stop_reason !== "end_turn" || !response.parsed_output) throw new Error(`el orquestador se detuvo con ${response.stop_reason}`);
-        return { output: response.parsed_output, meta: { model: response.model, ms: Date.now() - started, tokensIn, tokensOut, ...(WEB_SEARCH ? { webSearches } : {}) } };
+        if (response.stop_reason !== "end_turn" || !response.parsed_output)
+          throw new Error(`el orquestador se detuvo con ${response.stop_reason}`);
+        return {
+          output: response.parsed_output,
+          meta: {
+            model: response.model,
+            ms: Date.now() - started,
+            tokensIn,
+            tokensOut,
+            ...(WEB_SEARCH ? { webSearches } : {}),
+          },
+        };
       }
       throw new Error("el orquestador siguió en pausa después de tres intentos");
     },

@@ -18,11 +18,22 @@ export async function POST(request: Request) {
 
   if (input.action === "join") {
     const me = await authenticate(supabaseAdmin, input.personId, request.headers.get("authorization"));
-    if (!me) return Response.json({ error: "Falta la clave del dispositivo, o no es la de esa persona" }, { status: 401 });
-    const member = await supabaseAdmin.from("room_members").select("display_name").eq("room_id", input.roomId).eq("person_id", me).maybeSingle();
+    if (!me)
+      return Response.json({ error: "Falta la clave del dispositivo, o no es la de esa persona" }, { status: 401 });
+    const member = await supabaseAdmin
+      .from("room_members")
+      .select("display_name")
+      .eq("room_id", input.roomId)
+      .eq("person_id", me)
+      .maybeSingle();
     if (member.error) return Response.json({ error: member.error.message }, { status: 500 });
     if (!member.data) return Response.json({ error: "Primero hay que entrar a la sala" }, { status: 403 });
-    const joined = proximityHub.join({ roomId: input.roomId, personId: me, displayName: member.data.display_name.slice(0, 40), radius: input.radius });
+    const joined = proximityHub.join({
+      roomId: input.roomId,
+      personId: me,
+      displayName: member.data.display_name.slice(0, 40),
+      radius: input.radius,
+    });
     return joined ? Response.json(joined) : Response.json({ error: "La sala está llena" }, { status: 503 });
   }
   if (input.action === "leave") {
@@ -73,6 +84,10 @@ export async function GET(request: Request) {
     cancel: end,
   });
   return new Response(stream, {
-    headers: { "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-cache, no-transform", "x-accel-buffering": "no" },
+    headers: {
+      "content-type": "text/event-stream; charset=utf-8",
+      "cache-control": "no-cache, no-transform",
+      "x-accel-buffering": "no",
+    },
   });
 }

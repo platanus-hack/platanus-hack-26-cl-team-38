@@ -18,8 +18,23 @@ import { api, checkIn, DEFAULT_ROOM } from "../_lib/api";
 import { COPY } from "../_lib/copy";
 import { EXAMPLE_SIGNALS, isLocked, isPublished } from "../_lib/node";
 import { type NodeSync, useNodeSync } from "../_lib/node-sync";
-import { connectedSources, logOutbox, mergeSignals, type PhoneState, resumeSession, savedSessions, setPhone, usePhone } from "../_lib/store";
-import { type AssistantInbox, classifyOnApi, type InboxSink, useAssistantInbox, useCopy } from "../onboarding/connect-assistant";
+import {
+  connectedSources,
+  logOutbox,
+  mergeSignals,
+  type PhoneState,
+  resumeSession,
+  savedSessions,
+  setPhone,
+  usePhone,
+} from "../_lib/store";
+import {
+  type AssistantInbox,
+  classifyOnApi,
+  type InboxSink,
+  useAssistantInbox,
+  useCopy,
+} from "../onboarding/connect-assistant";
 import { addProfiles } from "../onboarding/store";
 
 // Three steps, one sentence and one button each: your name, your Fuentes, what you share.
@@ -42,7 +57,15 @@ function chooseTeammate(p: TeamProfile) {
   const signals: Signal[] = p.topics.flatMap(([label, kind, depth, sources]) =>
     sources.map((source) => ({ source, kind: kind as Kind, label, strength: depth / 3, evidence: "seed" })),
   );
-  setPhone({ personId, displayName: p.displayName, signals, node: null, room: null, onboarded: false, focus: { topic: null, person: null } });
+  setPhone({
+    personId,
+    displayName: p.displayName,
+    signals,
+    node: null,
+    room: null,
+    onboarded: false,
+    focus: { topic: null, person: null },
+  });
 }
 
 /** Everything the filter lets through, shared or kept: what a teammate from the seed starts with, and "Seleccionar todos". */
@@ -50,7 +73,8 @@ function shareEverything(node: PersonalNode, shared = true): PersonalNode {
   return node.topics.filter((t) => !isLocked(t)).reduce((n, t) => setShared(n, t.id, shared), node);
 }
 
-const roomFromLink = () => new URLSearchParams(window.location.search).get("sala")?.trim().toUpperCase() || DEFAULT_ROOM;
+const roomFromLink = () =>
+  new URLSearchParams(window.location.search).get("sala")?.trim().toUpperCase() || DEFAULT_ROOM;
 
 const AGENTS: Source[] = ["claude", "chatgpt", "gemini"];
 const APPS: Source[] = ["spotify", "github"];
@@ -95,7 +119,17 @@ export function Onboarding({ team }: { team: TeamProfile[] }) {
 
 /* ---------- 1 · nombre ---------- */
 
-function NameStep({ s, team, next, asTeammate }: { s: PhoneState; team: TeamProfile[]; next: () => void; asTeammate: (p: TeamProfile) => void }) {
+function NameStep({
+  s,
+  team,
+  next,
+  asTeammate,
+}: {
+  s: PhoneState;
+  team: TeamProfile[];
+  next: () => void;
+  asTeammate: (p: TeamProfile) => void;
+}) {
   const router = useRouter();
   const [name, setName] = useState(s.displayName);
   // Sessions closed on this phone come first; a teammate already among them is not shown twice.
@@ -112,7 +146,14 @@ function NameStep({ s, team, next, asTeammate }: { s: PhoneState; team: TeamProf
   return (
     <div className="content step">
       <h1 className="t-hero">{C.name}</h1>
-      <Field label={C.name} value={name} placeholder={C.namePlaceholder} maxLength={24} onChange={setName} onSubmit={save} />
+      <Field
+        label={C.name}
+        value={name}
+        placeholder={C.namePlaceholder}
+        maxLength={24}
+        onChange={setName}
+        onSubmit={save}
+      />
       {saved.length > 0 && (
         <>
           <div className="sec">{C.saved}</div>
@@ -135,7 +176,14 @@ function NameStep({ s, team, next, asTeammate }: { s: PhoneState; team: TeamProf
           <div className="sec">{C.team}</div>
           <div className="rows">
             {others.map((p) => (
-              <ListRow key={p.slug} lead={<Avatar id={`seed-${p.slug}`} />} title={p.displayName} data={p.topics.length} chevron onClick={() => asTeammate(p)} />
+              <ListRow
+                key={p.slug}
+                lead={<Avatar id={`seed-${p.slug}`} />}
+                title={p.displayName}
+                data={p.topics.length}
+                chevron
+                onClick={() => asTeammate(p)}
+              />
             ))}
           </div>
         </>
@@ -150,7 +198,8 @@ function SourcesStep({ s, inbox, next }: { s: PhoneState; inbox: AssistantInbox;
   const [open, setOpen] = useState<Source | null>(null);
   const connected = connectedSources(s);
   const count = (src: Source) => s.signals.filter((x) => x.source === src).length;
-  const addExample = () => setPhone((p) => ({ signals: [...p.signals.filter((x) => x.source !== "claude"), ...EXAMPLE_SIGNALS] }));
+  const addExample = () =>
+    setPhone((p) => ({ signals: [...p.signals.filter((x) => x.source !== "claude"), ...EXAMPLE_SIGNALS] }));
 
   return (
     <>
@@ -175,14 +224,31 @@ function SourcesStep({ s, inbox, next }: { s: PhoneState; inbox: AssistantInbox;
             onClick={() => setOpen("google")}
           />
           {APPS.map((src) => (
-            <ListRow key={src} className="off" lead={<BrandLogo source={src} />} title={SOURCE_META[src].label} data={C.soon} />
+            <ListRow
+              key={src}
+              className="off"
+              lead={<BrandLogo source={src} />}
+              title={SOURCE_META[src].label}
+              data={C.soon}
+            />
           ))}
           {SOON.map((src) => (
-            <ListRow key={src} className="off" lead={<SoonLogo source={src} />} title={SOON_META[src].label} data={C.soon} />
+            <ListRow
+              key={src}
+              className="off"
+              lead={<SoonLogo source={src} />}
+              title={SOON_META[src].label}
+              data={C.soon}
+            />
           ))}
         </div>
         {connected.length === 0 && (
-          <button type="button" className="link" style={{ display: "block", margin: "24px auto 0" }} onClick={addExample}>
+          <button
+            type="button"
+            className="link"
+            style={{ display: "block", margin: "24px auto 0" }}
+            onClick={addExample}
+          >
             {C.example}
           </button>
         )}
@@ -193,7 +259,12 @@ function SourcesStep({ s, inbox, next }: { s: PhoneState; inbox: AssistantInbox;
         </button>
       </div>
       <Sheet open={open !== null} size="auto" onClose={() => setOpen(null)} label={C.pasteTitle}>
-        {open && (open === "google" ? <GoogleSheet arrived={count(open)} /> : <AssistantSheet source={open} inbox={inbox} arrived={count(open)} />)}
+        {open &&
+          (open === "google" ? (
+            <GoogleSheet arrived={count(open)} />
+          ) : (
+            <AssistantSheet source={open} inbox={inbox} arrived={count(open)} />
+          ))}
       </Sheet>
     </>
   );
@@ -212,7 +283,9 @@ function AssistantSheet({ source, inbox, arrived }: { source: Source; inbox: Ass
   async function read() {
     const items = parsePastedSignals(raw);
     // The assistant names itself as source; trust the row the person tapped instead.
-    const parsed = IncomingSignalsSchema.safeParse(Array.isArray(items) ? items.map((i) => ({ ...(i as object), source })) : items);
+    const parsed = IncomingSignalsSchema.safeParse(
+      Array.isArray(items) ? items.map((i) => ({ ...(i as object), source })) : items,
+    );
     if (!parsed.success) return setError(C.unreadable);
     setBusy(true);
     setError(undefined);
@@ -249,7 +322,10 @@ function AssistantSheet({ source, inbox, arrived }: { source: Source; inbox: Ass
         // When the clipboard refuses (iOS, an embedded browser), the message is here to copy by hand.
         <details className="mute" style={{ marginTop: 8 }}>
           <summary>{C.seeMessage}</summary>
-          <pre className="paste" style={{ marginTop: 8, maxHeight: 200, overflow: "auto", whiteSpace: "pre-wrap", userSelect: "all" }}>
+          <pre
+            className="paste"
+            style={{ marginTop: 8, maxHeight: 200, overflow: "auto", whiteSpace: "pre-wrap", userSelect: "all" }}
+          >
             {text}
           </pre>
         </details>
@@ -263,7 +339,11 @@ function AssistantSheet({ source, inbox, arrived }: { source: Source; inbox: Ass
         onChange={(e) => (setRaw(e.target.value), setError(undefined), setNote(undefined))}
       />
       {error && <div className="err">{error}</div>}
-      {note && <p className="mute" style={{ marginTop: 8 }}>{note}</p>}
+      {note && (
+        <p className="mute" style={{ marginTop: 8 }}>
+          {note}
+        </p>
+      )}
       <button className="btn" style={{ marginTop: 16 }} disabled={!raw.trim() || busy} onClick={read}>
         {busy ? C.reading : C.read}
       </button>
@@ -371,7 +451,12 @@ function BuildingStep({ sync, asTeammate, next }: { sync: NodeSync; asTeammate: 
       {problem && (
         <>
           <div className="err">{problem}</div>
-          <button type="button" className="link" style={{ display: "block", margin: "16px auto 0" }} onClick={sync.error ? sync.retry : enter}>
+          <button
+            type="button"
+            className="link"
+            style={{ display: "block", margin: "16px auto 0" }}
+            onClick={sync.error ? sync.retry : enter}
+          >
             {C.retry}
           </button>
         </>
@@ -418,12 +503,20 @@ function ShareStep({ s }: { s: PhoneState }) {
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 24px" }}>
           {open.length > 0 && (
-            <button type="button" className="link" onClick={() => setPhone((p) => (p.node ? { node: shareEverything(p.node, !all) } : {}))}>
+            <button
+              type="button"
+              className="link"
+              onClick={() => setPhone((p) => (p.node ? { node: shareEverything(p.node, !all) } : {}))}
+            >
               {all ? C.selectNone : C.selectAll}
             </button>
           )}
           {recommended > 0 && (
-            <button type="button" className="link" onClick={() => setPhone((p) => (p.node ? { node: shareRecommended(p.node) } : {}))}>
+            <button
+              type="button"
+              className="link"
+              onClick={() => setPhone((p) => (p.node ? { node: shareRecommended(p.node) } : {}))}
+            >
               {C.shareAll}
             </button>
           )}
@@ -438,8 +531,16 @@ function ShareStep({ s }: { s: PhoneState }) {
         <p className="mono mute" style={{ textAlign: "center", margin: "0 0 16px" }}>
           {COPY.nodo.count(shared, topics.length - shared)}
         </p>
-        {error && <div className="err" style={{ textAlign: "center", margin: "0 0 12px" }}>{error}</div>}
-        {rejected > 0 && <p className="mute" style={{ textAlign: "center", margin: "0 0 12px" }}>{C.rejected(rejected)}</p>}
+        {error && (
+          <div className="err" style={{ textAlign: "center", margin: "0 0 12px" }}>
+            {error}
+          </div>
+        )}
+        {rejected > 0 && (
+          <p className="mute" style={{ textAlign: "center", margin: "0 0 12px" }}>
+            {C.rejected(rejected)}
+          </p>
+        )}
         <button className="btn" disabled={busy} onClick={done}>
           {busy ? C.entering : rejected ? C.toHome : C.done}
         </button>

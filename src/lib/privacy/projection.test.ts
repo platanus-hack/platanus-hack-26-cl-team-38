@@ -4,7 +4,14 @@ import { projectNode, toPublicProjection } from "./projection";
 import { fingerprint } from "./taxonomy";
 
 function topic(overrides: Omit<Partial<Topic>, "privacy"> & { privacy?: Partial<TopicPrivacy> } = {}): Topic {
-  const base = { id: "p1.escalada", name: "escalada", kind: "hace" as const, depth: 2 as const, sources: ["claude" as const], public: true };
+  const base = {
+    id: "p1.escalada",
+    name: "escalada",
+    kind: "hace" as const,
+    depth: 2 as const,
+    sources: ["claude" as const],
+    public: true,
+  };
   const merged = { ...base, ...overrides };
   const privacy =
     "privacy" in overrides && overrides.privacy === undefined
@@ -19,7 +26,10 @@ function node(...topics: Topic[]): PersonalNode {
 
 describe("projectNode", () => {
   it("publishes a reviewed topic the owner chose to share, with exactly the public fields", () => {
-    const withReason = topic({ embedding: [0.1, 0.2], privacy: { level: "personal", reason: "solo para ti", saferName: "deporte" } });
+    const withReason = topic({
+      embedding: [0.1, 0.2],
+      privacy: { level: "personal", reason: "solo para ti", saferName: "deporte" },
+    });
     const { projection, withheld } = projectNode(node(withReason));
     expect(withheld).toEqual([]);
     expect(Object.keys(projection.topics[0]).sort()).toEqual(["depth", "embedding", "id", "kind", "name", "sources"]);
@@ -28,8 +38,16 @@ describe("projectNode", () => {
 
   it.each([
     ["was never reviewed", topic({ privacy: undefined }), "sin_revisar"],
-    ["was renamed after the review", topic({ name: "escalada en roca", privacy: { checkedFor: fingerprint({ kind: "hace", name: "escalada" }) } }), "revision_vencida"],
-    ["changed kind after the review", topic({ kind: "busca", privacy: { checkedFor: fingerprint({ kind: "hace", name: "escalada" }) } }), "revision_vencida"],
+    [
+      "was renamed after the review",
+      topic({ name: "escalada en roca", privacy: { checkedFor: fingerprint({ kind: "hace", name: "escalada" }) } }),
+      "revision_vencida",
+    ],
+    [
+      "changed kind after the review",
+      topic({ kind: "busca", privacy: { checkedFor: fingerprint({ kind: "hace", name: "escalada" }) } }),
+      "revision_vencida",
+    ],
     ["was reviewed by an older classifier", topic({ privacy: { checkedFor: "v0:hace:escalada" } }), "revision_vencida"],
     ["was only recommended, not chosen", topic({ privacy: { decidedBy: "default" } }), "sin_decision"],
     ["is sensitive", topic({ privacy: { level: "sensible" } }), "sensible"],

@@ -15,7 +15,13 @@ import { call, type Db } from "@/lib/users/profile";
 export async function writeLog(db: Db, entry: LogEntry): Promise<number | null> {
   const { actor, event, detail, userId, mesaId } = LogEntrySchema.parse(entry);
   try {
-    return (await call(db, "write_log", { p_actor: actor, p_event: event, p_detail: detail, p_user_id: userId ?? null, p_mesa_id: mesaId ?? null })) as number;
+    return (await call(db, "write_log", {
+      p_actor: actor,
+      p_event: event,
+      p_detail: detail,
+      p_user_id: userId ?? null,
+      p_mesa_id: mesaId ?? null,
+    })) as number;
   } catch (error) {
     console.error("log:", error);
     return null;
@@ -28,12 +34,19 @@ type Recorded = { ok: true; id: number } | { ok: false; reason: "privacidad" | "
 // model. A member agent's `motivo` is the only free text and the room reads it, so it goes
 // through the lexicon and must not name any of that person's private topics (`personality`, from
 // agentBrief()): a line that fails is not stored.
-export async function recordDecision(db: Db, mesaId: string, decision: MesaDecision, options: { logId?: number | null; personality?: string[] } = {}): Promise<Recorded> {
+export async function recordDecision(
+  db: Db,
+  mesaId: string,
+  decision: MesaDecision,
+  options: { logId?: number | null; personality?: string[] } = {},
+): Promise<Recorded> {
   const parsed = MesaDecisionSchema.parse(decision);
   if (parsed.agent === "miembro") {
-    if (!options.personality) throw new Error("recordDecision: la decisión de un agente de miembro necesita personality");
+    if (!options.personality)
+      throw new Error("recordDecision: la decisión de un agente de miembro necesita personality");
     const { motivo } = parsed.content;
-    if (screenText(motivo) || mentionsPrivate(motivo, { personality: options.personality }).length > 0) return { ok: false, reason: "privacidad" };
+    if (screenText(motivo) || mentionsPrivate(motivo, { personality: options.personality }).length > 0)
+      return { ok: false, reason: "privacidad" };
   }
   const id = await call(db, "record_decision", {
     p_mesa_id: mesaId,
@@ -50,6 +63,13 @@ type LogRow = { id: number; mesa_id: string | null; actor: string; event: string
 // Only the caller's own: the logs of their agent and their own actions, from the last week.
 export async function listLogs(db: Db, me: string, mesaId?: string): Promise<Log[]> {
   return ((await call(db, "logs_of", { p_me: me, p_mesa_id: mesaId ?? null })) as LogRow[]).map((row) =>
-    LogSchema.parse({ id: row.id, mesaId: row.mesa_id, actor: row.actor, event: row.event, detail: row.detail, createdAt: row.created_at }),
+    LogSchema.parse({
+      id: row.id,
+      mesaId: row.mesa_id,
+      actor: row.actor,
+      event: row.event,
+      detail: row.detail,
+      createdAt: row.created_at,
+    }),
   );
 }

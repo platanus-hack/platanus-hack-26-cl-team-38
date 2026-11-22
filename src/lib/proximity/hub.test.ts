@@ -5,7 +5,10 @@ import { createProximityHub } from "./hub";
 const LAT = -33.45;
 const LON = -70.65;
 const M_PER_DEG = 111_194.9;
-const at = (east: number, north = 0) => ({ lat: LAT + north / M_PER_DEG, lon: LON + east / (M_PER_DEG * Math.cos((LAT * Math.PI) / 180)) });
+const at = (east: number, north = 0) => ({
+  lat: LAT + north / M_PER_DEG,
+  lon: LON + east / (M_PER_DEG * Math.cos((LAT * Math.PI) / 180)),
+});
 const person = (personId: string, roomId = "room-1") => ({ roomId, personId, displayName: personId, radius: 25 });
 
 function connect(hub: ReturnType<typeof createProximityHub>, personId: string, roomId?: string) {
@@ -23,7 +26,14 @@ describe("createProximityHub", () => {
     hub.report(ana.session, { ...at(0), accuracy: 5, stamp: 111 });
     hub.report(beto.session, { ...at(0, 10), accuracy: 5, stamp: 9 });
     hub.tick();
-    expect(ana.updates).toEqual([{ anchor: 111, enter: [{ personId: "beto", displayName: "beto", distance: 10, bearing: 0, uncertainty: 7 }], move: [], leave: [] }]);
+    expect(ana.updates).toEqual([
+      {
+        anchor: 111,
+        enter: [{ personId: "beto", displayName: "beto", distance: 10, bearing: 0, uncertainty: 7 }],
+        move: [],
+        leave: [],
+      },
+    ]);
     expect(beto.updates[0].anchor).toBe(9);
     expect(beto.updates[0].enter[0]).toMatchObject({ personId: "ana", distance: 10, bearing: 180 });
   });

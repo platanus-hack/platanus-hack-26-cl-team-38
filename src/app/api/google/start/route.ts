@@ -10,5 +10,7 @@ export async function POST(request: Request) {
   if (!key) return Response.json({ error: "Falta la clave del teléfono." }, { status: 401 });
   const config = googleConfig();
   if (!config) return Response.json({ error: "Google no está configurado en este servidor." }, { status: 503 });
-  return Response.json({ url: googleAuthUrl(config.clientId, `${publicOrigin(request)}/api/google/callback`, googleFlow.put(ownerOf(key))) });
+  return Response.json({
+    url: googleAuthUrl(config.clientId, `${publicOrigin(request)}/api/google/callback`, googleFlow.put(ownerOf(key))),
+  });
 }

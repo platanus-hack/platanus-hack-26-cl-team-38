@@ -54,9 +54,19 @@ export function OnboardingFlow() {
     setError("");
     fetchVerdicts(missing)
       .then((verdicts) => {
-        if (!cancelled) setNode(reconcile(nodeRef.current, owner, drafts, missing.map((draft, i) => ({ draft, verdict: verdicts[i] }))));
+        if (!cancelled)
+          setNode(
+            reconcile(
+              nodeRef.current,
+              owner,
+              drafts,
+              missing.map((draft, i) => ({ draft, verdict: verdicts[i] })),
+            ),
+          );
       })
-      .catch(() => !cancelled && setError("No pudimos revisar la privacidad de tus temas. Intenta de nuevo en un rato."))
+      .catch(
+        () => !cancelled && setError("No pudimos revisar la privacidad de tus temas. Intenta de nuevo en un rato."),
+      )
       .finally(() => !cancelled && setReviewing(false));
     return () => {
       cancelled = true;
@@ -117,27 +127,44 @@ function PrivacyRule() {
     <dl className="grid grid-cols-2 gap-3 text-sm">
       <div className="rounded-lg bg-[rgba(31,138,91,0.08)] p-3">
         <dt className="font-medium">Público</dt>
-        <dd className="text-muted-foreground">Lo ve la sala con tu nombre. Es lo único que se usa para armar mesas y lo único que tu agente puede citar.</dd>
+        <dd className="text-muted-foreground">
+          Lo ve la sala con tu nombre. Es lo único que se usa para armar mesas y lo único que tu agente puede citar.
+        </dd>
       </div>
       <div className="rounded-lg bg-muted p-3">
         <dt className="font-medium">Privado</dt>
         <dd className="text-muted-foreground">
-          No se usa para buscar conexiones ni para lo que responde tu agente. Solo le da personalidad: su tono y su forma de hablar.
+          No se usa para buscar conexiones ni para lo que responde tu agente. Solo le da personalidad: su tono y su
+          forma de hablar.
         </dd>
       </div>
     </dl>
   );
 }
 
-function Choose({ node, reviewing, onChange, onNext }: { node: PersonalNode; reviewing: boolean; onChange: (node: PersonalNode) => void; onNext: () => void }) {
+function Choose({
+  node,
+  reviewing,
+  onChange,
+  onNext,
+}: {
+  node: PersonalNode;
+  reviewing: boolean;
+  onChange: (node: PersonalNode) => void;
+  onNext: () => void;
+}) {
   const pending = node.topics.filter((t) => t.privacy?.level === "segura" && t.privacy.decidedBy === "default").length;
-  const sorted = [...node.topics].sort((a, b) => Number(b.privacy?.level === "segura") - Number(a.privacy?.level === "segura") || b.depth - a.depth);
+  const sorted = [...node.topics].sort(
+    (a, b) => Number(b.privacy?.level === "segura") - Number(a.privacy?.level === "segura") || b.depth - a.depth,
+  );
   const toggle = (t: Topic) => onChange(setShared(node, t.id, !t.public));
   const shared = node.topics.filter((t) => t.public).length;
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-muted-foreground">Todo parte privado. Elige qué quieres que vea la sala; comparte lo que dirías en voz alta al presentarte.</p>
+      <p className="text-sm text-muted-foreground">
+        Todo parte privado. Elige qué quieres que vea la sala; comparte lo que dirías en voz alta al presentarte.
+      </p>
       <PrivacyRule />
       <NodePreview topics={node.topics} ownerName={node.displayName} locked={reviewing} onToggle={toggle} />
 
@@ -157,7 +184,11 @@ function Choose({ node, reviewing, onChange, onNext }: { node: PersonalNode; rev
                   {KIND_LABEL[t.kind]} · {t.sources.map((s) => SOURCE_LABEL[s]).join(", ")}
                 </span>
               </span>
-              <div role="radiogroup" aria-label={`${t.name}: público o privado`} className="flex rounded-lg bg-muted p-0.5 text-xs">
+              <div
+                role="radiogroup"
+                aria-label={`${t.name}: público o privado`}
+                className="flex rounded-lg bg-muted p-0.5 text-xs"
+              >
                 {[true, false].map((value) => (
                   <button
                     key={String(value)}
@@ -172,19 +203,33 @@ function Choose({ node, reviewing, onChange, onNext }: { node: PersonalNode; rev
                 ))}
               </div>
             </div>
-            {t.privacy?.level === "personal" && <p className="text-xs text-amber-700">Ojo: {t.privacy.reason ?? "podría decir de más sobre ti."}</p>}
+            {t.privacy?.level === "personal" && (
+              <p className="text-xs text-amber-700">Ojo: {t.privacy.reason ?? "podría decir de más sobre ti."}</p>
+            )}
           </li>
         ))}
       </ul>
 
       <Button size="lg" disabled={shared === 0} onClick={onNext}>
-        {shared === 0 ? "Haz público al menos un tema" : `Siguiente: entrar con ${shared} ${shared === 1 ? "tema público" : "temas públicos"}`}
+        {shared === 0
+          ? "Haz público al menos un tema"
+          : `Siguiente: entrar con ${shared} ${shared === 1 ? "tema público" : "temas públicos"}`}
       </Button>
     </div>
   );
 }
 
-function EnterRoom({ node, name, onName, onRejected }: { node: PersonalNode; name: string; onName: (name: string) => void; onRejected: (topicIds: string[]) => void }) {
+function EnterRoom({
+  node,
+  name,
+  onName,
+  onRejected,
+}: {
+  node: PersonalNode;
+  name: string;
+  onName: (name: string) => void;
+  onRejected: (topicIds: string[]) => void;
+}) {
   const router = useRouter();
   const params = useSearchParams();
   const [roomCode, setRoomCode] = useState(params.get("sala") ?? "HACK26");
@@ -214,7 +259,10 @@ function EnterRoom({ node, name, onName, onRejected }: { node: PersonalNode; nam
       if (result.rejected.length === 0) return router.push(href);
       // The server classifies again and can disagree: those topics go back to private here too.
       onRejected(result.rejected.map((r) => r.topicId));
-      setNotice({ text: `Entraste, pero el servidor dejó ${result.rejected.length === 1 ? "un tema" : `${result.rejected.length} temas`} en privado.`, href });
+      setNotice({
+        text: `Entraste, pero el servidor dejó ${result.rejected.length === 1 ? "un tema" : `${result.rejected.length} temas`} en privado.`,
+        href,
+      });
     } catch {
       setNotice({ text: "No pudimos entrarte a la sala. Intenta de nuevo." });
     } finally {
@@ -226,20 +274,35 @@ function EnterRoom({ node, name, onName, onRejected }: { node: PersonalNode; nam
     <div className="flex flex-col gap-4">
       <label className="flex flex-col gap-1 text-sm">
         <span className="font-medium">Tu nombre en la sala</span>
-        <input value={name} maxLength={40} onChange={(e) => onName(e.target.value)} className="rounded-lg border bg-background px-3 py-2" autoComplete="given-name" />
-        {badName && <span className="text-xs text-destructive">Tu nombre no puede llevar un correo, teléfono ni RUT.</span>}
+        <input
+          value={name}
+          maxLength={40}
+          onChange={(e) => onName(e.target.value)}
+          className="rounded-lg border bg-background px-3 py-2"
+          autoComplete="given-name"
+        />
+        {badName && (
+          <span className="text-xs text-destructive">Tu nombre no puede llevar un correo, teléfono ni RUT.</span>
+        )}
       </label>
       <label className="flex flex-col gap-1 text-sm">
         <span className="font-medium">Código de la sala</span>
-        <input value={roomCode} maxLength={40} onChange={(e) => setRoomCode(e.target.value)} className="rounded-lg border bg-background px-3 py-2 uppercase" />
+        <input
+          value={roomCode}
+          maxLength={40}
+          onChange={(e) => setRoomCode(e.target.value)}
+          className="rounded-lg border bg-background px-3 py-2 uppercase"
+        />
       </label>
 
       <section className="flex flex-col gap-1 rounded-lg border p-3 text-sm">
         <p>
-          <span className="font-medium">La sala verá {brief.projection.topics.length}:</span> {brief.projection.topics.map((t) => t.name).join(", ")}.
+          <span className="font-medium">La sala verá {brief.projection.topics.length}:</span>{" "}
+          {brief.projection.topics.map((t) => t.name).join(", ")}.
         </p>
         <p className="text-muted-foreground">
-          Tu agente guarda {brief.personality.length} como personalidad. No salen a la sala, no arman mesas y tu agente no los nombra ni los usa para decidir.
+          Tu agente guarda {brief.personality.length} como personalidad. No salen a la sala, no arman mesas y tu agente
+          no los nombra ni los usa para decidir.
         </p>
       </section>
 
@@ -247,14 +310,22 @@ function EnterRoom({ node, name, onName, onRejected }: { node: PersonalNode; nam
         <div role="status" className="flex flex-col gap-1 text-sm">
           <p>{notice.text}</p>
           {notice.href && (
-            <button type="button" className="self-start underline underline-offset-4" onClick={() => router.push(notice.href!)}>
+            <button
+              type="button"
+              className="self-start underline underline-offset-4"
+              onClick={() => router.push(notice.href!)}
+            >
               Ir a la sala
             </button>
           )}
         </div>
       )}
 
-      <Button size="lg" disabled={busy || !name.trim() || badName || !roomCode.trim() || brief.projection.topics.length === 0} onClick={checkIn}>
+      <Button
+        size="lg"
+        disabled={busy || !name.trim() || badName || !roomCode.trim() || brief.projection.topics.length === 0}
+        onClick={checkIn}
+      >
         {busy ? "Entrando…" : "Entrar a la sala"}
       </Button>
     </div>

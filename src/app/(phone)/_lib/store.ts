@@ -7,7 +7,7 @@ import type { PersonalNode, Signal, Source, SynthesisSignal, Topic, UserInfo } f
 // Phone-local state. Stand-in for front B's IndexedDB store: same PersonalNode contract, kept in
 // localStorage so the flow works today.
 
-export type OutboxEntry = { at: string; to: string; what: string };
+type OutboxEntry = { at: string; to: string; what: string };
 
 /** Something you set out to do from Inicio: who you asked, and what your Agente must keep in mind. */
 export type Initiative = { id: string; intent: string; members: string[]; restrictions: string[]; at: string };
@@ -195,7 +195,12 @@ function writeSaved(list: PhoneState[]) {
 export function signOut() {
   const current = getPhone();
   if (current.onboarded) {
-    writeSaved([{ ...current, focus: { topic: null, person: null } }, ...savedSessions().filter((x) => x.personId !== current.personId)].slice(0, 6));
+    writeSaved(
+      [
+        { ...current, focus: { topic: null, person: null } },
+        ...savedSessions().filter((x) => x.personId !== current.personId),
+      ].slice(0, 6),
+    );
   }
   replace(fresh());
 }
@@ -212,7 +217,9 @@ export function resumeSession(personId: string): boolean {
 
 /** Your depth for a topic. Survives a resync: see useNodeSync. */
 export function setDepth(id: string, depth: Topic["depth"]) {
-  setPhone((p) => (p.node ? { node: { ...p.node, topics: p.node.topics.map((t) => (t.id === id ? { ...t, depth } : t)) } } : {}));
+  setPhone((p) =>
+    p.node ? { node: { ...p.node, topics: p.node.topics.map((t) => (t.id === id ? { ...t, depth } : t)) } } : {},
+  );
 }
 
 /** Public or private, decided by you: only a topic you decided on can be published. */

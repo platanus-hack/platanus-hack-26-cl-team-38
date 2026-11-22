@@ -3,7 +3,16 @@ import type { PlanContent, PlanMessageView, PlanView } from "@/lib/types";
 import { changes, threadOf } from "./plan-thread";
 
 let id = 0;
-const msg = (round: number, extra: Partial<PlanMessageView>): PlanMessageView => ({ id: ++id, round, agent: "miembro", personId: null, text: "…", aportes: [], createdAt: "2026-11-22T12:00:00Z", ...extra });
+const msg = (round: number, extra: Partial<PlanMessageView>): PlanMessageView => ({
+  id: ++id,
+  round,
+  agent: "miembro",
+  personId: null,
+  text: "…",
+  aportes: [],
+  createdAt: "2026-11-22T12:00:00Z",
+  ...extra,
+});
 const content = (resumen: string, decisiones: [string, string][] = []): PlanContent => ({
   resumen,
   decisiones: decisiones.map(([tema, valor]) => ({ tema, valor, porque: "" })),
@@ -11,10 +20,18 @@ const content = (resumen: string, decisiones: [string, string][] = []): PlanCont
   abiertos: [],
   desacuerdos: [],
 });
-const proposal = (round: number, version: number, c: PlanContent, final = false) => msg(round, { agent: "orquestador", proposal: { version, final, content: c } });
+const proposal = (round: number, version: number, c: PlanContent, final = false) =>
+  msg(round, { agent: "orquestador", proposal: { version, final, content: c } });
 const opening = ["yo", "ana", "beto"].map((p) => msg(0, { personId: p, participa: true }));
-const v1 = content("Sábado en Pirque", [["fecha", "sábado 17"], ["lugar", "Pirque"]]);
-const v2 = content("Sábado en Pirque con carpa", [["fecha", "sábado 17"], ["lugar", "Pirque, con carpa"], ["música", "DJ"]]);
+const v1 = content("Sábado en Pirque", [
+  ["fecha", "sábado 17"],
+  ["lugar", "Pirque"],
+]);
+const v2 = content("Sábado en Pirque con carpa", [
+  ["fecha", "sábado 17"],
+  ["lugar", "Pirque, con carpa"],
+  ["música", "DJ"],
+]);
 
 const planOf = (messages: PlanMessageView[], status: PlanView["status"] = "deliberando"): PlanView => ({
   id: "plan-1",
@@ -60,21 +77,37 @@ describe("el hilo de un plan", () => {
     );
     expect(t.steps.map((s) => (s.kind === "opening" ? "apertura" : s.proposal.version))).toEqual(["apertura", 1, 2]);
     const [, first, second] = t.steps;
-    expect(first).toMatchObject({ messages: { length: 3 }, current: false, tally: { accept: 2, adjust: 1, block: 0, all: false } });
+    expect(first).toMatchObject({
+      messages: { length: 3 },
+      current: false,
+      tally: { accept: 2, adjust: 1, block: 0, all: false },
+    });
     expect(second).toMatchObject({ current: true, previous: v1 });
     expect(second.kind === "proposal" && second.tally).toBeUndefined();
     expect(t.writers).toEqual(["yo", "beto"]);
   });
 
   it("con el plan cerrado, la última etapa también cuenta y nadie escribe", () => {
-    const t = threadOf(planOf([...opening, proposal(1, 1, v1), ...["yo", "ana", "beto"].map((p) => msg(1, { personId: p, decision: "accept" }))], "consenso"));
+    const t = threadOf(
+      planOf(
+        [
+          ...opening,
+          proposal(1, 1, v1),
+          ...["yo", "ana", "beto"].map((p) => msg(1, { personId: p, decision: "accept" })),
+        ],
+        "consenso",
+      ),
+    );
     expect(t.steps.at(-1)).toMatchObject({ current: false, tally: { all: true } });
     expect(t.writers).toEqual([]);
     expect(t.drafting).toBeNull();
   });
 
   it("después de la última ronda, lo que se redacta es la decisión final", () => {
-    const rounds = [1, 2, 3, 4, 5].flatMap((r) => [proposal(r, r, v1), ...["yo", "ana", "beto"].map((p) => msg(r, { personId: p, decision: "adjust" }))]);
+    const rounds = [1, 2, 3, 4, 5].flatMap((r) => [
+      proposal(r, r, v1),
+      ...["yo", "ana", "beto"].map((p) => msg(r, { personId: p, decision: "adjust" })),
+    ]);
     expect(threadOf(planOf([...opening, ...rounds])).drafting).toEqual({ version: 6, final: true });
     const closed = threadOf(planOf([...opening, ...rounds, proposal(5, 6, v2, true)], "decidido"));
     expect(closed.steps.at(-1)).toMatchObject({ kind: "proposal", proposal: { final: true } });

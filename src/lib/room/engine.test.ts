@@ -111,7 +111,9 @@ describe("computeRoom against SEED_EXPECTATIONS", () => {
   });
 
   it("gives 0 mesas in the control room", () => {
-    expect(computeRoom("seed-control", room("seed-control").projections).mesas).toHaveLength(SEED_EXPECTATIONS["seed-control"].mesas);
+    expect(computeRoom("seed-control", room("seed-control").projections).mesas).toHaveLength(
+      SEED_EXPECTATIONS["seed-control"].mesas,
+    );
   });
 });
 
@@ -125,7 +127,14 @@ type T = [name: string, kind: PublicProjection["topics"][number]["kind"], depth:
 const person = (id: string, topics: T[]): PublicProjection => ({
   personId: id,
   displayName: id,
-  topics: topics.map(([name, kind, depth, embedding]) => ({ id: `${id}.${name}`, name, kind, depth, sources: ["claude"], embedding })),
+  topics: topics.map(([name, kind, depth, embedding]) => ({
+    id: `${id}.${name}`,
+    name,
+    kind,
+    depth,
+    sources: ["claude"],
+    embedding,
+  })),
 });
 
 describe("buildThemes", () => {
@@ -136,7 +145,10 @@ describe("buildThemes", () => {
     const c = axis(1);
     const { themes } = buildThemes([
       person("p1", [["alfa", "le_gusta", 2, a]]),
-      person("p2", [["alfa", "le_gusta", 2, a], ["beta", "le_gusta", 2, b]]),
+      person("p2", [
+        ["alfa", "le_gusta", 2, a],
+        ["beta", "le_gusta", 2, b],
+      ]),
       person("p3", [["gama", "le_gusta", 2, c]]),
     ]);
     expect(themes.map((t) => [t.name, t.topicIds])).toEqual([
@@ -146,7 +158,10 @@ describe("buildThemes", () => {
   });
 
   it("treats accents and case as the same topic", () => {
-    const { themes } = buildThemes([person("p1", [["Cerámica", "hace", 2, axis(0)]]), person("p2", [["ceramica", "hace", 2, axis(3)]])]);
+    const { themes } = buildThemes([
+      person("p1", [["Cerámica", "hace", 2, axis(0)]]),
+      person("p2", [["ceramica", "hace", 2, axis(3)]]),
+    ]);
     expect(themes).toHaveLength(1);
   });
 });
@@ -154,9 +169,18 @@ describe("buildThemes", () => {
 describe("scoreMesa", () => {
   it("adds complement, cohesion, and penalizes only the seated role repeated", () => {
     const projections = [
-      person("ana", [["escalada", "sabe", 3, axis(0)], ["jazz", "le_gusta", 2, axis(1)]]),
-      person("carla", [["escalada", "quiere_ser", 1, axis(0)], ["jazz", "le_gusta", 2, axis(1)]]),
-      person("dani", [["escalada", "quiere_ser", 1, axis(0)], ["jazz", "le_gusta", 2, axis(1)]]),
+      person("ana", [
+        ["escalada", "sabe", 3, axis(0)],
+        ["jazz", "le_gusta", 2, axis(1)],
+      ]),
+      person("carla", [
+        ["escalada", "quiere_ser", 1, axis(0)],
+        ["jazz", "le_gusta", 2, axis(1)],
+      ]),
+      person("dani", [
+        ["escalada", "quiere_ser", 1, axis(0)],
+        ["jazz", "le_gusta", 2, axis(1)],
+      ]),
       person("eva", [["surf", "hace", 3, axis(2)]]),
     ];
     const index = buildIndex(projections);

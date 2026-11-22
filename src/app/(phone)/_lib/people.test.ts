@@ -10,7 +10,13 @@ const encounter = (personId: string): Encounter => ({
   place: "HACK26",
   relation: "cercania",
 });
-const neighbor = (personId: string, distance: number, uncertainty: number): ProximityNeighbor => ({ personId, displayName: personId, distance, bearing: 0, uncertainty });
+const neighbor = (personId: string, distance: number, uncertainty: number): ProximityNeighbor => ({
+  personId,
+  displayName: personId,
+  distance,
+  bearing: 0,
+  uncertainty,
+});
 
 describe("nearby", () => {
   it("keeps only who the proximity engine has in range, at the distance it measured", () => {

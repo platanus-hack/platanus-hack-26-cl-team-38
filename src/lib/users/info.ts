@@ -10,7 +10,15 @@ import { authenticate, bearerKey, call, ensureUser, type Db } from "./profile";
 type Row = { email: string; age: number; gender: string; phone: string; occupation: string };
 
 const toInfo = (row: Row | undefined): UserInfo | null =>
-  row ? UserInfoSchema.parse({ email: row.email, age: row.age, gender: row.gender, phone: row.phone, occupation: row.occupation }) : null;
+  row
+    ? UserInfoSchema.parse({
+        email: row.email,
+        age: row.age,
+        gender: row.gender,
+        phone: row.phone,
+        occupation: row.occupation,
+      })
+    : null;
 
 // No key check: for the seed and for code that already authenticated the person.
 export async function saveUserInfo(db: Db, personId: string, info: UserInfo): Promise<UserInfo> {
@@ -30,7 +38,7 @@ export async function getUserInfo(db: Db, personId: string): Promise<UserInfo | 
 }
 
 // Strict, like the check-in. `displayName` is only used when the person does not exist yet.
-export const SaveUserInfoSchema = z
+const SaveUserInfoSchema = z
   .object({
     personId: z.string().min(1).max(80),
     displayName: z.string().min(1).max(40).optional(),

@@ -31,7 +31,9 @@ async function pickPhoto(file: File | undefined) {
     const side = Math.min(bmp.width, bmp.height);
     const canvas = document.createElement("canvas");
     canvas.width = canvas.height = 256;
-    canvas.getContext("2d")!.drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, 256, 256);
+    canvas
+      .getContext("2d")!
+      .drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, 256, 256);
     setPhone({ photo: canvas.toDataURL("image/jpeg", 0.85) });
   } catch {
     toast(C.photoFailed);
@@ -80,7 +82,12 @@ export default function PerfilPage() {
           <div style={{ display: "flex", gap: 16 }}>
             <label className="link" style={{ cursor: "pointer" }}>
               {C.photo}
-              <input type="file" accept="image/*" className="sr" onChange={(e) => (pickPhoto(e.target.files?.[0]), (e.target.value = ""))} />
+              <input
+                type="file"
+                accept="image/*"
+                className="sr"
+                onChange={(e) => (pickPhoto(e.target.files?.[0]), (e.target.value = ""))}
+              />
             </label>
             {s.photo && (
               <button type="button" className="link" onClick={() => setPhone({ photo: null })}>
@@ -105,9 +112,7 @@ export default function PerfilPage() {
         {/* Your Nodo and its privacy are one thing: each topic, public or only yours */}
         <div className="sec u">
           {C.nodeTitle}
-          <Mono className="mute">
-            {COPY.nodo.count(interests.length, kept)}
-          </Mono>
+          <Mono className="mute">{COPY.nodo.count(interests.length, kept)}</Mono>
         </div>
         <p className="mute" style={{ margin: 0, fontSize: 13 }}>
           {C.privacyHelp}
@@ -144,9 +149,7 @@ export default function PerfilPage() {
         <h2 className="t-title">{C.nodeTitle}</h2>
         <div className="sec">
           {C.byTopic}
-          <Mono className="mute">
-            {COPY.nodo.count(interests.length, kept)}
-          </Mono>
+          <Mono className="mute">{COPY.nodo.count(interests.length, kept)}</Mono>
         </div>
         {recommended > 0 && (
           <button
@@ -173,14 +176,29 @@ export default function PerfilPage() {
         <div className="t-data mute">{C.visibility}</div>
         <div className="segbar" role="radiogroup" aria-label={C.visibility}>
           {(["todos", "conocidos", "amigos"] as const).map((v) => (
-            <button key={v} type="button" role="radio" aria-checked={privacy.visibility === v} onClick={() => setPrivacy({ visibility: v })}>
+            <button
+              key={v}
+              type="button"
+              role="radio"
+              aria-checked={privacy.visibility === v}
+              onClick={() => setPrivacy({ visibility: v })}
+            >
               {C.visibilityOptions[v]}
             </button>
           ))}
         </div>
         <div className="rows">
-          <SwitchRow label={C.discoverable} on={privacy.discoverable} onChange={(v) => setPrivacy({ discoverable: v })} />
-          <SwitchRow label={C.location} on={s.locationOn} busy={status === "locating"} onChange={(v) => (v ? locate() : turnOff())} />
+          <SwitchRow
+            label={C.discoverable}
+            on={privacy.discoverable}
+            onChange={(v) => setPrivacy({ discoverable: v })}
+          />
+          <SwitchRow
+            label={C.location}
+            on={s.locationOn}
+            busy={status === "locating"}
+            onChange={(v) => (v ? locate() : turnOff())}
+          />
           <SwitchRow label={C.showPlace} on={privacy.showPlace} onChange={(v) => setPrivacy({ showPlace: v })} />
         </div>
       </Sheet>
@@ -207,7 +225,9 @@ export default function PerfilPage() {
           {s.outbox.length === 0 ? (
             <p className="mute">{C.none}</p>
           ) : (
-            s.outbox.map((o) => <ListRow key={o.at} title={o.to} sub={o.what} data={<Mono>{time.format(new Date(o.at))}</Mono>} />)
+            s.outbox.map((o) => (
+              <ListRow key={o.at} title={o.to} sub={o.what} data={<Mono>{time.format(new Date(o.at))}</Mono>} />
+            ))
           )}
         </div>
       </Sheet>
@@ -216,11 +236,29 @@ export default function PerfilPage() {
   );
 }
 
-function SwitchRow({ label, on, busy, onChange }: { label: string; on: boolean; busy?: boolean; onChange: (v: boolean) => void }) {
+function SwitchRow({
+  label,
+  on,
+  busy,
+  onChange,
+}: {
+  label: string;
+  on: boolean;
+  busy?: boolean;
+  onChange: (v: boolean) => void;
+}) {
   return (
     <div className="row">
       <span className="main">{label}</span>
-      <button type="button" role="switch" aria-checked={on} aria-label={label} aria-busy={busy} className="switch" onClick={() => onChange(!on)} />
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label={label}
+        aria-busy={busy}
+        className="switch"
+        onClick={() => onChange(!on)}
+      />
     </div>
   );
 }
@@ -251,7 +289,10 @@ function InfoForm({ s }: { s: PhoneState }) {
     setFailed(false);
     if (DEMO) return;
     // displayName lets the server create the user if this phone never checked in.
-    api("/api/users/info", { method: "POST", body: JSON.stringify({ personId: s.personId, displayName: s.displayName, info }) })
+    api("/api/users/info", {
+      method: "POST",
+      body: JSON.stringify({ personId: s.personId, displayName: s.displayName, info }),
+    })
       .then((r) => setFailed(!r.ok))
       .catch(() => setFailed(true));
   }
@@ -265,7 +306,8 @@ function InfoForm({ s }: { s: PhoneState }) {
       // Leaving a field tidies it: mail in lowercase, phone as +56 9 1234 5678.
       onBlur={(e) => {
         const el = e.target;
-        if (el instanceof HTMLInputElement && el.name in FORMAT) el.value = FORMAT[el.name as keyof typeof FORMAT](el.value);
+        if (el instanceof HTMLInputElement && el.name in FORMAT)
+          el.value = FORMAT[el.name as keyof typeof FORMAT](el.value);
       }}
     >
       <div className="sec u">
@@ -274,7 +316,18 @@ function InfoForm({ s }: { s: PhoneState }) {
       </div>
       <label className="field">
         <span>{C.email}</span>
-        <input name="email" type="email" inputMode="email" required autoComplete="email" autoCapitalize="none" spellCheck={false} maxLength={120} placeholder="nombre@ejemplo.cl" defaultValue={info?.email} />
+        <input
+          name="email"
+          type="email"
+          inputMode="email"
+          required
+          autoComplete="email"
+          autoCapitalize="none"
+          spellCheck={false}
+          maxLength={120}
+          placeholder="nombre@ejemplo.cl"
+          defaultValue={info?.email}
+        />
       </label>
       <label className="field">
         <span>{C.age}</span>
@@ -293,11 +346,24 @@ function InfoForm({ s }: { s: PhoneState }) {
       </label>
       <label className="field">
         <span>{C.phone}</span>
-        <input name="phone" type="tel" required autoComplete="tel" maxLength={24} placeholder="+56 9 1234 5678" defaultValue={info ? FORMAT.phone(info.phone) : undefined} />
+        <input
+          name="phone"
+          type="tel"
+          required
+          autoComplete="tel"
+          maxLength={24}
+          placeholder="+56 9 1234 5678"
+          defaultValue={info ? FORMAT.phone(info.phone) : undefined}
+        />
       </label>
       <label className="field">
         <span>{C.occupation}</span>
-        <input name="occupation" autoComplete="organization-title" maxLength={60} defaultValue={info?.occupation || suggested} />
+        <input
+          name="occupation"
+          autoComplete="organization-title"
+          maxLength={60}
+          defaultValue={info?.occupation || suggested}
+        />
       </label>
       {suggested && <p className="hint">{C.occupationSuggested}</p>}
       {failed && (

@@ -8,7 +8,11 @@ const signal = (label: string) => ({ source: "claude", kind: "sabe", label, stre
 function setup(sensible: string[] = []) {
   const store = createInboxStore();
   const { token, inbox: inboxId } = store.open();
-  const classify = vi.fn(async (topics: { name: string }[]) => topics.map((t) => ({ privacy: { level: sensible.includes(t.name) ? ("sensible" as const) : ("segura" as const) } })));
+  const classify = vi.fn(async (topics: { name: string }[]) =>
+    topics.map((t) => ({
+      privacy: { level: sensible.includes(t.name) ? ("sensible" as const) : ("segura" as const) },
+    })),
+  );
   return { store, classify, token, inboxId, deps: { inbox: store, classify } };
 }
 
@@ -16,7 +20,11 @@ describe("receiveSignals", () => {
   it("filters on the way in: the phone only collects what the privacy filter let through, in the format it arrived in", async () => {
     const { store, token, inboxId, deps } = setup(["mi diagnostico"]);
     const result = await receiveSignals(token, [signal("pagos"), signal("mi diagnostico")], deps);
-    expect(result).toEqual({ status: 200, message: "Recibidas 1 señales. 1 se descartaron por ser datos sensibles. Nada se publicó: quedan como borrador en el teléfono de la persona." });
+    expect(result).toEqual({
+      status: 200,
+      message:
+        "Recibidas 1 señales. 1 se descartaron por ser datos sensibles. Nada se publicó: quedan como borrador en el teléfono de la persona.",
+    });
     expect(store.drain(inboxId)).toEqual([signal("pagos")]);
   });
 
@@ -36,7 +44,10 @@ describe("receiveSignals", () => {
 
   it("still answers 200 when everything was filtered out, so the assistant does not retry", async () => {
     const { store, token, inboxId, deps } = setup(["mi diagnostico"]);
-    expect(await receiveSignals(token, [signal("mi diagnostico")], deps)).toMatchObject({ status: 200, message: expect.stringContaining("Recibidas 0 señales. 1 se descartaron") });
+    expect(await receiveSignals(token, [signal("mi diagnostico")], deps)).toMatchObject({
+      status: 200,
+      message: expect.stringContaining("Recibidas 0 señales. 1 se descartaron"),
+    });
     expect(store.drain(inboxId)).toEqual([]);
   });
 });

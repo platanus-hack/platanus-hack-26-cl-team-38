@@ -90,7 +90,11 @@ async function loadSupabase(): Promise<Encounter[]> {
   const { data, error } = await supabase.from("room_members").select("projection, checked_in_at, rooms(name)");
   if (error) throw new Error(error.message);
   const byId = new Map<string, Encounter>();
-  for (const row of data as unknown as { projection: PublicProjection; checked_in_at: string; rooms: { name: string } | null }[]) {
+  for (const row of data as unknown as {
+    projection: PublicProjection;
+    checked_in_at: string;
+    rooms: { name: string } | null;
+  }[]) {
     byId.set(row.projection.personId, {
       person: row.projection,
       distanceM: 0,
@@ -144,7 +148,10 @@ export function coincidences(s: PhoneState, encounters: Encounter[]): Coincidenc
   const mine = myInterests(s);
   return encounters
     .map((e) => withRelation(s, e))
-    .filter((e) => e.person.personId !== s.personId && (e.inRange || e.distanceM <= Math.min(clampRadius(s.radiusM), e.radiusM)))
+    .filter(
+      (e) =>
+        e.person.personId !== s.personId && (e.inRange || e.distanceM <= Math.min(clampRadius(s.radiusM), e.radiusM)),
+    )
     .map((e) => ({ ...e, ...matchTopics(mine, e.person.topics) }))
     .filter((c) => c.items.length > 0)
     .sort((a, b) => b.score - a.score || a.distanceM - b.distanceM);
@@ -159,7 +166,9 @@ export function nearby(encounters: Encounter[], near: ReadonlyMap<string, Proxim
   return encounters.flatMap((e) => {
     const n = near.get(e.person.personId);
     if (!n) return [];
-    return [{ ...e, distanceM: n.distance < 2 * n.uncertainty ? 0 : n.distance, inRange: true, at: new Date().toISOString() }];
+    return [
+      { ...e, distanceM: n.distance < 2 * n.uncertainty ? 0 : n.distance, inRange: true, at: new Date().toISOString() },
+    ];
   });
 }
 
@@ -219,11 +228,6 @@ export function contactsOf(s: PhoneState, encounters: Encounter[]): Coincidence[
 /** A distance on its own, wherever it shows next to a name: "12 m", "1,2 km". */
 export function fmtMeters(m: number): string {
   return m < 1000 ? `${m} m` : `${(m / 1000).toLocaleString("es-CL", { maximumFractionDigits: 1 })} km`;
-}
-
-/** A distance inside a sentence: "a 12 m", or "en el mismo lugar". */
-export function fmtDistance(m: number): string {
-  return m === 0 ? "en el mismo lugar" : `a ${fmtMeters(m)}`;
 }
 
 export function relTime(iso: string): string {

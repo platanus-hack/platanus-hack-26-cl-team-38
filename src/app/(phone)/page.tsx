@@ -48,13 +48,21 @@ export default function Home() {
         {COPY.app}
         {/* Your Contactos, small: the faces lead to the whole view (or to Explorar while you have none). */}
         {known && (
-          <Link href={contacts.length ? "/afinidades" : "/coincidencias"} className="home-contacts" aria-label={contacts.length ? `${C.contacts}: ${contacts.length}` : C.contactsHint}>
+          <Link
+            href={contacts.length ? "/afinidades" : "/coincidencias"}
+            className="home-contacts"
+            aria-label={contacts.length ? `${C.contacts}: ${contacts.length}` : C.contactsHint}
+          >
             <span className="stack">
               {contacts.slice(0, 3).map((c) => (
                 <Avatar key={c.person.personId} id={c.person.personId} />
               ))}
             </span>
-            {contacts.length > 3 ? <Mono>+{contacts.length - 3}</Mono> : contacts.length === 0 ? <Icon name="users" /> : null}
+            {contacts.length > 3 ? (
+              <Mono>+{contacts.length - 3}</Mono>
+            ) : contacts.length === 0 ? (
+              <Icon name="users" />
+            ) : null}
           </Link>
         )}
       </header>
@@ -62,7 +70,13 @@ export default function Home() {
       <div className="content">
         <div className="home-title">
           <h1 className="t-hero">{C.titles[0]}</h1>
-          <button type="button" className="q" aria-haspopup="dialog" aria-label={C.howTitle} onClick={() => setHow(!how)}>
+          <button
+            type="button"
+            className="q"
+            aria-haspopup="dialog"
+            aria-label={C.howTitle}
+            onClick={() => setHow(!how)}
+          >
             i
           </button>
         </div>
@@ -100,7 +114,11 @@ export default function Home() {
             <div className="empty">
               <div className="empty-state">
                 <p>{X.invisible}</p>
-                <button type="button" className="btn" onClick={() => setPhone({ privacy: { ...s.privacy, discoverable: true } })}>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => setPhone({ privacy: { ...s.privacy, discoverable: true } })}
+                >
                   {X.turnVisible}
                 </button>
               </div>
@@ -110,7 +128,14 @@ export default function Home() {
               <p>{X.nobody(clampRadius(s.radiusM))}</p>
             </div>
           ) : (
-            <MatchGraph W={360} H={360} compact me={{ id: s.personId, name: s.displayName }} groups={groups} focus={s.focus} />
+            <MatchGraph
+              W={360}
+              H={360}
+              compact
+              me={{ id: s.personId, name: s.displayName }}
+              groups={groups}
+              focus={s.focus}
+            />
           )}
         </div>
         <Initiatives s={s} encounters={encounters} max={3} head={<div className="sec">{C.initiatives}</div>} />

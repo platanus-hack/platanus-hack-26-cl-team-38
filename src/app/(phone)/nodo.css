@@ -519,7 +519,8 @@
     appearance: none;
     -webkit-appearance: none;
     padding-right: 24px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%231b2326' stroke-opacity='.5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E") no-repeat right center / 16px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%231b2326' stroke-opacity='.5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E")
+      no-repeat right center / 16px;
   }
   .info .field select:invalid {
     color: var(--mute);
@@ -1523,7 +1524,12 @@
     height: 12px;
     margin-top: 10px;
     border-radius: 6px;
-    background: linear-gradient(90deg, rgba(27, 35, 38, 0.06) 0%, rgba(27, 35, 38, 0.14) 50%, rgba(27, 35, 38, 0.06) 100%);
+    background: linear-gradient(
+      90deg,
+      rgba(27, 35, 38, 0.06) 0%,
+      rgba(27, 35, 38, 0.14) 50%,
+      rgba(27, 35, 38, 0.06) 100%
+    );
     background-size: 200% 100%;
     animation: nodo-shimmer 1.2s linear infinite;
   }
@@ -2125,18 +2131,18 @@
     border-color: color-mix(in srgb, currentColor 25%, transparent);
   }
   .plan-card.ai li {
-  padding-left: 20px;
-}
-.plan-card.ai li::before {
-  top: 10px;
-}
-.plan-sources a {
-  color: var(--accent);
-  font-size: 12px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.plan-card {
+    padding-left: 20px;
+  }
+  .plan-card.ai li::before {
+    top: 10px;
+  }
+  .plan-sources a {
+    color: var(--accent);
+    font-size: 12px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .plan-card {
     align-self: stretch;
     margin-top: 16px;
   }

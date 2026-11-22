@@ -24,7 +24,7 @@ export const PERSONAL_CATEGORIES = [
   "vida_intima",
   "unico",
 ] as const;
-export type PersonalCategory = (typeof PERSONAL_CATEGORIES)[number];
+type PersonalCategory = (typeof PERSONAL_CATEGORIES)[number];
 
 export const PRIVACY_CATEGORIES = [...SENSITIVE_CATEGORIES, ...PERSONAL_CATEGORIES] as const;
 export type PrivacyCategory = (typeof PRIVACY_CATEGORIES)[number];
@@ -62,7 +62,9 @@ const PERSONAL_REASONS: Record<PersonalCategory, string> = {
 // Fixed copy instead of model-written text: it is faster (no output tokens) and says the same thing every time.
 export function reasonFor(category: PrivacyCategory | undefined): string {
   if (!category) return "Podría decir de más sobre ti.";
-  return category in PERSONAL_REASONS ? PERSONAL_REASONS[category as PersonalCategory] : `Toca un tema de ${CATEGORY_LABELS[category]}.`;
+  return category in PERSONAL_REASONS
+    ? PERSONAL_REASONS[category as PersonalCategory]
+    : `Toca un tema de ${CATEGORY_LABELS[category]}.`;
 }
 
 export type Finding = {
@@ -73,7 +75,7 @@ export type Finding = {
 
 // Bump when the lexicon, the anchors or the judge prompt change: every stored verdict goes stale
 // and its topic falls back to private until it is classified again.
-export const CLASSIFIER_VERSION = 1;
+const CLASSIFIER_VERSION = 1;
 
 export function strictest(...levels: PrivacyLevel[]): PrivacyLevel {
   return PRIVACY_LEVELS[Math.max(0, ...levels.map((l) => PRIVACY_LEVELS.indexOf(l)))];

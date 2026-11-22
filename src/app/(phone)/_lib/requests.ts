@@ -27,17 +27,26 @@ function demoIncoming(s: PhoneState, encounters: Encounter[]): Incoming[] {
 }
 
 /** The requests waiting for you, and how to answer one. Empty while loading. */
-export function useIncoming(s: PhoneState | undefined, encounters: Encounter[] | undefined): { list: Incoming[]; answer: (r: Incoming, accept: boolean) => Promise<void> } {
+export function useIncoming(
+  s: PhoneState | undefined,
+  encounters: Encounter[] | undefined,
+): { list: Incoming[]; answer: (r: Incoming, accept: boolean) => Promise<void> } {
   const [remote, setRemote] = useState<Incoming[]>([]);
   useEffect(() => {
     if (DEMO) return;
     let alive = true;
     api(`/api/connections?personId=${encodeURIComponent(getPhone().personId)}`)
-      .then(async (r) => (r.ok ? z.object({ connections: z.array(ConnectionSchema) }).parse(await r.json()).connections : []))
+      .then(async (r) =>
+        r.ok ? z.object({ connections: z.array(ConnectionSchema) }).parse(await r.json()).connections : [],
+      )
       .catch(() => [])
       .then((all) => {
         if (!alive) return;
-        setRemote(all.filter((c) => c.status === "propuesta" && !c.proposedByMe).map((c) => ({ personId: c.personId, displayName: c.displayName, where: c.origin.label, at: c.createdAt })));
+        setRemote(
+          all
+            .filter((c) => c.status === "propuesta" && !c.proposedByMe)
+            .map((c) => ({ personId: c.personId, displayName: c.displayName, where: c.origin.label, at: c.createdAt })),
+        );
       });
     return () => {
       alive = false;
@@ -48,10 +57,17 @@ export function useIncoming(s: PhoneState | undefined, encounters: Encounter[] |
     const done = () => toast(accept ? C.accepted(r.displayName) : C.rejected);
     if (DEMO) {
       // In demo an accepted request is a Conocido, which is what makes someone a Contacto there.
-      setPhone((p) => (accept ? { relations: { ...p.relations, [r.personId]: "conocido" } } : { dismissed: [...(p.dismissed ?? []), r.personId] }));
+      setPhone((p) =>
+        accept
+          ? { relations: { ...p.relations, [r.personId]: "conocido" } }
+          : { dismissed: [...(p.dismissed ?? []), r.personId] },
+      );
       return done();
     }
-    const ok = await api("/api/connections", { method: "POST", body: JSON.stringify({ personId: getPhone().personId, otherId: r.personId, action: accept ? "accept" : "close" }) })
+    const ok = await api("/api/connections", {
+      method: "POST",
+      body: JSON.stringify({ personId: getPhone().personId, otherId: r.personId, action: accept ? "accept" : "close" }),
+    })
       .then((res) => res.ok)
       .catch(() => false);
     if (!ok) return toast(C.failed);

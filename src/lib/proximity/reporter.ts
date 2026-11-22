@@ -7,7 +7,7 @@ const EARTH_RADIUS_M = 6_371_000;
 export type LatLon = [lat: number, lon: number];
 
 /** Metres east and north to go from `a` to `b`. */
-export function displacement(a: LatLon, b: LatLon): [east: number, north: number] {
+function displacement(a: LatLon, b: LatLon): [east: number, north: number] {
   return [(b[1] - a[1]) * RAD * EARTH_RADIUS_M * Math.cos(a[0] * RAD), (b[0] - a[0]) * RAD * EARTH_RADIUS_M];
 }
 
@@ -74,7 +74,11 @@ export function createReporter({
     // one from start-up stays as the official position for several seconds.
     const muchBetter = accuracy < 0.6 * lastReportedAccuracy;
     if (timeMs - lastReportAt < minIntervalMs && !muchBetter) return null;
-    if (!lastReported || muchBetter || distanceMeters(lastReported, estimate) >= Math.max(threshold, accuracyFraction * accuracy)) {
+    if (
+      !lastReported ||
+      muchBetter ||
+      distanceMeters(lastReported, estimate) >= Math.max(threshold, accuracyFraction * accuracy)
+    ) {
       lastReported = estimate;
       lastReportAt = timeMs;
       lastReportedAccuracy = accuracy;

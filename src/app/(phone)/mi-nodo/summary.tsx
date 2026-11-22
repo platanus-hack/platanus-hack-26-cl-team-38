@@ -61,14 +61,19 @@ export function Summary({ people }: { people: SeedPerson[] }) {
       const verdicts = await fetchVerdicts(next.topics.map(({ kind, name, sources }) => ({ kind, name, sources })));
       if (ticket === latestPick.current) setNode(buildNode(next, next.topics, verdicts));
     } catch {
-      if (ticket === latestPick.current) setNotice({ tone: "error", text: "No pudimos revisar tus tópicos. Intenta de nuevo en un rato." });
+      if (ticket === latestPick.current)
+        setNotice({ tone: "error", text: "No pudimos revisar tus tópicos. Intenta de nuevo en un rato." });
     } finally {
       if (ticket === latestPick.current) setLoading(false);
     }
   }
 
   // Edits and general versions need a fresh verdict before they touch the node.
-  async function withVerdict(topicId: string, input: ClassifyInput, apply: (verdict: TopicPrivacy) => PersonalNode | { error: string }) {
+  async function withVerdict(
+    topicId: string,
+    input: ClassifyInput,
+    apply: (verdict: TopicPrivacy) => PersonalNode | { error: string },
+  ) {
     setBusy(topicId);
     setNotice(undefined);
     try {
@@ -93,14 +98,18 @@ export function Summary({ people }: { people: SeedPerson[] }) {
     const name = normalizeName(change.name);
     if (!name) return setNotice({ tone: "error", text: "El tópico necesita un nombre." });
     if (name === topic.name && change.kind === topic.kind) return setEditing(undefined);
-    const saved = await withVerdict(topic.id, { kind: change.kind, name, sources: topic.sources }, (v) => editTopic(node, topic.id, { name, kind: change.kind }, v));
+    const saved = await withVerdict(topic.id, { kind: change.kind, name, sources: topic.sources }, (v) =>
+      editTopic(node, topic.id, { name, kind: change.kind }, v),
+    );
     if (saved) setEditing(undefined);
   }
 
   function shareGeneralVersion(topic: Topic) {
     const name = topic.privacy?.saferName;
     if (!node || !name) return;
-    void withVerdict(topic.id, { kind: topic.kind, name, sources: topic.sources }, (v) => shareGeneral(node, topic.id, v));
+    void withVerdict(topic.id, { kind: topic.kind, name, sources: topic.sources }, (v) =>
+      shareGeneral(node, topic.id, v),
+    );
   }
 
   async function checkIn() {
@@ -116,7 +125,10 @@ export function Summary({ people }: { people: SeedPerson[] }) {
       const json: unknown = await response.json().catch(() => null);
       if (!response.ok) {
         const message = z.object({ error: z.string() }).safeParse(json);
-        return setNotice({ tone: "error", text: `No pudimos entrarte a la sala${message.success ? `: ${message.data.error}` : "."}` });
+        return setNotice({
+          tone: "error",
+          text: `No pudimos entrarte a la sala${message.success ? `: ${message.data.error}` : "."}`,
+        });
       }
       const result = CheckInResponseSchema.parse(json);
       try {
@@ -130,7 +142,10 @@ export function Summary({ people }: { people: SeedPerson[] }) {
       // The server classifies again and can disagree: those topics go back to private here too.
       const names = result.rejected.map((r) => node.topics.find((t) => t.id === r.topicId)?.name).filter(Boolean);
       setNode(result.rejected.reduce((n, r) => setShared(n, r.topicId, false), node));
-      setNotice({ tone: "info", text: `Entraste a la sala, pero el servidor dejó fuera ${names.length === 1 ? "un tópico" : `${names.length} tópicos`}: ${names.join(", ")}. Ahora están en privado.` });
+      setNotice({
+        tone: "info",
+        text: `Entraste a la sala, pero el servidor dejó fuera ${names.length === 1 ? "un tópico" : `${names.length} tópicos`}: ${names.join(", ")}. Ahora están en privado.`,
+      });
       setRoomHref(href);
     } catch {
       setNotice({ tone: "error", text: "No pudimos entrarte a la sala. Intenta de nuevo." });
@@ -156,7 +171,8 @@ export function Summary({ people }: { people: SeedPerson[] }) {
         <header className="flex flex-col gap-3">
           <h1 className="font-heading text-[2rem] leading-[1.05] font-semibold tracking-tight">Así te ve la sala</h1>
           <p className="text-[0.9375rem] leading-relaxed text-[#18212F]/70">
-            Todo parte privado. Lo que compartas aparece en el proyector con tu nombre, así que comparte lo que dirías en voz alta.
+            Todo parte privado. Lo que compartas aparece en el proyector con tu nombre, así que comparte lo que dirías
+            en voz alta.
           </p>
           <label className="flex items-center justify-between gap-3 rounded-xl bg-[#F2B84B]/12 p-4 text-sm font-medium">
             Soy
@@ -188,7 +204,11 @@ export function Summary({ people }: { people: SeedPerson[] }) {
           >
             <p>{notice.text}</p>
             {roomHref && (
-              <button type="button" onClick={() => router.push(roomHref)} className={`self-start font-medium underline underline-offset-4 ${FOCUS}`}>
+              <button
+                type="button"
+                onClick={() => router.push(roomHref)}
+                className={`self-start font-medium underline underline-offset-4 ${FOCUS}`}
+              >
                 Ir a la sala
               </button>
             )}
@@ -207,12 +227,21 @@ export function Summary({ people }: { people: SeedPerson[] }) {
             >
               {summary.recommended.map((topic) => (
                 <TopicRow key={topic.id} {...rowProps(topic)}>
-                  <Switch label={`Compartir ${topic.name}`} checked={topic.public} disabled={locked} onChange={(on) => setNode(setShared(node, topic.id, on))} />
+                  <Switch
+                    label={`Compartir ${topic.name}`}
+                    checked={topic.public}
+                    disabled={locked}
+                    onChange={(on) => setNode(setShared(node, topic.id, on))}
+                  />
                 </TopicRow>
               ))}
             </Pile>
 
-            <Pile title="Tú decides" hint="Queda privado hasta que lo compartas, uno por uno." empty="Nada que decidir: todo lo tuyo es para compartir.">
+            <Pile
+              title="Tú decides"
+              hint="Queda privado hasta que lo compartas, uno por uno."
+              empty="Nada que decidir: todo lo tuyo es para compartir."
+            >
               {summary.decide.map((topic) => (
                 <TopicRow key={topic.id} {...rowProps(topic)} reason={topic.privacy?.reason} actionsBelow>
                   <Decision
@@ -240,7 +269,13 @@ export function Summary({ people }: { people: SeedPerson[] }) {
                     key={r.code}
                     className="flex cursor-pointer flex-col rounded-lg px-3 py-1.5 text-sm has-checked:bg-white has-checked:shadow-[0_1px_2px_rgba(24,33,47,0.12)] has-focus-visible:outline-2 has-focus-visible:outline-[#2F7FD1]"
                   >
-                    <input type="radio" name="room" className="sr-only" checked={r.code === roomCode} onChange={() => setRoomCode(r.code)} />
+                    <input
+                      type="radio"
+                      name="room"
+                      className="sr-only"
+                      checked={r.code === roomCode}
+                      onChange={() => setRoomCode(r.code)}
+                    />
                     <span className="truncate font-medium">{r.name}</span>
                     <span className="text-xs text-[#18212F]/55">código {r.code}</span>
                   </label>
@@ -255,7 +290,9 @@ export function Summary({ people }: { people: SeedPerson[] }) {
             >
               {busy === "checkin" ? "Entrando…" : `Entrar a ${room?.name ?? "la sala"}`}
             </button>
-            {summary.shared.length === 0 && <p className="text-center text-xs text-[#18212F]/55">Comparte al menos un tópico para entrar.</p>}
+            {summary.shared.length === 0 && (
+              <p className="text-center text-xs text-[#18212F]/55">Comparte al menos un tópico para entrar.</p>
+            )}
           </div>
         </footer>
       )}
@@ -265,18 +302,27 @@ export function Summary({ people }: { people: SeedPerson[] }) {
 
 function Preview({ summary }: { summary: SummaryData }) {
   return (
-    <section aria-labelledby="preview-heading" className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-[0_1px_2px_rgba(24,33,47,0.08)]">
+    <section
+      aria-labelledby="preview-heading"
+      className="flex flex-col gap-3 rounded-2xl bg-white p-5 shadow-[0_1px_2px_rgba(24,33,47,0.08)]"
+    >
       <h2 id="preview-heading" className="font-heading text-xl font-semibold">
-        Compartes {summary.shared.length} · {summary.keptCount} {summary.keptCount === 1 ? "se queda" : "se quedan"} contigo
+        Compartes {summary.shared.length} · {summary.keptCount} {summary.keptCount === 1 ? "se queda" : "se quedan"}{" "}
+        contigo
       </h2>
       {summary.shared.length === 0 ? (
-        <p className="text-sm text-[#18212F]/60">Todavía no compartes nada. Lo que elijas abajo aparece aquí tal como lo verá la sala.</p>
+        <p className="text-sm text-[#18212F]/60">
+          Todavía no compartes nada. Lo que elijas abajo aparece aquí tal como lo verá la sala.
+        </p>
       ) : (
         <ul className="flex flex-wrap gap-1.5" aria-label="Tópicos que verá la sala">
           {summary.shared.map((t) => {
             const role = rolesOf(t)[0] ?? "comparte";
             return (
-              <li key={t.id} className="flex items-center gap-1.5 rounded-full border border-[#18212F]/12 px-2.5 py-1 text-sm">
+              <li
+                key={t.id}
+                className="flex items-center gap-1.5 rounded-full border border-[#18212F]/12 px-2.5 py-1 text-sm"
+              >
                 <span aria-hidden className="size-2 rounded-full" style={{ backgroundColor: ROLE[role].color }} />
                 {t.name}
                 <span className="text-xs text-[#18212F]/50">{KIND_LABEL[t.kind]}</span>
@@ -289,7 +335,19 @@ function Preview({ summary }: { summary: SummaryData }) {
   );
 }
 
-function Pile({ title, hint, action, empty, children }: { title: string; hint: string; action?: ReactNode; empty: string; children: ReactNode[] }) {
+function Pile({
+  title,
+  hint,
+  action,
+  empty,
+  children,
+}: {
+  title: string;
+  hint: string;
+  action?: ReactNode;
+  empty: string;
+  children: ReactNode[];
+}) {
   return (
     <section className="flex flex-col gap-3" aria-label={title}>
       <div className="flex items-end justify-between gap-3">
@@ -299,7 +357,11 @@ function Pile({ title, hint, action, empty, children }: { title: string; hint: s
         </div>
         {action}
       </div>
-      {children.length === 0 ? <p className="text-sm text-[#18212F]/55">{empty}</p> : <ul className="flex flex-col gap-2">{children}</ul>}
+      {children.length === 0 ? (
+        <p className="text-sm text-[#18212F]/55">{empty}</p>
+      ) : (
+        <ul className="flex flex-col gap-2">{children}</ul>
+      )}
     </section>
   );
 }
@@ -357,7 +419,12 @@ function TopicRow({
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            <button type="button" onClick={onEdit} disabled={locked} className={`text-sm text-[#18212F]/60 underline-offset-4 hover:underline disabled:opacity-40 ${FOCUS}`}>
+            <button
+              type="button"
+              onClick={onEdit}
+              disabled={locked}
+              className={`text-sm text-[#18212F]/60 underline-offset-4 hover:underline disabled:opacity-40 ${FOCUS}`}
+            >
               Editar
             </button>
             {!actionsBelow && children}
@@ -371,7 +438,17 @@ function TopicRow({
   );
 }
 
-function TopicEditor({ topic, busy, onCancel, onSave }: { topic: Topic; busy: boolean; onCancel: () => void; onSave: (change: { name: string; kind: Kind }) => void }) {
+function TopicEditor({
+  topic,
+  busy,
+  onCancel,
+  onSave,
+}: {
+  topic: Topic;
+  busy: boolean;
+  onCancel: () => void;
+  onSave: (change: { name: string; kind: Kind }) => void;
+}) {
   const [name, setName] = useState(topic.name);
   const [kind, setKind] = useState<Kind>(topic.kind);
   return (
@@ -404,12 +481,18 @@ function TopicEditor({ topic, busy, onCancel, onSave }: { topic: Topic; busy: bo
           className={`min-w-0 flex-1 rounded-lg border border-[#18212F]/15 px-3 py-1.5 text-sm ${FOCUS}`}
         />
       </div>
-      <p className="text-xs text-[#18212F]/55">Al guardar lo revisamos de nuevo y queda privado hasta que lo vuelvas a compartir.</p>
+      <p className="text-xs text-[#18212F]/55">
+        Al guardar lo revisamos de nuevo y queda privado hasta que lo vuelvas a compartir.
+      </p>
       <div className="flex justify-end gap-3">
         <button type="button" onClick={onCancel} disabled={busy} className={`text-sm text-[#18212F]/60 ${FOCUS}`}>
           Cancelar
         </button>
-        <button type="submit" disabled={busy} className={`rounded-lg bg-[#18212F] px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-40 ${FOCUS}`}>
+        <button
+          type="submit"
+          disabled={busy}
+          className={`rounded-lg bg-[#18212F] px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-40 ${FOCUS}`}
+        >
           {busy ? "Revisando…" : "Guardar"}
         </button>
       </div>
@@ -417,7 +500,17 @@ function TopicEditor({ topic, busy, onCancel, onSave }: { topic: Topic; busy: bo
   );
 }
 
-function Switch({ label, checked, disabled, onChange }: { label: string; checked: boolean; disabled: boolean; onChange: (on: boolean) => void }) {
+function Switch({
+  label,
+  checked,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  disabled: boolean;
+  onChange: (on: boolean) => void;
+}) {
   return (
     <button
       type="button"
@@ -428,7 +521,9 @@ function Switch({ label, checked, disabled, onChange }: { label: string; checked
       onClick={() => onChange(!checked)}
       className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-40 ${checked ? "bg-[#1F8A5B]" : "bg-[#18212F]/20"} ${FOCUS}`}
     >
-      <span className={`absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow transition-transform ${checked ? "translate-x-5" : ""}`} />
+      <span
+        className={`absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow transition-transform ${checked ? "translate-x-5" : ""}`}
+      />
     </button>
   );
 }
@@ -452,7 +547,13 @@ function Decision({
     `rounded-lg border px-3 py-1.5 text-sm disabled:opacity-40 ${pressed ? "border-[#18212F] bg-[#18212F] text-white" : "border-[#18212F]/15 bg-white"} ${FOCUS}`;
   return (
     <div className="flex flex-wrap gap-2" role="group" aria-label={`Qué hacer con ${topic.name}`}>
-      <button type="button" aria-pressed={decided && topic.public} disabled={locked} onClick={onShare} className={option(decided && topic.public)}>
+      <button
+        type="button"
+        aria-pressed={decided && topic.public}
+        disabled={locked}
+        onClick={onShare}
+        className={option(decided && topic.public)}
+      >
         Compartir
       </button>
       {saferName && (
@@ -460,7 +561,13 @@ function Decision({
           Compartir «{saferName}»
         </button>
       )}
-      <button type="button" aria-pressed={decided && !topic.public} disabled={locked} onClick={onKeep} className={option(decided && !topic.public)}>
+      <button
+        type="button"
+        aria-pressed={decided && !topic.public}
+        disabled={locked}
+        onClick={onKeep}
+        className={option(decided && !topic.public)}
+      >
         Dejar privado
       </button>
     </div>

@@ -18,10 +18,20 @@ const C = COPY.solicitudes;
 function Answer({ r, answer }: { r: Incoming; answer: (r: Incoming, accept: boolean) => void }) {
   return (
     <div className="btn-pair">
-      <button type="button" className="btn ghost" aria-label={`${C.reject}: ${r.displayName}`} onClick={() => answer(r, false)}>
+      <button
+        type="button"
+        className="btn ghost"
+        aria-label={`${C.reject}: ${r.displayName}`}
+        onClick={() => answer(r, false)}
+      >
         {C.reject}
       </button>
-      <button type="button" className="btn" aria-label={`${C.accept}: ${r.displayName}`} onClick={() => answer(r, true)}>
+      <button
+        type="button"
+        className="btn"
+        aria-label={`${C.accept}: ${r.displayName}`}
+        onClick={() => answer(r, true)}
+      >
         {C.accept}
       </button>
     </div>
@@ -35,13 +45,20 @@ export function Requests({ s, encounters }: { s: PhoneState; encounters: Encount
   const [openId, setOpenId] = useState<string | null>(null);
   const open = list.find((r) => r.personId === openId);
   // What you have in common, when they are (or were) around.
-  const detail = open && encounters ? affinities(s, encounters).find((c) => c.person.personId === open.personId) : undefined;
+  const detail =
+    open && encounters ? affinities(s, encounters).find((c) => c.person.personId === open.personId) : undefined;
   if (list.length === 0) return null;
 
   return (
     <>
       <section className="req-box" aria-label={C.title}>
-        <button type="button" className="req-sum" aria-expanded={expanded} aria-controls="reqs" onClick={() => setExpanded(!expanded)}>
+        <button
+          type="button"
+          className="req-sum"
+          aria-expanded={expanded}
+          aria-controls="reqs"
+          onClick={() => setExpanded(!expanded)}
+        >
           <span className="stack">
             {list.slice(0, 3).map((r) => (
               <Avatar key={r.personId} id={r.personId} />
@@ -66,10 +83,20 @@ export function Requests({ s, encounters }: { s: PhoneState; encounters: Encount
                     <span>{r.where}</span>
                   </span>
                 </button>
-                <button type="button" className="req-no" aria-label={`${C.reject}: ${r.displayName}`} onClick={() => answer(r, false)}>
+                <button
+                  type="button"
+                  className="req-no"
+                  aria-label={`${C.reject}: ${r.displayName}`}
+                  onClick={() => answer(r, false)}
+                >
                   <Icon name="x" />
                 </button>
-                <button type="button" className="req-yes" aria-label={`${C.accept}: ${r.displayName}`} onClick={() => answer(r, true)}>
+                <button
+                  type="button"
+                  className="req-yes"
+                  aria-label={`${C.accept}: ${r.displayName}`}
+                  onClick={() => answer(r, true)}
+                >
                   <Icon name="check" />
                 </button>
               </li>
@@ -94,7 +121,11 @@ export function Requests({ s, encounters }: { s: PhoneState; encounters: Encount
             {detail && (
               <>
                 <div className="sec">{C.common}</div>
-                {detail.items.length ? <p style={{ margin: 0 }}>{detail.items.map(matchPhrase).join(" · ")}</p> : <p className="mute">{C.nothing}</p>}
+                {detail.items.length ? (
+                  <p style={{ margin: 0 }}>{detail.items.map(matchPhrase).join(" · ")}</p>
+                ) : (
+                  <p className="mute">{C.nothing}</p>
+                )}
                 {detail.person.topics.length > 0 && (
                   <>
                     <div className="sec">{C.topics}</div>

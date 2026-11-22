@@ -27,9 +27,14 @@ export async function createTestDb(): Promise<{ pg: PGlite; db: Db }> {
   const db: Db = {
     async rpc(fn, args) {
       const names = Object.keys(args);
-      const values = Object.values(args).map((v) => (v !== null && typeof v === "object" && !isTextArray(v) ? JSON.stringify(v) : v));
+      const values = Object.values(args).map((v) =>
+        v !== null && typeof v === "object" && !isTextArray(v) ? JSON.stringify(v) : v,
+      );
       try {
-        const { rows } = await pg.query<Record<string, unknown>>(`select * from ${fn}(${names.map((n, i) => `${n} => $${i + 1}`).join(", ")})`, values);
+        const { rows } = await pg.query<Record<string, unknown>>(
+          `select * from ${fn}(${names.map((n, i) => `${n} => $${i + 1}`).join(", ")})`,
+          values,
+        );
         const scalar = rows.length === 1 && Object.keys(rows[0]).join() === fn;
         return { data: JSON.parse(JSON.stringify(scalar ? rows[0][fn] : rows)), error: null };
       } catch (error) {

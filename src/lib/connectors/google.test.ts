@@ -1,6 +1,16 @@
 import { deflateRawSync } from "node:zlib";
 import { describe, expect, it, vi } from "vitest";
-import { createGoogleFlow, downloadDriveFile, DRIVE_FILE_SCOPE, exchangeGoogleCode, googleAuthUrl, googlePickerPage, receiveTakeout, takeoutSignals, unzip } from "./google";
+import {
+  createGoogleFlow,
+  downloadDriveFile,
+  DRIVE_FILE_SCOPE,
+  exchangeGoogleCode,
+  googleAuthUrl,
+  googlePickerPage,
+  receiveTakeout,
+  takeoutSignals,
+  unzip,
+} from "./google";
 import { createInboxStore } from "./inbox";
 
 // A ZIP built by hand, deflated like Takeout's, so the test needs no `zip` binary.
@@ -34,18 +44,26 @@ function zipOf(files: Record<string, string>): Buffer {
   return Buffer.concat([...locals, ...central, end]);
 }
 
-const watchedHtml = (channel: string, times: number) => `<a href="https://www.youtube.com/watch?v=x">un video</a><br><a href="https://www.youtube.com/channel/UC1">${channel}</a><br>`.repeat(times);
+const watchedHtml = (channel: string, times: number) =>
+  `<a href="https://www.youtube.com/watch?v=x">un video</a><br><a href="https://www.youtube.com/channel/UC1">${channel}</a><br>`.repeat(
+    times,
+  );
 const event = (title: string, extra = "") => `BEGIN:VEVENT\r\nSUMMARY:${title}\r\n${extra}END:VEVENT\r\n`;
 
 // An invented export, with the names Takeout uses for an account in Spanish.
 const TAKEOUT = zipOf({
   "Takeout/YouTube y YouTube Music/suscripciones/suscripciones.csv":
     'ID del canal,URL del canal,Título del canal\nUC1,http://www.youtube.com/channel/UC1,Torno & Barro\nUC2,http://www.youtube.com/channel/UC2,"Running, sin apuro"\n',
-  "Takeout/YouTube y YouTube Music/historial/historial-de-reproducciones.html": watchedHtml("Torno &amp; Barro", 4) + watchedHtml("Finanzas Abiertas", 2) + watchedHtml("Visto una vez", 1),
-  "Takeout/YouTube y YouTube Music/historial/historial-de-búsquedas.html": '<a href="https://www.youtube.com/results?search_query=x">ansiedad nocturna</a>',
+  "Takeout/YouTube y YouTube Music/historial/historial-de-reproducciones.html":
+    watchedHtml("Torno &amp; Barro", 4) + watchedHtml("Finanzas Abiertas", 2) + watchedHtml("Visto una vez", 1),
+  "Takeout/YouTube y YouTube Music/historial/historial-de-búsquedas.html":
+    '<a href="https://www.youtube.com/results?search_query=x">ansiedad nocturna</a>',
   "Takeout/Calendar/ana@example.com.ics":
     "BEGIN:VCALENDAR\r\n" +
-    event("Clase de cerámica\\, torno", "RRULE:FREQ=WEEKLY\r\nATTENDEE:mailto:otra.persona@example.com\r\nDESCRIPTION:Traer delantal\r\n") +
+    event(
+      "Clase de cerámica\\, torno",
+      "RRULE:FREQ=WEEKLY\r\nATTENDEE:mailto:otra.persona@example.com\r\nDESCRIPTION:Traer delantal\r\n",
+    ) +
     event("Almuerzo con Pedro") +
     event("Trote largo con el club\r\n  de running").repeat(3) +
     "END:VCALENDAR\r\n",
@@ -67,22 +85,38 @@ describe("takeoutSignals", () => {
   it("gives the same signals for the same export, and refuses what is not a ZIP", () => {
     expect(takeoutSignals(TAKEOUT)).toEqual(takeoutSignals(TAKEOUT));
     expect(() => takeoutSignals(Buffer.from("esto no es un zip"))).toThrow();
-    expect(unzip(zipOf({ "a.txt": "hola" }))[0].read().toString()).toBe("hola");
+    expect(
+      unzip(zipOf({ "a.txt": "hola" }))[0]
+        .read()
+        .toString(),
+    ).toBe("hola");
   });
 });
 
 describe("receiveTakeout", () => {
   it("filters on the way in and leaves the rest in the inbox of the phone that started the flow", async () => {
     const inbox = createInboxStore();
-    const classify = vi.fn(async (topics: { name: string }[]) => topics.map((t) => ({ privacy: { level: t.name.includes("running") ? ("sensible" as const) : ("segura" as const) } })));
+    const classify = vi.fn(async (topics: { name: string }[]) =>
+      topics.map((t) => ({
+        privacy: { level: t.name.includes("running") ? ("sensible" as const) : ("segura" as const) },
+      })),
+    );
     expect(await receiveTakeout("este-telefono", TAKEOUT, { inbox, classify })).toEqual({ accepted: 2, held: 2 });
-    expect(inbox.drainOwner("este-telefono").signals.map((s) => s.label)).toEqual(["torno & barro", "clase de cerámica, torno"]);
+    expect(inbox.drainOwner("este-telefono").signals.map((s) => s.label)).toEqual([
+      "torno & barro",
+      "clase de cerámica, torno",
+    ]);
     expect(inbox.drainOwner("otro-telefono").signals).toEqual([]);
   });
 
   it("does not call the filter when the export has nothing to read", async () => {
     const classify = vi.fn();
-    expect(await receiveTakeout("este-telefono", zipOf({ "Takeout/leeme.html": "<p>hola</p>" }), { inbox: createInboxStore(), classify })).toEqual({ accepted: 0, held: 0 });
+    expect(
+      await receiveTakeout("este-telefono", zipOf({ "Takeout/leeme.html": "<p>hola</p>" }), {
+        inbox: createInboxStore(),
+        classify,
+      }),
+    ).toEqual({ accepted: 0, held: 0 });
     expect(classify).not.toHaveBeenCalled();
   });
 });
@@ -93,7 +127,13 @@ describe("the flow with Google", () => {
 
   it("asks only for the per-file Drive permission", () => {
     const url = new URL(googleAuthUrl(config.clientId, "https://minga.example/api/google/callback", "estado"));
-    expect(Object.fromEntries(url.searchParams)).toEqual({ client_id: config.clientId, redirect_uri: "https://minga.example/api/google/callback", state: "estado", response_type: "code", scope: DRIVE_FILE_SCOPE });
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      client_id: config.clientId,
+      redirect_uri: "https://minga.example/api/google/callback",
+      state: "estado",
+      response_type: "code",
+      scope: DRIVE_FILE_SCOPE,
+    });
   });
 
   it("each step id works once and expires", () => {
@@ -108,22 +148,55 @@ describe("the flow with Google", () => {
 
   it("exchanges the code, and gives nothing when Google refuses or the permission was left unticked", async () => {
     const granted = vi.fn(async () => json({ access_token: "token", scope: `openid ${DRIVE_FILE_SCOPE}` }));
-    expect(await exchangeGoogleCode(config, "codigo", "https://minga.example/api/google/callback", granted as unknown as typeof fetch)).toBe("token");
-    expect(String((granted.mock.calls[0] as unknown as [string, { body: URLSearchParams }])[1].body)).toContain("grant_type=authorization_code");
-    expect(await exchangeGoogleCode(config, "codigo", "x", (async () => json({ access_token: "token", scope: "openid" })) as unknown as typeof fetch)).toBeNull();
-    expect(await exchangeGoogleCode(config, "codigo", "x", (async () => json({ error: "invalid_grant" }, 400)) as unknown as typeof fetch)).toBeNull();
+    expect(
+      await exchangeGoogleCode(
+        config,
+        "codigo",
+        "https://minga.example/api/google/callback",
+        granted as unknown as typeof fetch,
+      ),
+    ).toBe("token");
+    expect(String((granted.mock.calls[0] as unknown as [string, { body: URLSearchParams }])[1].body)).toContain(
+      "grant_type=authorization_code",
+    );
+    expect(
+      await exchangeGoogleCode(config, "codigo", "x", (async () =>
+        json({ access_token: "token", scope: "openid" })) as unknown as typeof fetch),
+    ).toBeNull();
+    expect(
+      await exchangeGoogleCode(config, "codigo", "x", (async () =>
+        json({ error: "invalid_grant" }, 400)) as unknown as typeof fetch),
+    ).toBeNull();
   });
 
   it("downloads only the picked file, and refuses one that is too large", async () => {
     const drive = vi.fn(async () => new Response(new Uint8Array(TAKEOUT)));
-    expect((await downloadDriveFile("token", "id_del-archivo", drive as unknown as typeof fetch))?.equals(TAKEOUT)).toBe(true);
-    expect(drive.mock.calls[0]).toEqual(["https://www.googleapis.com/drive/v3/files/id_del-archivo?alt=media", { headers: { authorization: "Bearer token" } }]);
-    expect(await downloadDriveFile("token", "x", (async () => new Response("", { headers: { "content-length": String(301 * 2 ** 20) } })) as unknown as typeof fetch)).toBeNull();
-    expect(await downloadDriveFile("token", "x", (async () => new Response("", { status: 403 })) as unknown as typeof fetch)).toBeNull();
+    expect(
+      (await downloadDriveFile("token", "id_del-archivo", drive as unknown as typeof fetch))?.equals(TAKEOUT),
+    ).toBe(true);
+    expect(drive.mock.calls[0]).toEqual([
+      "https://www.googleapis.com/drive/v3/files/id_del-archivo?alt=media",
+      { headers: { authorization: "Bearer token" } },
+    ]);
+    expect(
+      await downloadDriveFile(
+        "token",
+        "x",
+        (async () =>
+          new Response("", { headers: { "content-length": String(301 * 2 ** 20) } })) as unknown as typeof fetch,
+      ),
+    ).toBeNull();
+    expect(
+      await downloadDriveFile("token", "x", (async () => new Response("", { status: 403 })) as unknown as typeof fetch),
+    ).toBeNull();
   });
 
   it("the picker page carries the project number as app id and cannot be broken out of", () => {
-    const html = googlePickerPage({ accessToken: "</script><script>alert(1)", clientId: config.clientId, pick: "elegir" });
+    const html = googlePickerPage({
+      accessToken: "</script><script>alert(1)",
+      clientId: config.clientId,
+      pick: "elegir",
+    });
     expect(html).toContain('"appId":"123456"');
     expect(html).not.toContain("</script><script>alert(1)");
   });

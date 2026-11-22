@@ -11,19 +11,27 @@ import { receiveSignals } from "./receive";
 // it to a phone: `owner` is that phone's inbox, and each call opens a fresh permit into it so the
 // deliveries go through the same checks and filter as the HTTP routes.
 
-type Deps = { inbox: Pick<InboxStore, "openFor" | "has" | "deliver" | "deliverProfile">; classify: ClassifySignals & ClassifyLines };
+type Deps = {
+  inbox: Pick<InboxStore, "openFor" | "has" | "deliver" | "deliverProfile">;
+  classify: ClassifySignals & ClassifyLines;
+};
 
 // The person may ask without pasting the app's message, so the tools carry the rules themselves.
 const WHEN = `Úsala cuando la persona te pida cargar o actualizar su perfil en ${APP_NAME}. Si te pegó el mensaje de ${APP_NAME}, sigue sus reglas; si no, arma la entrega con lo que ya sabes de ella y deja fuera lo de esta lista, aunque lo sepas:\n${LEAVE_OUT}`;
 
-const answer = ({ status, message }: { status: number; message: string }) => ({ content: [{ type: "text" as const, text: message }], isError: status >= 400 });
+const answer = ({ status, message }: { status: number; message: string }) => ({
+  content: [{ type: "text" as const, text: message }],
+  isError: status >= 400,
+});
 
 export function createConnectorServer(deps: Deps, owner: string): McpServer {
   const permit = () => deps.inbox.openFor(owner).token;
 
   const server = new McpServer(
     { name: "nodos", version: "0.1.0" },
-    { instructions: `${APP_NAME} recibe el perfil que una persona pide a su asistente. Todo pasa por un filtro de privacidad al llegar y queda como borrador privado en su teléfono: nada se publica desde aquí.` },
+    {
+      instructions: `${APP_NAME} recibe el perfil que una persona pide a su asistente. Todo pasa por un filtro de privacidad al llegar y queda como borrador privado en su teléfono: nada se publica desde aquí.`,
+    },
   );
 
   server.registerTool(

@@ -9,12 +9,16 @@ const ALL = new Set<LinkType>(["complemento", "afinidad"]);
 describe("topicGraph", () => {
   it("points Carla's wish to climb at Ana's escalada as a complement", () => {
     const { links } = topicGraph(room("seed-mut"), 0.6);
-    expect(links).toContainEqual(expect.objectContaining({ source: "seed-carla.escalada", target: "seed-ana.escalada", type: "complemento" }));
+    expect(links).toContainEqual(
+      expect.objectContaining({ source: "seed-carla.escalada", target: "seed-ana.escalada", type: "complemento" }),
+    );
   });
 
   it("links jazz lovers by affinity", () => {
     const { links } = topicGraph(room("seed-mut"), 0.6);
-    expect(links).toContainEqual(expect.objectContaining({ source: "seed-ana.jazz", target: "seed-bruno.jazz", type: "afinidad" }));
+    expect(links).toContainEqual(
+      expect.objectContaining({ source: "seed-ana.jazz", target: "seed-bruno.jazz", type: "afinidad" }),
+    );
   });
 
   it("never links two topics of the same person", () => {

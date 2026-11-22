@@ -42,7 +42,9 @@ function Row({ cv, replies }: { cv: Conversation; replies?: { text: string }[] }
 function PlanRow({ plan, me }: { plan: PlanSummary; me: string }) {
   const others = plan.members.filter((m) => m.personId !== me);
   const state =
-    plan.status === "deliberando" ? `${COPY.plan.deliberating} · ${plan.round} de ${plan.maxRounds}` : (plan.resumen ?? (plan.status === "consenso" ? COPY.plan.consensus : COPY.plan.decided));
+    plan.status === "deliberando"
+      ? `${COPY.plan.deliberating} · ${plan.round} de ${plan.maxRounds}`
+      : (plan.resumen ?? (plan.status === "consenso" ? COPY.plan.consensus : COPY.plan.decided));
   return (
     <ListRow
       lead={
@@ -65,11 +67,24 @@ function PlanRow({ plan, me }: { plan: PlanSummary; me: string }) {
 }
 
 /** `head` goes above the list when there is one; `empty` shows once we know there is none. With `max`, only the newest ones and no more pages. */
-export function Initiatives({ s, encounters, max, head, empty }: { s: PhoneState; encounters: Encounter[] | undefined; max?: number; head: ReactNode; empty?: ReactNode }) {
+export function Initiatives({
+  s,
+  encounters,
+  max,
+  head,
+  empty,
+}: {
+  s: PhoneState;
+  encounters: Encounter[] | undefined;
+  max?: number;
+  head: ReactNode;
+  empty?: ReactNode;
+}) {
   const plans = usePlans();
   const [shown, setShown] = useState(max ?? PAGE);
   const people = encounters ? affinities(s, encounters) : [];
-  const mine = DEMO && encounters ? localInitiatives(s, encounters).map((i) => buildInitiative(s.displayName, i, people)) : [];
+  const mine =
+    DEMO && encounters ? localInitiatives(s, encounters).map((i) => buildInitiative(s.displayName, i, people)) : [];
   const rows = [
     ...plans.map((plan) => <PlanRow key={plan.id} plan={plan} me={s.personId} />),
     ...mine.map((cv) => <Row key={cv.id} cv={cv} replies={s.replies?.[cv.id]} />),

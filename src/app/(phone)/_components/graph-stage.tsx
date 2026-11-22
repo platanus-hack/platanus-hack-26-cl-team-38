@@ -44,9 +44,18 @@ function nodeScene(phase: Phase, s: PhoneState) {
   const edges: Edge[] = [];
   const me = s.personId;
   const sources = connectedSources(s);
-  E[me] = { kind: "person", name: s.displayName || "Tú", me: true, silo: sources.length === 0, pose: pose({ x: 440, y: 320 }, 1, 1.3) };
+  E[me] = {
+    kind: "person",
+    name: s.displayName || "Tú",
+    me: true,
+    silo: sources.length === 0,
+    pose: pose({ x: 440, y: 320 }, 1, 1.3),
+  };
   // Eight Fuentes in two rows of four: in one row they overlap once the panel is narrower than ~900 px.
-  const slot = (i: number) => ({ x: W / 2 + ((i % PER_ROW) - (PER_ROW - 1) / 2) * PITCH, y: 52 + Math.floor(i / PER_ROW) * ROW_GAP });
+  const slot = (i: number) => ({
+    x: W / 2 + ((i % PER_ROW) - (PER_ROW - 1) / 2) * PITCH,
+    y: 52 + Math.floor(i / PER_ROW) * ROW_GAP,
+  });
   SOURCES.forEach((src, i) => {
     const on = sources.includes(src);
     E[`src:${src}`] = {

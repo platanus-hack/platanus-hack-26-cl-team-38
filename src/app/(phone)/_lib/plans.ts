@@ -2,7 +2,14 @@
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { z } from "zod";
-import { PlanGraphSchema, PlanSummarySchema, PlanViewSchema, type PlanGraph, type PlanSummary, type PlanView } from "@/lib/types";
+import {
+  PlanGraphSchema,
+  PlanSummarySchema,
+  PlanViewSchema,
+  type PlanGraph,
+  type PlanSummary,
+  type PlanView,
+} from "@/lib/types";
 import { api } from "./api";
 import { COPY } from "./copy";
 import { type Coincidence, contactsOf, DEMO, type Encounter, useEncounters } from "./people";
@@ -24,10 +31,16 @@ export type Created = { ok: true; planId: string } | { ok: false; error: string 
 
 export async function createPlan(intent: string, memberIds: string[], restrictions: string[]): Promise<Created> {
   try {
-    const response = await api("/api/plans", { method: "POST", body: JSON.stringify({ personId: getPhone().personId, intent, memberIds, restrictions }) });
+    const response = await api("/api/plans", {
+      method: "POST",
+      body: JSON.stringify({ personId: getPhone().personId, intent, memberIds, restrictions }),
+    });
     const json: unknown = await response.json().catch(() => null);
     if (response.ok) return { ok: true, planId: z.object({ planId: z.string() }).parse(json).planId };
-    return { ok: false, error: response.status === 409 ? C.onlyConnections : response.status === 401 ? C.noUser : C.failed };
+    return {
+      ok: false,
+      error: response.status === 409 ? C.onlyConnections : response.status === 401 ? C.noUser : C.failed,
+    };
   } catch {
     return { ok: false, error: C.failed };
   }
@@ -60,12 +73,18 @@ export function usePlanGraph(): LoadedGraph | null | undefined {
 }
 
 /** Your connections as people to invite: with their public Intereses when they are around. */
-export function connectionEncounters(graph: PlanGraph, encounters: Encounter[]): Encounter[] {
+function connectionEncounters(graph: PlanGraph, encounters: Encounter[]): Encounter[] {
   const known = new Map(encounters.map((e) => [e.person.personId, e]));
-  return graph.connections.map(
-    (c): Encounter =>
-      ({ ...(known.get(c.personId) ?? { person: { personId: c.personId, displayName: c.displayName, topics: [] }, distanceM: 0, radiusM: 50, at: new Date(0).toISOString(), place: "" }), relation: "conocido" }),
-  );
+  return graph.connections.map((c): Encounter => ({
+    ...(known.get(c.personId) ?? {
+      person: { personId: c.personId, displayName: c.displayName, topics: [] },
+      distanceM: 0,
+      radiusM: 50,
+      at: new Date(0).toISOString(),
+      place: "",
+    }),
+    relation: "conocido",
+  }));
 }
 
 /**
@@ -128,7 +147,11 @@ type Watch = {
 const watches = new Map<string, Watch>();
 
 function emit(w: Watch) {
-  w.state = w.missing ? { missing: true, confirmed: [] } : w.raw ? { plan: paced(w.raw, w.shown), confirmed: going(w.raw).slice(0, w.confirmed) } : EMPTY;
+  w.state = w.missing
+    ? { missing: true, confirmed: [] }
+    : w.raw
+      ? { plan: paced(w.raw, w.shown), confirmed: going(w.raw).slice(0, w.confirmed) }
+      : EMPTY;
   for (const listener of w.listeners) listener();
 }
 
@@ -204,7 +227,11 @@ export function usePlan(id: string): PlanState {
     },
     [id],
   );
-  return useSyncExternalStore(subscribe, () => watches.get(id)?.state ?? EMPTY, () => EMPTY);
+  return useSyncExternalStore(
+    subscribe,
+    () => watches.get(id)?.state ?? EMPTY,
+    () => EMPTY,
+  );
 }
 
 const SYNCED_KEY = "team38.profiles.synced";
@@ -222,10 +249,16 @@ export async function syncProfiles(profiles: Profile[]): Promise<void> {
     // Unreadable marker: send everything again.
   }
   const current = new Map(profiles.map((p) => [`${s.personId}:${p.source}`, p.markdown]));
-  for (const key of new Set([...current.keys(), ...Object.keys(synced).filter((k) => k.startsWith(`${s.personId}:`))])) {
+  for (const key of new Set([
+    ...current.keys(),
+    ...Object.keys(synced).filter((k) => k.startsWith(`${s.personId}:`)),
+  ])) {
     const markdown = current.get(key) ?? "";
     if (synced[key] === markdown) continue;
-    const response = await api("/api/context", { method: "POST", body: JSON.stringify({ personId: s.personId, source: key.slice(s.personId.length + 1), markdown }) }).catch(() => null);
+    const response = await api("/api/context", {
+      method: "POST",
+      body: JSON.stringify({ personId: s.personId, source: key.slice(s.personId.length + 1), markdown }),
+    }).catch(() => null);
     if (!response?.ok) continue;
     if (markdown) synced[key] = markdown;
     else delete synced[key];

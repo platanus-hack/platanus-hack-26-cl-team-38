@@ -15,7 +15,10 @@ function hash(text: string): string {
 }
 
 function toMesa(roomId: string, draft: Draft, score: number): Mesa {
-  const people = draft.members.map((m) => m.personId).sort().join("+");
+  const people = draft.members
+    .map((m) => m.personId)
+    .sort()
+    .join("+");
   return {
     id: `${roomId}.${draft.anchorThemeId}.${hash(people)}`,
     roomId,

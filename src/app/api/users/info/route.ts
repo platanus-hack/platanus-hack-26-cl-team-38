@@ -6,12 +6,20 @@ import { readOwnInfo, saveOwnInfo } from "@/lib/users/info";
 
 // GET /api/users/info?personId=… → { info: UserInfo | null }
 export async function GET(request: Request) {
-  const { status, ...reply } = await readOwnInfo(supabaseAdmin, new URL(request.url).searchParams.get("personId"), request.headers.get("authorization"));
+  const { status, ...reply } = await readOwnInfo(
+    supabaseAdmin,
+    new URL(request.url).searchParams.get("personId"),
+    request.headers.get("authorization"),
+  );
   return Response.json(reply, { status });
 }
 
 // POST /api/users/info { personId, displayName?, info } → { info: UserInfo }
 export async function POST(request: Request) {
-  const { status, ...reply } = await saveOwnInfo(supabaseAdmin, await request.json().catch(() => null), request.headers.get("authorization"));
+  const { status, ...reply } = await saveOwnInfo(
+    supabaseAdmin,
+    await request.json().catch(() => null),
+    request.headers.get("authorization"),
+  );
   return Response.json(reply, { status });
 }

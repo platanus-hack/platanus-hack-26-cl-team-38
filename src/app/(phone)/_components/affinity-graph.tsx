@@ -49,7 +49,8 @@ export function AffinityGraph({
   const list = sorted.slice(0, MAX);
   if (match) {
     const waiting = sorted.slice(MAX).filter((c) => match.has(c.person.personId));
-    for (let i = list.length - 1; i >= 0 && waiting.length; i--) if (!match.has(list[i].person.personId)) list[i] = waiting.shift()!;
+    for (let i = list.length - 1; i >= 0 && waiting.length; i--)
+      if (!match.has(list[i].person.personId)) list[i] = waiting.shift()!;
   }
   list.forEach((c, i) => {
     const id = `p:${c.person.personId}`;

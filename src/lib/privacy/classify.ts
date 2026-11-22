@@ -35,7 +35,12 @@ export async function classifyTopics(
     privacy: {
       level: "sensible",
       category: blocked[i]?.category,
-      reason: blocked[i]?.by === "patron" ? "Contiene un dato de contacto." : blocked[i] ? reasonFor(blocked[i].category) : undefined,
+      reason:
+        blocked[i]?.by === "patron"
+          ? "Contiene un dato de contacto."
+          : blocked[i]
+            ? reasonFor(blocked[i].category)
+            : undefined,
       checkedFor: fingerprint(topic),
       decidedBy: "default",
     },
@@ -52,13 +57,20 @@ export async function classifyTopics(
     // With no verdict or a passing one, a local finding is what explains the level.
     const localDecides = local !== null && (verdict === null || verdict.level === "segura");
     // A suggested general version is only worth showing if it would itself get through.
-    const saferName = verdict?.saferName && !screen({ kind: topic.kind, name: verdict.saferName }) ? verdict.saferName : undefined;
+    const saferName =
+      verdict?.saferName && !screen({ kind: topic.kind, name: verdict.saferName }) ? verdict.saferName : undefined;
 
     results[topicIndex] = {
       privacy: {
         level,
         category: localDecides ? local.category : verdict?.category,
-        reason: localDecides ? local.reason : !verdict ? "No pudimos revisarlo ahora, así que decides tú." : level === "segura" ? undefined : reasonFor(verdict.category),
+        reason: localDecides
+          ? local.reason
+          : !verdict
+            ? "No pudimos revisarlo ahora, así que decides tú."
+            : level === "segura"
+              ? undefined
+              : reasonFor(verdict.category),
         saferName: level === "personal" ? saferName : undefined,
         checkedFor: fingerprint(topic),
         decidedBy: "default",
@@ -100,8 +112,15 @@ function localFinding(
   name: string,
   anchor: Finding | null | "failed",
 ): { by: "ancla" | "patron"; category?: PrivacyCategory; reason: string } | null {
-  if (anchor === "failed") return { by: "ancla", reason: "No pudimos compararlo con los temas sensibles, así que decides tú." };
-  if (anchor) return { by: "ancla", category: anchor.category, reason: `Se parece a un tema de ${CATEGORY_LABELS[anchor.category]}.` };
-  if (name.length > MAX_NAME_LENGTH) return { by: "patron", category: "unico", reason: "Es muy largo para ser un tópico: revisa que no diga de más." };
+  if (anchor === "failed")
+    return { by: "ancla", reason: "No pudimos compararlo con los temas sensibles, así que decides tú." };
+  if (anchor)
+    return {
+      by: "ancla",
+      category: anchor.category,
+      reason: `Se parece a un tema de ${CATEGORY_LABELS[anchor.category]}.`,
+    };
+  if (name.length > MAX_NAME_LENGTH)
+    return { by: "patron", category: "unico", reason: "Es muy largo para ser un tópico: revisa que no diga de más." };
   return null;
 }

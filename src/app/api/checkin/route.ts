@@ -13,14 +13,19 @@ export async function POST(request: Request) {
   if (room.error) return Response.json({ error: room.error.message }, { status: 500 });
   if (!room.data) return Response.json({ error: "No existe una sala con ese código" }, { status: 404 });
 
-  const write = await supabaseAdmin
-    .from("room_members")
-    .upsert({ room_id: room.data.id, person_id: projection.personId, display_name: projection.displayName, projection });
+  const write = await supabaseAdmin.from("room_members").upsert({
+    room_id: room.data.id,
+    person_id: projection.personId,
+    display_name: projection.displayName,
+    projection,
+  });
   if (write.error) return Response.json({ error: write.error.message }, { status: 500 });
 
   // The same projection as the person's profile, across rooms. A phone that sends its device key
   // claims the profile here. Not fatal: the room works without it (say, migration not applied yet).
-  await saveProfile(supabaseAdmin, projection, bearerKey(request.headers.get("authorization"))).catch((error) => console.error("perfil:", error));
+  await saveProfile(supabaseAdmin, projection, bearerKey(request.headers.get("authorization"))).catch((error) =>
+    console.error("perfil:", error),
+  );
 
   return Response.json({ roomId: room.data.id, accepted: projection.topics.map((t) => t.id), rejected });
 }

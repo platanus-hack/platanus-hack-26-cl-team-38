@@ -80,7 +80,14 @@ export function Explorer() {
           </p>
         )}
 
-        <RoomSwitch rooms={rooms} roomId={roomId} onChange={(id) => { setRoomId(id); setSelected(undefined); }} />
+        <RoomSwitch
+          rooms={rooms}
+          roomId={roomId}
+          onChange={(id) => {
+            setRoomId(id);
+            setSelected(undefined);
+          }}
+        />
 
         <section className="flex flex-col gap-3" aria-labelledby="threshold-label">
           <div className="flex items-baseline justify-between">
@@ -109,7 +116,11 @@ export function Explorer() {
 
         <dl className="grid grid-cols-3 border-y border-[#18212F]/10 py-5">
           <Figure value={projections.length} label="personas en la sala" />
-          <Figure value={buildable} label="mesas con complemento: alguien aporta y alguien busca" tone={OUTCOME.complemento.text} />
+          <Figure
+            value={buildable}
+            label="mesas con complemento: alguien aporta y alguien busca"
+            tone={OUTCOME.complemento.text}
+          />
           <Figure value={affinity} label="mesas de pura afinidad" tone={OUTCOME.afinidad.text} />
         </dl>
 
@@ -122,8 +133,8 @@ export function Explorer() {
         )}
 
         <p className="mt-auto pt-4 text-xs leading-relaxed text-[#18212F]/50">
-          Una mesa se arma con 3 o más personas. Esta es una vista previa de temas y roles, calculada en tu navegador con los embeddings del seed. Las mesas finales las
-          arma el motor de sala.
+          Una mesa se arma con 3 o más personas. Esta es una vista previa de temas y roles, calculada en tu navegador
+          con los embeddings del seed. Las mesas finales las arma el motor de sala.
         </p>
       </aside>
     </div>
@@ -139,7 +150,13 @@ function RoomSwitch({ rooms, roomId, onChange }: { rooms: Room[]; roomId?: strin
           key={room.id}
           className="flex cursor-pointer flex-col rounded-lg px-3 py-2 text-sm transition-colors has-checked:bg-white has-checked:shadow-[0_1px_2px_rgba(24,33,47,0.12)] has-focus-visible:outline-2 has-focus-visible:outline-[#2F7FD1]"
         >
-          <input type="radio" name="room" className="sr-only" checked={room.id === roomId} onChange={() => onChange(room.id)} />
+          <input
+            type="radio"
+            name="room"
+            className="sr-only"
+            checked={room.id === roomId}
+            onChange={() => onChange(room.id)}
+          />
           <span className="font-medium">{room.name}</span>
           <span className="text-xs text-[#18212F]/55">código {room.code}</span>
         </label>
@@ -240,8 +257,13 @@ function PersonDetail({
                 <span className="size-2.5 rounded-full" style={{ background: ROLE[role].color }} />
                 {theme.name}
               </span>
-              <span className="text-xs" style={{ color: theme.outcome === "sin mesa" ? "rgba(24,33,47,0.45)" : ROLE[role].color }}>
-                {theme.outcome === "sin mesa" ? `${ROLE[role].label.toLowerCase()}, no se arma` : ROLE[role].label.toLowerCase()}
+              <span
+                className="text-xs"
+                style={{ color: theme.outcome === "sin mesa" ? "rgba(24,33,47,0.45)" : ROLE[role].color }}
+              >
+                {theme.outcome === "sin mesa"
+                  ? `${ROLE[role].label.toLowerCase()}, no se arma`
+                  : ROLE[role].label.toLowerCase()}
               </span>
             </li>
           ))}
@@ -273,7 +295,11 @@ function Depth({ value }: { value: 1 | 2 | 3 }) {
   return (
     <span className="flex gap-0.5" aria-label={`profundidad ${value} de 3`}>
       {[1, 2, 3].map((level) => (
-        <span key={level} className="size-1.5 rounded-full" style={{ background: level <= value ? INK : "rgba(24,33,47,0.15)" }} />
+        <span
+          key={level}
+          className="size-1.5 rounded-full"
+          style={{ background: level <= value ? INK : "rgba(24,33,47,0.15)" }}
+        />
       ))}
     </span>
   );

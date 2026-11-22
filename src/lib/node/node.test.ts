@@ -4,16 +4,34 @@ import type { Signal, TopicPrivacy } from "@/lib/types";
 import { draftsFromSignals, needsVerdict, reconcile, setShared, type DraftTopic } from "./node";
 
 const person = { personId: "p1", displayName: "Ana" };
-const signal = (label: string, over: Partial<Signal> = {}): Signal => ({ source: "claude", kind: "hace", label, strength: 0.7, evidence: "", ...over });
-const verdict = (d: DraftTopic, level: TopicPrivacy["level"] = "segura"): { draft: DraftTopic; verdict: TopicPrivacy } => ({
+const signal = (label: string, over: Partial<Signal> = {}): Signal => ({
+  source: "claude",
+  kind: "hace",
+  label,
+  strength: 0.7,
+  evidence: "",
+  ...over,
+});
+const verdict = (
+  d: DraftTopic,
+  level: TopicPrivacy["level"] = "segura",
+): { draft: DraftTopic; verdict: TopicPrivacy } => ({
   draft: d,
   verdict: { level, checkedFor: fingerprint(d), decidedBy: "default" },
 });
-const start = (drafts: DraftTopic[]) => reconcile(undefined, person, drafts, drafts.map((d) => verdict(d)));
+const start = (drafts: DraftTopic[]) =>
+  reconcile(
+    undefined,
+    person,
+    drafts,
+    drafts.map((d) => verdict(d)),
+  );
 
 describe("draftsFromSignals", () => {
   it("gives distinct ids to names that fold to the same slug", () => {
-    const ids = draftsFromSignals("p1", [signal("c++", { kind: "sabe" }), signal("c#", { kind: "sabe" })]).map((d) => d.id);
+    const ids = draftsFromSignals("p1", [signal("c++", { kind: "sabe" }), signal("c#", { kind: "sabe" })]).map(
+      (d) => d.id,
+    );
     expect(new Set(ids).size).toBe(2);
   });
 });

@@ -57,7 +57,12 @@ function Aportes({ message, author, mine }: { message: PlanMessageView; author: 
             {network.map((a, i) => (
               <li key={i}>
                 {a.texto}
-                {a.contacto && <Mono className="mute"> {C.yourContact} {a.contacto}</Mono>}
+                {a.contacto && (
+                  <Mono className="mute">
+                    {" "}
+                    {C.yourContact} {a.contacto}
+                  </Mono>
+                )}
               </li>
             ))}
           </ul>
@@ -75,7 +80,8 @@ const dots = (
   </span>
 );
 
-const listed = (names: string[]) => (names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} ${C.and} ${names.at(-1)}`);
+const listed = (names: string[]) =>
+  names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} ${C.and} ${names.at(-1)}`;
 
 /** Every Agente still writing, in one row: their faces side by side and a single bubble. */
 function WritingRow({ ids, me, names }: { ids: string[]; me: string; names: Map<string, string> }) {
@@ -105,7 +111,11 @@ function StepHeader({ label, hint }: { label: string; hint?: string }) {
 
 function TallyLine({ tally }: { tally: Tally }) {
   if (tally.all) return <Mono className="plan-tally ok">{C.allAccept}</Mono>;
-  const parts = [tally.accept && C.accepts(tally.accept), tally.adjust && C.adjusts(tally.adjust), tally.block && C.blocks(tally.block)].filter(Boolean);
+  const parts = [
+    tally.accept && C.accepts(tally.accept),
+    tally.adjust && C.adjusts(tally.adjust),
+    tally.block && C.blocks(tally.block),
+  ].filter(Boolean);
   if (parts.length === 0) return null;
   return (
     <Mono className="plan-tally">
@@ -181,7 +191,15 @@ function ProposalCard({ step, open }: { step: Extract<Step, { kind: "proposal" }
   );
 }
 
-function ThePlan({ plan, names, verdict }: { plan: NonNullable<PlanView["plan"]>; names: Map<string, string>; verdict: string }) {
+function ThePlan({
+  plan,
+  names,
+  verdict,
+}: {
+  plan: NonNullable<PlanView["plan"]>;
+  names: Map<string, string>;
+  verdict: string;
+}) {
   const { content } = plan;
   return (
     <section className="plan-card ai">
@@ -251,7 +269,9 @@ function Message({ m, me, names }: { m: PlanMessageView; me: string; names: Map<
       <span className="who">
         {mine ? C.you : COPY.agentOf(author)}
         {m.decision && <span className={`dchip ${m.decision}`}>{DECISION[m.decision]}</span>}
-        {m.participa !== undefined && <span className={`pchip ${m.participa ? "va" : "nova"}`}>{m.participa ? C.going : C.notGoing}</span>}
+        {m.participa !== undefined && (
+          <span className={`pchip ${m.participa ? "va" : "nova"}`}>{m.participa ? C.going : C.notGoing}</span>
+        )}
       </span>
       {m.text}
       <Aportes message={m} author={author} mine={mine} />
@@ -260,7 +280,7 @@ function Message({ m, me, names }: { m: PlanMessageView; me: string; names: Map<
   return mine ? (
     <div className="bubble me">{body}</div>
   ) : (
-    <div className={`msg${m.participa === false ? " nova" : ""}`}>
+    <div className={`msg${m.participa === false ? "nova" : ""}`}>
       <Avatar id={m.personId ?? ""} />
       <div className="bubble">{body}</div>
     </div>
@@ -304,7 +324,7 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
         <div className="plan-net">
           <PlanNetwork plan={plan} me={me} confirmed={confirmed} W={340} H={300} compact />
         </div>
-        <Mono className={`plan-status${closed ? " done" : ""}`}>{statusOf(plan)}</Mono>
+        <Mono className={`plan-status${closed ? "done" : ""}`}>{statusOf(plan)}</Mono>
         {thread.steps.map((step, i) => (
           <Fragment key={step.kind === "opening" ? "opening" : `v${step.proposal.version}`}>
             {step.kind === "opening" ? (
@@ -313,7 +333,10 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
               <StepHeader label={C.finalDecision} />
             ) : (
               <>
-                <StepHeader label={`${C.proposal} ${step.proposal.version}`} hint={step.current ? C.answeringHint : undefined} />
+                <StepHeader
+                  label={`${C.proposal} ${step.proposal.version}`}
+                  hint={step.current ? C.answeringHint : undefined}
+                />
                 <ProposalCard step={step} open={!closed && i === lastProposal} />
               </>
             )}

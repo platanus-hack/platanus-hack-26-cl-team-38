@@ -39,7 +39,14 @@ export default function CoincidenciasPage() {
               {visible ? `${coins.length} · ${fmtMeters(radius)}` : "—"}
               {DEMO && !s.locationOn ? ` · ${C.demoShort}` : ""}
             </Mono>
-            <button type="button" className="filter-btn" aria-expanded={filters} aria-controls="explore-filters" aria-label={C.filters} onClick={() => setFilters(!filters)}>
+            <button
+              type="button"
+              className="filter-btn"
+              aria-expanded={filters}
+              aria-controls="explore-filters"
+              aria-label={C.filters}
+              onClick={() => setFilters(!filters)}
+            >
               <Icon name="filter" />
             </button>
           </div>
@@ -47,7 +54,14 @@ export default function CoincidenciasPage() {
             <div id="explore-filters" className="filters">
               <label className="near-switch">
                 <span>{C.visible}</span>
-                <button type="button" role="switch" aria-checked={visible} aria-label={C.visible} className="switch" onClick={() => setVisible(!visible)} />
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={visible}
+                  aria-label={C.visible}
+                  className="switch"
+                  onClick={() => setVisible(!visible)}
+                />
               </label>
               {visible && (
                 <label className="range">
@@ -104,15 +118,34 @@ export default function CoincidenciasPage() {
 }
 
 /** Why proximity is not running yet, and the one thing that turns it on. */
-function NotNear({ status, s, location }: { status: ProximityStatus; s: { located: boolean; room: boolean }; location: ReturnType<typeof useLocation> }) {
+function NotNear({
+  status,
+  s,
+  location,
+}: {
+  status: ProximityStatus;
+  s: { located: boolean; room: boolean };
+  location: ReturnType<typeof useLocation>;
+}) {
   if (status === "connecting") return <div className="empty">{C.loading}</div>;
-  const message = !s.room ? C.noRoom : !s.located ? C.needLocation : status === "denied" || location.status === "denied" ? C.locationDenied : C.proximityFailed;
+  const message = !s.room
+    ? C.noRoom
+    : !s.located
+      ? C.needLocation
+      : status === "denied" || location.status === "denied"
+        ? C.locationDenied
+        : C.proximityFailed;
   return (
     <div className="empty">
       <div className="empty-state">
         <p>{message}</p>
         {s.room && !s.located && (
-          <button type="button" className="btn light" disabled={location.status === "locating"} onClick={location.locate}>
+          <button
+            type="button"
+            className="btn light"
+            disabled={location.status === "locating"}
+            onClick={location.locate}
+          >
             {C.turnLocation}
           </button>
         )}

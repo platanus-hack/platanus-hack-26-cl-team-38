@@ -7,7 +7,7 @@ import { team } from "./team";
 // and depth 3 always has sabe/hace evidence.
 
 export type SeedTopic = [name: string, kind: Kind, depth: 1 | 2 | 3, sources: Source[]];
-export type SeedPerson = { slug: string; displayName: string; topics: SeedTopic[] };
+type SeedPerson = { slug: string; displayName: string; topics: SeedTopic[] };
 export type SeedRoom = { id: string; code: string; name: string; people: SeedPerson[] };
 
 const mut: SeedPerson[] = [
@@ -178,11 +178,46 @@ const mut: SeedPerson[] = [
 
 // Negative control (O8): nothing in common, so the engine must return 0 mesas.
 const control: SeedPerson[] = [
-  { slug: "ximena", displayName: "Ximena", topics: [["astronomía", "sabe", 3, ["claude"]], ["rugby", "busca", 1, ["chatgpt"]]] },
-  { slug: "yago", displayName: "Yago", topics: [["repostería", "hace", 3, ["instagram", "chatgpt"]], ["numismática", "le_gusta", 1, ["claude"]]] },
-  { slug: "zoe", displayName: "Zoe", topics: [["k-pop", "le_gusta", 2, ["spotify"]], ["derecho tributario", "sabe", 3, ["claude"]]] },
-  { slug: "walter", displayName: "Walter", topics: [["pesca con mosca", "hace", 3, ["instagram", "chatgpt"]], ["japonés", "quiere_ser", 1, ["chatgpt"]]] },
-  { slug: "valeria", displayName: "Valeria", topics: [["bordado", "hace", 2, ["instagram"]], ["blockchain", "busca", 1, ["claude"]]] },
+  {
+    slug: "ximena",
+    displayName: "Ximena",
+    topics: [
+      ["astronomía", "sabe", 3, ["claude"]],
+      ["rugby", "busca", 1, ["chatgpt"]],
+    ],
+  },
+  {
+    slug: "yago",
+    displayName: "Yago",
+    topics: [
+      ["repostería", "hace", 3, ["instagram", "chatgpt"]],
+      ["numismática", "le_gusta", 1, ["claude"]],
+    ],
+  },
+  {
+    slug: "zoe",
+    displayName: "Zoe",
+    topics: [
+      ["k-pop", "le_gusta", 2, ["spotify"]],
+      ["derecho tributario", "sabe", 3, ["claude"]],
+    ],
+  },
+  {
+    slug: "walter",
+    displayName: "Walter",
+    topics: [
+      ["pesca con mosca", "hace", 3, ["instagram", "chatgpt"]],
+      ["japonés", "quiere_ser", 1, ["chatgpt"]],
+    ],
+  },
+  {
+    slug: "valeria",
+    displayName: "Valeria",
+    topics: [
+      ["bordado", "hace", 2, ["instagram"]],
+      ["blockchain", "busca", 1, ["claude"]],
+    ],
+  },
 ];
 
 // The coordination cases of seed/network.v2.json: one room per case and one with everyone in the network and
@@ -190,7 +225,14 @@ const control: SeedPerson[] = [
 // take part as guests or helpers, so the rooms resolve them from seed/team. Only the public part goes
 // into rooms: the detailed profile, agentOnly and connections are loaded apart (scripts/load-seed.mts).
 const networkPeople = new Map<string, SeedPerson>([
-  ...network.people.map((p): [string, SeedPerson] => [p.personId, { slug: slugOf(p.personId), displayName: p.displayName, topics: p.topics.map((t): SeedTopic => [t.name, t.kind, t.depth, t.sources]) }]),
+  ...network.people.map((p): [string, SeedPerson] => [
+    p.personId,
+    {
+      slug: slugOf(p.personId),
+      displayName: p.displayName,
+      topics: p.topics.map((t): SeedTopic => [t.name, t.kind, t.depth, t.sources]),
+    },
+  ]),
   ...team.map((p): [string, SeedPerson] => [`seed-${p.slug}`, p]),
 ]);
 
@@ -199,10 +241,17 @@ const networkPeople = new Map<string, SeedPerson>([
 const hack: SeedPerson[] = [
   ...team.filter((p) => p.rooms.includes("seed-hack")),
   ...mut.filter((p) => ["bruno", "hugo", "lucia", "javier", "sofia"].includes(p.slug)),
-  ...["nicolas-bravo", "francisco-leiva", "sebastian-perez", "isidora-paredes", "tamara-quezada", "ignacia-silva"].map((slug) => networkPeople.get(`seed-${slug}`)!),
+  ...["nicolas-bravo", "francisco-leiva", "sebastian-perez", "isidora-paredes", "tamara-quezada", "ignacia-silva"].map(
+    (slug) => networkPeople.get(`seed-${slug}`)!,
+  ),
 ];
 
-const networkRooms: SeedRoom[] = network.rooms.map((room) => ({ id: room.id, code: room.code, name: room.name, people: room.members.map((id) => networkPeople.get(id)!) }));
+const networkRooms: SeedRoom[] = network.rooms.map((room) => ({
+  id: room.id,
+  code: room.code,
+  name: room.name,
+  people: room.members.map((id) => networkPeople.get(id)!),
+}));
 
 export const SEED_ROOMS: SeedRoom[] = [
   { id: "seed-mut", code: "MUT001", name: "Sala de prueba · MUT", people: mut },

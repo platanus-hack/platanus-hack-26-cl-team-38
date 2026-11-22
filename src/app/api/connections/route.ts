@@ -4,11 +4,16 @@ import { ConnectionRequestSchema, listConnections, runConnectionAction } from "@
 import { authenticate } from "@/lib/users/profile";
 
 // Both need `Authorization: Bearer <device key>`: a connection is read and changed only by its two parties.
-const denied = () => Response.json({ error: "Falta la clave del dispositivo, o no es la de esa persona" }, { status: 401 });
+const denied = () =>
+  Response.json({ error: "Falta la clave del dispositivo, o no es la de esa persona" }, { status: 401 });
 
 // GET /api/connections?personId=… → { connections }
 export async function GET(request: Request) {
-  const me = await authenticate(supabaseAdmin, new URL(request.url).searchParams.get("personId"), request.headers.get("authorization"));
+  const me = await authenticate(
+    supabaseAdmin,
+    new URL(request.url).searchParams.get("personId"),
+    request.headers.get("authorization"),
+  );
   if (!me) return denied();
   return Response.json({ connections: await listConnections(supabaseAdmin, me) });
 }

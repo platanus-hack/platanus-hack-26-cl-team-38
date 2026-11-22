@@ -50,8 +50,10 @@ export function topicGraph(projections: PublicProjection[], threshold: number): 
       if (a.personId === b.personId) continue;
       const score = cosine(a.embedding, b.embedding);
       if (score < threshold) continue;
-      if (a.roles.includes("busca") && b.roles.includes("aporta")) links.push({ source: a.id, target: b.id, type: "complemento", score });
-      else if (b.roles.includes("busca") && a.roles.includes("aporta")) links.push({ source: b.id, target: a.id, type: "complemento", score });
+      if (a.roles.includes("busca") && b.roles.includes("aporta"))
+        links.push({ source: a.id, target: b.id, type: "complemento", score });
+      else if (b.roles.includes("busca") && a.roles.includes("aporta"))
+        links.push({ source: b.id, target: a.id, type: "complemento", score });
       else links.push({ source: a.id, target: b.id, type: "afinidad", score });
     }
   }

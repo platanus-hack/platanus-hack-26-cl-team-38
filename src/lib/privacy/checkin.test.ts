@@ -17,12 +17,28 @@ function deps(verdicts: Record<string, Classified> = {}) {
   };
 }
 
-const topic = (name: string, extra: Record<string, unknown> = {}) => ({ id: `p1.${name}`, name, kind: "hace", depth: 2, sources: ["claude"], ...extra });
-const body = (topics: unknown[], extra: Record<string, unknown> = {}) => ({ roomCode: "HACK26", personId: "p1", displayName: "Ana", topics, ...extra });
+const topic = (name: string, extra: Record<string, unknown> = {}) => ({
+  id: `p1.${name}`,
+  name,
+  kind: "hace",
+  depth: 2,
+  sources: ["claude"],
+  ...extra,
+});
+const body = (topics: unknown[], extra: Record<string, unknown> = {}) => ({
+  roomCode: "HACK26",
+  personId: "p1",
+  displayName: "Ana",
+  topics,
+  ...extra,
+});
 
 describe("admitCheckIn", () => {
   it("admits what the server itself classified as safe or personal, with server-side embeddings", async () => {
-    const result = await admitCheckIn(body([topic("escalada"), topic("riesgo en banco x")]), deps({ "riesgo en banco x": verdict("personal") }));
+    const result = await admitCheckIn(
+      body([topic("escalada"), topic("riesgo en banco x")]),
+      deps({ "riesgo en banco x": verdict("personal") }),
+    );
     expect(result).toMatchObject({ ok: true, roomCode: "HACK26", rejected: [] });
     if (!result.ok) return;
     expect(result.projection).toEqual({

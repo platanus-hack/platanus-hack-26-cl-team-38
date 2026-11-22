@@ -8,7 +8,15 @@ import { Icon } from "./icons";
 import { COPY } from "../_lib/copy";
 
 /** Back arrow: returns to the screen you came from; opened from a link, it goes to `fallback`. */
-export function BackLink({ fallback, className, style }: { fallback: string; className?: string; style?: CSSProperties }) {
+export function BackLink({
+  fallback,
+  className,
+  style,
+}: {
+  fallback: string;
+  className?: string;
+  style?: CSSProperties;
+}) {
   const router = useRouter();
   return (
     <Link
@@ -121,7 +129,11 @@ export function Field({
     const el = area.current;
     if (!el) return;
     const line = parseFloat(getComputedStyle(el).lineHeight) || 22;
-    const pad = el.offsetHeight - el.clientHeight + parseFloat(getComputedStyle(el).paddingTop) + parseFloat(getComputedStyle(el).paddingBottom);
+    const pad =
+      el.offsetHeight -
+      el.clientHeight +
+      parseFloat(getComputedStyle(el).paddingTop) +
+      parseFloat(getComputedStyle(el).paddingBottom);
     el.style.height = "auto";
     // An empty field measures its placeholder, so a long one gets its second line too.
     const probe = !value && placeholder ? (el.value = placeholder) : null;
@@ -148,9 +160,20 @@ export function Field({
           }}
         />
       ) : (
-        <input aria-label={label} value={value} placeholder={placeholder} maxLength={maxLength} onChange={(e) => onChange(e.target.value)} />
+        <input
+          aria-label={label}
+          value={value}
+          placeholder={placeholder}
+          maxLength={maxLength}
+          onChange={(e) => onChange(e.target.value)}
+        />
       )}
-      <button type="submit" className={`go${ready ? " on" : ""}${done ? " done" : ""}`} aria-label={done ? COPY.sent : COPY.send} disabled={!ready}>
+      <button
+        type="submit"
+        className={`go${ready ? "on" : ""}${done ? "done" : ""}`}
+        aria-label={done ? COPY.sent : COPY.send}
+        disabled={!ready}
+      >
         <Icon name={send ? "send" : done ? "check" : "arrow"} />
       </button>
     </form>
@@ -158,7 +181,17 @@ export function Field({
 }
 
 /** A big title that hands over to a small centered one when it scrolls away. */
-export function LargeTitle({ title, back, right, sub }: { title: string; back?: string; right?: ReactNode; sub?: ReactNode }) {
+export function LargeTitle({
+  title,
+  back,
+  right,
+  sub,
+}: {
+  title: string;
+  back?: string;
+  right?: ReactNode;
+  sub?: ReactNode;
+}) {
   const big = useRef<HTMLHeadingElement>(null);
   const [stuck, setStuck] = useState(false);
   useEffect(() => {
@@ -166,21 +199,20 @@ export function LargeTitle({ title, back, right, sub }: { title: string; back?: 
     if (!el) return;
     // Stuck as soon as the title starts going under the bar: a two-line title would otherwise
     // show half of itself under it before the small one appears.
-    const io = new IntersectionObserver(([e]) => setStuck(e.intersectionRatio < 1 && e.boundingClientRect.top < (e.rootBounds?.top ?? 48)), {
-      rootMargin: "-48px 0px 0px 0px",
-      threshold: 1,
-    });
+    const io = new IntersectionObserver(
+      ([e]) => setStuck(e.intersectionRatio < 1 && e.boundingClientRect.top < (e.rootBounds?.top ?? 48)),
+      {
+        rootMargin: "-48px 0px 0px 0px",
+        threshold: 1,
+      },
+    );
     io.observe(el);
     return () => io.disconnect();
   }, []);
   return (
     <>
-      <div className={`lt-bar${stuck ? " stuck" : ""}`}>
-        <span className="slot">
-          {back && (
-            <BackLink fallback={back} className="back slot" />
-          )}
-        </span>
+      <div className={`lt-bar${stuck ? "stuck" : ""}`}>
+        <span className="slot">{back && <BackLink fallback={back} className="back slot" />}</span>
         <span className="small-title" aria-hidden={!stuck}>
           {title}
         </span>
@@ -204,7 +236,7 @@ export function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boo
       role="switch"
       aria-checked={on}
       aria-label={`${label}: ${on ? COPY.isPublic : COPY.onlyYou}`}
-      className={`toggle${on ? " on" : ""}`}
+      className={`toggle${on ? "on" : ""}`}
       onClick={() => onChange(!on)}
     >
       <Icon name={on ? "eye" : "eyeoff"} />
@@ -219,7 +251,7 @@ export function Tags({ topics, selected }: { topics: Pick<Topic, "id" | "name" |
       {topics.map((t, i) => (
         <span key={t.id}>
           {i > 0 && <span className="sep"> · </span>}
-          <span className={`tag d${t.depth}${selected?.has(t.name) ? " sel" : ""}`}>{t.name}</span>
+          <span className={`tag d${t.depth}${selected?.has(t.name) ? "sel" : ""}`}>{t.name}</span>
         </span>
       ))}
     </p>
@@ -231,7 +263,13 @@ export function Why({ text }: { text: string }) {
   const [open, setOpen] = useState(false);
   return (
     <span className="why">
-      <button type="button" className="q" aria-expanded={open} aria-label={COPY.whatIsThis} onClick={() => setOpen(!open)}>
+      <button
+        type="button"
+        className="q"
+        aria-expanded={open}
+        aria-label={COPY.whatIsThis}
+        onClick={() => setOpen(!open)}
+      >
         ?
       </button>
       {open && <span className="hint">{text}</span>}

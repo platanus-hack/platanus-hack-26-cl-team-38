@@ -3,7 +3,15 @@ import { fold } from "@/lib/privacy/taxonomy";
 import type { PlanAporte, PlanContent, PlanDecidedBy, PlanMessage } from "@/lib/types";
 import type { Db } from "@/lib/users/profile";
 import { createContextBuilder, type AgentContext } from "./context";
-import { closePlan, loadPlan, recordMessage, saveVersion, type CallMeta, type PlanMember, type PlanSnapshot } from "./store";
+import {
+  closePlan,
+  loadPlan,
+  recordMessage,
+  saveVersion,
+  type CallMeta,
+  type PlanMember,
+  type PlanSnapshot,
+} from "./store";
 import { describePlan, planInForce, transcript } from "./view";
 
 // The deliberation of one plan. The models write; this code decides everything else: who speaks
@@ -17,8 +25,18 @@ export type Measured<T> = { output: T; meta: CallMeta };
 
 // What the models return: no ids and no length limits. Everything is cut and checked here.
 type Cited = { cita: string; texto: string };
-export type MemberOpening = { postura: string; participa?: boolean; condiciones: { texto: string; dura: boolean }[]; aportes: Cited[] };
-export type MemberResponse = { motivo: string; decision: "accept" | "adjust" | "block"; ajustes: { tema: string; pide: string }[]; aportes: Cited[] };
+type MemberOpening = {
+  postura: string;
+  participa?: boolean;
+  condiciones: { texto: string; dura: boolean }[];
+  aportes: Cited[];
+};
+export type MemberResponse = {
+  motivo: string;
+  decision: "accept" | "adjust" | "block";
+  ajustes: { tema: string; pide: string }[];
+  aportes: Cited[];
+};
 export type OrchestratorPlan = {
   resumen: string;
   decisiones: { tema: string; valor: string; porque: string }[];
@@ -88,7 +106,11 @@ function publicLine(text: string, contactNames: string[], max?: number): { text:
 // Line ids are unique per person, and an agent reads lines of several people.
 const lineKey = (a: Pick<PlanAporte, "lineId" | "contactId">) => `${a.contactId ?? ""}/${a.lineId}`;
 
-function checkAportes(raw: Cited[], context: AgentContext, already: Set<string>): { aportes: PlanAporte[]; drops: Drop[] } {
+function checkAportes(
+  raw: Cited[],
+  context: AgentContext,
+  already: Set<string>,
+): { aportes: PlanAporte[]; drops: Drop[] } {
   const aportes: PlanAporte[] = [];
   const drops: Drop[] = [];
   for (const { cita, texto } of raw.slice(0, MAX_ITEMS)) {
@@ -118,20 +140,33 @@ function keep<T>(items: T[], texts: (item: T) => string[], contactNames: string[
   });
 }
 
-const withFuentes = (fuentes: { dato: string; url: string }[]) => (fuentes.length ? { fuentes: fuentes.map((f) => ({ dato: clip(f.dato), url: f.url })) } : {});
+const withFuentes = (fuentes: { dato: string; url: string }[]) =>
+  fuentes.length ? { fuentes: fuentes.map((f) => ({ dato: clip(f.dato), url: f.url })) } : {};
 
 function toContent(raw: OrchestratorPlan, plan: PlanSnapshot, keys: Map<string, string>, final: boolean): PlanContent {
-  const names = (personId: string | undefined) => plan.members.find((m) => m.personId === personId)?.displayName.split(" ")[0];
+  const names = (personId: string | undefined) =>
+    plan.members.find((m) => m.personId === personId)?.displayName.split(" ")[0];
   const drops: Drop[] = [];
-  const idOf = (key: string) => keys.get(key.trim().toUpperCase()) ?? plan.members.find((m) => fold(m.displayName) === fold(key))?.personId;
+  const idOf = (key: string) =>
+    keys.get(key.trim().toUpperCase()) ?? plan.members.find((m) => fold(m.displayName) === fold(key))?.personId;
   // The orchestrator sometimes writes the member keys in prose; people read names.
   const named = (text: string) => text.replace(/\bM(\d+)\b/g, (key) => names(keys.get(key)) ?? key);
-  raw = { ...raw, resumen: named(raw.resumen), decisiones: raw.decisiones.map((d) => ({ ...d, valor: named(d.valor) })), pasos: raw.pasos.map((p) => ({ ...p, que: named(p.que) })) };
+  raw = {
+    ...raw,
+    resumen: named(raw.resumen),
+    decisiones: raw.decisiones.map((d) => ({ ...d, valor: named(d.valor) })),
+    pasos: raw.pasos.map((p) => ({ ...p, que: named(p.que) })),
+  };
   const resumen = publicLine(raw.resumen, [], 600);
   return {
     resumen: "text" in resumen ? resumen.text : clip(plan.intent, 600),
-    decisiones: keep(raw.decisiones, (d) => [d.tema, d.valor], [], drops).slice(0, MAX_DECISIONES).map((d) => ({ tema: clip(d.tema, 80), valor: clip(d.valor), porque: clip(d.porque) })),
-    pasos: keep(raw.pasos, (p) => [p.que], [], drops).map((p) => ({ que: clip(p.que), responsable: idOf(p.responsable) ?? plan.ownerId })),
+    decisiones: keep(raw.decisiones, (d) => [d.tema, d.valor], [], drops)
+      .slice(0, MAX_DECISIONES)
+      .map((d) => ({ tema: clip(d.tema, 80), valor: clip(d.valor), porque: clip(d.porque) })),
+    pasos: keep(raw.pasos, (p) => [p.que], [], drops).map((p) => ({
+      que: clip(p.que),
+      responsable: idOf(p.responsable) ?? plan.ownerId,
+    })),
     abiertos: keep(raw.abiertos, (a) => [a], [], drops).map((a) => clip(a)),
     desacuerdos: final
       ? keep(raw.desacuerdos, (d) => [d.tema, d.detalle], [], drops).flatMap((d) => {
@@ -139,32 +174,54 @@ function toContent(raw: OrchestratorPlan, plan: PlanSnapshot, keys: Map<string, 
           return personId ? [{ personId, tema: clip(d.tema, 80), detalle: clip(d.detalle) }] : [];
         })
       : [],
-    ...withFuentes(keep((raw.fuentes ?? []).filter((f) => isWebUrl(f.url)), (f) => [f.dato], [], drops).slice(0, MAX_FUENTES)),
+    ...withFuentes(
+      keep(
+        (raw.fuentes ?? []).filter((f) => isWebUrl(f.url)),
+        (f) => [f.dato],
+        [],
+        drops,
+      ).slice(0, MAX_FUENTES),
+    ),
   };
 }
-
 
 const answeredIn = (plan: PlanSnapshot, round: number) =>
   new Set(
     plan.messages
-      .filter(({ round: r, message }) => r === round && (message.agent === "miembro" || (message.agent === "verificador" && message.content.descartado === "turno")))
+      .filter(
+        ({ round: r, message }) =>
+          r === round &&
+          (message.agent === "miembro" || (message.agent === "verificador" && message.content.descartado === "turno")),
+      )
       .map(({ message }) => ("personId" in message ? message.personId : undefined)),
   );
 
 // Every agent that answered accepted, and at least half of them answered: one that fails to
 // respond does not hold the others back, but one voice alone is not an agreement.
 function agreed(plan: PlanSnapshot, round: number): boolean {
-  const answers = plan.messages.flatMap(({ round: r, message }) => (r === round && message.agent === "miembro" && message.content.tipo === "respuesta" ? [message.content.decision] : []));
+  const answers = plan.messages.flatMap(({ round: r, message }) =>
+    r === round && message.agent === "miembro" && message.content.tipo === "respuesta"
+      ? [message.content.decision]
+      : [],
+  );
   return answers.length * 2 >= plan.members.length && answers.every((decision) => decision === "accept");
 }
 
 function declaredHard(plan: PlanSnapshot, personId: string): boolean | undefined {
-  const opening = plan.messages.find(({ message }) => message.agent === "miembro" && message.personId === personId && message.content.tipo === "postura")?.message;
-  return opening?.agent === "miembro" && opening.content.tipo === "postura" ? opening.content.condiciones.some((c) => c.dura) : undefined;
+  const opening = plan.messages.find(
+    ({ message }) => message.agent === "miembro" && message.personId === personId && message.content.tipo === "postura",
+  )?.message;
+  return opening?.agent === "miembro" && opening.content.tipo === "postura"
+    ? opening.content.condiciones.some((c) => c.dura)
+    : undefined;
 }
 
 const contributedBy = (plan: PlanSnapshot, personId: string) =>
-  new Set(plan.messages.flatMap(({ message }) => (message.agent === "miembro" && message.personId === personId ? message.content.aportes.map(lineKey) : [])));
+  new Set(
+    plan.messages.flatMap(({ message }) =>
+      message.agent === "miembro" && message.personId === personId ? message.content.aportes.map(lineKey) : [],
+    ),
+  );
 
 export async function deliberate(planId: string, deps: DeliberationDeps): Promise<Outcome | null> {
   const { db, agents } = deps;
@@ -176,7 +233,9 @@ export async function deliberate(planId: string, deps: DeliberationDeps): Promis
   };
   const closed = (): Outcome | null => {
     const version = planInForce(plan);
-    return plan.status !== "deliberando" && version?.decidedBy ? { status: plan.status, version: version.version, decidedBy: version.decidedBy } : null;
+    return plan.status !== "deliberando" && version?.decidedBy
+      ? { status: plan.status, version: version.version, decidedBy: version.decidedBy }
+      : null;
   };
   if (plan.status !== "deliberando") return closed();
 
@@ -197,62 +256,97 @@ export async function deliberate(planId: string, deps: DeliberationDeps): Promis
     const said = transcript(plan);
 
     // Each answer is stored as soon as it arrives, so the phones see who is still writing.
-    await Promise.all(pending.map(async (me) => {
-      const discard = (descartado: "turno" | "aporte" | "texto", razon: Drop | "sin_respuesta") =>
-        recordMessage(db, planId, round, { agent: "verificador", personId: me.personId, content: { descartado, razon } });
-      let context: AgentContext;
-      let answer: ({ kind: "opening" } & Measured<MemberOpening>) | ({ kind: "response" } & Measured<MemberResponse>);
-      try {
-        context = await buildContext(me, proposal?.content.abiertos ?? []);
-        const turn: MemberTurn = {
-          me,
-          members: plan.members,
-          ownerId: plan.ownerId,
-          intent: plan.intent,
-          context,
-          transcript: said,
-          round,
-          maxRounds: plan.maxRounds,
-          proposal: proposal ? describePlan(proposal.content, names) : null,
-        };
-        answer = round === 0 ? { kind: "opening", ...(await agents.open(turn)) } : { kind: "response", ...(await agents.respond(turn)) };
-      } catch (error) {
-        console.error(`plan ${planId}: el agente de ${me.personId} no respondió en la ronda ${round}:`, error);
-        await discard("turno", "sin_respuesta");
-        return;
-      }
-      const { aportes, drops } = checkAportes(answer.output.aportes, context, contributedBy(plan, me.personId));
-      const textDrops: Drop[] = [];
-      let message: PlanMessage;
-      if (answer.kind === "opening") {
-        const { output } = answer;
-        const postura = publicLine(output.postura, context.contactNames);
-        if ("drop" in postura) textDrops.push(postura.drop);
-        message = {
-          agent: "miembro",
-          personId: me.personId,
-          content: {
-            tipo: "postura",
-            postura: "text" in postura ? postura.text : output.participa === false ? "No puede ser parte de este plan." : "Se suma al plan.",
-            ...(typeof output.participa === "boolean" && { participa: output.participa }),
-            condiciones: keep(output.condiciones, (c) => [c.texto], context.contactNames, textDrops).map((c) => ({ texto: clip(c.texto), dura: c.dura })),
-            aportes,
-          },
-        };
-      } else {
-        const { output } = answer;
-        const motivo = publicLine(output.motivo, context.contactNames);
-        if ("drop" in motivo) textDrops.push(motivo.drop);
-        const ajustes = keep(output.ajustes, (a) => [a.tema, a.pide], context.contactNames, textDrops).map((a) => ({ tema: clip(a.tema, 80), pide: clip(a.pide) }));
-        // Blocking is for a condition the person cannot do without: an agent that declared none asks for a change instead.
-        const decision = output.decision === "block" && declaredHard(plan, me.personId) === false ? "adjust" : output.decision;
-        const fallback = { accept: "Acepta la propuesta.", adjust: "Pide un cambio a la propuesta.", block: "La propuesta no cumple una de sus condiciones." }[decision];
-        message = { agent: "miembro", personId: me.personId, content: { tipo: "respuesta", decision, motivo: "text" in motivo ? motivo.text : fallback, ajustes, aportes } };
-      }
-      await recordMessage(db, planId, round, message, answer.meta);
-      for (const drop of drops) await discard("aporte", drop);
-      for (const drop of textDrops) await discard("texto", drop);
-    }));
+    await Promise.all(
+      pending.map(async (me) => {
+        const discard = (descartado: "turno" | "aporte" | "texto", razon: Drop | "sin_respuesta") =>
+          recordMessage(db, planId, round, {
+            agent: "verificador",
+            personId: me.personId,
+            content: { descartado, razon },
+          });
+        let context: AgentContext;
+        let answer: ({ kind: "opening" } & Measured<MemberOpening>) | ({ kind: "response" } & Measured<MemberResponse>);
+        try {
+          context = await buildContext(me, proposal?.content.abiertos ?? []);
+          const turn: MemberTurn = {
+            me,
+            members: plan.members,
+            ownerId: plan.ownerId,
+            intent: plan.intent,
+            context,
+            transcript: said,
+            round,
+            maxRounds: plan.maxRounds,
+            proposal: proposal ? describePlan(proposal.content, names) : null,
+          };
+          answer =
+            round === 0
+              ? { kind: "opening", ...(await agents.open(turn)) }
+              : { kind: "response", ...(await agents.respond(turn)) };
+        } catch (error) {
+          console.error(`plan ${planId}: el agente de ${me.personId} no respondió en la ronda ${round}:`, error);
+          await discard("turno", "sin_respuesta");
+          return;
+        }
+        const { aportes, drops } = checkAportes(answer.output.aportes, context, contributedBy(plan, me.personId));
+        const textDrops: Drop[] = [];
+        let message: PlanMessage;
+        if (answer.kind === "opening") {
+          const { output } = answer;
+          const postura = publicLine(output.postura, context.contactNames);
+          if ("drop" in postura) textDrops.push(postura.drop);
+          message = {
+            agent: "miembro",
+            personId: me.personId,
+            content: {
+              tipo: "postura",
+              postura:
+                "text" in postura
+                  ? postura.text
+                  : output.participa === false
+                    ? "No puede ser parte de este plan."
+                    : "Se suma al plan.",
+              ...(typeof output.participa === "boolean" && { participa: output.participa }),
+              condiciones: keep(output.condiciones, (c) => [c.texto], context.contactNames, textDrops).map((c) => ({
+                texto: clip(c.texto),
+                dura: c.dura,
+              })),
+              aportes,
+            },
+          };
+        } else {
+          const { output } = answer;
+          const motivo = publicLine(output.motivo, context.contactNames);
+          if ("drop" in motivo) textDrops.push(motivo.drop);
+          const ajustes = keep(output.ajustes, (a) => [a.tema, a.pide], context.contactNames, textDrops).map((a) => ({
+            tema: clip(a.tema, 80),
+            pide: clip(a.pide),
+          }));
+          // Blocking is for a condition the person cannot do without: an agent that declared none asks for a change instead.
+          const decision =
+            output.decision === "block" && declaredHard(plan, me.personId) === false ? "adjust" : output.decision;
+          const fallback = {
+            accept: "Acepta la propuesta.",
+            adjust: "Pide un cambio a la propuesta.",
+            block: "La propuesta no cumple una de sus condiciones.",
+          }[decision];
+          message = {
+            agent: "miembro",
+            personId: me.personId,
+            content: {
+              tipo: "respuesta",
+              decision,
+              motivo: "text" in motivo ? motivo.text : fallback,
+              ajustes,
+              aportes,
+            },
+          };
+        }
+        await recordMessage(db, planId, round, message, answer.meta);
+        for (const drop of drops) await discard("aporte", drop);
+        for (const drop of textDrops) await discard("texto", drop);
+      }),
+    );
     await reload();
   }
 
@@ -261,7 +355,11 @@ export async function deliberate(planId: string, deps: DeliberationDeps): Promis
     const previous = plan.versions.at(-1);
     const turn: OrchestratorTurn = {
       intent: plan.intent,
-      members: [...keys].map(([key, personId]) => ({ key, displayName: names.get(personId)!, owner: personId === plan.ownerId })),
+      members: [...keys].map(([key, personId]) => ({
+        key,
+        displayName: names.get(personId)!,
+        owner: personId === plan.ownerId,
+      })),
       transcript: transcript(plan),
       previous: previous ? describePlan(previous.content, names) : null,
       round: Math.min(version, plan.maxRounds),
@@ -285,13 +383,21 @@ export async function deliberate(planId: string, deps: DeliberationDeps): Promis
   // Without an orchestrator the plan still closes: with the last proposal, or with the intent
   // itself when there never was one.
   async function closeByCode(): Promise<Outcome> {
-    await recordMessage(db, planId, Math.min(plan.round, plan.maxRounds), { agent: "verificador", content: { descartado: "plan", razon: "orquestador_caido" } });
+    await recordMessage(db, planId, Math.min(plan.round, plan.maxRounds), {
+      agent: "verificador",
+      content: { descartado: "plan", razon: "orquestador_caido" },
+    });
     const last = plan.versions.at(-1);
     if (last) return close(last.version, "codigo");
     await saveVersion(db, planId, 1, {
       resumen: clip(plan.intent, 600),
       decisiones: [],
-      pasos: [{ que: "Conversar el plan entre los participantes, con las posturas de cada uno a la vista", responsable: plan.ownerId }],
+      pasos: [
+        {
+          que: "Conversar el plan entre los participantes, con las posturas de cada uno a la vista",
+          responsable: plan.ownerId,
+        },
+      ],
       abiertos: [],
       desacuerdos: [],
     });
@@ -305,6 +411,7 @@ export async function deliberate(planId: string, deps: DeliberationDeps): Promis
     if (agreed(plan, round)) return close(round, "consenso");
   }
   const decision = plan.maxRounds + 1;
-  if (plan.versions.some((v) => v.version === decision) || (await propose(decision, true))) return close(decision, "orquestador");
+  if (plan.versions.some((v) => v.version === decision) || (await propose(decision, true)))
+    return close(decision, "orquestador");
   return closeByCode();
 }

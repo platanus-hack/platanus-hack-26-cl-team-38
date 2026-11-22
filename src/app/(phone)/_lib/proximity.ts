@@ -14,7 +14,7 @@ import { getPhone, logOutbox, type PhoneState } from "./store";
 // are Visible, have Ubicación on and checked in to a room.
 
 export type ProximityStatus = "off" | "connecting" | "on" | "denied" | "error";
-export type Proximity = { status: ProximityStatus; near: ReadonlyMap<string, ProximityNeighbor> };
+type Proximity = { status: ProximityStatus; near: ReadonlyMap<string, ProximityNeighbor> };
 
 const OFF: Proximity = { status: "off", near: new Map() };
 let snapshot: Proximity = OFF;
@@ -24,7 +24,13 @@ const set = (next: Partial<Proximity>) => {
   for (const l of listeners) l();
 };
 
-const post = (body: object) => fetch("/api/proximity", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), keepalive: true });
+const post = (body: object) =>
+  fetch("/api/proximity", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+    keepalive: true,
+  });
 
 type Connection = { key: string; users: number; setRadius: (m: number) => void; stop: () => void };
 let current: Connection | null = null;
@@ -63,12 +69,16 @@ function connect(personId: string, roomId: string, radius: number): Connection {
     if (!session) return;
     const out = report(reading, accuracy, performance.now());
     if (out === "heartbeat") deliver({ action: "heartbeat", session });
-    else if (out) deliver({ action: "report", session, position: { lat: out[0], lon: out[1], accuracy, stamp: ++stamp } });
+    else if (out)
+      deliver({ action: "report", session, position: { lat: out[0], lon: out[1], accuracy, stamp: ++stamp } });
   };
 
   async function join() {
     set({ status: snapshot.status === "denied" ? "denied" : "connecting", near: new Map() });
-    const reply = await api("/api/proximity", { method: "POST", body: JSON.stringify({ action: "join", personId, roomId, radius }) })
+    const reply = await api("/api/proximity", {
+      method: "POST",
+      body: JSON.stringify({ action: "join", personId, roomId, radius }),
+    })
       .then(async (r) => (r.ok ? ((await r.json()) as { session: string }) : null))
       .catch(() => null);
     if (stopped) {
@@ -111,8 +121,16 @@ function connect(personId: string, roomId: string, radius: number): Connection {
       : null;
   if (watch === null) set({ status: "denied" });
   // Standing still, the GPS goes quiet but the server still needs to hear that this phone is here.
-  const tick = setInterval(() => (last ? send(null, last.accuracy) : session && deliver({ action: "heartbeat", session })), 10_000);
-  const onHide = () => session && navigator.sendBeacon?.("/api/proximity", new Blob([JSON.stringify({ action: "leave", session })], { type: "application/json" }));
+  const tick = setInterval(
+    () => (last ? send(null, last.accuracy) : session && deliver({ action: "heartbeat", session })),
+    10_000,
+  );
+  const onHide = () =>
+    session &&
+    navigator.sendBeacon?.(
+      "/api/proximity",
+      new Blob([JSON.stringify({ action: "leave", session })], { type: "application/json" }),
+    );
   window.addEventListener("pagehide", onHide);
   void join();
 
@@ -157,7 +175,7 @@ function acquire(personId: string, roomId: string, radius: number): () => void {
 }
 
 /** Who is in range now, or `off` when proximity does not apply (demo mode, not Visible, no Ubicación, no room). */
-export function useProximity(s: PhoneState | null | undefined): Proximity {
+function useProximity(s: PhoneState | null | undefined): Proximity {
   const personId = s?.personId;
   const roomId = s?.room?.id;
   const on = !!s && !DEMO && !!roomId && s.locationOn && isVisible(s);
@@ -180,7 +198,10 @@ export function useProximity(s: PhoneState | null | undefined): Proximity {
 }
 
 /** Explorar's people: the sample encounters in demo mode; with a backend, only who proximity has in range. */
-export function useNearby(s: PhoneState | null | undefined): { encounters: Encounter[] | undefined; status: ProximityStatus } {
+export function useNearby(s: PhoneState | null | undefined): {
+  encounters: Encounter[] | undefined;
+  status: ProximityStatus;
+} {
   const encounters = useEncounters();
   const { status, near } = useProximity(s);
   return { encounters: encounters && (DEMO ? encounters : nearby(encounters, near)), status };

@@ -4,7 +4,10 @@ import { createReporter, distanceMeters, type LatLon } from "./reporter";
 const LAT = -33.45;
 const LON = -70.65;
 const M_PER_DEG = 111_194.9;
-const at = (east: number, north = 0): LatLon => [LAT + north / M_PER_DEG, LON + east / (M_PER_DEG * Math.cos((LAT * Math.PI) / 180))];
+const at = (east: number, north = 0): LatLon => [
+  LAT + north / M_PER_DEG,
+  LON + east / (M_PER_DEG * Math.cos((LAT * Math.PI) / 180)),
+];
 const ORIGIN = at(0);
 
 describe("createReporter", () => {
@@ -23,7 +26,13 @@ describe("createReporter", () => {
   });
 
   it("respects the minimum interval and sends a heartbeat when still", () => {
-    const report = createReporter({ threshold: 5, accuracyFraction: 0, smoothing: 1, minIntervalMs: 1000, heartbeatMs: 30_000 });
+    const report = createReporter({
+      threshold: 5,
+      accuracyFraction: 0,
+      smoothing: 1,
+      minIntervalMs: 1000,
+      heartbeatMs: 30_000,
+    });
     report(at(0), 5, 0);
     expect(report(at(50), 5, 500)).toBeNull();
     expect(report(at(50), 5, 1000)).toEqual(at(50));

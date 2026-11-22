@@ -1,0 +1,32 @@
+name: CI
+
+on: push
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    # Only on the mirror: the org repo can't connect integrations (see README).
+    if: github.repository == 'oerlandsen/platanus-hack-26-cl-team-38'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm knip
+      - run: pnpm typecheck
+      - run: pnpm test:coverage
+      - run: pnpm build
+        env:
+          # The build only needs them present; nothing connects to Supabase.
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci
+          SUPABASE_SECRET_KEY: ci

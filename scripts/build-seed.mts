@@ -7,7 +7,12 @@ import { PublicProjectionSchema, type PublicProjection } from "@/lib/types";
 const THEME_THRESHOLD = 0.6;
 
 function slugify(name: string): string {
-  return name.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 const names = [...new Set(SEED_ROOMS.flatMap((r) => r.people.flatMap((p) => p.topics.map(([name]) => name))))].sort();

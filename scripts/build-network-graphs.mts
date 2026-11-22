@@ -7,7 +7,9 @@ import { team } from "../seed/team";
 // degree links are visible. Run after editing network.json: `pnpm seed:graphs`.
 
 const network = toV1();
-const graph = new Map<string, Set<string>>([...network.team, ...network.people].map((n) => [n.slug, new Set(n.friends.map((f) => f.slug))]));
+const graph = new Map<string, Set<string>>(
+  [...network.team, ...network.people].map((n) => [n.slug, new Set(n.friends.map((f) => f.slug))]),
+);
 
 function degreesFrom(from: string[], g = graph): Map<string, number> {
   const dist = new Map(from.map((s) => [s, 0]));
@@ -63,13 +65,23 @@ const cases = network.events.map((event) => {
       group,
       organizer: event.organizers.includes(slug),
       degree: fromTeam.get(slug) ?? null,
-      role: participant?.role ?? (helper ? `ayuda · ${helper.degree}° de ${event.organizers.length > 1 ? "los organizadores" : "la organizadora"}` : group === "team" ? "equipo" : "puente"),
+      role:
+        participant?.role ??
+        (helper
+          ? `ayuda · ${helper.degree}° de ${event.organizers.length > 1 ? "los organizadores" : "la organizadora"}`
+          : group === "team"
+            ? "equipo"
+            : "puente"),
       why: helper?.why ?? null,
       bio: person?.bio ?? "Integrante del equipo (perfil en seed/team).",
       place: person ? `${person.age} años · ${person.comuna}, ${person.region}` : "",
       profile: person?.profile ?? null,
-      constraints: (person?.constraints ?? []).filter((c) => c.appliesTo.includes(event.type)).map((c) => ({ type: c.type, detail: c.detail, hard: c.hard })),
-      experiences: (person?.experiences ?? []).filter((x) => x.usefulFor.includes(event.type)).map((x) => ({ title: x.title, place: x.place, date: x.date, summary: x.summary })),
+      constraints: (person?.constraints ?? [])
+        .filter((c) => c.appliesTo.includes(event.type))
+        .map((c) => ({ type: c.type, detail: c.detail, hard: c.hard })),
+      experiences: (person?.experiences ?? [])
+        .filter((x) => x.usefulFor.includes(event.type))
+        .map((x) => ({ title: x.title, place: x.place, date: x.date, summary: x.summary })),
       friendCount: friendsBySlug.get(slug)?.length ?? 0,
     };
   });
@@ -77,10 +89,24 @@ const cases = network.events.map((event) => {
   const edges = [...included].flatMap((slug) =>
     (friendsBySlug.get(slug) ?? [])
       .filter((f) => included.has(f.slug) && slug < f.slug)
-      .map((f) => ({ source: slug, target: f.slug, relation: f.relation, closeness: f.closeness, label: `${f.detail}` })),
+      .map((f) => ({
+        source: slug,
+        target: f.slug,
+        relation: f.relation,
+        closeness: f.closeness,
+        label: `${f.detail}`,
+      })),
   );
 
-  return { id: event.id, type: event.type, title: event.title, summary: event.summary, tensions: event.tensions, nodes, edges };
+  return {
+    id: event.id,
+    type: event.type,
+    title: event.title,
+    summary: event.summary,
+    tensions: event.tensions,
+    nodes,
+    edges,
+  };
 });
 
 const template = String.raw`<!doctype html>

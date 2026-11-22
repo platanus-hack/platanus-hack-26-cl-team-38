@@ -13,13 +13,24 @@ export async function POST(request: Request) {
     const invalid = request.headers.has("authorization") ? 'error="invalid_token", ' : "";
     return Response.json(
       { error: "invalid_token", error_description: "Falta autorizar el conector." },
-      { status: 401, headers: { ...CORS, "www-authenticate": `Bearer ${invalid}resource_metadata="${resourceMetadataUrl(publicOrigin(request))}"` } },
+      {
+        status: 401,
+        headers: {
+          ...CORS,
+          "www-authenticate": `Bearer ${invalid}resource_metadata="${resourceMetadataUrl(publicOrigin(request))}"`,
+        },
+      },
     );
   }
 
-  const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
+  const transport = new WebStandardStreamableHTTPServerTransport({
+    sessionIdGenerator: undefined,
+    enableJsonResponse: true,
+  });
   await connectorServer(auth.owner).connect(transport);
-  const response = await transport.handleRequest(request, { authInfo: { token: auth.token, clientId: auth.clientId, scopes: [], expiresAt: auth.expiresAt } });
+  const response = await transport.handleRequest(request, {
+    authInfo: { token: auth.token, clientId: auth.clientId, scopes: [], expiresAt: auth.expiresAt },
+  });
   for (const [name, value] of Object.entries(CORS)) response.headers.set(name, value);
   return response;
 }

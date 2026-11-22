@@ -1,22 +1,15 @@
-import type { Kind, PublicProjection, PublicTopic } from "@/lib/types";
+import type { Kind, PublicTopic } from "@/lib/types";
 
 // What you share with someone: the topics you both publish, and whether one of you can help the other.
 // Only public topics on both sides take part, so nothing private is ever compared.
 // Matching is by normalized name for now; embeddings would also catch near synonyms.
 
-export type MatchType = "comun" | "te_ayuda" | "ayudas";
+type MatchType = "comun" | "te_ayuda" | "ayudas";
 export type MatchItem = { type: MatchType; topic: string };
-export type PersonMatches = { personId: string; name: string; items: MatchItem[]; score: number };
-
 const WANTS: Kind[] = ["busca", "quiere_ser"];
 const KNOWS: Kind[] = ["sabe", "hace", "es", "ofrece"];
 
-const norm = (s: string) =>
-  s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .trim();
+const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 
 function classify(mine: PublicTopic, theirs: PublicTopic): MatchItem {
   if (WANTS.includes(mine.kind) && KNOWS.includes(theirs.kind)) return { type: "te_ayuda", topic: mine.name };
@@ -37,14 +30,6 @@ export function matchTopics(mine: PublicTopic[], theirs: PublicTopic[]): { items
     .filter((x): x is MatchItem => x !== null)
     .sort((a, b) => ORDER[a.type] - ORDER[b.type]);
   return { items, score: items.reduce((s, i) => s + WEIGHT[i.type], 0) };
-}
-
-export function findMatches(mine: PublicTopic[], others: PublicProjection[], meId: string): PersonMatches[] {
-  return others
-    .filter((p) => p.personId !== meId)
-    .map((p) => ({ personId: p.personId, name: p.displayName, ...matchTopics(mine, p.topics) }))
-    .filter((p) => p.items.length > 0)
-    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 }
 
 /** "sabe de python" (they can help you), "busca python" (you can help them), or just the topic. */

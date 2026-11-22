@@ -35,7 +35,17 @@ function useTween(target: Map<string, Point>) {
   return shown;
 }
 
-export function NodePreview({ topics, ownerName, locked, onToggle }: { topics: Topic[]; ownerName: string; locked: boolean; onToggle: (topic: Topic) => void }) {
+export function NodePreview({
+  topics,
+  ownerName,
+  locked,
+  onToggle,
+}: {
+  topics: Topic[];
+  ownerName: string;
+  locked: boolean;
+  onToggle: (topic: Topic) => void;
+}) {
   const [asRoom, setAsRoom] = useState(false);
   // Each new layout starts from the previous one, so untouched topics stay where they were.
   const key = topics.map((t) => `${t.id}:${t.public}:${t.depth}`).join("|");
@@ -68,7 +78,12 @@ export function NodePreview({ topics, ownerName, locked, onToggle }: { topics: T
         </div>
       </div>
 
-      <svg viewBox="-225 -225 450 450" className="w-full touch-manipulation select-none" role="group" aria-label="Vista previa de tu nodo: público adentro del círculo, privado afuera">
+      <svg
+        viewBox="-225 -225 450 450"
+        className="w-full touch-manipulation select-none"
+        role="group"
+        aria-label="Vista previa de tu nodo: público adentro del círculo, privado afuera"
+      >
         <circle r={RING} fill="rgba(31,138,91,0.06)" stroke="rgba(31,138,91,0.5)" strokeDasharray="4 4" />
         <text y={-RING - 6} textAnchor="middle" fontSize={10} fill="rgba(31,138,91,0.9)">
           lo ve la sala
@@ -83,7 +98,18 @@ export function NodePreview({ topics, ownerName, locked, onToggle }: { topics: T
           const p = shown.get(t.id);
           if (!p || (asRoom && !t.public)) return null;
           const color = t.public ? ROLE[rolesOf(t)[0] ?? "comparte"].color : PRIVATE;
-          return <line key={`spoke:${t.id}`} x1={0} y1={0} x2={p.x} y2={p.y} stroke={color} strokeOpacity={t.public ? 0.45 : 0.3} strokeDasharray={t.public ? undefined : "3 3"} />;
+          return (
+            <line
+              key={`spoke:${t.id}`}
+              x1={0}
+              y1={0}
+              x2={p.x}
+              y2={p.y}
+              stroke={color}
+              strokeOpacity={t.public ? 0.45 : 0.3}
+              strokeDasharray={t.public ? undefined : "3 3"}
+            />
+          );
         })}
 
         <circle r={22} fill="#F2B84B" />
@@ -115,8 +141,22 @@ export function NodePreview({ topics, ownerName, locked, onToggle }: { topics: T
               }}
             >
               <circle r={r + 8} fill="transparent" />
-              <circle r={r} fill={t.public ? color : "white"} stroke={color} strokeWidth={1.5} strokeDasharray={t.public ? undefined : "2.5 2"} />
-              <text y={r + 10} textAnchor="middle" fontSize={10} fill={t.public ? "#18212F" : PRIVATE} stroke="white" strokeWidth={3} paintOrder="stroke">
+              <circle
+                r={r}
+                fill={t.public ? color : "white"}
+                stroke={color}
+                strokeWidth={1.5}
+                strokeDasharray={t.public ? undefined : "2.5 2"}
+              />
+              <text
+                y={r + 10}
+                textAnchor="middle"
+                fontSize={10}
+                fill={t.public ? "#18212F" : PRIVATE}
+                stroke="white"
+                strokeWidth={3}
+                paintOrder="stroke"
+              >
                 {shortName(t.name)}
               </text>
             </g>

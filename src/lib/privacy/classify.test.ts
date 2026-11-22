@@ -72,15 +72,25 @@ describe("classifyTopics", () => {
       { judge },
     );
     expect(personal).toMatchObject({
-      privacy: { level: "personal", category: "identificable", reason: "Dice dónde trabajas, tu cargo o cómo ubicarte.", saferName: "riesgo financiero" },
+      privacy: {
+        level: "personal",
+        category: "identificable",
+        reason: "Dice dónde trabajas, tu cargo o cómo ubicarte.",
+        saferName: "riesgo financiero",
+      },
       by: "juez",
     });
-    expect(sensitive).toMatchObject({ privacy: { level: "sensible", category: "salud", reason: "Toca un tema de salud." }, by: "juez" });
+    expect(sensitive).toMatchObject({
+      privacy: { level: "sensible", category: "salud", reason: "Toca un tema de salud." },
+      by: "juez",
+    });
     expect(sensitive.privacy.saferName).toBeUndefined();
   });
 
   it("drops a safer name that would itself be blocked", async () => {
-    const judge = judgeSaying({ "algo delicado": { level: "personal", category: "vida_intima", saferName: "mi depresión" } });
+    const judge = judgeSaying({
+      "algo delicado": { level: "personal", category: "vida_intima", saferName: "mi depresión" },
+    });
     const [result] = await classifyTopics([{ kind: "busca", name: "algo delicado" }], { judge });
     expect(result.privacy.saferName).toBeUndefined();
   });
@@ -132,11 +142,15 @@ describe("classifyTopics", () => {
 describe("createCachedClassifier", () => {
   it("asks the judge once per topic and keeps its first answer", async () => {
     let calls = 0;
-    const flaky: Judge = async (topics) => topics.map(() => ({ level: calls++ === 0 ? ("sensible" as const) : ("segura" as const) }));
+    const flaky: Judge = async (topics) =>
+      topics.map(() => ({ level: calls++ === 0 ? ("sensible" as const) : ("segura" as const) }));
     const classify = createCachedClassifier(flaky);
     const topic = { kind: "hace" as const, name: "algo ambiguo", sources: ["claude" as const] };
     expect((await classify([topic]))[0].privacy.level).toBe("sensible");
-    expect((await classify([topic, { ...topic, name: "Algo  Ambiguo" }])).map((c) => c.privacy.level)).toEqual(["sensible", "sensible"]);
+    expect((await classify([topic, { ...topic, name: "Algo  Ambiguo" }])).map((c) => c.privacy.level)).toEqual([
+      "sensible",
+      "sensible",
+    ]);
     expect(calls).toBe(1);
   });
 
@@ -144,14 +158,21 @@ describe("createCachedClassifier", () => {
     let up = false;
     const judge: Judge = async (topics) => topics.map(() => (up ? { level: "segura" as const } : null));
     const classify = createCachedClassifier(judge);
-    expect((await classify([{ kind: "hace", name: "escalada" }]))[0]).toMatchObject({ judged: false, privacy: { level: "personal" } });
+    expect((await classify([{ kind: "hace", name: "escalada" }]))[0]).toMatchObject({
+      judged: false,
+      privacy: { level: "personal" },
+    });
     up = true;
-    expect((await classify([{ kind: "hace", name: "escalada" }]))[0]).toMatchObject({ judged: true, privacy: { level: "segura" } });
+    expect((await classify([{ kind: "hace", name: "escalada" }]))[0]).toMatchObject({
+      judged: true,
+      privacy: { level: "segura" },
+    });
   });
 
   it("judges the same name again when it comes from other sources", async () => {
     const seen: string[] = [];
-    const judge: Judge = async (topics) => topics.map((t) => (seen.push((t.sources ?? []).join()), { level: "segura" as const }));
+    const judge: Judge = async (topics) =>
+      topics.map((t) => (seen.push((t.sources ?? []).join()), { level: "segura" as const }));
     const classify = createCachedClassifier(judge);
     await classify([{ kind: "le_gusta", name: "podcasts", sources: ["claude"] }]);
     await classify([{ kind: "le_gusta", name: "podcasts", sources: ["spotify"] }]);

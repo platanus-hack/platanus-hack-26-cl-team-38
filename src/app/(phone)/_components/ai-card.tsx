@@ -15,7 +15,15 @@ const C = COPY.ai;
  * answers. Frontend only for now: the reading is built locally (see _lib/insight) after a short pause,
  * so it reads like an Agent at work; re-mount it (key) for each person.
  */
-export function AiCard({ prompt, insight, listLabel = C.opportunities }: { prompt: string; insight: Insight; listLabel?: string }) {
+export function AiCard({
+  prompt,
+  insight,
+  listLabel = C.opportunities,
+}: {
+  prompt: string;
+  insight: Insight;
+  listLabel?: string;
+}) {
   const [info, setInfo] = useState(false);
   const [ready, setReady] = useState(false);
   useEffect(() => {
@@ -28,7 +36,13 @@ export function AiCard({ prompt, insight, listLabel = C.opportunities }: { promp
       <div className="ai-head">
         <Icon name="sparkle" />
         <span>{C.title}</span>
-        <button type="button" className="q" aria-expanded={info} aria-label={C.promptLabel} onClick={() => setInfo(!info)}>
+        <button
+          type="button"
+          className="q"
+          aria-expanded={info}
+          aria-label={C.promptLabel}
+          onClick={() => setInfo(!info)}
+        >
           i
         </button>
       </div>

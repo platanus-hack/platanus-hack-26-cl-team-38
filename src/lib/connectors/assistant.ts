@@ -16,22 +16,33 @@ export const AssistantSourceSchema = z.enum(["claude", "chatgpt", "gemini"]);
 // No `evidence`: it is quoted from private conversations and has no place on our server. Strict,
 // so an assistant that sends it gets an error it can read and fix.
 export const IncomingSignalsSchema = z
-  .array(SynthesisSignalSchema.extend({ source: AssistantSourceSchema, label: z.string().trim().min(1).max(60) }).strict())
+  .array(
+    SynthesisSignalSchema.extend({ source: AssistantSourceSchema, label: z.string().trim().min(1).max(60) }).strict(),
+  )
   .min(1)
   .max(40);
 
 // The shape the privacy filter already takes (`classifyOnServer`, `POST /api/privacy/classify`).
-export type ClassifySignals = (topics: { kind: Kind; name: string; sources: Source[] }[]) => Promise<{ privacy: { level: PrivacyLevel } }[]>;
+export type ClassifySignals = (
+  topics: { kind: Kind; name: string; sources: Source[] }[],
+) => Promise<{ privacy: { level: PrivacyLevel } }[]>;
 
 // Second barrier after the prompt: every signal goes through the repo's privacy filter (lexicon,
 // anchors and judge) as it comes in, and what it calls `sensible` is dropped before anything is
 // stored. `personal` stays: this is a private draft and publishing it is the owner's call. The
 // output keeps the shape of the input, only shorter.
-export async function admitSignals(signals: SynthesisSignal[], classify: ClassifySignals): Promise<{ accepted: SynthesisSignal[]; held: number }> {
+export async function admitSignals(
+  signals: SynthesisSignal[],
+  classify: ClassifySignals,
+): Promise<{ accepted: SynthesisSignal[]; held: number }> {
   const lowered = signals.map((signal) => ({ ...signal, label: signal.label.toLowerCase() }));
-  const classified = await classify(lowered.map((signal) => ({ kind: signal.kind, name: signal.label, sources: [signal.source] })));
+  const classified = await classify(
+    lowered.map((signal) => ({ kind: signal.kind, name: signal.label, sources: [signal.source] })),
+  );
   // A signal with no verdict is dropped too: the filter fails closed.
-  const accepted = lowered.filter((_, i) => classified[i]?.privacy.level === "segura" || classified[i]?.privacy.level === "personal");
+  const accepted = lowered.filter(
+    (_, i) => classified[i]?.privacy.level === "segura" || classified[i]?.privacy.level === "personal",
+  );
   return { accepted, held: signals.length - accepted.length };
 }
 
@@ -75,7 +86,15 @@ Aunque lo sepas, no incluyas:
 
 // Written in the person's voice and explicit about what the app is, what the code allows and what
 // happens with the result, so the assistant does not have to guess whether sending is safe.
-export function buildAssistantPrompt({ origin, token, minutes = TOKEN_MINUTES }: { origin: string; token: string; minutes?: number }): string {
+export function buildAssistantPrompt({
+  origin,
+  token,
+  minutes = TOKEN_MINUTES,
+}: {
+  origin: string;
+  token: string;
+  minutes?: number;
+}): string {
   return `Soy yo quien te pide esto, y es mi decisión. Uso ${APP_NAME}, una app que en un evento me junta con personas afines, y quiero cargar ahí mi propio perfil, hecho con lo que tú sabes de mí.
 
 QUÉ NECESITO

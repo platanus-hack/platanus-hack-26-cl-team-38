@@ -215,4 +215,11 @@ export const SAFE_HARD = cases("segura", [
   ["sabe", "ciberseguridad"],
 ]);
 
-export const EVAL_SET: EvalCase[] = [...SENSITIVE_OBVIOUS, ...SENSITIVE_SUBTLE, ...SENSITIVE_HARD, ...PERSONAL, ...SAFE, ...SAFE_HARD];
+export const EVAL_SET: EvalCase[] = [
+  ...SENSITIVE_OBVIOUS,
+  ...SENSITIVE_SUBTLE,
+  ...SENSITIVE_HARD,
+  ...PERSONAL,
+  ...SAFE,
+  ...SAFE_HARD,
+];

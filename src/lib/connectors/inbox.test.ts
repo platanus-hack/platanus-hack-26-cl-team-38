@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import type { SynthesisSignal } from "@/lib/types";
 import { createInboxStore } from "./inbox";
 
-const signal = (label: string, strength = 0.8, source: SynthesisSignal["source"] = "claude"): SynthesisSignal => ({ source, kind: "sabe", label, strength });
+const signal = (label: string, strength = 0.8, source: SynthesisSignal["source"] = "claude"): SynthesisSignal => ({
+  source,
+  kind: "sabe",
+  label,
+  strength,
+});
 const MINUTE = 60_000;
 
 describe("createInboxStore", () => {
@@ -26,7 +31,11 @@ describe("createInboxStore", () => {
     const { token, inbox } = store.open(0);
     store.deliver(token, [signal("pagos", 0.5), signal("running", 0.6)], 1);
     store.deliver(token, [signal("pagos", 0.9), signal("pagos", 0.4, "chatgpt")], 2);
-    expect(store.drain(inbox, 3)).toEqual([signal("pagos", 0.9), signal("running", 0.6), signal("pagos", 0.4, "chatgpt")]);
+    expect(store.drain(inbox, 3)).toEqual([
+      signal("pagos", 0.9),
+      signal("running", 0.6),
+      signal("pagos", 0.4, "chatgpt"),
+    ]);
   });
 
   it("refuses an expired token, lets the phone collect a little longer, then forgets everything", () => {
@@ -67,7 +76,9 @@ describe("owner inboxes (the OAuth connector)", () => {
   it("keeps what arrived for a day after the last delivery, so the phone can be closed meanwhile", () => {
     const store = createInboxStore();
     store.deliverProfile(store.openFor(OWNER, 0).token, "claude", "- Prefiero hostales.", 1);
-    expect(store.drainOwner(OWNER, 20 * HOUR).profiles).toEqual([{ source: "claude", markdown: "- Prefiero hostales." }]);
+    expect(store.drainOwner(OWNER, 20 * HOUR).profiles).toEqual([
+      { source: "claude", markdown: "- Prefiero hostales." },
+    ]);
     store.deliver(store.openFor(OWNER, 20 * HOUR).token, [signal("pagos")], 20 * HOUR);
     expect(store.drainOwner(OWNER, 45 * HOUR)).toEqual({ signals: [], profiles: [] });
   });

@@ -30,10 +30,26 @@ export const COPY = {
     saved: "Tu Agente lo sabe",
     howTitle: "Cómo funciona Minga",
     how: [
-      { icon: "sparkle", title: "Tu Agente te conoce", text: "Aprende de tus Fuentes lo que sabes, haces y buscas. Lo privado nunca sale de tu teléfono." },
-      { icon: "users", title: "Encuentra a tu gente", text: "Explora a quienes están cerca y revisa tus Contactos, por lo que tienen en común." },
-      { icon: "chat", title: "Los Agentes coordinan", text: "Dices qué quieres lograr; tu Agente invita a los indicados y conversa con sus Agentes por ti." },
-      { icon: "check", title: "Ustedes deciden", text: "Eliges con quién y qué considerar. Los Agentes proponen el primer paso; ustedes lo hacen realidad." },
+      {
+        icon: "sparkle",
+        title: "Tu Agente te conoce",
+        text: "Aprende de tus Fuentes lo que sabes, haces y buscas. Lo privado nunca sale de tu teléfono.",
+      },
+      {
+        icon: "users",
+        title: "Encuentra a tu gente",
+        text: "Explora a quienes están cerca y revisa tus Contactos, por lo que tienen en común.",
+      },
+      {
+        icon: "chat",
+        title: "Los Agentes coordinan",
+        text: "Dices qué quieres lograr; tu Agente invita a los indicados y conversa con sus Agentes por ti.",
+      },
+      {
+        icon: "check",
+        title: "Ustedes deciden",
+        text: "Eliges con quién y qué considerar. Los Agentes proponen el primer paso; ustedes lo hacen realidad.",
+      },
     ],
     howMore: "Entendido",
     contacts: "Contactos",
@@ -60,7 +76,8 @@ export const COPY = {
     next: "Seguir",
     limits: "¿Qué considerar?",
     limitsHelp: "Solo las lee tu Agente. Al grupo le dice la condición, no el motivo.",
-    limitsPlaceholder: "Por ejemplo: presupuesto acotado, solo fines de semana, volver antes del lunes. Soy vegetariana.",
+    limitsPlaceholder:
+      "Por ejemplo: presupuesto acotado, solo fines de semana, volver antes del lunes. Soy vegetariana.",
     create: "Crear Iniciativa",
     skip: "Sin restricciones",
     back: "Volver",
@@ -146,7 +163,8 @@ export const COPY = {
     found: "Lo que quizás no sabían",
     opener: "Para partir",
     note: "Tu Agente · solo con lo público de ambos",
-    coincidencias: "¿Qué oportunidades se podrían dar, dados nuestros perfiles? ¿Sería provechoso empezar a conversar? ¿Sobre qué?",
+    coincidencias:
+      "¿Qué oportunidades se podrían dar, dados nuestros perfiles? ¿Sería provechoso empezar a conversar? ¿Sobre qué?",
     afinidades: "¿Qué cosas en común podríamos tener que quizás no sabíamos?",
   },
 
@@ -349,10 +367,13 @@ export const COPY = {
     rejected: (n: number) => `El servidor dejó ${n === 1 ? "un tema" : `${n} temas`} en privado.`,
     personal: "Ojo: podría decir de más sobre ti",
     toHome: "Seguir",
-    googleHint: "Trae los canales de YouTube que sigues y más ves, y lo que se repite en tu calendario. Llega como borrador y tú decides qué compartes.",
-    googleExport: "Pide tu exportación en Google Takeout: deja YouTube (historial y suscripciones) y Calendar, y en “Método de entrega” elige Añadir a Drive. Tarda cerca de un minuto.",
+    googleHint:
+      "Trae los canales de YouTube que sigues y más ves, y lo que se repite en tu calendario. Llega como borrador y tú decides qué compartes.",
+    googleExport:
+      "Pide tu exportación en Google Takeout: deja YouTube (historial y suscripciones) y Calendar, y en “Método de entrega” elige Añadir a Drive. Tarda cerca de un minuto.",
     googleOpenTakeout: "Abrir Google Takeout",
-    googlePickHint: "Después elige el archivo .zip que quedó en tu Drive. Solo vemos ese archivo, no el resto de tu Drive.",
+    googlePickHint:
+      "Después elige el archivo .zip que quedó en tu Drive. Solo vemos ese archivo, no el resto de tu Drive.",
     googlePick: "Elegir mi exportación",
     googleOpening: "Abriendo Google…",
     googleFailed: "No pudimos abrir Google. Intenta de nuevo.",
@@ -370,7 +391,8 @@ export const COPY = {
     expires: (min: number) => `Vence en ${min} min`,
     then: "Después pídele a tu asistente: “Sube mi perfil a Minga”. Llega a tu teléfono como borrador y tú decides qué compartes.",
     setupTitle: "¿Cómo lo agrego?",
-    setup: (url: string) => `En claude.ai, desde el computador: Configuración → Conectores → Agregar conector personalizado, con el nombre Minga y la dirección ${url}. Al conectarlo te pide este código.`,
+    setup: (url: string) =>
+      `En claude.ai, desde el computador: Configuración → Conectores → Agregar conector personalizado, con el nombre Minga y la dirección ${url}. Al conectarlo te pide este código.`,
   },
 
   sala: {
@@ -389,7 +411,8 @@ export const COPY = {
     published: (n: number) => `Tu nombre y ${n} ${n === 1 ? "Interés público" : "Intereses públicos"}`,
     map: "Mapa de OpenStreetMap",
     location: "Tu Ubicación aproximada (±100 m), para saber el nombre del lugar",
-    proximity: "Tu posición mientras Explorar está abierto, para saber quién está cerca. Nadie más la ve y se olvida al minuto",
+    proximity:
+      "Tu posición mientras Explorar está abierto, para saber quién está cerca. Nadie más la ve y se olvida al minuto",
   },
 
   desktop: {
@@ -412,6 +435,3 @@ export const COPY = {
     },
   },
 } as const;
-
-/** Domain words that always go capitalized, for the copy check. */
-export const CONCEPTS = ["Minga", "Nodo", "Agente", "Coincidencia", "Iniciativa", "Chat", "Contacto", "Contactos", "Interés", "Intereses", "Perfil", "Fuente", "Ubicación", "Distancia"];

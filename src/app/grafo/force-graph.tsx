@@ -59,7 +59,13 @@ export function ForceGraph({
   const names = useMemo(() => new Map(people.map((p) => [p.personId, p.displayName])), [people]);
   const edges = useMemo(
     () => [
-      ...nodes.map((n) => ({ id: `owns:${n.id}`, source: `person:${n.personId}`, target: n.id, type: "owns" as const, score: 1 })),
+      ...nodes.map((n) => ({
+        id: `owns:${n.id}`,
+        source: `person:${n.personId}`,
+        target: n.id,
+        type: "owns" as const,
+        score: 1,
+      })),
       ...links.map((l) => ({ id: `${l.source}->${l.target}`, ...l })),
     ],
     [nodes, links],
@@ -86,8 +92,14 @@ export function ForceGraph({
           .distance((l) => (l.type === "owns" ? 46 : 80 - l.score * 30))
           .strength((l) => (l.type === "owns" ? 0.9 : 0.15 + l.score * 0.35)),
       )
-      .force("charge", forceManyBody<SimNode>().strength((d) => (d.kind === "person" ? -420 : -110)))
-      .force("collide", forceCollide<SimNode>((d) => d.r + (d.kind === "person" ? 22 : 10)))
+      .force(
+        "charge",
+        forceManyBody<SimNode>().strength((d) => (d.kind === "person" ? -420 : -110)),
+      )
+      .force(
+        "collide",
+        forceCollide<SimNode>((d) => d.r + (d.kind === "person" ? 22 : 10)),
+      )
       .force("x", forceX(0).strength(0.04))
       .force("y", forceY(0).strength(0.05))
       .alpha(positions.current.size > 0 ? 0.5 : 1)
@@ -134,7 +146,11 @@ export function ForceGraph({
     } else if (d.panFrom) {
       const rect = svgRef.current!.getBoundingClientRect();
       const scale = Math.max(d.panFrom.view.w / rect.width, d.panFrom.view.h / rect.height);
-      setView({ ...d.panFrom.view, x: d.panFrom.view.x - (e.clientX - d.panFrom.x) * scale, y: d.panFrom.view.y - (e.clientY - d.panFrom.y) * scale });
+      setView({
+        ...d.panFrom.view,
+        x: d.panFrom.view.x - (e.clientX - d.panFrom.x) * scale,
+        y: d.panFrom.view.y - (e.clientY - d.panFrom.y) * scale,
+      });
     }
   };
 
@@ -194,7 +210,16 @@ export function ForceGraph({
       onWheel={onWheel}
     >
       <defs>
-        <marker id="arrow-complemento" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+        <marker
+          id="arrow-complemento"
+          viewBox="0 0 10 10"
+          refX="9"
+          refY="5"
+          markerUnits="userSpaceOnUse"
+          markerWidth="9"
+          markerHeight="9"
+          orient="auto-start-reverse"
+        >
           <path d="M0,0 L10,5 L0,10 z" fill={LINK_STYLE.complemento.color} />
         </marker>
       </defs>
@@ -207,7 +232,18 @@ export function ForceGraph({
           const b = pos(t);
           const on = isLit(s) && isLit(t);
           if (l.type === "owns") {
-            return <line key={l.id} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={INK} strokeOpacity={on ? 0.18 : 0.04} strokeWidth={1} />;
+            return (
+              <line
+                key={l.id}
+                x1={a.x}
+                y1={a.y}
+                x2={b.x}
+                y2={b.y}
+                stroke={INK}
+                strokeOpacity={on ? 0.18 : 0.04}
+                strokeWidth={1}
+              />
+            );
           }
           const style = LINK_STYLE[l.type];
           // Stop the arrow at the target's rim so the head stays visible.
@@ -235,34 +271,42 @@ export function ForceGraph({
 
       <g>
         {nodes.map((k) => {
-            const n = { id: k.id, r: topicRadius(k.depth) };
-            const p = pos(n.id);
-            const on = isLit(n.id);
-            const busca = k.role === "busca";
-            return (
-              <g
-                key={n.id}
-                transform={`translate(${p.x}, ${p.y})`}
-                opacity={on ? 1 : 0.15}
-                className="cursor-grab"
-                onPointerDown={(e) => onPointerDownNode(e, n.id)}
-                onPointerEnter={() => setHover(n.id)}
-                onPointerLeave={() => setHover(undefined)}
+          const n = { id: k.id, r: topicRadius(k.depth) };
+          const p = pos(n.id);
+          const on = isLit(n.id);
+          const busca = k.role === "busca";
+          return (
+            <g
+              key={n.id}
+              transform={`translate(${p.x}, ${p.y})`}
+              opacity={on ? 1 : 0.15}
+              className="cursor-grab"
+              onPointerDown={(e) => onPointerDownNode(e, n.id)}
+              onPointerEnter={() => setHover(n.id)}
+              onPointerLeave={() => setHover(undefined)}
+            >
+              <title>{`${names.get(k.personId)} · ${k.roles.join(", ")} · ${k.name} · profundidad ${k.depth} · ${k.sources.join(", ")}`}</title>
+              <circle
+                r={n.r}
+                fill={busca ? "white" : ROLE[k.role].color}
+                stroke={busca ? ROLE.busca.color : "white"}
+                strokeWidth={busca ? 2 : 1.5}
+                strokeDasharray={busca ? "3 2" : undefined}
+              />
+              <text
+                x={n.r + 4}
+                dy="0.35em"
+                fontSize={10.5}
+                fill={INK}
+                fillOpacity={0.8}
+                pointerEvents="none"
+                className="[stroke:#E9EDF1] [stroke-width:3px] [paint-order:stroke]"
               >
-                <title>{`${names.get(k.personId)} · ${k.roles.join(", ")} · ${k.name} · profundidad ${k.depth} · ${k.sources.join(", ")}`}</title>
-                <circle
-                  r={n.r}
-                  fill={busca ? "white" : ROLE[k.role].color}
-                  stroke={busca ? ROLE.busca.color : "white"}
-                  strokeWidth={busca ? 2 : 1.5}
-                  strokeDasharray={busca ? "3 2" : undefined}
-                />
-                <text x={n.r + 4} dy="0.35em" fontSize={10.5} fill={INK} fillOpacity={0.8} pointerEvents="none" className="[paint-order:stroke] [stroke:#E9EDF1] [stroke-width:3px]">
-                  {k.name}
-                </text>
-              </g>
-            );
-          })}
+                {k.name}
+              </text>
+            </g>
+          );
+        })}
       </g>
 
       <g>
@@ -291,11 +335,24 @@ export function ForceGraph({
                 onSelectPerson(isSelected ? undefined : person.personId);
               }}
             >
-              <circle r={n.r} fill={person.personId === me ? ME_COLOR : "white"} stroke={INK} strokeWidth={isSelected ? 4 : 2} />
+              <circle
+                r={n.r}
+                fill={person.personId === me ? ME_COLOR : "white"}
+                stroke={INK}
+                strokeWidth={isSelected ? 4 : 2}
+              />
               <text textAnchor="middle" dy="0.35em" fontSize={11} fontWeight={600} fill={INK} pointerEvents="none">
                 {person.displayName.slice(0, 2)}
               </text>
-              <text textAnchor="middle" y={n.r + 14} fontSize={12} fontWeight={600} fill={INK} pointerEvents="none" className="[paint-order:stroke] [stroke:#E9EDF1] [stroke-width:4px]">
+              <text
+                textAnchor="middle"
+                y={n.r + 14}
+                fontSize={12}
+                fontWeight={600}
+                fill={INK}
+                pointerEvents="none"
+                className="[stroke:#E9EDF1] [stroke-width:4px] [paint-order:stroke]"
+              >
                 {person.displayName}
               </text>
             </g>

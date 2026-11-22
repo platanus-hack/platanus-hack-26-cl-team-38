@@ -36,7 +36,11 @@ export const SOURCE_META: Record<Source, { label: string; reads: string; kind: "
   spotify: { label: "Spotify", reads: "Tus artistas y géneros, no tus playlists privadas", kind: "app" },
   github: { label: "GitHub", reads: "Lenguajes y temas de tus repos públicos", kind: "app" },
   instagram: { label: "Instagram", reads: "Tus Intereses, desde el export de tus datos", kind: "app" },
-  google: { label: "Google", reads: "Los canales de YouTube que sigues y ves, y lo que se repite en tu calendario", kind: "app" },
+  google: {
+    label: "Google",
+    reads: "Los canales de YouTube que sigues y ves, y lo que se repite en tu calendario",
+    kind: "app",
+  },
   manual: { label: "Tú", reads: "Lo que escribiste tú en Perfil", kind: "app" },
 };
 
@@ -52,7 +56,10 @@ export function SoonLogo({ source }: { source: SoonSource }) {
   if (source === "strava")
     return (
       <svg className="lg" viewBox="0 0 24 24" aria-hidden="true">
-        <path fill="#FC4C02" d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+        <path
+          fill="#FC4C02"
+          d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"
+        />
       </svg>
     );
   return (
