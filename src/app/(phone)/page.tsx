@@ -8,7 +8,7 @@ import { Sheet, Splash, TabBar, useOnboardedPhone } from "./_components/chrome";
 import { MingaMark } from "./_components/minga-mark";
 import { Icon } from "./_components/icons";
 import { Field, ListRow, Mono } from "./_components/ui";
-import { buildInitiative } from "./_lib/conversations";
+import { buildInitiative, localInitiatives } from "./_lib/conversations";
 import { COPY } from "./_lib/copy";
 import { affinities, relTime, useEncounters } from "./_lib/people";
 import { useContacts } from "./_lib/plans";
@@ -27,7 +27,8 @@ export default function Home() {
   if (!s) return <Splash />;
   const everyone = encounters ? affinities(s, encounters) : [];
   const contacts = known ?? [];
-  const initiatives = (s.initiatives ?? []).map((i) => buildInitiative(s.displayName, i, everyone));
+  const initiatives = (encounters ? localInitiatives(s, encounters) : []).map((i) => buildInitiative(s.displayName, i, everyone));
+  const invited = contacts.find((c) => c.person.personId === s.invite);
   const text = draft ?? s.intent;
   const saved = draft === null ? !!s.intent : draft.trim() === s.intent;
 
@@ -71,6 +72,14 @@ export default function Home() {
             router.push("/iniciativa");
           }}
         />
+        {invited && (
+          <p className="hint">
+            {C.with(invited.person.displayName)}{" "}
+            <button type="button" className="link" onClick={() => setPhone({ invite: null })}>
+              {C.withRemove}
+            </button>
+          </p>
+        )}
         {initiatives.length > 0 && (
           <>
             <div className="sec">{C.initiatives}</div>

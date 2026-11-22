@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { PublicTopic } from "@/lib/types";
 import { AiCard, MoreTopics } from "../_components/ai-card";
@@ -224,10 +223,6 @@ function PersonSummary({ c, myTopics, state }: { c: Coincidence; myTopics: Publi
         </>
       )}
 
-      <Link className="btn ghost" href={`/conversaciones/${encodeURIComponent(c.person.personId)}`} style={{ marginTop: 32 }}>
-        <Icon name="chat" />
-        {COPY.startConversation}
-      </Link>
     </>
   );
 }

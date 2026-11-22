@@ -68,8 +68,10 @@ export default function IniciativaPage() {
   });
   const suggested = withReason.filter((x) => x.why).sort((a, b) => a.rank - b.rank).slice(0, 5);
   const picks = new Set(suggested.map((x) => x.c.person.personId));
-  // Until you touch the list, your Agente's picks are checked: the first three who know about it.
-  const chosen = picked ?? new Set(suggested.slice(0, 3).map((x) => x.c.person.personId));
+  // Until you touch the list, who you came with is checked; else your Agente's picks, the first
+  // three who know about it.
+  const invited = s.invite && contacts.some((c) => c.person.personId === s.invite) ? s.invite : null;
+  const chosen = picked ?? new Set(invited ? [invited] : suggested.slice(0, 3).map((x) => x.c.person.personId));
   const toggle = (id: string) => {
     const next = new Set(chosen);
     if (next.has(id)) next.delete(id);
@@ -100,7 +102,7 @@ export default function IniciativaPage() {
       setCreating(true);
       setError(undefined);
       const created = await createPlan(intent, people.map((c) => c.person.personId), limits);
-      if (created.ok) return router.replace(`/conversaciones/${created.planId}`);
+      if (created.ok) return (setPhone({ invite: null }), router.replace(`/conversaciones/${created.planId}`));
       setCreating(false);
       return setError(created.error);
     }
@@ -109,7 +111,7 @@ export default function IniciativaPage() {
       people.map((c) => c.person.personId),
       limits,
     );
-    setPhone((p) => ({ initiatives: [init, ...(p.initiatives ?? [])] }));
+    setPhone((p) => ({ initiatives: [init, ...(p.initiatives ?? [])], invite: null }));
     toast(C.created);
     router.replace(`/conversaciones/${init.id}`);
   }

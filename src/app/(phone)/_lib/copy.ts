@@ -29,6 +29,8 @@ export const COPY = {
     contacts: "Contactos",
     contactsHint: "Agrégalos desde Explorar",
     initiatives: "Iniciativas",
+    with: (name: string) => `Con ${name}.`,
+    withRemove: "Quitar",
   },
 
   /** Iniciativa: from what you want to do on Inicio to a group Conversación. */
@@ -124,7 +126,7 @@ export const COPY = {
 
   more: "Ver más",
   less: "Ver menos",
-  startConversation: "Iniciar Conversación",
+  startInitiative: "Crear Iniciativa",
 
   afinidades: {
     title: "Contactos",
@@ -185,11 +187,9 @@ export const COPY = {
 
   conversaciones: {
     title: "Chats",
-    groups: "Grupos",
-    people: "Personas",
+    initiatives: "Iniciativas",
     you: "Tu Agente",
-    empty: "Todavía no hay Chats.",
-    noBackend: "Sin registro todavía.",
+    empty: "Todavía no hay Iniciativas.",
     notFound: "No encontramos esta Conversación.",
     yourself: "Tú",
     confirm: "Confirmo",
