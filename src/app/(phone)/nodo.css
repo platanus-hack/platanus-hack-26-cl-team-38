@@ -286,6 +286,32 @@
     font-weight: 400;
     color: var(--mute);
   }
+  /* Inicio: the same filter as Explorar, next to the Distancia; its panel floats over the graph */
+  .home-near {
+    position: relative;
+    z-index: 3;
+    align-items: center;
+  }
+  .home-near .tools {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .home-near .filter-btn {
+    margin: -8px -8px -8px 0;
+    color: var(--mute);
+  }
+  .home-near .filter-btn[aria-expanded="true"] {
+    background: rgba(27, 35, 38, 0.06);
+    color: var(--ink);
+  }
+  .home-near .filters {
+    font-weight: 400;
+    color: var(--on-slate);
+  }
+  .home-near .filters .switch:not([aria-checked="true"]) {
+    background: rgba(242, 241, 238, 0.18);
+  }
   /* Intereses en común: the topics graph, straight on the stone */
   .home-graph {
     position: relative;
@@ -496,6 +522,13 @@
     padding: 8px 0;
     font-size: 16px;
     line-height: 1.4;
+  }
+  /* line-height lands on a fraction of a pixel: with "always show scrollbars" a sub-pixel overflow drew a bar */
+  .field textarea {
+    scrollbar-width: none;
+  }
+  .field textarea::-webkit-scrollbar {
+    display: none;
   }
   /* Perfil → Información: label on the left, value on the right */
   .info .field {
@@ -3003,6 +3036,7 @@ html:has(.nodo .graph-screen) body {
 /* everyone still writing, side by side in one row */
 .nodo .writing-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   animation: nodo-fade 0.3s ease-out;
@@ -3020,6 +3054,7 @@ html:has(.nodo .graph-screen) body {
   padding: 8px 14px;
 }
 .nodo .writing-row > .mono {
+  flex-basis: 100%;
   font-size: 11px;
 }
 .nodo .plan-drafting {

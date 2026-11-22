@@ -13,6 +13,7 @@ import { going } from "../../_lib/plan-network";
 import { changes, threadOf, type Step, type Tally } from "../../_lib/plan-thread";
 import { usePlan } from "../../_lib/plans";
 import { useStickToBottom } from "../../_lib/stick-to-bottom";
+import { cx } from "../../_lib/cx";
 
 // An Iniciativa on the backend: the Agentes of everyone in it, round by round, and the plan they
 // reach. The phone only watches; every line here was written and filtered on the server.
@@ -161,8 +162,8 @@ function Sources({ content }: { content: PlanContent }) {
   );
 }
 
-/** A proposal where the orchestrator made it: open while it is the one being answered, folded after. */
-function ProposalCard({ step, open }: { step: Extract<Step, { kind: "proposal" }>; open: boolean }) {
+/** A proposal, folded: only the final plan opens in full. */
+function ProposalCard({ step }: { step: Extract<Step, { kind: "proposal" }> }) {
   const { content, version } = step.proposal;
   const head = (
     <div className="ai-head">
@@ -170,15 +171,6 @@ function ProposalCard({ step, open }: { step: Extract<Step, { kind: "proposal" }
       {C.orchestrator} · {C.proposal} {version}
     </div>
   );
-  if (open)
-    return (
-      <section className="plan-card ai proposal">
-        {head}
-        <p className="plan-summary">{content.resumen}</p>
-        <Decisions content={content} previous={step.previous} />
-        <Sources content={content} />
-      </section>
-    );
   return (
     <details className="plan-card ai proposal old">
       <summary>
@@ -280,7 +272,7 @@ function Message({ m, me, names }: { m: PlanMessageView; me: string; names: Map<
   return mine ? (
     <div className="bubble me">{body}</div>
   ) : (
-    <div className={`msg${m.participa === false ? "nova" : ""}`}>
+    <div className={cx("msg", m.participa === false && "nova")}>
       <Avatar id={m.personId ?? ""} />
       <div className="bubble">{body}</div>
     </div>
@@ -306,7 +298,6 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
   const names = new Map(plan.members.map((m) => [m.personId, m.displayName]));
   const others = plan.members.filter((m) => m.personId !== me);
   const thread = threadOf(plan);
-  const lastProposal = thread.steps.findLastIndex((s) => s.kind === "proposal" && !s.proposal.final);
 
   return (
     <div className="app with-tabs">
@@ -324,8 +315,8 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
         <div className="plan-net">
           <PlanNetwork plan={plan} me={me} confirmed={confirmed} W={340} H={300} compact />
         </div>
-        <Mono className={`plan-status${closed ? "done" : ""}`}>{statusOf(plan)}</Mono>
-        {thread.steps.map((step, i) => (
+        <Mono className={cx("plan-status", closed && "done")}>{statusOf(plan)}</Mono>
+        {thread.steps.map((step) => (
           <Fragment key={step.kind === "opening" ? "opening" : `v${step.proposal.version}`}>
             {step.kind === "opening" ? (
               <StepHeader label={C.opening} hint={step.current ? C.openingHint : undefined} />
@@ -337,7 +328,7 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
                   label={`${C.proposal} ${step.proposal.version}`}
                   hint={step.current ? C.answeringHint : undefined}
                 />
-                <ProposalCard step={step} open={!closed && i === lastProposal} />
+                <ProposalCard step={step} />
               </>
             )}
             {step.messages.map((m) => (

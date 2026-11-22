@@ -6,6 +6,7 @@ import { type CSSProperties, type ReactNode, useEffect, useLayoutEffect, useRef,
 import type { Topic } from "@/lib/types";
 import { Icon } from "./icons";
 import { COPY } from "../_lib/copy";
+import { cx } from "../_lib/cx";
 
 /** Back arrow: returns to the screen you came from; opened from a link, it goes to `fallback`. */
 export function BackLink({
@@ -170,7 +171,7 @@ export function Field({
       )}
       <button
         type="submit"
-        className={`go${ready ? "on" : ""}${done ? "done" : ""}`}
+        className={cx("go", ready && "on", done && "done")}
         aria-label={done ? COPY.sent : COPY.send}
         disabled={!ready}
       >
@@ -211,7 +212,7 @@ export function LargeTitle({
   }, []);
   return (
     <>
-      <div className={`lt-bar${stuck ? "stuck" : ""}`}>
+      <div className={cx("lt-bar", stuck && "stuck")}>
         <span className="slot">{back && <BackLink fallback={back} className="back slot" />}</span>
         <span className="small-title" aria-hidden={!stuck}>
           {title}
@@ -236,7 +237,7 @@ export function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boo
       role="switch"
       aria-checked={on}
       aria-label={`${label}: ${on ? COPY.isPublic : COPY.onlyYou}`}
-      className={`toggle${on ? "on" : ""}`}
+      className={cx("toggle", on && "on")}
       onClick={() => onChange(!on)}
     >
       <Icon name={on ? "eye" : "eyeoff"} />
@@ -251,7 +252,7 @@ export function Tags({ topics, selected }: { topics: Pick<Topic, "id" | "name" |
       {topics.map((t, i) => (
         <span key={t.id}>
           {i > 0 && <span className="sep"> · </span>}
-          <span className={`tag d${t.depth}${selected?.has(t.name) ? "sel" : ""}`}>{t.name}</span>
+          <span className={cx("tag", `d${t.depth}`, selected?.has(t.name) && "sel")}>{t.name}</span>
         </span>
       ))}
     </p>
