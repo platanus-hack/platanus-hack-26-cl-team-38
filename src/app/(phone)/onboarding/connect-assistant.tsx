@@ -6,12 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { admitSignals, buildAssistantPrompt, IncomingSignalsSchema, parsePastedSignals, type ClassifySignals } from "@/lib/connectors/assistant";
 import { buildProfilePrompt, PROFILE_MAX_CHARS } from "@/lib/connectors/profile";
-import { SynthesisSignalSchema, type Signal } from "@/lib/types";
+import { SynthesisSignalSchema, type Signal, type SynthesisSignal } from "@/lib/types";
 import { addProfiles, addSignals, ProfilesSchema, removeProfileLine, writeSignals, type Profile } from "./store";
 
 // Pasted text goes through the same privacy filter as the other two ways in. Only kind and name
 // travel to the server, as in the rest of the onboarding.
-const classifyOnApi: ClassifySignals = async (topics) => {
+export const classifyOnApi: ClassifySignals = async (topics) => {
   const response = await fetch("/api/privacy/classify", { method: "POST", body: JSON.stringify({ topics }) });
   if (!response.ok) throw new Error("classify");
   const { verdicts } = z.object({ verdicts: z.array(z.object({ level: z.enum(["segura", "personal", "sensible"]) })) }).parse(await response.json());
@@ -22,8 +22,13 @@ type Ticket = { token: string; inbox: string; expiresAt: number };
 // A ticket with less than this left gets replaced, so the assistant has time to answer.
 const MIN_LEFT_MS = 3 * 60_000;
 
+// Where collected signals and profiles go. /onboarding keeps them in its own store; Minga passes its own.
+export type InboxSink = { onSignals: (arrived: SynthesisSignal[]) => void; onProfiles: (arrived: Profile[]) => void };
+const ONBOARDING_SINK: InboxSink = { onSignals: addSignals, onProfiles: addProfiles };
+
 // Lives in the flow, not in step 1: the phone keeps collecting while the person reviews.
-export function useAssistantInbox() {
+// `sink` must be stable (a module constant), or polling restarts on every render.
+export function useAssistantInbox({ onSignals, onProfiles }: InboxSink = ONBOARDING_SINK) {
   const [ticket, setTicket] = useState<Ticket | null>(null);
 
   useEffect(() => {
@@ -34,12 +39,12 @@ export function useAssistantInbox() {
       if (!response.ok) return setTicket(null);
       const body = await response.json();
       const arrived = z.array(SynthesisSignalSchema).catch([]).parse(body.signals);
-      if (arrived.length > 0) addSignals(arrived);
+      if (arrived.length > 0) onSignals(arrived);
       const profiles = ProfilesSchema.catch([]).parse(body.profiles);
-      if (profiles.length > 0) addProfiles(profiles);
+      if (profiles.length > 0) onProfiles(profiles);
     }, 2000);
     return () => clearInterval(poll);
-  }, [ticket]);
+  }, [ticket, onSignals, onProfiles]);
 
   // The token works several times inside its window, so Claude and ChatGPT share one message.
   async function liveToken(): Promise<string> {
@@ -70,7 +75,7 @@ export function useAssistantInbox() {
 
 export type AssistantInbox = ReturnType<typeof useAssistantInbox>;
 
-function useCopy(message: () => Promise<string>, pasteInto: string) {
+export function useCopy(message: () => Promise<string>, pasteInto: string) {
   const [status, setStatus] = useState("");
   const [text, setText] = useState("");
 

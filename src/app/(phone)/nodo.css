@@ -724,6 +724,9 @@
   .paste:focus {
     border-color: var(--accent);
   }
+  .warn {
+    color: #a3322e;
+  }
   .err {
     color: #a3322e;
     font-size: 13px;

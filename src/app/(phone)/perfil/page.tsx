@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { shareRecommended } from "@/lib/node/node";
 import { useState } from "react";
 import { Avatar } from "../_components/avatar";
 import { BrandLogo } from "../_components/brand";
@@ -11,8 +12,7 @@ import { ListRow, Mono, Tags } from "../_components/ui";
 import { COPY } from "../_lib/copy";
 import { useLocation } from "../_lib/location";
 import { cap, DEMO, myInterests } from "../_lib/people";
-import { isSensitive } from "../_lib/node";
-import { connectedSources, resetPhone, setPhone, setTopic, signOut } from "../_lib/store";
+import { connectedSources, resetPhone, setPhone, signOut } from "../_lib/store";
 
 const C = COPY.perfil;
 const time = new Intl.DateTimeFormat("es-CL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" });
@@ -30,7 +30,8 @@ export default function PerfilPage() {
   const setPrivacy = (patch: Partial<typeof privacy>) => setPhone({ privacy: { ...privacy, ...patch } });
   const topics = s.node?.topics ?? [];
   const kept = topics.length - interests.length;
-  const pending = topics.filter((t) => !t.public && !isSensitive(t));
+  // "Lo recomendado": what the privacy filter found safe and you haven't decided on yet.
+  const recommended = topics.filter((t) => t.privacy?.level === "segura" && t.privacy.decidedBy === "default").length;
 
   function leave() {
     signOut();
@@ -103,8 +104,8 @@ export default function PerfilPage() {
             {interests.length} {COPY.nodo.shared} · {kept} {COPY.nodo.kept}
           </Mono>
         </div>
-        {pending.length > 0 && (
-          <button type="button" className="link" onClick={() => pending.forEach((t) => setTopic(t.id, { public: true }))}>
+        {recommended > 0 && (
+          <button type="button" className="link" onClick={() => setPhone((p) => (p.node ? { node: shareRecommended(p.node) } : {}))}>
             {COPY.bienvenida.shareAll}
           </button>
         )}
