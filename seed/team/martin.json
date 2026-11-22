@@ -12,7 +12,7 @@
     ["estadística bayesiana", "sabe", 2, ["claude"]],
     ["fairness en ia", "sabe", 2, ["claude"]],
     ["formación en liderazgo y empatía", "ofrece", 2, ["claude"]],
-    ["hackathons", "hace", 2, ["claude"]],
+    ["hackathon", "hace", 2, ["claude"]],
     ["investigador en procesamiento de lenguaje natural", "es", 2, ["claude"]],
     ["modelamiento predictivo", "sabe", 2, ["claude"]],
     ["optimización matemática", "sabe", 2, ["claude"]],

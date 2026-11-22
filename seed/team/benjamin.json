@@ -14,7 +14,7 @@
     ["diagnósticos de conversión", "ofrece", 2, ["claude"]],
     ["entrevistas a usuarios", "hace", 2, ["claude"]],
     ["finanzas personales", "sabe", 2, ["claude"]],
-    ["hackathons", "hace", 2, ["claude"]],
+    ["hackathon", "hace", 2, ["claude"]],
     ["metodología shape up", "sabe", 2, ["claude"]],
     ["pagos en cuotas bnpl", "sabe", 2, ["claude"]],
     ["pruebas a/b de producto", "sabe", 2, ["claude"]],

@@ -3,7 +3,7 @@
   "displayName": "Cristóbal",
   "rooms": ["seed-hack"],
   "topics": [
-    ["hackathons", "hace", 3, ["claude"]],
+    ["hackathon", "hace", 3, ["claude"]],
     ["programar con agentes de ia", "hace", 3, ["claude"]],
     ["apis rest con fastapi", "sabe", 2, ["claude"]],
     ["astrofotografía", "hace", 2, ["instagram", "claude"]],
