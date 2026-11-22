@@ -9,7 +9,7 @@ import { AffinityGraph } from "./affinity-graph";
 import { MatchGraph } from "./match-graph";
 import { COPY } from "../_lib/copy";
 import { isPublished } from "../_lib/node";
-import { byTopic, cap, clampRadius, coincidences, searchTopics, useEncounters } from "../_lib/people";
+import { byTopic, cap, clampRadius, coincidences, isVisible, searchTopics, useEncounters } from "../_lib/people";
 import { useContacts } from "../_lib/plans";
 import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 
@@ -83,7 +83,9 @@ export function GraphStage() {
   if (!s) return null;
 
   const phase = phaseOf(s, path);
-  const coins = encounters ? coincidences(s, encounters) : [];
+  const visible = isVisible(s);
+  const coins = encounters && visible ? coincidences(s, encounters) : [];
+  const people = (s.explore ?? "personas") === "personas";
   const groups = byTopic(coins);
   const topics = s.node?.topics ?? [];
   const shared = topics.filter((t) => isPublished(t)).length;
@@ -94,7 +96,9 @@ export function GraphStage() {
     inicio: COPY.desktop.building,
     fuentes: `${n} ${n === 1 ? "Fuente" : "Fuentes"}`,
     compartir: `${shared} públicos · ${topics.length - shared} contigo`,
-    coincidencias: `${coins.length} ${coins.length === 1 ? "Coincidencia" : "Coincidencias"} · ${(s.nearOnly ?? true) ? `${clampRadius(s.radiusM)} m` : COPY.coincidencias.anyDistance}${selected ? ` · ${cap(selected.topic)}` : ""}`,
+    coincidencias: visible
+      ? `${coins.length} ${coins.length === 1 ? "Coincidencia" : "Coincidencias"} · ${clampRadius(s.radiusM)} m${selected && !people ? ` · ${cap(selected.topic)}` : ""}`
+      : COPY.coincidencias.visible + ": no",
   }[phase];
 
   const affinity = path.startsWith("/afinidades") && phase === "coincidencias";
@@ -117,6 +121,11 @@ export function GraphStage() {
           <li className="mute">{L.size}</li>
           <li className="mute">{L.drag}</li>
         </ul>
+      ) : phase === "coincidencias" && people ? (
+        <ul className="legend">
+          <li>{L.close}</li>
+          <li className="mute">{L.size}</li>
+        </ul>
       ) : phase === "coincidencias" ? (
         <ul className="legend">
           <li>{L.topics}</li>
@@ -125,8 +134,8 @@ export function GraphStage() {
       ) : null}
       {phase === "coincidencias" && !affinity && encounters && groups.length === 0 && (
         <div className="stage-empty">
-          <p>{L.empty}</p>
-          {(s.nearOnly ?? true) && <p className="mute">{L.emptyHint}</p>}
+          <p>{visible ? L.empty : COPY.coincidencias.invisible}</p>
+          {visible && <p className="mute">{L.emptyHint}</p>}
         </div>
       )}
       <div className="gwrap">
@@ -139,6 +148,8 @@ export function GraphStage() {
             focus={s.focus.person}
             match={contacts ? (searchTopics(contacts, s.affinityQuery ?? "")?.ids ?? null) : null}
           />
+        ) : phase === "coincidencias" && people ? (
+          <AffinityGraph W={W} H={H} me={{ id: s.personId }} contacts={coins} focus={s.focus.person} />
         ) : phase === "coincidencias" ? (
           <MatchGraph W={W} H={H} me={{ id: s.personId, name: s.displayName }} groups={groups} focus={s.focus} />
         ) : (

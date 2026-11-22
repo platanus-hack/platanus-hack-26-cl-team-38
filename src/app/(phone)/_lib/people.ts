@@ -35,7 +35,7 @@ export type Coincidence = Encounter & { items: MatchItem[]; score: number };
 export type TopicGroup = { topic: string; people: Coincidence[] };
 
 /** Distancia range for Coincidencias, in meters. */
-export const RANGE = { min: 5, max: 50, step: 1, initial: 25 };
+export const RANGE = { min: 25, max: 100, step: 5, initial: 25 };
 export const clampRadius = (m: number) => Math.min(RANGE.max, Math.max(RANGE.min, m));
 export const DEMO = !(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
 
@@ -49,8 +49,8 @@ const PLACES = [
   "Cowork en Providencia",
   "Costanera Center",
 ];
-const DISTANCES = [3, 5, 7, 9, 12, 15, 18, 22, 27, 33, 40, 48];
-const THEIR_RADII = [15, 20, 30, 40, 50];
+const DISTANCES = [5, 9, 14, 20, 27, 35, 44, 54, 65, 77, 88, 96];
+const THEIR_RADII = [25, 40, 60, 80, 100];
 const RELATIONS: Relation[] = ["amigo", "conocido", "cercania", "cercania", "conocido", "amigo", "cercania"];
 
 function hash(text: string): number {
@@ -134,13 +134,15 @@ function withRelation(s: PhoneState, e: Encounter): Encounter {
   return mine ? { ...e, relation: mine } : e;
 }
 
+/** Whether others can find you, and you them. Off, Explorar shows nobody. */
+export const isVisible = (s: PhoneState) => s.privacy?.discoverable ?? true;
+
+/** Who is within range (the smaller of your Distancia and theirs) and shares a public Interés with you. */
 export function coincidences(s: PhoneState, encounters: Encounter[]): Coincidence[] {
   const mine = myInterests(s);
-  // With "Cercanía" off, everyone you crossed paths with counts, at any distance.
-  const near = s.nearOnly ?? true;
   return encounters
     .map((e) => withRelation(s, e))
-    .filter((e) => e.person.personId !== s.personId && (!near || e.distanceM <= Math.min(clampRadius(s.radiusM), e.radiusM)))
+    .filter((e) => e.person.personId !== s.personId && e.distanceM <= Math.min(clampRadius(s.radiusM), e.radiusM))
     .map((e) => ({ ...e, ...matchTopics(mine, e.person.topics) }))
     .filter((c) => c.items.length > 0)
     .sort((a, b) => b.score - a.score || a.distanceM - b.distanceM);

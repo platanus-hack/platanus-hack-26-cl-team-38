@@ -29,8 +29,6 @@ export type PhoneState = {
   outbox: OutboxEntry[];
   /** Coincidences count only within the smaller of your radius and theirs. */
   radiusM: number;
-  /** Coincidencias: only people who were near (within radiusM), or everyone you crossed paths with. */
-  nearOnly: boolean;
   /** Location is opt-in; we keep the place name, never the coordinates. */
   locationOn: boolean;
   place: { label: string; at: string } | null;
@@ -48,6 +46,10 @@ export type PhoneState = {
   pendingTopic: { id: string; name: string; share: boolean; held: number } | null;
   /** Perfil → Información. Owner-only: this copy, plus the server's `user_info` (POST /api/users/info). */
   info: UserInfo | null;
+  /** Explorar: who is near as people, or as the topics you share (shared with the desktop graph). */
+  explore: "personas" | "temas";
+  /** People you asked to add as Contacto and who have not accepted yet. */
+  requests: string[];
   /** Your own photo, as a small JPEG data URL. Stays in this phone: nobody else sees it yet. */
   photo: string | null;
   /** What you said in a Conversación, and your Agente's answer, by conversation id. */
@@ -91,7 +93,6 @@ function fresh(personId = `p-${randomHex(6)}`): PhoneState {
     intent: "",
     outbox: [],
     radiusM: 25,
-    nearOnly: true,
     locationOn: false,
     place: null,
     focus: { topic: null, person: null },
@@ -100,6 +101,8 @@ function fresh(personId = `p-${randomHex(6)}`): PhoneState {
     affinityQuery: "",
     initiatives: [],
     info: null,
+    explore: "personas",
+    requests: [],
     photo: null,
     replies: {},
     pendingTopic: null,
