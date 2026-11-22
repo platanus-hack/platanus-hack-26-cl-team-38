@@ -1,19 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Avatar } from "./_components/avatar";
+import { BrandBar } from "./_components/brand-bar";
 import { Sheet, Splash, TabBar, useOnboardedPhone } from "./_components/chrome";
 import { CoincidenceSheet } from "./_components/coincidence-sheet";
 import { MatchGraph, setFocus } from "./_components/match-graph";
-import { MingaMark } from "./_components/minga-mark";
-import { NearFilters } from "./_components/near-filters";
 import { Icon } from "./_components/icons";
-import { Initiatives } from "./_components/initiatives";
+import { NearFilters } from "./_components/near-filters";
+import { RotatingLine } from "./_components/rotating-line";
 import { Field, Mono } from "./_components/ui";
 import { COPY } from "./_lib/copy";
-import { byTopic, clampRadius, coincidences, fmtMeters, isVisible, useEncounters } from "./_lib/people";
+import { byTopic, clampRadius, coincidences, fmtMeters, isVisible } from "./_lib/people";
 import { useNearby } from "./_lib/proximity";
 import { useContacts } from "./_lib/plans";
 import { setPhone } from "./_lib/store";
@@ -24,7 +22,6 @@ const X = COPY.coincidencias;
 export default function Home() {
   const s = useOnboardedPhone();
   const router = useRouter();
-  const encounters = useEncounters();
   // The Intereses graph shows the same people as Explorar: only who is in range.
   const { encounters: near } = useNearby(s);
   const known = useContacts(s);
@@ -44,29 +41,7 @@ export default function Home() {
 
   return (
     <div className="app with-tabs home">
-      <header className="topbar">
-        <MingaMark />
-        {COPY.app}
-        {/* Your Contactos, small: the faces lead to the whole view (or to Explorar while you have none). */}
-        {known && (
-          <Link
-            href={contacts.length ? "/afinidades" : "/coincidencias"}
-            className="home-contacts"
-            aria-label={contacts.length ? `${C.contacts}: ${contacts.length}` : C.contactsHint}
-          >
-            <span className="stack">
-              {contacts.slice(0, 3).map((c) => (
-                <Avatar key={c.person.personId} id={c.person.personId} />
-              ))}
-            </span>
-            {contacts.length > 3 ? (
-              <Mono>+{contacts.length - 3}</Mono>
-            ) : contacts.length === 0 ? (
-              <Icon name="users" />
-            ) : null}
-          </Link>
-        )}
-      </header>
+      <BrandBar contacts={known} />
 
       <div className="content">
         <div className="home-title">
@@ -81,31 +56,8 @@ export default function Home() {
             i
           </button>
         </div>
-        <Field
-          label={C.titles[0]}
-          rows={2}
-          send
-          maxLength={280}
-          value={text}
-          placeholder={C.placeholder}
-          done={saved}
-          onChange={setDraft}
-          onSubmit={() => {
-            setPhone({ intent: text.trim() });
-            setDraft(null);
-            router.push("/iniciativa");
-          }}
-        />
-        {invited && (
-          <p className="hint">
-            {C.with(invited.person.displayName)}{" "}
-            <button type="button" className="link" onClick={() => setPhone({ invite: null })}>
-              {C.withRemove}
-            </button>
-          </p>
-        )}
+        <RotatingLine lines={C.tips} />
         <div className="sec home-near">
-          {C.interests}
           <span className="tools">
             {visible && <Mono>{fmtMeters(clampRadius(s.radiusM))}</Mono>}
             <NearFilters s={s} id="home-filters" />
@@ -142,7 +94,33 @@ export default function Home() {
             />
           )}
         </div>
-        <Initiatives s={s} encounters={encounters} max={3} head={<div className="sec">{C.initiatives}</div>} />
+      </div>
+
+      {/* The question sits at the bottom, over the tab bar, like a message box. */}
+      <div className="home-ask">
+        {invited && (
+          <p className="hint">
+            {C.with(invited.person.displayName)}{" "}
+            <button type="button" className="link" onClick={() => setPhone({ invite: null })}>
+              {C.withRemove}
+            </button>
+          </p>
+        )}
+        <Field
+          label={C.titles[0]}
+          rows={2}
+          send
+          maxLength={280}
+          value={text}
+          placeholder={C.placeholder}
+          done={saved}
+          onChange={setDraft}
+          onSubmit={() => {
+            setPhone({ intent: text.trim() });
+            setDraft(null);
+            router.push("/iniciativa");
+          }}
+        />
       </div>
 
       {/* A sheet opens over the tab bar, so the whole explanation fits on screen. */}

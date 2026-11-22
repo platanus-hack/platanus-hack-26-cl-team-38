@@ -6,12 +6,12 @@ import { Avatar } from "./avatar";
 import { Sheet } from "./chrome";
 import { Icon } from "./icons";
 import { setFocus } from "./match-graph";
-import { ListRow, Mono } from "./ui";
+import { Mono } from "./ui";
 import { api } from "../_lib/api";
 import { COPY } from "../_lib/copy";
 import { recommend } from "../_lib/insight";
 import { matchPhrase } from "../_lib/matches";
-import { byTopic, cap, type Coincidence, DEMO, fmtMeters, myInterests, RELATION, relTime } from "../_lib/people";
+import { type Coincidence, DEMO, fmtMeters, myInterests, RELATION, relTime } from "../_lib/people";
 import { useContacts } from "../_lib/plans";
 import { getPhone, type PhoneState, setPhone } from "../_lib/store";
 import { toast } from "../_lib/toast";
@@ -19,20 +19,18 @@ import { toast } from "../_lib/toast";
 const C = COPY.coincidencias;
 const near = (m: number) => (m === 0 ? C.here : fmtMeters(m));
 
-/** The Interés you opened in a graph (who shares it), or the person you tapped (their summary). */
+/** The person you tapped in a graph: their summary. Opening an Interés only expands it in the graph. */
 export function CoincidenceSheet({ s, coins }: { s: PhoneState; coins: Coincidence[] }) {
   const contacts = useContacts(s);
-  const groups = byTopic(coins);
-  const selected = groups.find((g) => g.topic === s.focus.topic);
   const person = coins.find((c) => c.person.personId === s.focus.person);
   return (
     <Sheet
-      open={!!selected || !!person}
-      size={person ? "detail" : "list"}
-      onClose={() => setFocus({ topic: null, person: null })}
-      label={selected?.topic ?? ""}
+      open={!!person}
+      size="detail"
+      onClose={() => setFocus({ person: null })}
+      label={person?.person.displayName ?? ""}
     >
-      {person ? (
+      {person && (
         <PersonSummary
           key={person.person.personId}
           c={person}
@@ -45,29 +43,6 @@ export function CoincidenceSheet({ s, coins }: { s: PhoneState; coins: Coinciden
                 : "none"
           }
         />
-      ) : (
-        selected && (
-          <>
-            <h2 className="t-title">{cap(selected.topic)}</h2>
-            <div className="rows">
-              {selected.people.map((c) => (
-                <ListRow
-                  key={c.person.personId}
-                  lead={<Avatar id={c.person.personId} />}
-                  title={c.person.displayName}
-                  sub={
-                    <>
-                      <span className={`rel ${c.relation}`}>{RELATION[c.relation].label}</span> ·{" "}
-                      {c.items.map(matchPhrase).join(" · ")}
-                    </>
-                  }
-                  data={near(c.distanceM)}
-                  onClick={() => setFocus({ person: c.person.personId })}
-                />
-              ))}
-            </div>
-          </>
-        )
       )}
     </Sheet>
   );

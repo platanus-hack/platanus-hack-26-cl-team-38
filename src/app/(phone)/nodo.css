@@ -230,28 +230,65 @@
     width: 24px;
     height: 24px;
   }
-  .home .content {
-    padding-top: 16px;
-  }
   .home-title {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
   }
   .home-title h1 {
     flex: 1;
-    font-size: 26px;
-    text-wrap: balance;
+    font-size: var(--title);
+    white-space: nowrap;
   }
+  /* the title's box includes room for descenders, so its center sits above the letters: nudge to meet them */
   .home-title .q {
     margin-top: 0;
+    translate: 0 3px;
     font-family: var(--mono);
+  }
+  /* under the question, one line at a time: it fades out sliding down and the next fades in */
+  .rotating-line {
+    margin: 14px 0 0;
+    /* starts just shy of the Q, past the opening ¿ */
+    padding-left: calc(var(--title) * 0.54 - 3px);
+    min-height: 1.4em;
+    color: var(--mute);
+    font-size: 15px;
+  }
+  /* a line that does not fit goes on below instead of ending in an ellipsis */
+  .rotating-line span {
+    display: block;
+    animation: line-in 0.4s ease both;
+  }
+  .rotating-line span.out {
+    animation: line-out 0.4s ease both;
+  }
+  /* the question always fits on one line: the title shrinks with the screen's width */
+  .home .content {
+    container-type: inline-size;
+    --title: min(32px, calc((100cqw - 40px) / 9.6));
+    padding-top: 16px;
+    padding-bottom: calc(220px + env(safe-area-inset-bottom, 0px));
+  }
+  /* the question waits at the bottom, just over the tab bar; the stone fades in behind it so the graph scrolls under */
+  .home-ask {
+    position: fixed;
+    z-index: 19;
+    left: 0;
+    right: 0;
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    max-width: 440px;
+    margin: 0 auto;
+    padding: 24px 24px 12px;
+    background: linear-gradient(to bottom, transparent, var(--paper) 24px);
+  }
+  .home-ask .hint {
+    margin: 0 0 8px;
   }
   /* the question is a white box with room around the text, and the send button sits in it */
   .home .field {
     align-items: center;
     gap: 12px;
-    margin-top: 20px;
     padding: 8px 8px 8px 16px;
     border: 1px solid rgba(27, 35, 38, 0.1);
     border-radius: 20px;
@@ -260,8 +297,15 @@
   .home .field:focus-within {
     border-color: var(--accent);
   }
+  .home .field {
+    padding: 10px 10px 10px 20px;
+    border-radius: 24px;
+  }
+  /* two lines even before it measures itself, so the placeholder is never cut */
   .home .field textarea {
+    min-height: calc(2 * 1.4em + 8px);
     padding: 4px 0;
+    font-size: 17px;
   }
   .home .field .go {
     width: 44px;
@@ -287,10 +331,12 @@
     color: var(--mute);
   }
   /* Inicio: the same filter as Explorar, next to the Distancia; its panel floats over the graph */
-  .home-near {
+  .home .home-near {
     position: relative;
     z-index: 3;
     align-items: center;
+    justify-content: flex-end;
+    margin-top: 12px;
   }
   .home-near .tools {
     display: flex;
@@ -1699,12 +1745,70 @@
     color: var(--on-slate-mute);
   }
 
-  /* Explorar: one line over the graph */
-  .range-note {
-    margin: 12px 0 0;
-    font-size: 13px;
-    text-align: center;
+  /* Explorar on stone, like Inicio: a title, and under it on the right the count, the Distancia and the filter */
+  .graph-screen.stone {
+    background: var(--paper);
+    color: var(--ink);
+    --mute: #545a5c;
+  }
+  .graph-screen.stone .switch {
+    background: rgba(27, 35, 38, 0.18);
+  }
+  /* under the brand bar, with Inicio's spacing: the title, and the Distancia with its filter level with it */
+  .graph-screen.stone .head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .explore-title {
+    flex: 1;
+    font-size: 32px;
+  }
+  .graph-screen.stone .near-row {
+    margin-top: 0;
+    gap: 4px;
+  }
+  .graph-screen.stone .near-row .mono {
+    flex: none;
+  }
+  /* the graph starts right under the head instead of centering in the leftover height */
+  .graph-screen.stone .gwrap {
+    margin-top: 16px;
+  }
+  .graph-screen.stone .gbox {
+    margin-top: 0;
+  }
+  /* En tu red: one insight at a time between the graph and the tab bar */
+  .graph-screen.stone .gwrap:has(+ .net-insights) {
+    margin-bottom: 0;
+  }
+  .net-insights {
+    flex: none;
+    margin: 12px 24px calc(108px + env(safe-area-inset-bottom, 0px));
+  }
+  .net-insights > .mono {
+    font-size: 12px;
+  }
+  .rotating-line.wrap {
+    margin: 6px 0 0;
+    padding-left: 0;
+    min-height: 2.8em;
+    font-size: 16px;
+    color: var(--ink);
+  }
+  .graph-screen.stone .filter-btn {
+    color: var(--mute);
+  }
+  .graph-screen.stone .filter-btn[aria-expanded="true"] {
+    background: rgba(27, 35, 38, 0.06);
+    color: var(--ink);
+  }
+  .graph-screen.stone .filters {
     color: var(--on-slate);
+  }
+  .graph-screen.stone .filters .switch:not([aria-checked="true"]) {
+    background: rgba(242, 241, 238, 0.18);
   }
 
   /* Afinidades search: a pill on slate, suggestions as small chips under it */
@@ -2412,8 +2516,8 @@
 .nodo .gbox .ring.cercania {
   stroke: var(--cercania);
 }
-/* Inicio: the same graph in ink on stone */
-.nodo .home-graph .gbox {
+/* Inicio and Explorar: the same graph in ink on stone */
+.nodo :is(.home-graph, .graph-screen.stone) .gbox {
   --g-ink: var(--ink);
   --g-mute: var(--mute);
   --g-halo: rgba(231, 225, 215, 0.85);
@@ -2440,7 +2544,7 @@
 .nodo .home-graph button.gchip.stacked:hover {
   background: #f4f1ec;
 }
-.nodo .home-graph .gbox .disc {
+.nodo :is(.home-graph, .graph-screen.stone) .gbox .disc {
   fill: var(--paper);
 }
 /* a solid disc behind each face, so edges never show through the ring */
@@ -2624,8 +2728,8 @@ html:has(.nodo .app),
 html:has(.nodo .app) body {
   background: #e7e1d7;
 }
-html:has(.nodo .graph-screen),
-html:has(.nodo .graph-screen) body {
+html:has(.nodo .graph-screen:not(.stone)),
+html:has(.nodo .graph-screen:not(.stone)) body {
   background: #1f3138;
 }
 @media (min-width: 1024px) {
@@ -2646,7 +2750,7 @@ html:has(.nodo .graph-screen) body {
   background: var(--paper);
   pointer-events: none;
 }
-.nodo .app:has(> .graph-screen)::before {
+.nodo .app:has(> .graph-screen:not(.stone))::before {
   background: var(--slate);
 }
 @media (min-width: 1024px) {
@@ -3097,5 +3201,18 @@ html:has(.nodo .graph-screen) body {
 @keyframes nodo-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes line-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@keyframes line-out {
+  to {
+    opacity: 0;
+    transform: translateY(10px);
   }
 }

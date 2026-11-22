@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { Icon } from "./icons";
 import { Mono } from "./ui";
 import { COPY } from "../_lib/copy";
@@ -14,10 +14,28 @@ export function NearFilters({ s, id }: { s: PhoneState; id: string }) {
   const [open, setOpen] = useState(false);
   const visible = isVisible(s);
   const radius = clampRadius(s.radiusM);
+  const button = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const outside = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (!button.current?.contains(t) && !panel.current?.contains(t)) setOpen(false);
+    };
+    const escape = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [open]);
 
   return (
     <>
       <button
+        ref={button}
         type="button"
         className="filter-btn"
         aria-expanded={open}
@@ -28,7 +46,7 @@ export function NearFilters({ s, id }: { s: PhoneState; id: string }) {
         <Icon name="filter" />
       </button>
       {open && (
-        <div id={id} className="filters">
+        <div ref={panel} id={id} className="filters">
           <label className="near-switch">
             <span>{C.visible}</span>
             <button
