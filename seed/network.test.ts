@@ -15,6 +15,11 @@ const ids = new Set([...network.team, ...network.people.map((p) => p.personId)])
 const bySlug = (a: { slug: string }, b: { slug: string }) => a.slug.localeCompare(b.slug);
 const sortFriends = <T extends { friends: { slug: string }[] }>(nodes: T[]) => nodes.map((n) => ({ ...n, friends: [...n.friends].sort(bySlug) }));
 
+// v2 drops the names of the date decisions on purpose (see PurposeSchema): everything else must match.
+const DROPPED_VARIABLES = new Set(["fecha", "fechas", "fecha de entrada"]);
+const withoutDroppedVariables = (events: { decisions: { variable?: string }[] }[]) =>
+  events.map((e) => ({ ...e, decisions: e.decisions.map(({ variable, ...d }) => (variable && !DROPPED_VARIABLES.has(variable) ? { variable, ...d } : d)) }));
+
 describe("seed/network.v2.json", () => {
   it("loses nothing from the hand-written v1", () => {
     const rebuilt = toV1();
@@ -23,7 +28,12 @@ describe("seed/network.v2.json", () => {
       description: undefined,
       team: sortFriends(v1.team),
       people: sortFriends(v1.people),
+      events: withoutDroppedVariables(v1.events),
     });
+  });
+
+  it("no decision is named after a date", () => {
+    for (const d of network.purposes.flatMap((p) => p.decisions)) expect(d.variable ?? "").not.toMatch(/fecha/i);
   });
 
   it("has at least 50 people whose ids don't collide with the rest of the seed", () => {
