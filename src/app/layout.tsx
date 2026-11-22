@@ -18,12 +18,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "team-38 · Platanus Hack 26",
-  description: "Mesas de 3 o más personas armadas por roles y por agentes que deliberan.",
+  title: "Minga",
+  description: "Tu Agente te presenta a quienes coinciden contigo cerca tuyo.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
+  themeColor: "#e7e1d7",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

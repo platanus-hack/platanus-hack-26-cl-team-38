@@ -4,7 +4,7 @@ import seed from "../../../../seed/rooms.json";
 import type { SeedPerson } from "./seed-source";
 import { Summary } from "./summary";
 
-export const metadata: Metadata = { title: "Mi nodo · team-38" };
+export const metadata: Metadata = { title: "Mi Nodo · Minga" };
 
 // Until connectors and the synthesizer exist (fronts A and B), the node starts from a seed person.
 // Embeddings stay on the server: the check-in recomputes them.

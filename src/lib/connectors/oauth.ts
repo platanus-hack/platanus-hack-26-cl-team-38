@@ -1,5 +1,6 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
+import { APP_NAME } from "./assistant";
 
 // OAuth 2.1 for the MCP connector (claude.ai → Add custom connector). There are no accounts: what
 // a connector gets tied to is a phone, by its device key. The phone shows a short code and the
@@ -247,7 +248,7 @@ export const MCP_PATH = "/api/mcp";
 export const resourceMetadataUrl = (origin: string) => `${origin}/.well-known/oauth-protected-resource${MCP_PATH}`;
 
 export function protectedResourceMetadata(origin: string) {
-  return { resource: `${origin}${MCP_PATH}`, authorization_servers: [origin], bearer_methods_supported: ["header"], resource_name: "Nodos" };
+  return { resource: `${origin}${MCP_PATH}`, authorization_servers: [origin], bearer_methods_supported: ["header"], resource_name: APP_NAME };
 }
 
 // Without client_id_metadata_document_supported, claude.ai registers through registration_endpoint.

@@ -6,17 +6,19 @@ Documento vivo del fin de semana. Cada decisión nueva va en [Decisiones](#decis
 
 ## Qué es
 
-Cuando 3 o más personas están en la misma sala, cada una trae un **nodo personal** armado desde lo que ya saben de ella sus asistentes y apps (Claude, ChatGPT, Spotify, GitHub, Instagram). La sala agrupa los tópicos públicos en **temas**, asigna **roles** (aporta, busca, comparte) y arma **mesas** de 3 a 5 personas. Los agentes deliberan un plan concreto con punto de encuentro, y la mesa se activa cuando la aceptan 3 o más.
+**Minga** es la app del teléfono (`src/app/(phone)/`). Cada persona arma su **Nodo** con lo que ya saben de ella sus asistentes (Claude, ChatGPT, Gemini) y Google. El filtro de privacidad decide qué puede ser público, y ella elige qué comparte: esos son sus **Intereses**. **Explorar** muestra a quienes coinciden con ella por Intereses públicos, **Contactos** ordena a sus Amigos y Conocidos, y una **Iniciativa** ("¿Qué quieres lograr?") arma un plan con hasta 5 de sus contactos: un Agente por persona más un orquestador deliberan hasta llegar a un plan, que se sigue en **Chats**.
 
-Diseño completo y algoritmos: [`docs/arquitectura-por-capas.md`](docs/arquitectura-por-capas.md). Orden de construcción: [`docs/plan-de-construccion.md`](docs/plan-de-construccion.md). Índice de docs: [`docs/README.md`](docs/README.md).
+La idea original era una sala con mesas: temas, roles (aporta, busca, comparte), mesas de 3 a 5 personas y un proyector. De eso quedó construido el motor de sala (`src/lib/room/`), las tablas `mesas`, `group_nodes` y `deliberation_messages` con `recordDecision()`, `writeLog()` y `/api/logs`, y las vistas `/explorar` y `/grafo`. Ninguna pantalla de Minga los usa, y no existen el proyector (`/sala/[code]`) ni la deliberación de mesas (frente D). El teléfono no llama a `/api/matches`, y la librería de proximidad no tiene ruta. `/onboarding` y `/mi-nodo` son pantallas anteriores a Minga.
+
+Diseño original y algoritmos: [`docs/arquitectura-por-capas.md`](docs/arquitectura-por-capas.md). Orden de construcción: [`docs/plan-de-construccion.md`](docs/plan-de-construccion.md). Índice de docs: [`docs/README.md`](docs/README.md).
 
 ## Guion de demo
 
-1. Un integrante conecta sus fuentes y ve su nodo: tópicos con el ícono de cada fuente y la profundidad.
-2. Escanea el QR de la sala y escribe su intención de hoy, que solo ve su agente.
-3. En el proyector, la sala muestra los temas y las mesas que se forman, con los agentes conversando en vivo.
-4. Le llega "tu mesa" al teléfono: rol, plan y punto de encuentro. Acepta, y la mesa se enciende en el proyector.
-5. Control negativo: la sala sin nada en común da 0 mesas.
+1. Bienvenida: un integrante escribe su nombre (o entra como alguien del equipo), conecta Claude o ChatGPT y ve su Nodo, con el ícono de cada Fuente en cada tema. Elige qué comparte.
+2. Inicio: escribe qué quiere lograr ("organizar un viaje al sur").
+3. Iniciativa: su Agente sugiere contactos según lo que saben de eso; elige con quién y qué considerar (restricciones que solo lee su Agente).
+4. Chats: los Agentes deliberan ronda a ronda y llegan a un plan, por consenso o decidido por el orquestador, con aportes de los contactos de cada uno.
+5. Explorar y Contactos: con quién coincide por Intereses públicos.
 
 ## Fuera de alcance
 
@@ -174,6 +176,8 @@ D puede empezar antes que C con mesas escritas a mano sobre las proyecciones del
 - **22-11 · E1 (sin chat uno a uno):** ya no existe la Conversación entre dos personas. Chats tiene dos cosas: Solicitudes e Iniciativas; con una sola persona sigue siendo una Iniciativa, de dos. Se van la sección Personas y `buildConversation`, `buildGroup` y `allConversations` de `_lib/conversations.ts` (queda `buildInitiative`). Los grupos por temática que el modo demo armaba solo ahora son Iniciativas de ejemplo (`localInitiatives()`: hasta tres, "Juntarse por <tema>", una por cada tema que compartes con dos o más personas). En la ficha de un Contacto, "Iniciar Conversación" pasa a "Crear Iniciativa": guarda a esa persona en `PhoneState.invite` y abre `/iniciativa` con ella marcada; Inicio avisa "Con Ana. Quitar". En la ficha de Explorar no hay botón de chat: ahí se envía la solicitud.
 - **22-11 · planes (búsqueda web, experimento):** con `PLANS_WEB_SEARCH=1` el orquestador tiene la búsqueda web de la API (`web_search_20260209`, hasta 3 búsquedas por propuesta, ubicación Santiago) para cerrar lo abierto con un dato público: un lugar, un precio, un horario. Apagado por defecto, así que producción no cambia hasta que se defina la variable en Render. Contrato: `PlanContentSchema` suma `fuentes` (opcional: dato y dirección); el código descarta una fuente sin dirección web y guarda hasta 4, y los agentes las leen con la propuesta. Solo busca el orquestador, que no lee restricciones, y el prompt prohíbe poner nombres o datos de personas en la búsqueda. Con la búsqueda encendida el orquestador va con esfuerzo `medium` (en `low` no buscaba nunca) y la regla "no inventes lugares ni precios" admite lo leído en internet. Medido en una corrida con Supabase local: una búsqueda, la propuesta en 12,7 s contra 5 s, unos 25.000 tokens de entrada contra 7.500 (~US$ 0,06 contra 0,02), y propuso un gimnasio concreto con su precio y la nota de la que salió. Además, el código cambia las claves M1, M2 que se le escapan al orquestador por los nombres. `runner.ts` guarda los agentes en `globalThis`: un cambio de prompt se aplica recién al reiniciar `pnpm dev`.
 - **22-11 · E1 (red del plan en el teléfono):** la red del plan deja de estar fija arriba de la conversación: ocupaba 320 de 844 px y los mensajes pasaban por debajo. Ahora se va con el scroll; en escritorio sigue en el panel. `LargeTitle` muestra el título chico apenas el grande empieza a taparse, porque con un título de dos líneas la primera quedaba cortada bajo la barra.
+
+- **22-11 · nombre y palabras:** la app se llama Minga en todas partes: `APP_NAME` (el mensaje que se pega en el asistente y el conector MCP), el `resource_name` de OAuth, los títulos de página y el `<title>` raíz. "Nodos" y "team-38" salen de la interfaz; un conector que alguien ya agregó en claude.ai con el nombre Nodos sigue funcionando, porque el nombre es solo local. "Qué es" y el guion de demo pasan a describir Minga, y lo construido para la sala con mesas queda anotado como sin uso, sin borrarlo. En la interfaz, un **Interés** es un tema que compartes y un **tema** es cualquiera de tu Nodo; "señal" no aparece. Una **Iniciativa** es el grupo que coordina tu Agente y vive en **Chats** ("Conversación" deja de usarse); las personas con quienes planeas son **Contactos** ("conexión" queda solo en el backend). Todo texto visible del teléfono va en `(phone)/_lib/copy.ts`, también las etiquetas de accesibilidad y lo que anota "Qué salió de tu teléfono".
 
 ## Estado
 
