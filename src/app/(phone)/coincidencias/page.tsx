@@ -26,18 +26,21 @@ import {
   RANGE,
   RELATION,
   relTime,
-  useEncounters,
 } from "../_lib/people";
+import { useLocation } from "../_lib/location";
 import { useContacts } from "../_lib/plans";
+import { type ProximityStatus, useNearby } from "../_lib/proximity";
 import { getPhone, setPhone } from "../_lib/store";
 import { toast } from "../_lib/toast";
 
 const C = COPY.coincidencias;
+const near = (m: number) => (m === 0 ? C.here : fmtMeters(m));
 
 export default function CoincidenciasPage() {
   const s = useOnboardedPhone();
-  const encounters = useEncounters();
+  const { encounters, status } = useNearby(s);
   const contacts = useContacts(s);
+  const location = useLocation();
   if (!s) return <Splash />;
 
   const visible = isVisible(s);
@@ -85,6 +88,8 @@ export default function CoincidenciasPage() {
               </button>
             </div>
           </div>
+        ) : !DEMO && status !== "on" ? (
+          <NotNear status={status} s={{ located: s.locationOn, room: !!s.room }} location={location} />
         ) : coins.length === 0 ? (
           <div className="empty">
             <div className="empty-state">
@@ -143,7 +148,7 @@ export default function CoincidenciasPage() {
                         <span className={`rel ${c.relation}`}>{RELATION[c.relation].label}</span> · {c.items.map(matchPhrase).join(" · ")}
                       </>
                     }
-                    data={fmtMeters(c.distanceM)}
+                    data={near(c.distanceM)}
                     onClick={() => setFocus({ person: c.person.personId })}
                   />
                 ))}
@@ -153,6 +158,24 @@ export default function CoincidenciasPage() {
         )}
       </Sheet>
       <TabBar />
+    </div>
+  );
+}
+
+/** Why proximity is not running yet, and the one thing that turns it on. */
+function NotNear({ status, s, location }: { status: ProximityStatus; s: { located: boolean; room: boolean }; location: ReturnType<typeof useLocation> }) {
+  if (status === "connecting") return <div className="empty">{C.loading}</div>;
+  const message = !s.room ? C.noRoom : !s.located ? C.needLocation : status === "denied" || location.status === "denied" ? C.locationDenied : C.proximityFailed;
+  return (
+    <div className="empty">
+      <div className="empty-state">
+        <p>{message}</p>
+        {s.room && !s.located && (
+          <button type="button" className="btn light" disabled={location.status === "locating"} onClick={location.locate}>
+            {C.turnLocation}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -186,7 +209,7 @@ function PersonSummary({ c, myTopics, state }: { c: Coincidence; myTopics: Publi
           <h2 className="t-title">{c.person.displayName}</h2>
           <span className={`rel ${c.relation}`}>{RELATION[c.relation].label}</span>{" "}
           <Mono className="mute">
-            · {fmtMeters(c.distanceM)} · {c.place} · {relTime(c.at)}
+            · {near(c.distanceM)} · {c.place} · {relTime(c.at)}
           </Mono>
         </div>
       </div>

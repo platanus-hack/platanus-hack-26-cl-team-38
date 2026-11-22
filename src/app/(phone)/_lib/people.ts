@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { PublicProjection, PublicTopic, Source } from "@/lib/types";
+import type { ProximityNeighbor, PublicProjection, PublicTopic, Source } from "@/lib/types";
 import { isPublished } from "./node";
 import { type MatchItem, matchTopics } from "./matches";
 import type { PhoneState } from "./store";
@@ -10,8 +10,8 @@ import type { PhoneState } from "./store";
 // (within the smaller of your two distances) and shares at least one public interest with you.
 //
 // Demo mode (no Supabase key): the seed people, each with a sample encounter derived from their id.
-// Supabase mode: people from room_members, at the place where they checked in. There is no
-// location backend yet, so real distances don't exist: they count as 0 m.
+// Supabase mode: people from room_members, at the place where they checked in. Who is near comes
+// from the proximity engine (proximity.ts): nearby() keeps only them, at the distance it measured.
 
 export type Encounter = {
   person: PublicProjection;
@@ -24,6 +24,8 @@ export type Encounter = {
   agent?: Source;
   /** How you know them: a friend, an acquaintance, or just someone who was near. */
   relation: Relation;
+  /** The proximity engine already decided they are within your Distancia, GPS error included. */
+  inRange?: boolean;
 };
 export type Relation = "amigo" | "conocido" | "cercania";
 export const RELATION: Record<Relation, { label: string; plural: string }> = {
@@ -142,10 +144,23 @@ export function coincidences(s: PhoneState, encounters: Encounter[]): Coincidenc
   const mine = myInterests(s);
   return encounters
     .map((e) => withRelation(s, e))
-    .filter((e) => e.person.personId !== s.personId && e.distanceM <= Math.min(clampRadius(s.radiusM), e.radiusM))
+    .filter((e) => e.person.personId !== s.personId && (e.inRange || e.distanceM <= Math.min(clampRadius(s.radiusM), e.radiusM)))
     .map((e) => ({ ...e, ...matchTopics(mine, e.person.topics) }))
     .filter((c) => c.items.length > 0)
     .sort((a, b) => b.score - a.score || a.distanceM - b.distanceM);
+}
+
+/**
+ * With a backend, who is near now and how far, from the proximity engine. Indoors a GPS is off by
+ * 15 to 25 m, so the engine widens your Distancia by both errors and decides who is in range; its
+ * distance is shown as it comes, or as 0 ("Aquí") when it cannot be told apart from zero.
+ */
+export function nearby(encounters: Encounter[], near: ReadonlyMap<string, ProximityNeighbor>): Encounter[] {
+  return encounters.flatMap((e) => {
+    const n = near.get(e.person.personId);
+    if (!n) return [];
+    return [{ ...e, distanceM: n.distance < 2 * n.uncertainty ? 0 : n.distance, inRange: true, at: new Date().toISOString() }];
+  });
 }
 
 export function byTopic(coins: Coincidence[]): TopicGroup[] {
