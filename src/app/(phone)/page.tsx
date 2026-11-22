@@ -8,6 +8,7 @@ import { Sheet, Splash, TabBar, useOnboardedPhone } from "./_components/chrome";
 import { CoincidenceSheet } from "./_components/coincidence-sheet";
 import { MatchGraph, setFocus } from "./_components/match-graph";
 import { MingaMark } from "./_components/minga-mark";
+import { NearFilters } from "./_components/near-filters";
 import { Icon } from "./_components/icons";
 import { Initiatives } from "./_components/initiatives";
 import { Field, Mono } from "./_components/ui";
@@ -103,9 +104,12 @@ export default function Home() {
             </button>
           </p>
         )}
-        <div className="sec">
+        <div className="sec home-near">
           {C.interests}
-          {visible && <Mono>{fmtMeters(clampRadius(s.radiusM))}</Mono>}
+          <span className="tools">
+            {visible && <Mono>{fmtMeters(clampRadius(s.radiusM))}</Mono>}
+            <NearFilters s={s} id="home-filters" />
+          </span>
         </div>
         <div className="home-graph">
           {near === undefined ? (
