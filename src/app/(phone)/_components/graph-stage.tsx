@@ -2,14 +2,15 @@
 
 import { usePathname } from "next/navigation";
 import type { Source } from "@/lib/types";
-import { BrandLogo, SOURCE_META } from "./brand";
+import { BrandLogo, SOON_META, SoonLogo, type SoonSource, SOURCE_META } from "./brand";
 import { type Edge, type Entity, GraphCanvas, onEllipse, pose } from "./graph-canvas";
 import { Icon } from "./icons";
 import { AffinityGraph } from "./affinity-graph";
 import { MatchGraph } from "./match-graph";
 import { COPY } from "../_lib/copy";
 import { isPublished } from "../_lib/node";
-import { byTopic, cap, clampRadius, coincidences, contactsOf, searchTopics, useEncounters } from "../_lib/people";
+import { byTopic, cap, clampRadius, coincidences, isVisible, searchTopics, useEncounters } from "../_lib/people";
+import { useContacts } from "../_lib/plans";
 import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 
 // The graph behind the phone, on slate: your Fuentes and topics while you build your Nodo, then
@@ -17,7 +18,9 @@ import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 
 const W = 880;
 const H = 600;
-const SOURCES: Source[] = ["claude", "chatgpt", "gemini", "spotify", "github", "instagram"];
+const SOURCES: Source[] = ["claude", "chatgpt", "gemini", "google", "spotify", "github"];
+/** Shown like in the onboarding: coming soon, never connected. */
+const SOON: SoonSource[] = ["strava", "letterboxd"];
 
 type Phase = "inicio" | "fuentes" | "compartir" | "coincidencias";
 
@@ -40,9 +43,19 @@ function nodeScene(phase: Phase, s: PhoneState) {
       cls: `ghost${on ? " on" : ""}`,
       icon: <BrandLogo source={src} />,
       label: SOURCE_META[src].label,
-      pose: pose({ x: 115 + i * 130, y: 48 }, on || phase !== "compartir" ? 1 : 0.35),
+      pose: pose({ x: W / 2 + (i - (SOURCES.length - 1) / 2) * 130, y: 44 }, on || phase !== "compartir" ? 1 : 0.35),
     };
     if (on) edges.push({ a: `src:${src}`, b: me, kind: "soft", pulse: phase === "fuentes" ? i : undefined });
+  });
+  SOON.forEach((src, i) => {
+    E[`soon:${src}`] = {
+      kind: "chip",
+      cls: "ghost",
+      icon: <SoonLogo source={src} />,
+      label: SOON_META[src].label,
+      // coming soon: a second row under the ones you can connect
+      pose: pose({ x: W / 2 + (i - (SOON.length - 1) / 2) * 170, y: 92 }, phase !== "compartir" ? 1 : 0.35),
+    };
   });
   if (phase === "compartir") {
     const list = (s.node?.topics ?? []).slice(0, 14);
@@ -66,10 +79,13 @@ export function GraphStage() {
   const s = usePhone();
   const path = usePathname();
   const encounters = useEncounters();
+  const contacts = useContacts(s);
   if (!s) return null;
 
   const phase = phaseOf(s, path);
-  const coins = encounters ? coincidences(s, encounters) : [];
+  const visible = isVisible(s);
+  const coins = encounters && visible ? coincidences(s, encounters) : [];
+  const people = (s.explore ?? "personas") === "personas";
   const groups = byTopic(coins);
   const topics = s.node?.topics ?? [];
   const shared = topics.filter((t) => isPublished(t)).length;
@@ -80,7 +96,9 @@ export function GraphStage() {
     inicio: COPY.desktop.building,
     fuentes: `${n} ${n === 1 ? "Fuente" : "Fuentes"}`,
     compartir: `${shared} públicos · ${topics.length - shared} contigo`,
-    coincidencias: `${coins.length} ${coins.length === 1 ? "Coincidencia" : "Coincidencias"} · ${(s.nearOnly ?? true) ? `${clampRadius(s.radiusM)} m` : COPY.coincidencias.anyDistance}${selected ? ` · ${cap(selected.topic)}` : ""}`,
+    coincidencias: visible
+      ? `${coins.length} ${coins.length === 1 ? "Coincidencia" : "Coincidencias"} · ${clampRadius(s.radiusM)} m${selected && !people ? ` · ${cap(selected.topic)}` : ""}`
+      : COPY.coincidencias.visible + ": no",
   }[phase];
 
   const affinity = path.startsWith("/afinidades") && phase === "coincidencias";
@@ -103,6 +121,11 @@ export function GraphStage() {
           <li className="mute">{L.size}</li>
           <li className="mute">{L.drag}</li>
         </ul>
+      ) : phase === "coincidencias" && people ? (
+        <ul className="legend">
+          <li>{L.close}</li>
+          <li className="mute">{L.size}</li>
+        </ul>
       ) : phase === "coincidencias" ? (
         <ul className="legend">
           <li>{L.topics}</li>
@@ -111,8 +134,8 @@ export function GraphStage() {
       ) : null}
       {phase === "coincidencias" && !affinity && encounters && groups.length === 0 && (
         <div className="stage-empty">
-          <p>{L.empty}</p>
-          {(s.nearOnly ?? true) && <p className="mute">{L.emptyHint}</p>}
+          <p>{visible ? L.empty : COPY.coincidencias.invisible}</p>
+          {visible && <p className="mute">{L.emptyHint}</p>}
         </div>
       )}
       <div className="gwrap">
@@ -121,10 +144,12 @@ export function GraphStage() {
             W={W}
             H={H}
             me={{ id: s.personId }}
-            contacts={encounters ? contactsOf(s, encounters) : []}
+            contacts={contacts ?? []}
             focus={s.focus.person}
-            match={encounters ? (searchTopics(contactsOf(s, encounters), s.affinityQuery ?? "")?.ids ?? null) : null}
+            match={contacts ? (searchTopics(contacts, s.affinityQuery ?? "")?.ids ?? null) : null}
           />
+        ) : phase === "coincidencias" && people ? (
+          <AffinityGraph W={W} H={H} me={{ id: s.personId }} contacts={coins} focus={s.focus.person} />
         ) : phase === "coincidencias" ? (
           <MatchGraph W={W} H={H} me={{ id: s.personId, name: s.displayName }} groups={groups} focus={s.focus} />
         ) : (

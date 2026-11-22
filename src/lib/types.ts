@@ -2,7 +2,8 @@ import { z } from "zod";
 import { PRIVACY_CATEGORIES, PRIVACY_LEVELS } from "./privacy/taxonomy";
 
 export const KindSchema = z.enum(["es", "sabe", "hace", "le_gusta", "quiere_ser", "busca", "ofrece"]);
-export const SourceSchema = z.enum(["claude", "chatgpt", "gemini", "spotify", "github", "instagram", "google"]);
+// "google": Takeout (YouTube and Calendar). "manual": a topic the person wrote themselves in Perfil.
+export const SourceSchema = z.enum(["claude", "chatgpt", "gemini", "spotify", "github", "instagram", "google", "manual"]);
 export const RoleSchema = z.enum(["aporta", "busca", "comparte"]);
 
 export const SignalSchema = z.object({

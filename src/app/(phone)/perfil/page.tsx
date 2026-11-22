@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { shareRecommended } from "@/lib/node/node";
 import { useState } from "react";
@@ -10,13 +11,15 @@ import { Sheet, Splash, TabBar, useOnboardedPhone } from "../_components/chrome"
 import { Icon } from "../_components/icons";
 import { TopicItem } from "../_components/topic-item";
 import { ListRow, Mono } from "../_components/ui";
-import { UserInfoSchema } from "@/lib/types";
 import { api } from "../_lib/api";
 import { COPY } from "../_lib/copy";
+import { FORMAT, type InfoField, parseInfo } from "../_lib/info";
 import { useLocation } from "../_lib/location";
 import { cap, DEMO, myInterests } from "../_lib/people";
 import { connectedSources, type PhoneState, resetPhone, setPhone, signOut } from "../_lib/store";
 import { toast } from "../_lib/toast";
+import { AddTopic } from "./add-topic";
+import { useNodeSync } from "../_lib/node-sync";
 
 const C = COPY.perfil;
 
@@ -43,6 +46,8 @@ export default function PerfilPage() {
   const [outbox, setOutbox] = useState(false);
   const [config, setConfig] = useState(false);
   const [confirmWipe, setConfirmWipe] = useState(false);
+  // Topics you add by hand go through the same review as the ones your Fuentes bring.
+  const sync = useNodeSync(s);
   if (!s) return <Splash />;
   const interests = myInterests(s);
   const privacy = s.privacy ?? { visibility: "conocidos" as const, discoverable: true, showPlace: true };
@@ -97,8 +102,9 @@ export default function PerfilPage() {
           ))}
         </div>
 
+        {/* Your Nodo and its privacy are one thing: each topic, public or only yours */}
         <div className="sec u">
-          {C.privacy}
+          {C.nodeTitle}
           <Mono className="mute">
             {interests.length} {COPY.nodo.shared} · {kept} {COPY.nodo.kept}
           </Mono>
@@ -111,16 +117,18 @@ export default function PerfilPage() {
             <TopicItem key={t.id} topic={t} />
           ))}
         </div>
-        <button type="button" className="btn ghost" style={{ marginTop: 16 }} onClick={() => setConfig(true)}>
-          <Icon name="shield" />
-          {C.configure}
-          {topics.length > 4 && <Mono className="mute">+{topics.length - 4}</Mono>}
-        </button>
+        <div className="btn-pair">
+          <AddTopic s={s} sync={sync} />
+          <button type="button" className="btn ghost" onClick={() => setConfig(true)}>
+            <Icon name="shield" />
+            {C.configure}
+            {topics.length > 4 && <Mono className="mute">+{topics.length - 4}</Mono>}
+          </button>
+        </div>
 
         <div className="sec u">{C.account}</div>
         <div className="rows">
           <ListRow title={C.outbox} data={s.outbox.length} onClick={() => setOutbox(true)} chevron />
-          <ListRow title={C.myNode} data={`${interests.length} · ${kept}`} href="/nodo" chevron />
           <ListRow title={COPY.conectar.row} href="/conectar" chevron />
           <ListRow title={C.signOut} onClick={leave} />
           <ListRow title={C.wipe} onClick={() => setConfirmWipe(true)} className="danger" />
@@ -132,8 +140,8 @@ export default function PerfilPage() {
         )}
       </div>
 
-      <Sheet open={config} size="detail" onClose={() => setConfig(false)} label={C.privacy}>
-        <h2 className="t-title">{C.privacy}</h2>
+      <Sheet open={config} size="detail" onClose={() => setConfig(false)} label={C.nodeTitle}>
+        <h2 className="t-title">{C.nodeTitle}</h2>
         <div className="sec">
           {C.byTopic}
           <Mono className="mute">
@@ -147,9 +155,12 @@ export default function PerfilPage() {
         )}
         <div className="rows">
           {topics.map((t) => (
-            <TopicItem key={t.id} topic={t} />
+            <TopicItem key={t.id} topic={t} editDepth />
           ))}
         </div>
+        <Link href="/bienvenida" className="btn ghost" style={{ marginTop: 16 }}>
+          {COPY.nodo.addSource}
+        </Link>
 
         <div className="sec">{C.general}</div>
         <div className="t-data mute">{C.visibility}</div>
@@ -215,11 +226,18 @@ function InfoForm({ s }: { s: PhoneState }) {
   const suggested = info?.occupation ? "" : cap(s.node?.topics.find((t) => t.kind === "es")?.name ?? "");
 
   function save(form: HTMLFormElement) {
-    const f = new FormData(form);
-    const text = (k: string) => String(f.get(k) ?? "").trim();
-    const parsed = UserInfoSchema.safeParse({ email: text("email"), age: Number(f.get("age")), gender: text("gender"), phone: text("phone"), occupation: text("occupation") });
-    if (!parsed.success) return;
-    const info = parsed.data;
+    const input = (k: InfoField) => form.elements.namedItem(k) as HTMLInputElement | HTMLSelectElement;
+    const fields = ["email", "age", "gender", "phone", "occupation"] as const;
+    const parsed = parseInfo(Object.fromEntries(fields.map((k) => [k, input(k).value])) as Record<InfoField, string>);
+    if (!parsed.ok) {
+      // The browser shows the message on the field itself, and reads it to screen readers.
+      input(parsed.field).setCustomValidity(C.infoInvalid[parsed.field]);
+      input(parsed.field).reportValidity();
+      return;
+    }
+    const info = parsed.info;
+    // The form shows exactly what gets stored.
+    for (const k of fields) input(k).value = String(info[k]);
     // The phone keeps its copy first: a server that is down must not lose what you typed.
     setPhone({ info });
     setSaved(true);
@@ -232,18 +250,28 @@ function InfoForm({ s }: { s: PhoneState }) {
   }
 
   return (
-    <form className="info" onSubmit={(e) => (e.preventDefault(), save(e.currentTarget))} onChange={() => setSaved(false)}>
+    <form
+      className="info"
+      noValidate
+      onSubmit={(e) => (e.preventDefault(), save(e.currentTarget))}
+      onInput={(e) => ((e.target as HTMLInputElement).setCustomValidity(""), setSaved(false))}
+      // Leaving a field tidies it: mail in lowercase, phone as +56 9 1234 5678.
+      onBlur={(e) => {
+        const el = e.target;
+        if (el instanceof HTMLInputElement && el.name in FORMAT) el.value = FORMAT[el.name as keyof typeof FORMAT](el.value);
+      }}
+    >
       <div className="sec u">
         {C.info}
         <Mono className="mute">{info ? C.infoHelp : C.infoMissing}</Mono>
       </div>
       <label className="field">
         <span>{C.email}</span>
-        <input name="email" type="email" required autoComplete="email" maxLength={120} defaultValue={info?.email} />
+        <input name="email" type="email" inputMode="email" required autoComplete="email" autoCapitalize="none" spellCheck={false} maxLength={120} placeholder="nombre@ejemplo.cl" defaultValue={info?.email} />
       </label>
       <label className="field">
         <span>{C.age}</span>
-        <input name="age" type="number" required inputMode="numeric" min={13} max={120} defaultValue={info?.age} />
+        <input name="age" inputMode="numeric" required maxLength={3} placeholder="13 a 120" defaultValue={info?.age} />
       </label>
       <label className="field">
         <span>{C.gender}</span>
@@ -258,11 +286,11 @@ function InfoForm({ s }: { s: PhoneState }) {
       </label>
       <label className="field">
         <span>{C.phone}</span>
-        <input name="phone" type="tel" required autoComplete="tel" pattern="\+?[0-9 ]{8,16}" placeholder="+56 9 1234 5678" defaultValue={info?.phone} />
+        <input name="phone" type="tel" required autoComplete="tel" maxLength={24} placeholder="+56 9 1234 5678" defaultValue={info ? FORMAT.phone(info.phone) : undefined} />
       </label>
       <label className="field">
         <span>{C.occupation}</span>
-        <input name="occupation" maxLength={60} defaultValue={info?.occupation || suggested} />
+        <input name="occupation" autoComplete="organization-title" maxLength={60} defaultValue={info?.occupation || suggested} />
       </label>
       {suggested && <p className="hint">{C.occupationSuggested}</p>}
       {failed && (
