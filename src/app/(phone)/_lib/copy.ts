@@ -147,7 +147,7 @@ export const COPY = {
   /** Solicitudes: who asked to be your Contacto, answered from Chats. */
   solicitudes: {
     title: "Solicitudes",
-    wants: "Quiere ser tu Contacto",
+    count: (n: number) => (n === 1 ? "1 solicitud" : `${n} solicitudes`),
     accept: "Aceptar",
     reject: "Rechazar",
     accepted: (name: string) => `${name} ya es tu Contacto`,
