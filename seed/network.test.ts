@@ -117,11 +117,12 @@ describe("seed/network.v2.json", () => {
       for (const id of purpose.organizers) expect(inRoom).toContain(id);
     });
 
-    // Teammates come from seed/team, which has no agentOnly: they join a case as guests, not as the ones it's about.
+    // Teammates come from seed/team, which has no agentOnly: they join a case as guests, unless the case is
+    // about them too (teamAgentOnly).
     it("gives every synthetic participant something only their agent reads for this case", () => {
-      for (const id of inRoom.filter((id) => !network.team.includes(id))) {
-        const person = network.people.find((p) => p.personId === id)!;
-        expect(person.agentOnly.constraints.some((c) => c.appliesTo.includes(purpose.type)), id).toBe(true);
+      for (const id of inRoom.filter((id) => !network.team.includes(id) || network.teamAgentOnly[id])) {
+        const agentOnly = network.people.find((p) => p.personId === id)?.agentOnly ?? network.teamAgentOnly[id];
+        expect(agentOnly.constraints.some((c) => c.appliesTo.includes(purpose.type)), id).toBe(true);
       }
     });
 

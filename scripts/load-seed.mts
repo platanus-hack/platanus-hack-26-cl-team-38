@@ -7,7 +7,7 @@ import { saveUserInfo } from "@/lib/users/info";
 import { saveProfile } from "@/lib/users/profile";
 import { embed } from "@/lib/embeddings";
 import { saveContext } from "@/lib/plans/store";
-import { contextOf, network } from "../seed/network";
+import { contextOf, network, propioOf } from "../seed/network";
 import { seedUserInfo } from "../seed/user-info";
 
 config({ path: process.env.ENV_FILE ?? ".env.local" });
@@ -57,6 +57,12 @@ for (const person of network.people) {
     const vectors = await embed(lines.map((line) => line.text));
     contextLines += await saveContext(db, person.personId, scope, "seed", lines.map((line, i) => ({ lineId: `seed-${scope}-${i + 1}`, ...line, embedding: vectors[i] })));
   }
+}
+// A teammate a case is about (José in the fire brigade one) has only the "propio" part in the seed.
+for (const [personId, agentOnly] of Object.entries(network.teamAgentOnly)) {
+  const lines = propioOf(agentOnly);
+  const vectors = await embed(lines.map((line) => line.text));
+  contextLines += await saveContext(db, personId, "propio", "seed", lines.map((line, i) => ({ lineId: `seed-propio-${i + 1}`, ...line, embedding: vectors[i] })));
 }
 console.log(`${contextLines} líneas de contexto para los agentes`);
 
