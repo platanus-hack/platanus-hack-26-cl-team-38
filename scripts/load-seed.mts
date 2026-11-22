@@ -2,7 +2,9 @@ import { config } from "dotenv";
 import seed from "../seed/rooms.json" with { type: "json" };
 import { createAdminClient } from "@/lib/supabase/create-admin-client";
 import { PublicProjectionSchema, type PublicProjection } from "@/lib/types";
+import { runConnectionAction } from "@/lib/users/connections";
 import { saveProfile } from "@/lib/users/profile";
+import { network } from "../seed/network";
 
 config({ path: process.env.ENV_FILE ?? ".env.local" });
 const db = createAdminClient();
@@ -31,3 +33,14 @@ for (const room of seed.rooms) {
 
 for (const profile of profiles.values()) await saveProfile(db, profile);
 console.log(`${profiles.size} usuarios`);
+
+// The network's connections, accepted by both sides. Closing first makes re-seeding start clean, since
+// users and connections outlive the rooms. Relation, closeness and detail have no column yet: they stay
+// in seed/network.v2.json (`pending`).
+for (const { a, b, origin } of network.connections) {
+  await runConnectionAction(db, { personId: a, otherId: b, action: "close" });
+  await runConnectionAction(db, { personId: a, otherId: b, action: "propose", origin });
+  const accepted = await runConnectionAction(db, { personId: b, otherId: a, action: "accept" });
+  if (accepted.status !== 200) throw new Error(`conexión ${a} ↔ ${b}: ${JSON.stringify(accepted)}`);
+}
+console.log(`${network.connections.length} conexiones aceptadas`);

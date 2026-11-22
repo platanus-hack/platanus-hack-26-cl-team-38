@@ -1,0 +1,1929 @@
+{
+  "description": "Red social sintética para la demo: 3 casos de coordinación (matrimonio, viaje familiar, arriendo con roomies). Fuente de verdad de friends, experiences y constraints, que todavía no están en el esquema de la base de datos. seed/network.ts la valida y seed/people.ts arma las salas.",
+  "team": [
+    {
+      "slug": "martin",
+      "friends": [
+        {"slug": "oscar", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "jose", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "javiera-munoz", "relation": "estudios", "detail": "amiga de la universidad", "closeness": 3},
+        {"slug": "esteban-lagos", "relation": "amistad", "detail": "compañero de running", "closeness": 2},
+        {"slug": "ignacia-silva", "relation": "trabajo", "detail": "colega en la healthtech", "closeness": 2},
+        {"slug": "antonia-reyes", "relation": "trabajo", "detail": "colega en la healthtech", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "oscar",
+      "friends": [
+        {"slug": "martin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "jose", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "rodrigo-sepulveda", "relation": "amistad", "detail": "compañero de básquetbol", "closeness": 2},
+        {"slug": "tamara-quezada", "relation": "trabajo", "detail": "excolega de la fintech", "closeness": 1},
+        {"slug": "sebastian-perez", "relation": "estudios", "detail": "tocaban juntos en una banda en la universidad", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "jose",
+      "friends": [
+        {"slug": "martin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "oscar", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
+        {"slug": "matias-caceres", "relation": "estudios", "detail": "compañero de universidad", "closeness": 3},
+        {"slug": "felipe-navarro", "relation": "amistad", "detail": "compañero del club de running de Puente Alto", "closeness": 1},
+        {"slug": "francisco-leiva", "relation": "trabajo", "detail": "compañero de trabajo", "closeness": 2}
+      ]
+    }
+  ],
+  "people": [
+    {
+      "slug": "javiera-munoz",
+      "displayName": "Javiera Muñoz",
+      "age": 31,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Product manager en un banco. Se casa con Tomás y quiere cerrar fecha y lugar antes de fin de año.",
+      "profile": {"profession": "product manager en banca digital", "hobbies": ["pilates", "vinos chilenos"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [
+        ["organizar un matrimonio", "busca", 1, ["claude", "chatgpt"]],
+        ["gestión de productos digitales", "sabe", 3, ["claude"]],
+        ["clases de pilates", "hace", 2, ["instagram"]],
+        ["vinos del valle de colchagua", "le_gusta", 2, ["instagram"]],
+        ["pop de los 80", "le_gusta", 2, ["spotify"]]
+      ],
+      "experiences": [
+        {
+          "title": "Madrina en el matrimonio de su prima",
+          "type": "matrimonio",
+          "place": "Pirque, Metropolitana",
+          "date": "2024-03",
+          "summary": "Llovió a las 19:00 y la parcela no tenía carpa de respaldo: la fiesta se pasó a un galpón sin calefacción.",
+          "facts": {"invitados": 90},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Se va seis meses a Madrid por trabajo desde el 1 de junio de 2027: el matrimonio tiene que ser antes.",
+          "hard": true,
+          "to": "2027-05-31",
+          "appliesTo": ["matrimonio"]
+        },
+        {
+          "type": "presupuesto",
+          "detail": "Ahorro de la pareja para todo el matrimonio, sin contar aportes de los papás.",
+          "hard": true,
+          "amountClp": 14000000,
+          "per": "total",
+          "appliesTo": ["matrimonio"]
+        },
+        {"type": "preferencia", "detail": "No quiere más de 130 invitados.", "hard": false, "maxGuests": 130, "appliesTo": ["matrimonio"]}
+      ],
+      "friends": [
+        {"slug": "martin", "relation": "estudios", "detail": "amigo de la universidad", "closeness": 3},
+        {"slug": "tomas-fuentes", "relation": "pareja", "detail": "novio", "closeness": 3},
+        {"slug": "hernan-munoz", "relation": "familia", "detail": "papá", "closeness": 3},
+        {"slug": "patricia-soto", "relation": "familia", "detail": "mamá", "closeness": 3},
+        {"slug": "ignacio-munoz", "relation": "familia", "detail": "hermano", "closeness": 3},
+        {"slug": "francisca-lagos", "relation": "amistad", "detail": "amiga del colegio", "closeness": 3},
+        {"slug": "constanza-vidal", "relation": "estudios", "detail": "amiga de la universidad", "closeness": 2},
+        {"slug": "valentina-herrera", "relation": "amistad", "detail": "amiga", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "tomas-fuentes",
+      "displayName": "Tomás Fuentes",
+      "age": 33,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Arquitecto. Quiere un matrimonio al aire libre y que su abuela Olga pueda ir.",
+      "profile": {"profession": "arquitecto", "hobbies": ["ciclismo", "cerveza artesanal"], "languages": ["español", "inglés", "catalán"], "diet": "omnivora"},
+      "topics": [
+        ["organizar un matrimonio", "busca", 1, ["claude"]],
+        ["arquitectura residencial", "es", 3, ["claude", "instagram"]],
+        ["ciclismo de ruta", "hace", 2, ["instagram"]],
+        ["cerveza artesanal", "le_gusta", 2, ["instagram"]]
+      ],
+      "experiences": [
+        {
+          "title": "Magíster en Barcelona",
+          "type": "estudios",
+          "place": "Barcelona, España",
+          "date": "2019-09",
+          "summary": "Ahí conoció a Lucas; sabe lo que cuesta que alguien venga de afuera y recomienda avisar la fecha con 6 meses.",
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Entrega de un proyecto grande entre el 1 y el 15 de marzo de 2027; preferiría no casarse esa quincena.",
+          "hard": false,
+          "from": "2027-03-01",
+          "to": "2027-03-15",
+          "appliesTo": ["matrimonio"]
+        },
+        {"type": "preferencia", "detail": "Ceremonia y fiesta al aire libre.", "hard": false, "appliesTo": ["matrimonio"]},
+        {
+          "type": "movilidad",
+          "detail": "Su abuela Olga tiene que poder llegar: el lugar no puede quedar a más de una hora de La Reina.",
+          "hard": true,
+          "appliesTo": ["matrimonio"]
+        }
+      ],
+      "friends": [
+        {"slug": "javiera-munoz", "relation": "pareja", "detail": "novia", "closeness": 3},
+        {"slug": "jorge-fuentes", "relation": "familia", "detail": "papá", "closeness": 3},
+        {"slug": "veronica-araneda", "relation": "familia", "detail": "mamá", "closeness": 3},
+        {"slug": "olga-cardenas", "relation": "familia", "detail": "abuela", "closeness": 3},
+        {"slug": "ramon-fuentes", "relation": "familia", "detail": "tío y padrino de bautizo", "closeness": 2},
+        {"slug": "catalina-fuentes", "relation": "familia", "detail": "hermana", "closeness": 3},
+        {"slug": "joaquin-salas", "relation": "amistad", "detail": "mejor amigo y padrino", "closeness": 3},
+        {"slug": "sebastian-perez", "relation": "amistad", "detail": "amigo del ciclismo", "closeness": 2},
+        {"slug": "lucas-moreira", "relation": "estudios", "detail": "amigo del magíster en Barcelona", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "hernan-munoz",
+      "displayName": "Hernán Muñoz",
+      "age": 63,
+      "comuna": "San Pedro de la Paz",
+      "region": "Biobío",
+      "bio": "Papá de Javiera, contador auditor jubilado. Tiene una cirugía de cadera agendada.",
+      "profile": {"profession": "contador auditor jubilado", "hobbies": ["pesca", "boleros"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["finanzas personales", "sabe", 2, ["chatgpt"]], ["pesca deportiva", "hace", 2, ["instagram"]], ["música de boleros", "le_gusta", 2, ["spotify"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "salud",
+          "detail": "Cirugía de cadera el 2 de abril de 2027 en Concepción; seis semanas sin viajar ni estar de pie mucho rato (hasta el 14 de mayo).",
+          "hard": true,
+          "from": "2027-04-02",
+          "to": "2027-05-14",
+          "appliesTo": ["matrimonio"]
+        },
+        {"type": "salud", "detail": "Moverla le cuesta 4 meses más de lista de espera, así que no la quiere mover.", "hard": true, "appliesTo": ["matrimonio"]},
+        {"type": "alimentacion", "detail": "Diabetes tipo 2: necesita opción sin azúcar en el postre y la torta.", "hard": true, "appliesTo": ["matrimonio"]},
+        {"type": "presupuesto", "detail": "Aporta a la fiesta.", "hard": false, "amountClp": 5000000, "per": "total", "appliesTo": ["matrimonio"]}
+      ],
+      "friends": [
+        {"slug": "javiera-munoz", "relation": "familia", "detail": "hija", "closeness": 3},
+        {"slug": "patricia-soto", "relation": "pareja", "detail": "esposa", "closeness": 3},
+        {"slug": "ignacio-munoz", "relation": "familia", "detail": "hijo", "closeness": 3}
+      ]
+    },
+    {
+      "slug": "patricia-soto",
+      "displayName": "Patricia Soto",
+      "age": 60,
+      "comuna": "San Pedro de la Paz",
+      "region": "Biobío",
+      "bio": "Mamá de Javiera, profesora básica. Sueña con que su hija se case por la iglesia.",
+      "profile": {"profession": "profesora de educación básica", "hobbies": ["jardinería", "repostería"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["jardinería", "hace", 2, ["instagram"]], ["repostería casera", "hace", 2, ["instagram", "chatgpt"]], ["teleseries", "le_gusta", 1, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Bodas de plata con 80 invitados",
+          "type": "evento",
+          "place": "Concepción, Biobío",
+          "date": "2016-12",
+          "summary": "Organizó sola la fiesta de sus 25 años de casada; cotizó banquetería en Concepción y sabe cuánto sube el precio en Santiago.",
+          "facts": {"invitados": 80, "costoPorPersonaClp": 38000},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "preferencia",
+          "detail": "Quiere ceremonia religiosa; Javiera y Tomás prefieren civil más una ceremonia simbólica.",
+          "hard": false,
+          "appliesTo": ["matrimonio"]
+        },
+        {
+          "type": "logistica",
+          "detail": "La familia de Concepción (unas 25 personas) necesita traslado y alojamiento en Santiago.",
+          "hard": false,
+          "people": 25,
+          "appliesTo": ["matrimonio"]
+        }
+      ],
+      "friends": [
+        {"slug": "javiera-munoz", "relation": "familia", "detail": "hija", "closeness": 3},
+        {"slug": "hernan-munoz", "relation": "pareja", "detail": "esposo", "closeness": 3},
+        {"slug": "ignacio-munoz", "relation": "familia", "detail": "hijo", "closeness": 3},
+        {"slug": "monica-soto", "relation": "familia", "detail": "hermana", "closeness": 3}
+      ]
+    },
+    {
+      "slug": "ignacio-munoz",
+      "displayName": "Ignacio Muñoz",
+      "age": 28,
+      "comuna": "Concepción",
+      "region": "Biobío",
+      "bio": "Hermano de Javiera, ingeniero de sonido en una productora de eventos.",
+      "profile": {"profession": "ingeniero de sonido", "hobbies": ["bajo eléctrico", "skate"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [
+        ["sonido para eventos", "ofrece", 3, ["claude", "instagram"]],
+        ["bajo eléctrico", "hace", 2, ["instagram"]],
+        ["rock penquista", "le_gusta", 2, ["spotify"]]
+      ],
+      "experiences": [
+        {
+          "title": "Sonido de 40 matrimonios",
+          "type": "trabajo",
+          "place": "Biobío y Ñuble",
+          "date": "2022-01",
+          "summary": "Ha hecho el sonido de unos 40 matrimonios; puede prestar equipos a precio de costo si la fecha no choca con un evento grande.",
+          "facts": {"arriendoEquiposClp": 350000},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Trabaja en la producción de un festival en Concepción del 12 al 14 de marzo de 2027; puede pedirse el día, pero pierde el contrato.",
+          "hard": false,
+          "from": "2027-03-12",
+          "to": "2027-03-14",
+          "appliesTo": ["matrimonio"]
+        }
+      ],
+      "friends": [
+        {"slug": "javiera-munoz", "relation": "familia", "detail": "hermana", "closeness": 3},
+        {"slug": "hernan-munoz", "relation": "familia", "detail": "papá", "closeness": 3},
+        {"slug": "patricia-soto", "relation": "familia", "detail": "mamá", "closeness": 3},
+        {"slug": "daniel-farias", "relation": "amistad", "detail": "amigo", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "jorge-fuentes",
+      "displayName": "Jorge Fuentes",
+      "age": 64,
+      "comuna": "La Reina",
+      "region": "Metropolitana",
+      "bio": "Papá de Tomás, cardiólogo. Le gusta el vino y quiere invitar a sus amigos del hospital.",
+      "profile": {"profession": "médico cardiólogo", "hobbies": ["cata de vinos", "golf"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [["cardiología", "es", 3, ["chatgpt"]], ["cata de vinos", "sabe", 2, ["instagram", "chatgpt"]], ["golf", "hace", 2, ["instagram"]]],
+      "experiences": [],
+      "constraints": [
+        {"type": "presupuesto", "detail": "Aporta a la fiesta.", "hard": false, "amountClp": 4000000, "per": "total", "appliesTo": ["matrimonio"]},
+        {
+          "type": "preferencia",
+          "detail": "Quiere invitar a 40 personas de su lado (colegas y amigos), lo que choca con el tope de 130 de Javiera.",
+          "hard": false,
+          "guests": 40,
+          "appliesTo": ["matrimonio"]
+        }
+      ],
+      "friends": [
+        {"slug": "tomas-fuentes", "relation": "familia", "detail": "hijo", "closeness": 3},
+        {"slug": "veronica-araneda", "relation": "pareja", "detail": "esposa", "closeness": 3},
+        {"slug": "olga-cardenas", "relation": "familia", "detail": "mamá", "closeness": 3},
+        {"slug": "ramon-fuentes", "relation": "familia", "detail": "hermano", "closeness": 2},
+        {"slug": "catalina-fuentes", "relation": "familia", "detail": "hija", "closeness": 3},
+        {"slug": "barbara-nunez", "relation": "conocido", "detail": "enóloga de las catas", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "veronica-araneda",
+      "displayName": "Verónica Araneda",
+      "age": 61,
+      "comuna": "La Reina",
+      "region": "Metropolitana",
+      "bio": "Mamá de Tomás, diseñadora floral. Ofrece hacer las flores del matrimonio.",
+      "profile": {"profession": "diseñadora floral", "hobbies": ["jardinería", "cerámica"], "languages": ["español"], "diet": "vegetariana"},
+      "topics": [["diseño floral para eventos", "ofrece", 3, ["instagram", "chatgpt"]], ["jardinería", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Flores para 15 matrimonios",
+          "type": "trabajo",
+          "place": "Santiago y alrededores",
+          "date": "2023-01",
+          "summary": "En marzo y abril hay flores de temporada más baratas (dalias, hortensias); en mayo sube el costo porque casi todo es importado.",
+          "facts": {"costoFloresTemporadaClp": 900000, "costoFloresMayoClp": 1400000},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [{"type": "logistica", "detail": "Necesita entrar al lugar el día anterior para armar las flores.", "hard": false, "appliesTo": ["matrimonio"]}],
+      "friends": [
+        {"slug": "tomas-fuentes", "relation": "familia", "detail": "hijo", "closeness": 3},
+        {"slug": "jorge-fuentes", "relation": "pareja", "detail": "esposo", "closeness": 3},
+        {"slug": "catalina-fuentes", "relation": "familia", "detail": "hija", "closeness": 3},
+        {"slug": "olga-cardenas", "relation": "familia", "detail": "suegra", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "olga-cardenas",
+      "displayName": "Olga Cárdenas",
+      "age": 89,
+      "comuna": "La Reina",
+      "region": "Metropolitana",
+      "bio": "Abuela de Tomás. Vive con Jorge y Verónica; se mueve con andador.",
+      "profile": {"profession": "dueña de casa", "hobbies": ["tejido", "boleros"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["tejido a palillos con lana", "hace", 3, ["instagram", "chatgpt"]], ["música de boleros", "le_gusta", 2, ["spotify"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "movilidad",
+          "detail": "Anda con andador: necesita baño accesible y lugar sin escaleras ni pasto disparejo hasta la mesa.",
+          "hard": true,
+          "appliesTo": ["matrimonio"]
+        },
+        {
+          "type": "movilidad",
+          "detail": "No aguanta más de una hora en auto y tiene que estar de vuelta en casa antes de las 23:00.",
+          "hard": true,
+          "maxTravelMinutes": 60,
+          "appliesTo": ["matrimonio"]
+        },
+        {"type": "alimentacion", "detail": "Dieta baja en sal.", "hard": true, "appliesTo": ["matrimonio"]}
+      ],
+      "friends": [
+        {"slug": "tomas-fuentes", "relation": "familia", "detail": "nieto", "closeness": 3},
+        {"slug": "jorge-fuentes", "relation": "familia", "detail": "hijo", "closeness": 3},
+        {"slug": "veronica-araneda", "relation": "familia", "detail": "nuera", "closeness": 2},
+        {"slug": "catalina-fuentes", "relation": "familia", "detail": "nieta", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "ramon-fuentes",
+      "displayName": "Ramón Fuentes",
+      "age": 58,
+      "comuna": "Punta Arenas",
+      "region": "Magallanes",
+      "bio": "Tío de Tomás y su padrino de bautizo. Administra una estancia ovejera.",
+      "profile": {"profession": "administrador de estancia ganadera", "hobbies": ["pesca", "folclor"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["ganadería ovina", "es", 3, ["chatgpt"]], ["pesca deportiva", "hace", 2, ["instagram"]], ["cueca y folclor", "le_gusta", 2, ["spotify"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Temporada de esquila de diciembre a marzo: no puede dejar la estancia en marzo de 2027.",
+          "hard": true,
+          "from": "2026-12-01",
+          "to": "2027-03-31",
+          "appliesTo": ["matrimonio"]
+        },
+        {
+          "type": "presupuesto",
+          "detail": "Pasaje Punta Arenas–Santiago ida y vuelta, más alojamiento dos noches.",
+          "hard": false,
+          "amountClp": 380000,
+          "per": "total",
+          "appliesTo": ["matrimonio"]
+        }
+      ],
+      "friends": [
+        {"slug": "tomas-fuentes", "relation": "familia", "detail": "sobrino y ahijado", "closeness": 2},
+        {"slug": "jorge-fuentes", "relation": "familia", "detail": "hermano", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "catalina-fuentes",
+      "displayName": "Catalina Fuentes",
+      "age": 29,
+      "comuna": "Providencia",
+      "region": "Metropolitana",
+      "bio": "Hermana de Tomás y madrina. Nutricionista y vegana.",
+      "profile": {"profession": "nutricionista", "hobbies": ["yoga", "cocina vegana"], "languages": ["español", "inglés"], "diet": "vegana", "allergies": ["maní"]},
+      "topics": [["cocina vegana", "sabe", 3, ["instagram", "chatgpt"]], ["nutrición deportiva", "sabe", 2, ["claude"]], ["yoga", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Matrimonio de una amiga en Olmué",
+          "type": "matrimonio",
+          "place": "Olmué, Valparaíso",
+          "date": "2025-02",
+          "summary": "La cuesta La Dormida tomó 2 h 15 desde Ñuñoa un sábado y mucha gente se fue temprano por el camino de vuelta. El centro de eventos no tenía plato vegano: le dieron ensalada.",
+          "facts": {"minutosDesdeNunoa": 135},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [{"type": "alimentacion", "detail": "Menú con opción vegana de verdad (no solo ensalada) y sin maní.", "hard": true, "appliesTo": ["matrimonio"]}],
+      "friends": [
+        {"slug": "tomas-fuentes", "relation": "familia", "detail": "hermano", "closeness": 3},
+        {"slug": "jorge-fuentes", "relation": "familia", "detail": "papá", "closeness": 3},
+        {"slug": "veronica-araneda", "relation": "familia", "detail": "mamá", "closeness": 3},
+        {"slug": "olga-cardenas", "relation": "familia", "detail": "abuela", "closeness": 2},
+        {"slug": "camila-rojas", "relation": "amistad", "detail": "amiga", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "joaquin-salas",
+      "displayName": "Joaquín Salas",
+      "age": 33,
+      "comuna": "Las Condes",
+      "region": "Metropolitana",
+      "bio": "Mejor amigo de Tomás y padrino. Alergia severa a los mariscos.",
+      "profile": {
+        "profession": "ingeniero civil industrial",
+        "hobbies": ["trekking", "parrilla"],
+        "languages": ["español", "inglés"],
+        "diet": "omnivora",
+        "allergies": ["mariscos"]
+      },
+      "topics": [["trekking", "hace", 3, ["instagram", "claude"]], ["asado de carne", "sabe", 2, ["instagram"]], ["cerveza artesanal", "le_gusta", 2, ["instagram"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "alimentacion",
+          "detail": "Alergia severa a los mariscos (anda con epinefrina): la banquetera tiene que evitar contaminación cruzada en toda la cocina, no solo en su plato.",
+          "hard": true,
+          "appliesTo": ["matrimonio"]
+        }
+      ],
+      "friends": [
+        {"slug": "tomas-fuentes", "relation": "amistad", "detail": "mejor amigo", "closeness": 3},
+        {"slug": "pedro-alarcon", "relation": "familia", "detail": "primo", "closeness": 2},
+        {"slug": "sebastian-perez", "relation": "amistad", "detail": "amigo", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "francisca-lagos",
+      "displayName": "Francisca Lagos",
+      "age": 34,
+      "comuna": "Vitacura",
+      "region": "Metropolitana",
+      "bio": "Amiga de Javiera del colegio. Organizó el matrimonio de su hermana y ahora es wedding planner part-time.",
+      "profile": {"profession": "wedding planner", "hobbies": ["running", "decoración"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [
+        ["planificación de matrimonios", "ofrece", 3, ["instagram", "claude"]],
+        ["decoración de eventos", "sabe", 2, ["instagram"]],
+        ["running", "hace", 2, ["instagram"]]
+      ],
+      "experiences": [
+        {
+          "title": "Matrimonio de su hermana en una viña de Casablanca",
+          "type": "matrimonio",
+          "place": "Casablanca, Valparaíso",
+          "date": "2025-10",
+          "summary": "140 invitados. La viña obliga a usar su banquetería; el bus de acercamiento desde Santiago fue clave porque nadie quería manejar de vuelta. Hubo que reservar con 10 meses.",
+          "facts": {
+            "invitados": 140,
+            "costoTotalClp": 19800000,
+            "arriendoViñaClp": 3500000,
+            "banqueteriaPorPersonaClp": 95000,
+            "busDe45Clp": 650000,
+            "mesesDeAnticipacion": 10
+          },
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "presupuesto",
+          "detail": "Cobra $1.200.000 por coordinar el día (a Javiera le hace precio de amiga).",
+          "hard": false,
+          "amountClp": 1200000,
+          "per": "total",
+          "appliesTo": ["matrimonio"]
+        }
+      ],
+      "friends": [
+        {"slug": "javiera-munoz", "relation": "amistad", "detail": "amiga del colegio", "closeness": 3},
+        {"slug": "esteban-lagos", "relation": "familia", "detail": "hermano", "closeness": 3},
+        {"slug": "rocio-araya", "relation": "amistad", "detail": "amiga", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "sebastian-perez",
+      "displayName": "Sebastián Pérez",
+      "age": 30,
+      "comuna": "Santiago",
+      "region": "Metropolitana",
+      "bio": "Amigo de Tomás del ciclismo. Ingeniero informático en la semana y DJ de matrimonios los fines de semana.",
+      "profile": {"profession": "ingeniero informático y dj", "hobbies": ["ciclismo", "música electrónica"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [
+        ["dj de matrimonios", "ofrece", 3, ["instagram", "spotify"]],
+        ["música electrónica", "le_gusta", 2, ["spotify"]],
+        ["ciclismo de ruta", "hace", 2, ["instagram"]]
+      ],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Ya tiene tomado el sábado 10 de abril de 2027 para otro matrimonio.",
+          "hard": true,
+          "from": "2027-04-10",
+          "to": "2027-04-10",
+          "appliesTo": ["matrimonio"]
+        },
+        {
+          "type": "presupuesto",
+          "detail": "Cobra $900.000; a Tomás le cobra $500.000.",
+          "hard": false,
+          "amountClp": 500000,
+          "per": "total",
+          "appliesTo": ["matrimonio"]
+        }
+      ],
+      "friends": [
+        {"slug": "oscar", "relation": "estudios", "detail": "tocaban juntos en una banda en la universidad", "closeness": 2},
+        {"slug": "tomas-fuentes", "relation": "amistad", "detail": "amigo del ciclismo", "closeness": 2},
+        {"slug": "joaquin-salas", "relation": "amistad", "detail": "amigo", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "constanza-vidal",
+      "displayName": "Constanza Vidal",
+      "age": 32,
+      "comuna": "Viña del Mar",
+      "region": "Valparaíso",
+      "bio": "Fotógrafa de matrimonios. Amiga de Javiera de la universidad y compañera de surf de Paula.",
+      "profile": {"profession": "fotógrafa", "hobbies": ["surf", "fotografía análoga"], "languages": ["español", "inglés"], "diet": "pescetariana"},
+      "topics": [
+        ["fotografía de matrimonios", "ofrece", 3, ["instagram", "claude"]],
+        ["surf", "hace", 2, ["instagram"]],
+        ["fotografía análoga", "hace", 2, ["instagram"]]
+      ],
+      "experiences": [
+        {
+          "title": "Fotografió en los tres lugares candidatos",
+          "type": "trabajo",
+          "place": "Pirque, Casablanca y Olmué",
+          "date": "2025-01",
+          "summary": "Pirque: atardecer contra la cordillera, pero con zancudos en marzo. Casablanca: neblina hasta mediodía, ideal ceremonia tarde. Olmué: más de 30 °C en marzo, la gente se esconde en la sombra.",
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Tiene tomado el sábado 24 de abril de 2027.",
+          "hard": true,
+          "from": "2027-04-24",
+          "to": "2027-04-24",
+          "appliesTo": ["matrimonio"]
+        },
+        {"type": "presupuesto", "detail": "Jornada completa $1.400.000.", "hard": false, "amountClp": 1400000, "per": "total", "appliesTo": ["matrimonio"]}
+      ],
+      "friends": [
+        {"slug": "javiera-munoz", "relation": "estudios", "detail": "amiga de la universidad", "closeness": 2},
+        {"slug": "paula-gonzalez", "relation": "amistad", "detail": "compañera de surf", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "valentina-herrera",
+      "displayName": "Valentina Herrera",
+      "age": 31,
+      "comuna": "Providencia",
+      "region": "Metropolitana",
+      "bio": "Amiga de Javiera. Celíaca, corre maratones.",
+      "profile": {"profession": "ingeniera en alimentos", "hobbies": ["running", "podcasts"], "languages": ["español"], "diet": "omnivora", "allergies": ["gluten"]},
+      "topics": [
+        ["cocina sin gluten", "sabe", 3, ["instagram", "chatgpt"]],
+        ["running", "hace", 2, ["instagram"]],
+        ["podcasts de true crime", "le_gusta", 2, ["spotify"]]
+      ],
+      "experiences": [
+        {
+          "title": "Cumpleaños 30 sin gluten",
+          "type": "evento",
+          "place": "Providencia, Metropolitana",
+          "date": "2025-06",
+          "summary": "Cotizó con cuatro banqueteras y solo una tenía cocina separada para celíacos; las otras decían 'sin gluten' pero freían en el mismo aceite.",
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [{"type": "alimentacion", "detail": "Celíaca: necesita cocina separada, no solo un plato sin pan.", "hard": true, "appliesTo": ["matrimonio"]}],
+      "friends": [
+        {"slug": "javiera-munoz", "relation": "amistad", "detail": "amiga", "closeness": 2},
+        {"slug": "carolina-mendez", "relation": "conocido", "detail": "pastelera que le hace tortas sin gluten", "closeness": 1},
+        {"slug": "ignacia-silva", "relation": "amistad", "detail": "compañera de running", "closeness": 1},
+        {"slug": "marcela-rivas", "relation": "conocido", "detail": "se conocieron en un grupo de celíacos", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "lucas-moreira",
+      "displayName": "Lucas Moreira",
+      "age": 33,
+      "comuna": "São Paulo",
+      "region": "Brasil",
+      "bio": "Amigo de Tomás del magíster en Barcelona. Arquitecto en São Paulo.",
+      "profile": {"profession": "arquitecto", "hobbies": ["fútbol", "música popular brasileña"], "languages": ["portugués", "inglés", "español"], "diet": "omnivora"},
+      "topics": [
+        ["arquitectura sustentable", "sabe", 3, ["claude", "instagram"]],
+        ["ver fútbol", "le_gusta", 2, ["instagram"]],
+        ["música popular brasileña", "le_gusta", 2, ["spotify"]]
+      ],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Cierre contable de su oficina la última semana de cada mes: un sábado de fin de mes le complica viajar.",
+          "hard": false,
+          "appliesTo": ["matrimonio"]
+        },
+        {
+          "type": "presupuesto",
+          "detail": "Pasaje São Paulo–Santiago comprado con 3 meses de anticipación.",
+          "hard": false,
+          "amountClp": 420000,
+          "per": "total",
+          "appliesTo": ["matrimonio"]
+        },
+        {
+          "type": "idioma",
+          "detail": "Entiende español pero habla portugués; la información práctica le sirve en inglés.",
+          "hard": false,
+          "appliesTo": ["matrimonio"]
+        }
+      ],
+      "friends": [{"slug": "tomas-fuentes", "relation": "estudios", "detail": "amigo del magíster en Barcelona", "closeness": 2}]
+    },
+    {
+      "slug": "rocio-araya",
+      "displayName": "Rocío Araya",
+      "age": 32,
+      "comuna": "Las Condes",
+      "region": "Metropolitana",
+      "bio": "Se casó hace un año en una parcela de Pirque. Amiga de Francisca.",
+      "profile": {"profession": "abogada laboral", "hobbies": ["pádel", "cocina"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [["derecho laboral", "sabe", 3, ["claude"]], ["torneos de pádel", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Su matrimonio en una parcela de Pirque",
+          "type": "matrimonio",
+          "place": "Pirque, Metropolitana",
+          "date": "2025-11",
+          "summary": "110 invitados. Arrendaron carpa por pronóstico de lluvia; la parcela exigía bajar la música a las 3:00 por los vecinos. Para la abuela de Felipe pusieron una mesa cerca del baño y un auto que la fue a dejar a las 22:00.",
+          "facts": {"invitados": 110, "costoTotalClp": 15200000, "arriendoParcelaClp": 2800000, "carpaClp": 1800000, "minutosDesdeLaReina": 50},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [],
+      "friends": [{"slug": "francisca-lagos", "relation": "amistad", "detail": "amiga", "closeness": 2}]
+    },
+    {
+      "slug": "carolina-mendez",
+      "displayName": "Carolina Méndez",
+      "age": 36,
+      "comuna": "Macul",
+      "region": "Metropolitana",
+      "bio": "Pastelera con un emprendimiento de tortas de novios. Hace versiones sin gluten y sin azúcar.",
+      "profile": {"profession": "pastelera", "hobbies": ["repostería", "ciclismo urbano"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["tortas de matrimonio", "ofrece", 3, ["instagram"]], ["repostería sin gluten", "sabe", 2, ["instagram", "chatgpt"]]],
+      "experiences": [
+        {
+          "title": "Tortas para 60 matrimonios",
+          "type": "trabajo",
+          "place": "Santiago",
+          "date": "2021-01",
+          "summary": "Una torta de tres pisos para 130 personas cuesta cerca de $650.000; la versión sin gluten y sin azúcar va en un piso aparte.",
+          "facts": {"tortaPara130Clp": 650000},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "valentina-herrera", "relation": "conocido", "detail": "clienta", "closeness": 1},
+        {"slug": "alonso-vergara", "relation": "trabajo", "detail": "socio en matrimonios", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "alonso-vergara",
+      "displayName": "Alonso Vergara",
+      "age": 40,
+      "comuna": "Peñalolén",
+      "region": "Metropolitana",
+      "bio": "Chef y dueño de una banquetería chica. Socio de Carolina en varios matrimonios.",
+      "profile": {"profession": "chef de banquetería", "hobbies": ["huerta", "fútbol"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["banquetería para eventos", "ofrece", 3, ["instagram", "chatgpt"]], ["comida chilena tradicional", "sabe", 3, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Banquetería con menú para alergias",
+          "type": "trabajo",
+          "place": "Santiago y Pirque",
+          "date": "2024-01",
+          "summary": "Tiene cocina separada sin gluten y un protocolo sin mariscos; menú de matrimonio con opción vegana a $85.000 por persona. No trabaja en Casablanca porque las viñas exigen su propia banquetería.",
+          "facts": {"porPersonaClp": 85000, "minimoInvitados": 80},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "carolina-mendez", "relation": "trabajo", "detail": "socia en matrimonios", "closeness": 2},
+        {"slug": "pedro-alarcon", "relation": "amistad", "detail": "compañero de fútbol", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "barbara-nunez",
+      "displayName": "Bárbara Núñez",
+      "age": 35,
+      "comuna": "Casablanca",
+      "region": "Valparaíso",
+      "bio": "Enóloga en una viña de Casablanca que arrienda su terraza para eventos. Conoce a Jorge de las catas.",
+      "profile": {"profession": "enóloga", "hobbies": ["cata de vinos", "cabalgatas"], "languages": ["español", "inglés", "francés"], "diet": "omnivora"},
+      "topics": [["elaboración de vino", "es", 3, ["claude", "instagram"]], ["eventos en viñas", "ofrece", 2, ["instagram"]], ["cata de vinos", "sabe", 3, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Eventos en la terraza de la viña",
+          "type": "trabajo",
+          "place": "Casablanca, Valparaíso",
+          "date": "2022-01",
+          "summary": "Capacidad 180, banquetería obligatoria de la viña, 12 habitaciones para invitados. En mayo baja el precio pero hay que tener plan de lluvia.",
+          "facts": {"capacidad": 180, "arriendoClp": 3500000, "habitaciones": 12, "habitacionPorNocheClp": 110000, "minutosDesdeSantiago": 75},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "jorge-fuentes", "relation": "conocido", "detail": "cliente de las catas", "closeness": 1},
+        {"slug": "tamara-quezada", "relation": "amistad", "detail": "amiga", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "daniel-farias",
+      "displayName": "Daniel Farías",
+      "age": 34,
+      "comuna": "Talcahuano",
+      "region": "Biobío",
+      "bio": "Amigo de Ignacio. Trabaja en una empresa de buses de turismo.",
+      "profile": {"profession": "ejecutivo de buses de turismo", "hobbies": ["fútbol", "pesca"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["buses para eventos", "ofrece", 2, ["chatgpt"]], ["fútbol amateur", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Traslados para matrimonios",
+          "type": "trabajo",
+          "place": "Concepción–Santiago",
+          "date": "2023-01",
+          "summary": "Un bus de 45 asientos Concepción–Santiago ida y vuelta, con chofer esperando, cuesta $1.100.000.",
+          "facts": {"busConcepcionSantiagoClp": 1100000},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [],
+      "friends": [{"slug": "ignacio-munoz", "relation": "amistad", "detail": "amigo", "closeness": 2}]
+    },
+    {
+      "slug": "monica-soto",
+      "displayName": "Mónica Soto",
+      "age": 57,
+      "comuna": "Maipú",
+      "region": "Metropolitana",
+      "bio": "Hermana de Patricia y tía de Javiera. Vive en Santiago hace 30 años.",
+      "profile": {"profession": "secretaria ejecutiva", "hobbies": ["baile entretenido"], "languages": ["español"], "diet": "omnivora", "allergies": ["frutos secos"]},
+      "topics": [["baile entretenido", "hace", 2, ["instagram"]], ["teleseries", "le_gusta", 2, ["instagram"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "logistica",
+          "detail": "Puede alojar a seis personas de la familia de Concepción en su casa de Maipú.",
+          "hard": false,
+          "people": 6,
+          "appliesTo": ["matrimonio"]
+        }
+      ],
+      "friends": [{"slug": "patricia-soto", "relation": "familia", "detail": "hermana", "closeness": 3}]
+    },
+    {
+      "slug": "claudia-gonzalez",
+      "displayName": "Claudia González",
+      "age": 44,
+      "comuna": "La Florida",
+      "region": "Metropolitana",
+      "bio": "Jefa de logística en una cadena de farmacias. Organiza las vacaciones de febrero de toda la familia.",
+      "profile": {"profession": "jefa de logística", "hobbies": ["zumba", "series"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["planificar un viaje familiar", "busca", 1, ["chatgpt"]], ["logística", "sabe", 3, ["claude", "chatgpt"]], ["zumba", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Vacaciones en La Serena",
+          "type": "viaje",
+          "place": "La Serena, Coquimbo",
+          "date": "2024-02",
+          "summary": "Arrendaron un depto frente a la playa; la vuelta por la Ruta 5 un domingo de febrero tomó 9 horas.",
+          "usefulFor": ["viaje"]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Vacaciones de la empresa solo del 1 al 14 de febrero de 2027.",
+          "hard": true,
+          "from": "2027-02-01",
+          "to": "2027-02-14",
+          "appliesTo": ["viaje"]
+        },
+        {
+          "type": "presupuesto",
+          "detail": "Para su familia de cuatro (ella, Rodrigo, Martina y Agustín), todo incluido.",
+          "hard": true,
+          "amountClp": 2500000,
+          "per": "total",
+          "appliesTo": ["viaje"]
+        },
+        {
+          "type": "logistica",
+          "detail": "Agustín (8) se aburre en viajes de más de seis horas en auto: hay que partir el viaje o hacer paradas largas.",
+          "hard": false,
+          "appliesTo": ["viaje"]
+        },
+        {"type": "logistica", "detail": "Tienen una perra (Canela) que no puede viajar: alguien la tiene que cuidar.", "hard": true, "appliesTo": ["viaje"]}
+      ],
+      "friends": [
+        {"slug": "rodrigo-sepulveda", "relation": "pareja", "detail": "esposo", "closeness": 3},
+        {"slug": "martina-sepulveda", "relation": "familia", "detail": "hija", "closeness": 3},
+        {"slug": "luis-gonzalez", "relation": "familia", "detail": "papá", "closeness": 3},
+        {"slug": "gloria-espinoza", "relation": "familia", "detail": "mamá", "closeness": 3},
+        {"slug": "paula-gonzalez", "relation": "familia", "detail": "hermana", "closeness": 3},
+        {"slug": "andres-gonzalez", "relation": "familia", "detail": "hermano", "closeness": 2},
+        {"slug": "rosa-tapia", "relation": "vecindad", "detail": "vecina", "closeness": 2},
+        {"slug": "agustina-mora", "relation": "conocido", "detail": "veterinaria de Canela", "closeness": 1},
+        {"slug": "macarena-diaz", "relation": "trabajo", "detail": "colega en la cadena de farmacias", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "rodrigo-sepulveda",
+      "displayName": "Rodrigo Sepúlveda",
+      "age": 46,
+      "comuna": "La Florida",
+      "region": "Metropolitana",
+      "bio": "Esposo de Claudia, profesor de educación física. Juega básquetbol los jueves con Oscar.",
+      "profile": {"profession": "profesor de educación física", "hobbies": ["básquetbol", "camping"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["camping", "sabe", 3, ["instagram", "chatgpt"]], ["básquetbol", "hace", 2, ["instagram"]], ["música cumbia", "le_gusta", 2, ["spotify"]]],
+      "experiences": [
+        {
+          "title": "Camping en el lago Caburgua",
+          "type": "viaje",
+          "place": "Pucón, Araucanía",
+          "date": "2019-02",
+          "summary": "Una semana en carpa con los niños; el sitio costaba $25.000 la noche y en febrero hay que llegar antes del mediodía para tener sombra.",
+          "facts": {"sitioPorNocheClp": 25000},
+          "usefulFor": ["viaje"]
+        }
+      ],
+      "constraints": [
+        {"type": "salud", "detail": "Se marea en barco; un cruce corto lo aguanta, una navegación larga no.", "hard": false, "appliesTo": ["viaje"]},
+        {"type": "preferencia", "detail": "Prefiere camping para que alcance la plata.", "hard": false, "appliesTo": ["viaje"]}
+      ],
+      "friends": [
+        {"slug": "oscar", "relation": "amistad", "detail": "compañero de básquetbol", "closeness": 2},
+        {"slug": "claudia-gonzalez", "relation": "pareja", "detail": "esposa", "closeness": 3},
+        {"slug": "martina-sepulveda", "relation": "familia", "detail": "hija", "closeness": 3},
+        {"slug": "felipe-navarro", "relation": "trabajo", "detail": "colega del colegio", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "martina-sepulveda",
+      "displayName": "Martina Sepúlveda",
+      "age": 16,
+      "comuna": "La Florida",
+      "region": "Metropolitana",
+      "bio": "Hija de Claudia y Rodrigo. Vegetariana, fanática de las estrellas.",
+      "profile": {
+        "profession": "estudiante de enseñanza media",
+        "hobbies": ["astronomía", "fotografía con celular"],
+        "languages": ["español", "inglés"],
+        "diet": "vegetariana"
+      },
+      "topics": [
+        ["astronomía", "le_gusta", 2, ["instagram", "chatgpt"]],
+        ["fotografía con celular", "hace", 2, ["instagram"]],
+        ["taylor swift", "le_gusta", 2, ["spotify"]]
+      ],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Preuniversitario de verano hasta el viernes 5 de febrero de 2027.",
+          "hard": true,
+          "from": "2027-01-04",
+          "to": "2027-02-05",
+          "appliesTo": ["viaje"]
+        },
+        {"type": "alimentacion", "detail": "Vegetariana.", "hard": true, "appliesTo": ["viaje"]}
+      ],
+      "friends": [
+        {"slug": "claudia-gonzalez", "relation": "familia", "detail": "mamá", "closeness": 3},
+        {"slug": "rodrigo-sepulveda", "relation": "familia", "detail": "papá", "closeness": 3},
+        {"slug": "gloria-espinoza", "relation": "familia", "detail": "abuela", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "luis-gonzalez",
+      "displayName": "Luis González",
+      "age": 75,
+      "comuna": "Rancagua",
+      "region": "O'Higgins",
+      "bio": "Papá de Claudia, Paula y Andrés. Jubilado de El Teniente, pescador.",
+      "profile": {"profession": "mecánico jubilado", "hobbies": ["pesca", "historia de chile"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [
+        ["pesca deportiva", "hace", 3, ["instagram", "chatgpt"]],
+        ["historia chilena del siglo xx", "le_gusta", 2, ["chatgpt"]],
+        ["música ranchera", "le_gusta", 2, ["spotify"]]
+      ],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "salud",
+          "detail": "Marcapasos e hipertensión: su cardiólogo le dijo que no suba sobre 2.500 msnm.",
+          "hard": true,
+          "maxAltitudeM": 2500,
+          "appliesTo": ["viaje"]
+        },
+        {
+          "type": "presupuesto",
+          "detail": "Paga el alojamiento de todos, si el lugar tiene donde pescar.",
+          "hard": false,
+          "amountClp": 1500000,
+          "per": "total",
+          "appliesTo": ["viaje"]
+        }
+      ],
+      "friends": [
+        {"slug": "claudia-gonzalez", "relation": "familia", "detail": "hija", "closeness": 3},
+        {"slug": "gloria-espinoza", "relation": "pareja", "detail": "esposa", "closeness": 3},
+        {"slug": "paula-gonzalez", "relation": "familia", "detail": "hija", "closeness": 3},
+        {"slug": "andres-gonzalez", "relation": "familia", "detail": "hijo", "closeness": 3},
+        {"slug": "soledad-pizarro", "relation": "familia", "detail": "prima", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "gloria-espinoza",
+      "displayName": "Gloria Espinoza",
+      "age": 72,
+      "comuna": "Rancagua",
+      "region": "O'Higgins",
+      "bio": "Mamá de Claudia, Paula y Andrés. Le tiene pánico a los aviones.",
+      "profile": {"profession": "dueña de casa", "hobbies": ["jardinería", "tejido"], "languages": ["español"], "diet": "omnivora", "allergies": ["lactosa"]},
+      "topics": [["jardinería", "hace", 2, ["instagram"]], ["tejido a palillos con lana", "hace", 2, ["instagram"]], ["coro parroquial", "hace", 2, ["chatgpt"]]],
+      "experiences": [],
+      "constraints": [
+        {"type": "movilidad", "detail": "No se sube a un avión: todo el viaje tiene que ser por tierra.", "hard": true, "appliesTo": ["viaje"]},
+        {
+          "type": "movilidad",
+          "detail": "Más de ocho horas seguidas en auto le hinchan las piernas.",
+          "hard": false,
+          "maxTravelMinutes": 480,
+          "appliesTo": ["viaje"]
+        },
+        {"type": "alimentacion", "detail": "Intolerante a la lactosa.", "hard": true, "appliesTo": ["viaje"]}
+      ],
+      "friends": [
+        {"slug": "claudia-gonzalez", "relation": "familia", "detail": "hija", "closeness": 3},
+        {"slug": "luis-gonzalez", "relation": "pareja", "detail": "esposo", "closeness": 3},
+        {"slug": "paula-gonzalez", "relation": "familia", "detail": "hija", "closeness": 3},
+        {"slug": "andres-gonzalez", "relation": "familia", "detail": "hijo", "closeness": 3},
+        {"slug": "martina-sepulveda", "relation": "familia", "detail": "nieta", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "paula-gonzalez",
+      "displayName": "Paula González",
+      "age": 39,
+      "comuna": "Viña del Mar",
+      "region": "Valparaíso",
+      "bio": "Hermana de Claudia, enfermera de UCI. Viaja sola y con poca plata.",
+      "profile": {"profession": "enfermera de uci", "hobbies": ["surf", "fotografía"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [["enfermería intensiva", "es", 3, ["claude", "chatgpt"]], ["surf", "hace", 2, ["instagram"]], ["fotografía de naturaleza", "le_gusta", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "San Pedro de Atacama con amigas",
+          "type": "viaje",
+          "place": "San Pedro de Atacama, Antofagasta",
+          "date": "2023-02",
+          "summary": "Le dio puna en los géiseres del Tatio (4.300 msnm). El tour a las lagunas altiplánicas costó $55.000 por persona. No llevaría a alguien con problemas cardíacos sobre 4.000 m.",
+          "facts": {"tourLagunasClp": 55000, "altitudTatioM": 4300},
+          "usefulFor": ["viaje"]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Turnos del hospital: solo tiene libre del 8 al 15 de febrero de 2027.",
+          "hard": true,
+          "from": "2027-02-08",
+          "to": "2027-02-15",
+          "appliesTo": ["viaje"]
+        },
+        {"type": "presupuesto", "detail": "Todo incluido para ella.", "hard": false, "amountClp": 500000, "per": "total", "appliesTo": ["viaje"]}
+      ],
+      "friends": [
+        {"slug": "claudia-gonzalez", "relation": "familia", "detail": "hermana", "closeness": 3},
+        {"slug": "luis-gonzalez", "relation": "familia", "detail": "papá", "closeness": 3},
+        {"slug": "gloria-espinoza", "relation": "familia", "detail": "mamá", "closeness": 3},
+        {"slug": "andres-gonzalez", "relation": "familia", "detail": "hermano", "closeness": 2},
+        {"slug": "daniela-ortiz", "relation": "estudios", "detail": "compañera de enfermería", "closeness": 2},
+        {"slug": "constanza-vidal", "relation": "amistad", "detail": "compañera de surf", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "andres-gonzalez",
+      "displayName": "Andrés González",
+      "age": 49,
+      "comuna": "Antofagasta",
+      "region": "Antofagasta",
+      "bio": "Hermano de Claudia, ingeniero en minería. Conoce San Pedro de memoria y quiere que vayan todos.",
+      "profile": {"profession": "ingeniero en minería", "hobbies": ["astroturismo", "conducción 4x4"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [["ingeniería en minería", "es", 3, ["claude"]], ["astroturismo", "sabe", 2, ["instagram", "chatgpt"]], ["conducción 4x4", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Doce viajes a San Pedro de Atacama",
+          "type": "viaje",
+          "place": "San Pedro de Atacama, Antofagasta",
+          "date": "2025-07",
+          "summary": "Arrienda siempre una casa en el ayllu de Solor para 12 personas; hay que reservar en octubre para febrero. Valle de la Luna (2.400 m) lo hace cualquiera.",
+          "facts": {"casaPorNocheClp": 280000, "capacidad": 12},
+          "usefulFor": ["viaje"]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Turno 7x7 en la faena: libre del 10 al 17 de febrero de 2027.",
+          "hard": true,
+          "from": "2027-02-10",
+          "to": "2027-02-17",
+          "appliesTo": ["viaje"]
+        },
+        {"type": "presupuesto", "detail": "Para su familia de cuatro.", "hard": false, "amountClp": 4000000, "per": "total", "appliesTo": ["viaje"]},
+        {"type": "logistica", "detail": "Tiene una camioneta de 7 asientos, pero está en Antofagasta.", "hard": false, "appliesTo": ["viaje"]}
+      ],
+      "friends": [
+        {"slug": "claudia-gonzalez", "relation": "familia", "detail": "hermana", "closeness": 2},
+        {"slug": "luis-gonzalez", "relation": "familia", "detail": "papá", "closeness": 3},
+        {"slug": "gloria-espinoza", "relation": "familia", "detail": "mamá", "closeness": 3},
+        {"slug": "marcela-rivas", "relation": "pareja", "detail": "esposa", "closeness": 3},
+        {"slug": "paula-gonzalez", "relation": "familia", "detail": "hermana", "closeness": 2},
+        {"slug": "cristian-moya", "relation": "estudios", "detail": "compañero del liceo", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "marcela-rivas",
+      "displayName": "Marcela Rivas",
+      "age": 46,
+      "comuna": "Antofagasta",
+      "region": "Antofagasta",
+      "bio": "Esposa de Andrés, profesora de inglés. Celíaca; viaja con Benjamín (12) y Florencia (10).",
+      "profile": {"profession": "profesora de inglés", "hobbies": ["pilates", "lectura"], "languages": ["español", "inglés"], "diet": "omnivora", "allergies": ["gluten"]},
+      "topics": [["enseñanza de inglés", "sabe", 3, ["claude"]], ["cocina sin gluten", "hace", 2, ["instagram"]], ["clases de pilates", "hace", 2, ["instagram"]]],
+      "experiences": [],
+      "constraints": [{"type": "alimentacion", "detail": "Celíaca: el alojamiento tiene que tener cocina para preparar su comida.", "hard": true, "appliesTo": ["viaje"]}],
+      "friends": [
+        {"slug": "andres-gonzalez", "relation": "pareja", "detail": "esposo", "closeness": 3},
+        {"slug": "valentina-herrera", "relation": "conocido", "detail": "se conocieron en un grupo de celíacos", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "felipe-navarro",
+      "displayName": "Felipe Navarro",
+      "age": 41,
+      "comuna": "Puente Alto",
+      "region": "Metropolitana",
+      "bio": "Colega de Rodrigo en el colegio. Fue a Chiloé con sus hijos el verano pasado.",
+      "profile": {"profession": "profesor de historia", "hobbies": ["kayak", "running"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["viajes en familia por chile", "sabe", 2, ["instagram", "chatgpt"]], ["kayak", "hace", 2, ["instagram"]], ["running", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Chiloé en auto con dos hijos chicos",
+          "type": "viaje",
+          "place": "Castro, Chiloé",
+          "date": "2026-02",
+          "summary": "Cabaña en Castro para 6 a $95.000 la noche. El transbordador Pargua–Chacao no se reserva: esperaron 1 h 30 un sábado de febrero ($14.000 el auto). Llovió 4 de 8 días. Desde Santiago son unas 13 horas.",
+          "facts": {"cabañaPorNocheClp": 95000, "transbordadorAutoClp": 14000, "esperaMinutos": 90, "horasDesdeSantiago": 13},
+          "usefulFor": ["viaje"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "jose", "relation": "amistad", "detail": "compañero del club de running de Puente Alto", "closeness": 1},
+        {"slug": "rodrigo-sepulveda", "relation": "trabajo", "detail": "colega del colegio", "closeness": 2},
+        {"slug": "lorena-figueroa", "relation": "conocido", "detail": "dueña de la cabaña en Castro", "closeness": 1},
+        {"slug": "daniela-ortiz", "relation": "conocido", "detail": "guía de kayak en Pucón", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "daniela-ortiz",
+      "displayName": "Daniela Ortiz",
+      "age": 38,
+      "comuna": "Pucón",
+      "region": "Araucanía",
+      "bio": "Estudió enfermería con Paula y se fue al sur. Arrienda dos cabañas en Pucón.",
+      "profile": {"profession": "anfitriona de cabañas", "hobbies": ["kayak", "esquí"], "languages": ["español", "inglés"], "diet": "vegetariana"},
+      "topics": [["cabañas turísticas en pucón", "ofrece", 3, ["instagram"]], ["turismo en la araucanía", "sabe", 2, ["instagram", "chatgpt"]]],
+      "experiences": [
+        {
+          "title": "Temporada alta en sus cabañas",
+          "type": "trabajo",
+          "place": "Pucón, Araucanía",
+          "date": "2026-02",
+          "summary": "Dos cabañas para 6 personas, $120.000 la noche cada una, mínimo 5 noches en febrero. Las termas Los Pozones son accesibles para adultos mayores; el volcán no.",
+          "facts": {"cabañaPorNocheClp": 120000, "capacidadPorCabaña": 6, "nochesMinimas": 5, "disponibleDesde": "2027-02-09", "disponibleHasta": "2027-02-16"},
+          "usefulFor": ["viaje"]
+        }
+      ],
+      "constraints": [{"type": "logistica", "detail": "Pide 50 % de abono para reservar.", "hard": true, "appliesTo": ["viaje"]}],
+      "friends": [
+        {"slug": "paula-gonzalez", "relation": "estudios", "detail": "compañera de enfermería", "closeness": 2},
+        {"slug": "felipe-navarro", "relation": "conocido", "detail": "cliente de kayak", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "cristian-moya",
+      "displayName": "Cristián Moya",
+      "age": 44,
+      "comuna": "San Pedro de Atacama",
+      "region": "Antofagasta",
+      "bio": "Guía de turismo astronómico. Compañero de Andrés en el liceo de Antofagasta.",
+      "profile": {
+        "profession": "guía de turismo astronómico",
+        "hobbies": ["astronomía", "ciclismo de montaña"],
+        "languages": ["español", "inglés", "kunza básico"],
+        "diet": "omnivora"
+      },
+      "topics": [["tours astronómicos", "ofrece", 3, ["instagram", "claude"]], ["astronomía", "sabe", 3, ["claude"]]],
+      "experiences": [
+        {
+          "title": "Invierno altiplánico en febrero",
+          "type": "trabajo",
+          "place": "San Pedro de Atacama, Antofagasta",
+          "date": "2026-02",
+          "summary": "En febrero de 2026 se suspendieron tours seis días por lluvias del invierno altiplánico. Sus tours de observación son a 2.500 m, aptos para adultos mayores.",
+          "facts": {"diasSuspendidos": 6, "altitudTourM": 2500, "tourPorPersonaClp": 35000},
+          "usefulFor": ["viaje"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "andres-gonzalez", "relation": "estudios", "detail": "compañero del liceo", "closeness": 2},
+        {"slug": "agustina-mora", "relation": "amistad", "detail": "amiga", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "soledad-pizarro",
+      "displayName": "Soledad Pizarro",
+      "age": 52,
+      "comuna": "Vicuña",
+      "region": "Coquimbo",
+      "bio": "Prima de Luis. Tiene una casa grande en el Valle del Elqui que arrienda en verano.",
+      "profile": {"profession": "productora de pisco artesanal", "hobbies": ["astronomía", "huerta"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [
+        ["turismo en el valle del elqui", "ofrece", 3, ["instagram"]],
+        ["destilación de pisco artesanal", "sabe", 2, ["instagram"]],
+        ["astronomía", "le_gusta", 2, ["instagram"]]
+      ],
+      "experiences": [
+        {
+          "title": "Arriendo de su casa en Vicuña",
+          "type": "vivienda",
+          "place": "Vicuña, Coquimbo",
+          "date": "2026-02",
+          "summary": "Casa para 10 con cocina grande y patio para una carpa, a 650 msnm. A la familia le cobra $180.000 la noche. Los observatorios turísticos están a 20 minutos. En el embalse Puclaro se pesca pejerrey, pero poco.",
+          "facts": {"casaPorNocheClp": 180000, "capacidad": 10, "altitudM": 650, "horasDesdeRancagua": 6},
+          "usefulFor": ["viaje"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "luis-gonzalez", "relation": "familia", "detail": "primo", "closeness": 1},
+        {"slug": "esteban-lagos", "relation": "conocido", "detail": "cliente", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "lorena-figueroa",
+      "displayName": "Lorena Figueroa",
+      "age": 47,
+      "comuna": "Castro",
+      "region": "Los Lagos",
+      "bio": "Dueña de la cabaña donde se quedó Felipe en Chiloé.",
+      "profile": {"profession": "artesana en lana", "hobbies": ["tejido", "cocina chilota"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["cabañas turísticas en castro", "ofrece", 2, ["instagram"]], ["cocina chilota", "sabe", 3, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Cabañas en Castro",
+          "type": "vivienda",
+          "place": "Castro, Chiloé",
+          "date": "2026-02",
+          "summary": "Cabaña para 8 a $110.000 la noche; febrero está casi lleno desde noviembre. El curanto lleva mariscos: para celíacos o alérgicos hay que pedir otra cosa.",
+          "facts": {"cabañaPorNocheClp": 110000, "capacidad": 8},
+          "usefulFor": ["viaje"]
+        }
+      ],
+      "constraints": [],
+      "friends": [{"slug": "felipe-navarro", "relation": "conocido", "detail": "huésped", "closeness": 1}]
+    },
+    {
+      "slug": "rosa-tapia",
+      "displayName": "Rosa Tapia",
+      "age": 66,
+      "comuna": "La Florida",
+      "region": "Metropolitana",
+      "bio": "Vecina de Claudia. Cuida perros del pasaje cuando sus dueños viajan.",
+      "profile": {"profession": "costurera jubilada", "hobbies": ["perros", "costura"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["cuidado de perros", "ofrece", 2, ["instagram"]], ["costura a máquina", "hace", 3, ["instagram", "chatgpt"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Puede cuidar a Canela solo hasta el 12 de febrero de 2027: después viaja a ver a su hija.",
+          "hard": true,
+          "from": "2027-02-01",
+          "to": "2027-02-12",
+          "appliesTo": ["viaje"]
+        }
+      ],
+      "friends": [{"slug": "claudia-gonzalez", "relation": "vecindad", "detail": "vecina", "closeness": 2}]
+    },
+    {
+      "slug": "macarena-diaz",
+      "displayName": "Macarena Díaz",
+      "age": 41,
+      "comuna": "Macul",
+      "region": "Metropolitana",
+      "bio": "Colega de Claudia. Fue al Valle del Elqui con sus papás el verano pasado.",
+      "profile": {"profession": "químico farmacéutica", "hobbies": ["viajes", "trekking"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["farmacia clínica", "es", 3, ["claude"]], ["viajes con adultos mayores", "sabe", 2, ["chatgpt", "instagram"]]],
+      "experiences": [
+        {
+          "title": "Valle del Elqui con sus papás de 78 y 80",
+          "type": "viaje",
+          "place": "Vicuña, Coquimbo",
+          "date": "2026-02",
+          "summary": "Hizo 34 °C a la sombra: salían temprano y dormían siesta. El tour astronómico grande terminaba a la 1:00 y tenía escaleras; encontró un observatorio chico en Vicuña con acceso plano que termina a las 23:00.",
+          "facts": {"temperaturaMaxima": 34, "horaFinTourGrande": "01:00", "horaFinTourChico": "23:00"},
+          "usefulFor": ["viaje"]
+        }
+      ],
+      "constraints": [],
+      "friends": [{"slug": "claudia-gonzalez", "relation": "trabajo", "detail": "colega", "closeness": 2}]
+    },
+    {
+      "slug": "antonia-reyes",
+      "displayName": "Antonia Reyes",
+      "age": 26,
+      "comuna": "Maipú",
+      "region": "Metropolitana",
+      "bio": "Analista de datos en una healthtech, colega de Martín. Busca depto para irse de la casa de sus papás con su gato.",
+      "profile": {"profession": "analista de datos", "hobbies": ["escalada", "gatos"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [
+        ["buscar departamento para compartir", "busca", 1, ["claude", "chatgpt"]],
+        ["análisis de datos", "sabe", 3, ["claude", "github"]],
+        ["escalada", "hace", 2, ["instagram"]],
+        ["gatos", "le_gusta", 2, ["instagram"]]
+      ],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "presupuesto",
+          "detail": "Hasta $350.000 al mes, gastos comunes incluidos.",
+          "hard": true,
+          "amountClp": 350000,
+          "per": "mes",
+          "appliesTo": ["arriendo"]
+        },
+        {"type": "vivienda", "detail": "Vive con su gato Mostaza y no lo deja.", "hard": true, "appliesTo": ["arriendo"]},
+        {"type": "vivienda", "detail": "Ñuñoa o Providencia, a menos de 10 minutos a pie de la Línea 1 o la 3.", "hard": false, "appliesTo": ["arriendo"]},
+        {"type": "fecha", "detail": "Quiere entrar el 1 de marzo de 2027.", "hard": false, "from": "2027-03-01", "appliesTo": ["arriendo"]}
+      ],
+      "friends": [
+        {"slug": "martin", "relation": "trabajo", "detail": "colega en la healthtech", "closeness": 1},
+        {"slug": "isidora-paredes", "relation": "familia", "detail": "prima", "closeness": 3},
+        {"slug": "nicolas-bravo", "relation": "amistad", "detail": "compañero de escalada", "closeness": 2},
+        {"slug": "ignacia-silva", "relation": "trabajo", "detail": "colega", "closeness": 2},
+        {"slug": "trinidad-ossa", "relation": "estudios", "detail": "amiga del colegio", "closeness": 2},
+        {"slug": "agustina-mora", "relation": "amistad", "detail": "amiga y veterinaria de Mostaza", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "matias-caceres",
+      "displayName": "Matías Cáceres",
+      "age": 27,
+      "comuna": "Puente Alto",
+      "region": "Metropolitana",
+      "bio": "Estudia un magíster en Beauchef con beca. Compañero de universidad de José.",
+      "profile": {
+        "profession": "estudiante de magíster en ingeniería",
+        "hobbies": ["fútbol", "cocina"],
+        "languages": ["español", "inglés"],
+        "diet": "omnivora",
+        "allergies": ["pelo de gato"]
+      },
+      "topics": [
+        ["buscar departamento para compartir", "busca", 1, ["chatgpt"]],
+        ["investigación de operaciones", "sabe", 2, ["github", "claude"]],
+        ["fútbol amateur", "hace", 2, ["instagram"]],
+        ["cocina casera", "hace", 2, ["instagram"]]
+      ],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "presupuesto",
+          "detail": "Beca de $650.000: puede pagar hasta $280.000 al mes.",
+          "hard": true,
+          "amountClp": 280000,
+          "per": "mes",
+          "appliesTo": ["arriendo"]
+        },
+        {
+          "type": "salud",
+          "detail": "Asma alérgica al pelo de gato; con antihistamínico tolera uno si no entra a su pieza.",
+          "hard": false,
+          "appliesTo": ["arriendo"]
+        },
+        {
+          "type": "vivienda",
+          "detail": "Menos de 40 minutos en transporte público a Beauchef (Línea 2).",
+          "hard": false,
+          "maxTravelMinutes": 40,
+          "appliesTo": ["arriendo"]
+        },
+        {"type": "vivienda", "detail": "No tiene liquidaciones de sueldo, solo el certificado de beca.", "hard": true, "appliesTo": ["arriendo"]}
+      ],
+      "friends": [
+        {"slug": "jose", "relation": "estudios", "detail": "compañero de universidad", "closeness": 3},
+        {"slug": "nicolas-bravo", "relation": "amistad", "detail": "amigo", "closeness": 2},
+        {"slug": "pedro-alarcon", "relation": "amistad", "detail": "compañero de fútbol", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "isidora-paredes",
+      "displayName": "Isidora Paredes",
+      "age": 24,
+      "comuna": "Temuco",
+      "region": "Araucanía",
+      "bio": "Diseñadora UX remota que se muda a Santiago. Prima de Antonia.",
+      "profile": {"profession": "diseñadora ux", "hobbies": ["ilustración", "plantas"], "languages": ["español", "inglés"], "diet": "vegetariana"},
+      "topics": [
+        ["buscar departamento para compartir", "busca", 1, ["claude"]],
+        ["diseño de interfaces", "sabe", 3, ["claude", "instagram"]],
+        ["ilustración digital", "hace", 2, ["instagram"]],
+        ["plantas de interior", "le_gusta", 2, ["instagram"]]
+      ],
+      "experiences": [],
+      "constraints": [
+        {"type": "presupuesto", "detail": "Hasta $320.000 al mes.", "hard": true, "amountClp": 320000, "per": "mes", "appliesTo": ["arriendo"]},
+        {
+          "type": "fecha",
+          "detail": "Su contrato en Temuco termina el 14 de marzo: no puede entrar antes del 15 de marzo de 2027.",
+          "hard": true,
+          "from": "2027-03-15",
+          "appliesTo": ["arriendo"]
+        },
+        {"type": "vivienda", "detail": "Trabaja remoto: necesita fibra óptica y una pieza donde quepa un escritorio.", "hard": true, "appliesTo": ["arriendo"]},
+        {"type": "vivienda", "detail": "No tiene aval en Santiago: su papá es independiente y no tiene liquidaciones.", "hard": true, "appliesTo": ["arriendo"]}
+      ],
+      "friends": [
+        {"slug": "antonia-reyes", "relation": "familia", "detail": "prima", "closeness": 3},
+        {"slug": "gonzalo-paredes", "relation": "familia", "detail": "papá", "closeness": 3}
+      ]
+    },
+    {
+      "slug": "nicolas-bravo",
+      "displayName": "Nicolás Bravo",
+      "age": 28,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Vivió tres años con roomies en Barrio Italia. Escala con Antonia.",
+      "profile": {"profession": "desarrollador backend", "hobbies": ["escalada", "café"], "languages": ["español", "inglés"], "diet": "vegetariana"},
+      "topics": [["convivencia con roomies", "sabe", 2, ["chatgpt"]], ["escalada", "hace", 2, ["instagram"]], ["café de especialidad", "le_gusta", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Tres años con roomies en Barrio Italia",
+          "type": "vivienda",
+          "place": "Providencia, Metropolitana",
+          "date": "2023-03",
+          "summary": "Depto 3D2B a $780.000 más $95.000 de gastos comunes y $25.000 de internet. La pieza en suite pagaba $40.000 más. Lo que más peleas evitó fue tener el aseo escrito en una planilla.",
+          "facts": {"arriendoClp": 780000, "gastosComunesClp": 95000, "internetClp": 25000, "recargoSuiteClp": 40000},
+          "usefulFor": ["arriendo"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "antonia-reyes", "relation": "amistad", "detail": "compañera de escalada", "closeness": 2},
+        {"slug": "matias-caceres", "relation": "amistad", "detail": "amigo", "closeness": 2},
+        {"slug": "josefa-lillo", "relation": "vecindad", "detail": "administradora de su edificio", "closeness": 1},
+        {"slug": "agustina-mora", "relation": "amistad", "detail": "compañera de escalada", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "camila-rojas",
+      "displayName": "Camila Rojas",
+      "age": 30,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Deja su depto en Ñuñoa en marzo porque se va a vivir a Valdivia. Amiga de Catalina.",
+      "profile": {"profession": "psicóloga", "hobbies": ["yoga", "plantas"], "languages": ["español"], "diet": "vegana"},
+      "topics": [["traspaso de departamento", "ofrece", 2, ["instagram"]], ["psicología clínica", "es", 3, ["claude"]], ["yoga", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Su depto en Ñuñoa",
+          "type": "vivienda",
+          "place": "Ñuñoa, Metropolitana",
+          "date": "2027-03",
+          "summary": "3D2B a 4 cuadras del metro Ñuñoa (Líneas 3 y 6), con fibra óptica. El dueño acepta mascotas y prefiere gente recomendada, pero quiere contrato desde el 1 de marzo.",
+          "facts": {"arriendoClp": 890000, "gastosComunesClp": 110000, "dormitorios": 3, "baños": 2, "aceptaMascotas": true, "disponibleDesde": "2027-03-01"},
+          "usefulFor": ["arriendo"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "catalina-fuentes", "relation": "amistad", "detail": "amiga", "closeness": 2},
+        {"slug": "josefa-lillo", "relation": "vecindad", "detail": "administradora de su edificio", "closeness": 1},
+        {"slug": "francisco-leiva", "relation": "vecindad", "detail": "vecino", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "josefa-lillo",
+      "displayName": "Josefa Lillo",
+      "age": 33,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Administra edificios en Ñuñoa. Vecina de Nicolás y de Camila.",
+      "profile": {"profession": "administradora de edificios", "hobbies": ["bicicleta urbana", "series"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [
+        ["administración de edificios", "es", 3, ["claude"]],
+        ["reglamentos de copropiedad", "sabe", 3, ["claude", "chatgpt"]],
+        ["bicicleta urbana", "hace", 2, ["instagram"]]
+      ],
+      "experiences": [
+        {
+          "title": "Casi la estafan con un arriendo",
+          "type": "vivienda",
+          "place": "Ñuñoa, Metropolitana",
+          "date": "2024-02",
+          "summary": "Un aviso en Marketplace pedía transferir la garantía antes de ver el depto; el depto existía, pero quien lo publicaba no era el dueño. Desde entonces no transfiere nada sin ver el depto y el dominio vigente.",
+          "usefulFor": ["arriendo"]
+        },
+        {
+          "title": "Mascotas en edificios",
+          "type": "trabajo",
+          "place": "Ñuñoa, Metropolitana",
+          "date": "2025-01",
+          "summary": "Con la ley de copropiedad de 2022 el reglamento del edificio no puede prohibir mascotas, pero el dueño sí puede ponerlo en el contrato de arriendo.",
+          "usefulFor": ["arriendo"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "nicolas-bravo", "relation": "vecindad", "detail": "vecino", "closeness": 1},
+        {"slug": "camila-rojas", "relation": "vecindad", "detail": "vecina", "closeness": 1},
+        {"slug": "benjamin-torres", "relation": "trabajo", "detail": "corredor con el que trabaja", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "pedro-alarcon",
+      "displayName": "Pedro Alarcón",
+      "age": 35,
+      "comuna": "Santiago",
+      "region": "Metropolitana",
+      "bio": "Abogado inmobiliario. Juega fútbol con Matías; primo de Joaquín.",
+      "profile": {"profession": "abogado inmobiliario", "hobbies": ["fútbol", "jazz"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [
+        ["contratos de arriendo", "ofrece", 3, ["claude", "chatgpt"]],
+        ["derecho inmobiliario", "sabe", 3, ["claude"]],
+        ["fútbol amateur", "hace", 2, ["instagram"]]
+      ],
+      "experiences": [
+        {
+          "title": "Treinta contratos de arriendo revisados",
+          "type": "trabajo",
+          "place": "Santiago",
+          "date": "2025-01",
+          "summary": "Lo normal es un mes de garantía; sin aval piden dos. Ojo con el reajuste por IPC semestral y con que el contrato diga si los tres son codeudores solidarios. La ley 'Devuélveme mi casa' (2022) acortó los juicios de desalojo, así que los dueños están más dispuestos a arrendar sin aval si hay seguro.",
+          "facts": {"mesesGarantiaSinAval": 2},
+          "usefulFor": ["arriendo"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "joaquin-salas", "relation": "familia", "detail": "primo", "closeness": 2},
+        {"slug": "matias-caceres", "relation": "amistad", "detail": "compañero de fútbol", "closeness": 1},
+        {"slug": "alonso-vergara", "relation": "amistad", "detail": "compañero de fútbol", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "benjamin-torres",
+      "displayName": "Benjamín Torres",
+      "age": 31,
+      "comuna": "Las Condes",
+      "region": "Metropolitana",
+      "bio": "Corredor de propiedades. Trabaja con Josefa en varios edificios.",
+      "profile": {"profession": "corredor de propiedades", "hobbies": ["tenis", "fotografía"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [["corretaje de propiedades", "es", 3, ["claude"]], ["mercado inmobiliario", "sabe", 3, ["claude", "chatgpt"]], ["tenis", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Temporada de marzo",
+          "type": "trabajo",
+          "place": "Santiago",
+          "date": "2026-03",
+          "summary": "En marzo un 3D en Ñuñoa sale entre $850.000 y $1.000.000 y se arrienda en 48 horas. Piden las tres últimas liquidaciones y renta líquida de 3 veces el arriendo, sumando a todos. Tiene un 3D1B cerca del metro Toesca (Línea 2) a $720.000 más $70.000 de gastos comunes, sin mascotas.",
+          "facts": {"comisionMeses": 0.5, "rentaExigidaVeces": 3, "toescaArriendoClp": 720000, "toescaGastosComunesClp": 70000},
+          "usefulFor": ["arriendo"]
+        }
+      ],
+      "constraints": [{"type": "presupuesto", "detail": "Cobra medio mes de arriendo más IVA como comisión.", "hard": false, "appliesTo": ["arriendo"]}],
+      "friends": [
+        {"slug": "josefa-lillo", "relation": "trabajo", "detail": "administradora con la que trabaja", "closeness": 1},
+        {"slug": "esteban-lagos", "relation": "amistad", "detail": "compañero de tenis", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "gonzalo-paredes",
+      "displayName": "Gonzalo Paredes",
+      "age": 55,
+      "comuna": "Temuco",
+      "region": "Araucanía",
+      "bio": "Papá de Isidora. Transportista independiente.",
+      "profile": {"profession": "transportista", "hobbies": ["huerta", "fútbol"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["transporte de carga", "es", 3, ["chatgpt"]], ["huerta orgánica en casa", "hace", 2, ["instagram"]], ["ver fútbol", "le_gusta", 2, ["instagram"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "presupuesto",
+          "detail": "Puede adelantar la garantía de la parte de Isidora (dos meses).",
+          "hard": false,
+          "amountClp": 640000,
+          "per": "total",
+          "appliesTo": ["arriendo"]
+        },
+        {
+          "type": "vivienda",
+          "detail": "Quiere ser aval, pero no tiene liquidaciones: prefiere pagar un seguro de arriendo.",
+          "hard": false,
+          "appliesTo": ["arriendo"]
+        }
+      ],
+      "friends": [{"slug": "isidora-paredes", "relation": "familia", "detail": "hija", "closeness": 3}]
+    },
+    {
+      "slug": "tamara-quezada",
+      "displayName": "Tamara Quezada",
+      "age": 29,
+      "comuna": "Providencia",
+      "region": "Metropolitana",
+      "bio": "Trabaja en una insurtech de seguros de arriendo. Antes estuvo con Oscar en una fintech.",
+      "profile": {"profession": "analista de riesgo en insurtech", "hobbies": ["pádel", "vinos naturales"], "languages": ["español", "inglés"], "diet": "pescetariana"},
+      "topics": [
+        ["seguros para arrendatarios", "sabe", 3, ["claude"]],
+        ["evaluación de riesgo", "sabe", 2, ["claude", "github"]],
+        ["torneos de pádel", "hace", 2, ["instagram"]]
+      ],
+      "experiences": [
+        {
+          "title": "Seguros de arriendo sin aval",
+          "type": "trabajo",
+          "place": "Santiago",
+          "date": "2026-01",
+          "summary": "El seguro reemplaza al aval y evalúa a los tres arrendatarios juntos: boletas de honorarios y certificado de beca cuentan. Cuesta alrededor de medio mes de arriendo al año.",
+          "facts": {"costoAnualMesesDeArriendo": 0.5},
+          "usefulFor": ["arriendo"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "oscar", "relation": "trabajo", "detail": "excolega de la fintech", "closeness": 1},
+        {"slug": "ignacia-silva", "relation": "amistad", "detail": "amiga", "closeness": 2},
+        {"slug": "barbara-nunez", "relation": "amistad", "detail": "amiga de las catas de vino natural", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "sergio-pino",
+      "displayName": "Sergio Pino",
+      "age": 61,
+      "comuna": "Providencia",
+      "region": "Metropolitana",
+      "bio": "Dueño de un depto en Providencia que arrienda. Tío de Ignacia.",
+      "profile": {"profession": "ingeniero comercial jubilado", "hobbies": ["golf", "historia"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["inversión inmobiliaria", "sabe", 2, ["chatgpt"]], ["golf", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Su depto en Manuel Montt",
+          "type": "vivienda",
+          "place": "Providencia, Metropolitana",
+          "date": "2027-03",
+          "summary": "3D2B a 3 cuadras del metro Manuel Montt (Línea 1), disponible el 1 de marzo. No acepta mascotas en el contrato. Lo arrienda directo, sin corredor.",
+          "facts": {"arriendoClp": 960000, "gastosComunesClp": 90000, "aceptaMascotas": false},
+          "usefulFor": ["arriendo"]
+        }
+      ],
+      "constraints": [],
+      "friends": [{"slug": "ignacia-silva", "relation": "familia", "detail": "sobrina", "closeness": 2}]
+    },
+    {
+      "slug": "trinidad-ossa",
+      "displayName": "Trinidad Ossa",
+      "age": 27,
+      "comuna": "Las Condes",
+      "region": "Metropolitana",
+      "bio": "Amiga de colegio de Antonia. También busca roomies, tiene auto.",
+      "profile": {"profession": "ingeniera comercial", "hobbies": ["esquí", "pádel"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [
+        ["buscar departamento para compartir", "busca", 1, ["instagram"]],
+        ["control de gestión", "sabe", 2, ["claude"]],
+        ["esquí en la cordillera", "hace", 2, ["instagram"]]
+      ],
+      "experiences": [],
+      "constraints": [
+        {"type": "presupuesto", "detail": "Hasta $400.000 al mes.", "hard": false, "amountClp": 400000, "per": "mes", "appliesTo": ["arriendo"]},
+        {"type": "vivienda", "detail": "Necesita estacionamiento para su auto.", "hard": true, "appliesTo": ["arriendo"]}
+      ],
+      "friends": [{"slug": "antonia-reyes", "relation": "estudios", "detail": "amiga del colegio", "closeness": 2}]
+    },
+    {
+      "slug": "agustina-mora",
+      "displayName": "Agustina Mora",
+      "age": 29,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Veterinaria en Ñuñoa: atiende a Mostaza, el gato de Antonia, y a Canela, la perra de Claudia.",
+      "profile": {"profession": "médica veterinaria", "hobbies": ["escalada", "trekking"], "languages": ["español", "inglés"], "diet": "vegetariana"},
+      "topics": [["medicina veterinaria", "es", 3, ["claude"]], ["escalada", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Hotel para mascotas en verano",
+          "type": "trabajo",
+          "place": "Ñuñoa, Metropolitana",
+          "date": "2026-02",
+          "summary": "En febrero el hotel canino de la clínica cobra $15.000 la noche y se llena en enero.",
+          "facts": {"hotelCaninoPorNocheClp": 15000},
+          "usefulFor": ["viaje"]
+        },
+        {
+          "title": "Gatos y alergias en un depto compartido",
+          "type": "trabajo",
+          "place": "Ñuñoa, Metropolitana",
+          "date": "2025-06",
+          "summary": "Con un purificador de aire y el gato fuera de la pieza del alérgico, la mayoría convive bien; bañarlo no sirve de mucho.",
+          "usefulFor": ["arriendo"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "claudia-gonzalez", "relation": "conocido", "detail": "dueña de Canela", "closeness": 1},
+        {"slug": "antonia-reyes", "relation": "amistad", "detail": "amiga", "closeness": 2},
+        {"slug": "nicolas-bravo", "relation": "amistad", "detail": "compañero de escalada", "closeness": 1},
+        {"slug": "cristian-moya", "relation": "amistad", "detail": "amigo de un viaje al norte", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "ignacia-silva",
+      "displayName": "Ignacia Silva",
+      "age": 32,
+      "comuna": "Providencia",
+      "region": "Metropolitana",
+      "bio": "Product manager en la healthtech de Martín y Antonia.",
+      "profile": {"profession": "product manager en healthtech", "hobbies": ["running", "cerámica"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [["gestión de productos digitales", "sabe", 3, ["claude"]], ["running", "hace", 2, ["instagram"]], ["cerámica", "hace", 2, ["instagram"]]],
+      "experiences": [],
+      "constraints": [],
+      "friends": [
+        {"slug": "martin", "relation": "trabajo", "detail": "colega en la healthtech", "closeness": 2},
+        {"slug": "valentina-herrera", "relation": "amistad", "detail": "compañera de running", "closeness": 1},
+        {"slug": "antonia-reyes", "relation": "trabajo", "detail": "colega", "closeness": 2},
+        {"slug": "tamara-quezada", "relation": "amistad", "detail": "amiga", "closeness": 2},
+        {"slug": "sergio-pino", "relation": "familia", "detail": "tío", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "esteban-lagos",
+      "displayName": "Esteban Lagos",
+      "age": 36,
+      "comuna": "Vitacura",
+      "region": "Metropolitana",
+      "bio": "Hermano de Francisca. Corre con Martín los domingos.",
+      "profile": {"profession": "analista financiero", "hobbies": ["running", "triatlón"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [["running", "hace", 3, ["instagram", "claude"]], ["finanzas corporativas", "sabe", 3, ["claude"]], ["triatlón", "quiere_ser", 1, ["chatgpt"]]],
+      "experiences": [],
+      "constraints": [],
+      "friends": [
+        {"slug": "martin", "relation": "amistad", "detail": "compañero de running", "closeness": 2},
+        {"slug": "francisca-lagos", "relation": "familia", "detail": "hermana", "closeness": 3},
+        {"slug": "soledad-pizarro", "relation": "conocido", "detail": "productora del pisco que compra", "closeness": 1},
+        {"slug": "benjamin-torres", "relation": "amistad", "detail": "compañero de tenis", "closeness": 1}
+      ]
+    },
+    {
+      "slug": "francisco-leiva",
+      "displayName": "Francisco Leiva",
+      "age": 30,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Compañero de trabajo de José. Vive en el mismo edificio que Camila.",
+      "profile": {"profession": "ingeniero de datos", "hobbies": ["realidad virtual", "básquetbol"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [["ingeniería de datos", "sabe", 3, ["github", "claude"]], ["realidad virtual", "le_gusta", 2, ["instagram"]]],
+      "experiences": [],
+      "constraints": [],
+      "friends": [
+        {"slug": "jose", "relation": "trabajo", "detail": "compañero de trabajo", "closeness": 2},
+        {"slug": "camila-rojas", "relation": "vecindad", "detail": "vecina", "closeness": 1}
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "matrimonio-javiera-tomas",
+      "type": "matrimonio",
+      "roomId": "seed-matrimonio",
+      "title": "Matrimonio de Javiera y Tomás",
+      "summary": "Javiera y Tomás quieren casarse antes de que ella se vaya a Madrid el 1 de junio de 2027, con unos 130 invitados y fiesta al aire libre.",
+      "organizers": ["javiera-munoz", "tomas-fuentes"],
+      "participants": [
+        {"slug": "javiera-munoz", "role": "novia"},
+        {"slug": "tomas-fuentes", "role": "novio"},
+        {"slug": "hernan-munoz", "role": "papá de la novia"},
+        {"slug": "patricia-soto", "role": "mamá de la novia"},
+        {"slug": "ignacio-munoz", "role": "hermano de la novia y sonido"},
+        {"slug": "jorge-fuentes", "role": "papá del novio"},
+        {"slug": "veronica-araneda", "role": "mamá del novio y flores"},
+        {"slug": "olga-cardenas", "role": "abuela del novio"},
+        {"slug": "ramon-fuentes", "role": "tío del novio"},
+        {"slug": "catalina-fuentes", "role": "hermana del novio y madrina"},
+        {"slug": "joaquin-salas", "role": "padrino"},
+        {"slug": "francisca-lagos", "role": "wedding planner"},
+        {"slug": "sebastian-perez", "role": "dj"},
+        {"slug": "constanza-vidal", "role": "fotógrafa"},
+        {"slug": "valentina-herrera", "role": "invitada"},
+        {"slug": "lucas-moreira", "role": "invitado desde Brasil"}
+      ],
+      "decisions": [
+        {
+          "variable": "fecha",
+          "options": [
+            {"id": "2027-03-13", "label": "sábado 13 de marzo de 2027"},
+            {"id": "2027-04-10", "label": "sábado 10 de abril de 2027"},
+            {"id": "2027-04-24", "label": "sábado 24 de abril de 2027"}
+          ]
+        },
+        {
+          "variable": "lugar",
+          "options": [
+            {
+              "id": "pirque",
+              "label": "Parcela en Pirque",
+              "minutosDesdeLaReina": 50,
+              "capacidad": 150,
+              "arriendoClp": 2800000,
+              "alojamiento": false,
+              "banqueteriaExterna": true
+            },
+            {
+              "id": "casablanca",
+              "label": "Terraza de una viña en Casablanca",
+              "minutosDesdeLaReina": 80,
+              "capacidad": 180,
+              "arriendoClp": 3500000,
+              "alojamiento": true,
+              "banqueteriaExterna": false
+            },
+            {
+              "id": "olmue",
+              "label": "Centro de eventos en Olmué",
+              "minutosDesdeLaReina": 135,
+              "capacidad": 200,
+              "todoIncluidoPorPersonaClp": 72000,
+              "alojamiento": true,
+              "banqueteriaExterna": false
+            }
+          ]
+        },
+        {"variable": "invitados", "range": [110, 170]},
+        {
+          "variable": "presupuesto",
+          "totalClp": 23000000,
+          "breakdown": {"pareja": 14000000, "hernan-munoz": 5000000, "jorge-fuentes": 4000000}
+        },
+        {
+          "variable": "menú",
+          "mustCover": ["vegano", "sin gluten con cocina separada", "sin mariscos sin contaminación cruzada", "postre sin azúcar", "bajo en sal"]
+        },
+        {
+          "variable": "ceremonia",
+          "options": [{"id": "religiosa"}, {"id": "civil-y-simbolica"}]
+        }
+      ],
+      "tensions": ["Ninguna de las tres fechas sirve a todos: el 13 de marzo Ramón está en la esquila; el 10 y el 24 de abril Hernán está recién operado. Además Sebastián tiene tomado el 10 de abril y Constanza el 24.", "El 13 de marzo choca también con el festival de Ignacio y la entrega de Tomás, aunque los dos podrían ceder.", "Una salida es mayo (22 o 29), después del alta de Hernán y antes del viaje de Javiera: pero en mayo hay que sumar carpa ($1.800.000) y las flores suben ($1.400.000 en vez de $900.000).", "Olga no puede ir a más de una hora de La Reina: Olmué queda fuera y Casablanca queda justo en el límite.", "Casablanca obliga a usar la banquetería de la viña, y nadie sabe si tiene cocina separada para Valentina y protocolo sin mariscos para Joaquín; Alonso sí, pero solo trabaja en Santiago y Pirque.", "Jorge quiere 40 invitados de su lado y Javiera un tope de 130.", "Patricia quiere ceremonia religiosa; los novios, civil y simbólica."],
+      "helpers": [
+        {"slug": "barbara-nunez", "degree": 2, "why": "Trabaja en la viña de Casablanca: capacidad, habitaciones y banquetería obligatoria."},
+        {"slug": "carolina-mendez", "degree": 2, "why": "Hace tortas sin gluten y sin azúcar (Valentina y Hernán)."},
+        {"slug": "daniel-farias", "degree": 2, "why": "Bus Concepción–Santiago para la familia de la novia."},
+        {"slug": "monica-soto", "degree": 2, "why": "Puede alojar a seis personas de Concepción en Maipú."},
+        {"slug": "paula-gonzalez", "degree": 2, "why": "Enfermera: puede orientar a Hernán sobre la recuperación de una cirugía de cadera."},
+        {"slug": "rocio-araya", "degree": 2, "why": "Se casó en Pirque con 110 invitados: sabe el costo real, lo de la carpa y cómo resolvió lo de la abuela."},
+        {"slug": "alonso-vergara", "degree": 3, "why": "Banquetería con cocina sin gluten y protocolo sin mariscos, pero no trabaja en Casablanca."}
+      ]
+    },
+    {
+      "id": "vacaciones-familia-gonzalez",
+      "type": "viaje",
+      "roomId": "seed-viaje",
+      "title": "Vacaciones de febrero de los González",
+      "summary": "Tres generaciones (11 personas, 4 de ellas niños) quieren pasar al menos cinco días juntos en febrero de 2027, viajando por tierra.",
+      "organizers": ["claudia-gonzalez"],
+      "participants": [
+        {"slug": "claudia-gonzalez", "role": "organizadora"},
+        {"slug": "rodrigo-sepulveda", "role": "esposo"},
+        {"slug": "martina-sepulveda", "role": "hija"},
+        {"slug": "luis-gonzalez", "role": "abuelo"},
+        {"slug": "gloria-espinoza", "role": "abuela"},
+        {"slug": "paula-gonzalez", "role": "tía"},
+        {"slug": "andres-gonzalez", "role": "tío"},
+        {"slug": "marcela-rivas", "role": "tía política"}
+      ],
+      "dependents": [
+        {"name": "Agustín", "age": 8, "with": "claudia-gonzalez"},
+        {"name": "Benjamín", "age": 12, "with": "andres-gonzalez"},
+        {"name": "Florencia", "age": 10, "with": "andres-gonzalez"}
+      ],
+      "decisions": [
+        {
+          "variable": "fechas",
+          "window": {"from": "2027-02-01", "to": "2027-02-28"}
+        },
+        {
+          "variable": "destino",
+          "options": [
+            {"id": "san-pedro", "label": "San Pedro de Atacama", "altitudM": 2400, "horasDesdeRancagua": 22, "requiereAvion": true},
+            {"id": "chiloe", "label": "Chiloé (Castro)", "altitudM": 50, "horasDesdeRancagua": 12, "transbordador": true},
+            {"id": "pucon", "label": "Pucón", "altitudM": 230, "horasDesdeRancagua": 8},
+            {"id": "elqui", "label": "Valle del Elqui (Vicuña)", "altitudM": 650, "horasDesdeRancagua": 6}
+          ]
+        },
+        {"variable": "alojamiento", "mustHave": ["cocina (celiaquía de Marcela)", "11 camas o espacio para carpa", "acceso sin escaleras para Luis y Gloria"]},
+        {
+          "variable": "presupuesto",
+          "totalClp": 8500000,
+          "breakdown": {"claudia-gonzalez": 2500000, "andres-gonzalez": 4000000, "paula-gonzalez": 500000, "luis-gonzalez": 1500000}
+        },
+        {"variable": "menú", "mustCover": ["vegetariano", "sin gluten", "sin lactosa"]}
+      ],
+      "tensions": ["Las ventanas se cruzan solo del 10 al 14 de febrero (Claudia hasta el 14, Martina desde el 6, Paula del 8 al 15, Andrés del 10 al 17): cinco días.", "Andrés empuja San Pedro, pero Gloria no vuela, Luis no puede subir a las excursiones sobre 4.000 m y en febrero hay riesgo de invierno altiplánico.", "Chiloé son 12 horas por tierra desde Rancagua más el transbordador, demasiado para cinco días con Gloria y Agustín.", "Pucón tiene pesca para Luis y cabañas de Daniela libres del 9 al 16, pero piden mínimo cinco noches (del 10 al 15), un día más de lo que Claudia tiene.", "El Valle del Elqui queda a seis horas, a 650 m y con cielo para Martina; la casa de Soledad es para 10 y son 11 (Rodrigo puede ir en carpa), pero la pesca es poca.", "Rosa cuida a Canela solo hasta el 12 de febrero: hay que pagar hotel canino o volver antes."],
+      "helpers": [
+        {"slug": "agustina-mora", "degree": 1, "why": "Hotel canino de la clínica, $15.000 la noche."},
+        {"slug": "macarena-diaz", "degree": 1, "why": "Fue al Elqui con sus papás: calor, horarios y un observatorio sin escaleras."},
+        {"slug": "rosa-tapia", "degree": 1, "why": "Cuida a Canela hasta el 12 de febrero."},
+        {"slug": "cristian-moya", "degree": 2, "why": "Guía en San Pedro: tours aptos para adultos mayores y riesgo de invierno altiplánico."},
+        {"slug": "daniela-ortiz", "degree": 2, "why": "Arrienda cabañas en Pucón, libres del 9 al 16 de febrero."},
+        {"slug": "felipe-navarro", "degree": 2, "why": "Fue a Chiloé con niños chicos: tiempos reales de viaje y de transbordador."},
+        {"slug": "soledad-pizarro", "degree": 2, "why": "Prima de Luis con casa para 10 en Vicuña, a 650 msnm."},
+        {"slug": "lorena-figueroa", "degree": 3, "why": "Arrienda cabañas en Castro."},
+        {"slug": "valentina-herrera", "degree": 3, "why": "Celíaca: sabe qué preguntarle al alojamiento por la cocina de Marcela."}
+      ]
+    },
+    {
+      "id": "arriendo-roomies-2027",
+      "type": "arriendo",
+      "roomId": "seed-arriendo",
+      "title": "Depto para tres desde marzo",
+      "summary": "Antonia, Isidora y Matías buscan un 3D en Santiago para marzo de 2027, sin aval y con un gato de por medio.",
+      "organizers": ["antonia-reyes"],
+      "participants": [{"slug": "antonia-reyes", "role": "busca depto"}, {"slug": "isidora-paredes", "role": "busca depto"}, {"slug": "matias-caceres", "role": "busca depto"}],
+      "decisions": [
+        {
+          "variable": "presupuesto",
+          "totalMensualClp": 950000,
+          "breakdown": {"antonia-reyes": 350000, "isidora-paredes": 320000, "matias-caceres": 280000}
+        },
+        {
+          "variable": "departamento",
+          "options": [
+            {
+              "id": "nunoa-camila",
+              "label": "3D2B de Camila en Ñuñoa (metro Ñuñoa, L3/L6)",
+              "arriendoClp": 890000,
+              "gastosComunesClp": 110000,
+              "aceptaMascotas": true,
+              "desde": "2027-03-01",
+              "fibra": true
+            },
+            {
+              "id": "providencia-sergio",
+              "label": "3D2B de Sergio en Providencia (metro Manuel Montt, L1)",
+              "arriendoClp": 960000,
+              "gastosComunesClp": 90000,
+              "aceptaMascotas": false,
+              "desde": "2027-03-01"
+            },
+            {
+              "id": "toesca-benjamin",
+              "label": "3D1B por corredor cerca del metro Toesca (L2)",
+              "arriendoClp": 720000,
+              "gastosComunesClp": 70000,
+              "aceptaMascotas": false,
+              "comisionMeses": 0.5
+            }
+          ]
+        },
+        {
+          "variable": "garantía",
+          "options": [{"id": "aval"}, {"id": "dos-meses-de-garantía"}, {"id": "seguro-de-arriendo"}]
+        },
+        {"variable": "piezas", "note": "Una pieza en suite y dos que comparten baño: quién paga más."},
+        {
+          "variable": "fecha de entrada",
+          "options": [{"id": "2027-03-01"}, {"id": "2027-03-15"}]
+        }
+      ],
+      "tensions": ["El gato de Antonia contra el asma de Matías: Agustina dice que con purificador y el gato fuera de su pieza se puede.", "Juntan $950.000 y el depto de Camila sale $1.000.000 con gastos comunes; el de Toesca entra en presupuesto pero no acepta mascotas y tiene un baño.", "El dueño de Camila quiere contrato desde el 1 de marzo e Isidora no llega antes del 15: alguien tiene que cubrir medio mes.", "Ninguno tiene liquidaciones que sumen 3 veces el arriendo: el seguro de arriendo que conoce Tamara evalúa a los tres juntos.", "Si Matías se baja por el gato, Trinidad (amiga de Antonia) paga más, pero necesita estacionamiento.", "Camila, que deja el depto ideal, está a tres pasos de Antonia (vía Nicolás y Josefa) y a dos de José."],
+      "helpers": [
+        {"slug": "agustina-mora", "degree": 1, "why": "Veterinaria: gato y asma en el mismo depto."},
+        {"slug": "nicolas-bravo", "degree": 1, "why": "Vivió tres años con roomies: cómo dividir arriendo, suite y gastos."},
+        {"slug": "trinidad-ossa", "degree": 1, "why": "Roomie de reemplazo si Matías se baja."},
+        {"slug": "gonzalo-paredes", "degree": 2, "why": "Puede adelantar la garantía de Isidora."},
+        {"slug": "josefa-lillo", "degree": 2, "why": "Reglamentos de copropiedad, mascotas y cómo evitar estafas."},
+        {"slug": "sergio-pino", "degree": 2, "why": "Arrienda directo un 3D2B en Manuel Montt (sin mascotas)."},
+        {"slug": "tamara-quezada", "degree": 2, "why": "Seguro de arriendo que evalúa a los tres juntos."},
+        {"slug": "benjamin-torres", "degree": 3, "why": "Corredor: precios de marzo y el 3D1B de Toesca."},
+        {"slug": "camila-rojas", "degree": 3, "why": "Deja un 3D2B en Ñuñoa que acepta mascotas."},
+        {"slug": "pedro-alarcon", "degree": 3, "why": "Abogado: garantía, codeudores y cláusulas del contrato."}
+      ]
+    }
+  ]
+}

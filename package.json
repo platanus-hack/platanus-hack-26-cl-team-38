@@ -11,6 +11,7 @@
     "seed": "tsx scripts/load-seed.mts",
     "seed:prod": "ENV_FILE=.env.production.local tsx scripts/load-seed.mts",
     "seed:person": "tsx scripts/add-person.mts",
+    "seed:graphs": "tsx scripts/build-network-graphs.mts",
     "privacy:eval": "tsx scripts/privacy-eval.mts",
     "test": "vitest run",
     "typecheck": "next typegen && tsc --noEmit",

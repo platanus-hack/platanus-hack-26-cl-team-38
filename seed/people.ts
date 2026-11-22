@@ -1,4 +1,5 @@
 import type { Kind, Source } from "@/lib/types";
+import { network, slugOf } from "./network";
 import { team } from "./team";
 
 // Hand-written source of truth for the seed. `pnpm seed:build` adds embeddings and writes rooms.json.
@@ -190,10 +191,19 @@ const hack: SeedPerson[] = [
   ...mut.filter((p) => ["bruno", "hugo", "lucia", "javier", "sofia"].includes(p.slug)),
 ];
 
+// The three coordination cases of seed/network.v2.json: one room per case and one with all 53 people,
+// so the helpers outside each case (reached through connections) are loaded too. Only the public part
+// goes into rooms: the detailed profile, agentOnly and connections are loaded apart (scripts/load-seed.mts).
+const networkPeople = new Map<string, SeedPerson>(
+  network.people.map((p) => [p.personId, { slug: slugOf(p.personId), displayName: p.displayName, topics: p.topics.map((t): SeedTopic => [t.name, t.kind, t.depth, t.sources]) }]),
+);
+const networkRooms: SeedRoom[] = network.rooms.map((room) => ({ id: room.id, code: room.code, name: room.name, people: room.members.map((id) => networkPeople.get(id)!) }));
+
 export const SEED_ROOMS: SeedRoom[] = [
   { id: "seed-mut", code: "MUT001", name: "Sala de prueba · MUT", people: mut },
   { id: "seed-hack", code: "HACK26", name: "Platanus Hack 26", people: hack },
   { id: "seed-control", code: "CTRL01", name: "Sala de control (nada en común)", people: control },
+  ...networkRooms,
 ];
 
 // What the room engine (front C) must produce from this seed. Person ids are `seed-<slug>`.
@@ -206,4 +216,9 @@ export const SEED_EXPECTATIONS = {
   },
   "seed-hack": {},
   "seed-control": { mesas: 0 },
+  // Coordination cases: what has to be planned is in network.v2.json (purposes[].decisions and tensions).
+  "seed-matrimonio": { purpose: "matrimonio-javiera-tomas" },
+  "seed-viaje": { purpose: "vacaciones-familia-gonzalez" },
+  "seed-arriendo": { purpose: "arriendo-roomies-2027" },
+  "seed-red": {},
 } as const;
