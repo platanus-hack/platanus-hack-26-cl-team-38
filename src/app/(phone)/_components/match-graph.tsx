@@ -42,13 +42,15 @@ export function matchScene(W: number, H: number, me: Me, groups: TopicGroup[], f
       kind: "chip",
       cls: isSel ? "sel" : selected ? "off" : "",
       label: cap(short(g.topic, compact && !isSel ? 14 : 30)),
-      n: g.people.length > 3 ? g.people.length : undefined,
-      faces: g.people.slice(0, 3).map((c) => c.person.personId),
+      // Up to three faces under the name, the rest as a count. Open, the people are around it instead.
+      n: !isSel && g.people.length > 3 ? g.people.length - 3 : undefined,
+      faces: isSel ? undefined : g.people.slice(0, 3).map((c) => c.person.personId),
       onClick: () => setFocus({ topic: isSel ? null : g.topic, person: null }),
       from: me.id,
       pose: isSel ? pose(hub) : pose(ring, selected ? 0.2 : 1),
     };
-    edges.push({ a: me.id, b: id, kind: isSel ? "strong" : "soft", o: selected && !isSel ? 0.25 : 1 });
+    // A dot runs from you to each topic; with one open, only along that line.
+    edges.push({ a: me.id, b: id, kind: isSel ? "strong" : "soft", o: selected && !isSel ? 0.25 : 1, pulse: !selected || isSel ? i : undefined });
   });
 
   if (selected) {
@@ -68,7 +70,7 @@ export function matchScene(W: number, H: number, me: Me, groups: TopicGroup[], f
         from: `t:${selected.topic}`,
         pose: pose(at, 1, isFocus ? 1.12 : 0.95),
       };
-      edges.push({ a: `t:${selected.topic}`, b: id, kind: isFocus ? "focus" : "strong", w: isFocus ? 2 : 1.5 });
+      edges.push({ a: `t:${selected.topic}`, b: id, kind: isFocus ? "focus" : "strong", w: isFocus ? 2 : 1.5, pulse: i + 1 });
     });
   }
   return { E, edges };
@@ -76,5 +78,5 @@ export function matchScene(W: number, H: number, me: Me, groups: TopicGroup[], f
 
 export function MatchGraph({ W, H, me, groups, focus, compact = false }: { W: number; H: number; me: Me; groups: TopicGroup[]; focus: Focus; compact?: boolean }) {
   const { E, edges } = matchScene(W, H, me, groups, focus, compact);
-  return <GraphCanvas W={W} H={H} E={E} edges={edges} onBackground={() => setFocus({ topic: null, person: null })} />;
+  return <GraphCanvas W={W} H={H} E={E} edges={edges} onBackground={() => setFocus({ topic: null, person: null })} draggable />;
 }
