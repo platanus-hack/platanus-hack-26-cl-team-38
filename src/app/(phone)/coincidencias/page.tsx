@@ -1,9 +1,10 @@
 "use client";
 
-import { type CSSProperties, useEffect } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 import { AffinityGraph } from "../_components/affinity-graph";
 import { Splash, TabBar, useOnboardedPhone } from "../_components/chrome";
 import { CoincidenceSheet } from "../_components/coincidence-sheet";
+import { Icon } from "../_components/icons";
 import { setFocus } from "../_components/match-graph";
 import { Mono } from "../_components/ui";
 import { COPY } from "../_lib/copy";
@@ -18,6 +19,7 @@ export default function CoincidenciasPage() {
   const s = useOnboardedPhone();
   const { encounters, status } = useNearby(s);
   const location = useLocation();
+  const [filters, setFilters] = useState(false);
   // Inicio shares the focus: what was open there should not open here.
   useEffect(() => setFocus({ topic: null, person: null }), []);
   if (!s) return <Splash />;
@@ -37,11 +39,35 @@ export default function CoincidenciasPage() {
               {visible ? `${coins.length} · ${fmtMeters(radius)}` : "—"}
               {DEMO && !s.locationOn ? ` · ${C.demoShort}` : ""}
             </Mono>
-            <label className="near-switch">
-              <span>{C.visible}</span>
-              <button type="button" role="switch" aria-checked={visible} aria-label={C.visible} className="switch" onClick={() => setVisible(!visible)} />
-            </label>
+            <button type="button" className="filter-btn" aria-expanded={filters} aria-controls="explore-filters" aria-label={C.filters} onClick={() => setFilters(!filters)}>
+              <Icon name="filter" />
+            </button>
           </div>
+          {filters && (
+            <div id="explore-filters" className="filters">
+              <label className="near-switch">
+                <span>{C.visible}</span>
+                <button type="button" role="switch" aria-checked={visible} aria-label={C.visible} className="switch" onClick={() => setVisible(!visible)} />
+              </label>
+              {visible && (
+                <label className="range">
+                  <span className="sr">{C.range}</span>
+                  <input
+                    type="range"
+                    min={RANGE.min}
+                    max={RANGE.max}
+                    step={RANGE.step}
+                    value={radius}
+                    aria-label={C.range}
+                    aria-valuetext={`${radius} metros`}
+                    style={{ "--fill": `${((radius - RANGE.min) / (RANGE.max - RANGE.min)) * 100}%` } as CSSProperties}
+                    onChange={(e) => setPhone({ radiusM: Number(e.target.value) })}
+                  />
+                  <Mono>{radius} m</Mono>
+                </label>
+              )}
+            </div>
+          )}
           {visible && <p className="range-note">{C.rangeNote}</p>}
         </div>
         {encounters === undefined ? (
@@ -68,23 +94,6 @@ export default function CoincidenciasPage() {
           <div className="gwrap">
             <AffinityGraph W={360} H={400} me={{ id: s.personId }} contacts={coins} focus={s.focus.person} />
           </div>
-        )}
-        {visible && (
-          <label className="range">
-            <span className="sr">{C.range}</span>
-            <input
-              type="range"
-              min={RANGE.min}
-              max={RANGE.max}
-              step={RANGE.step}
-              value={radius}
-              aria-label={C.range}
-              aria-valuetext={`${radius} metros`}
-              style={{ "--fill": `${((radius - RANGE.min) / (RANGE.max - RANGE.min)) * 100}%` } as CSSProperties}
-              onChange={(e) => setPhone({ radiusM: Number(e.target.value) })}
-            />
-            <Mono>{radius} m</Mono>
-          </label>
         )}
       </div>
 
