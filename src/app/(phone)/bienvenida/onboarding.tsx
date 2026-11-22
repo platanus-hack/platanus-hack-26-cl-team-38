@@ -54,7 +54,7 @@ const roomFromLink = () => new URLSearchParams(window.location.search).get("sala
 
 const AGENTS: Source[] = ["claude", "chatgpt", "gemini"];
 const APPS: Source[] = ["spotify", "github"];
-const SOON: SoonSource[] = ["strava", "letterboxd"];
+const SOON: SoonSource[] = ["gcalendar", "strava", "letterboxd"];
 
 export function Onboarding({ team }: { team: TeamProfile[] }) {
   const s = usePhone();

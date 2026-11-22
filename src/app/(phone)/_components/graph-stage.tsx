@@ -19,7 +19,7 @@ const W = 880;
 const H = 600;
 const SOURCES: Source[] = ["claude", "chatgpt", "gemini", "spotify", "github"];
 /** Shown like in the onboarding: coming soon, never connected. */
-const SOON: SoonSource[] = ["strava", "letterboxd"];
+const SOON: SoonSource[] = ["gcalendar", "strava", "letterboxd"];
 
 type Phase = "inicio" | "fuentes" | "compartir" | "coincidencias";
 
@@ -42,7 +42,7 @@ function nodeScene(phase: Phase, s: PhoneState) {
       cls: `ghost${on ? " on" : ""}`,
       icon: <BrandLogo source={src} />,
       label: SOURCE_META[src].label,
-      pose: pose({ x: 110 + i * 110, y: 48 }, on || phase !== "compartir" ? 1 : 0.35),
+      pose: pose({ x: W / 2 + (i - (SOURCES.length - 1) / 2) * 150, y: 44 }, on || phase !== "compartir" ? 1 : 0.35),
     };
     if (on) edges.push({ a: `src:${src}`, b: me, kind: "soft", pulse: phase === "fuentes" ? i : undefined });
   });
@@ -52,7 +52,8 @@ function nodeScene(phase: Phase, s: PhoneState) {
       cls: "ghost",
       icon: <SoonLogo source={src} />,
       label: SOON_META[src].label,
-      pose: pose({ x: 110 + (SOURCES.length + i) * 110, y: 48 }, phase !== "compartir" ? 1 : 0.35),
+      // coming soon: a second row under the ones you can connect
+      pose: pose({ x: W / 2 + (i - (SOON.length - 1) / 2) * 170, y: 92 }, phase !== "compartir" ? 1 : 0.35),
     };
   });
   if (phase === "compartir") {

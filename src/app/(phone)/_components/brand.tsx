@@ -31,17 +31,32 @@ export const SOURCE_META: Record<Source, { label: string; reads: string; kind: "
   spotify: { label: "Spotify", reads: "Tus artistas y géneros, no tus playlists privadas", kind: "app" },
   github: { label: "GitHub", reads: "Lenguajes y temas de tus repos públicos", kind: "app" },
   instagram: { label: "Instagram", reads: "Tus Intereses, desde el export de tus datos", kind: "app" },
+  manual: { label: "Tú", reads: "Lo que escribiste tú en Perfil", kind: "app" },
 };
 
 /** Fuentes shown as "pronto" in the onboarding. Not in the Source contract until they can connect. */
-export type SoonSource = "strava" | "letterboxd";
+export type SoonSource = "gcalendar" | "strava" | "letterboxd";
 export const SOON_META: Record<SoonSource, { label: string }> = {
+  gcalendar: { label: "Google Calendar" },
   strava: { label: "Strava" },
   letterboxd: { label: "Letterboxd" },
 };
 
-/** Strava from Simple Icons (CC0); Letterboxd as its three dots. */
+/** Google Calendar as its page with the blue band and "31"; Strava from Simple Icons (CC0);
+    Letterboxd as its three dots. */
 export function SoonLogo({ source }: { source: SoonSource }) {
+  if (source === "gcalendar")
+    return (
+      <svg className="lg" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="4" fill="#fff" stroke="#DADCE0" />
+        <path d="M6 2h12a4 4 0 0 1 4 4v1H2V6a4 4 0 0 1 4-4z" fill="#4285F4" />
+        <path d="M22 16.5V18a4 4 0 0 1-4 4h-1.5z" fill="#FBBC04" />
+        <path d="M2 16.5V18a4 4 0 0 0 4 4h1.5z" fill="#34A853" />
+        <text x="12" y="17.6" textAnchor="middle" fontSize="9" fontWeight="700" fill="#4285F4" fontFamily="Arial, Helvetica, sans-serif">
+          31
+        </text>
+      </svg>
+    );
   if (source === "strava")
     return (
       <svg className="lg" viewBox="0 0 24 24" aria-hidden="true">
@@ -60,6 +75,16 @@ export function SoonLogo({ source }: { source: SoonSource }) {
 
 /** size: needed when drawn inside another <svg>, where CSS width does not apply. */
 export function BrandLogo({ source, size }: { source: Source; size?: number }) {
+  // A topic you wrote yourself: a pencil.
+  if (source === "manual") {
+    return (
+      <svg className="lg" viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
+        <rect x="1.5" y="1.5" width="21" height="21" rx="6" fill="#1F3138" />
+        <path d="M7 17l1-3.6 6.9-6.9a1.6 1.6 0 0 1 2.3 0l.3.3a1.6 1.6 0 0 1 0 2.3L10.6 16z" fill="#F2F1EE" />
+        <path d="M7 17l1-3.6 2.6 2.6z" fill="#FF5A36" />
+      </svg>
+    );
+  }
   if (source === "instagram") {
     return (
       <svg className="lg" viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
