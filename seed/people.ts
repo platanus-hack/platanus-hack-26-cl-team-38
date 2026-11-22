@@ -185,7 +185,7 @@ const control: SeedPerson[] = [
   { slug: "valeria", displayName: "Valeria", topics: [["bordado", "hace", 2, ["instagram"]], ["blockchain", "busca", 1, ["claude"]]] },
 ];
 
-// The three coordination cases of seed/network.v2.json: one room per case and one with all 53 people and
+// The coordination cases of seed/network.v2.json: one room per case and one with everyone in the network and
 // the team, so the helpers outside each case (reached through connections) are loaded too. Teammates
 // take part as guests or helpers, so the rooms resolve them from seed/team. Only the public part goes
 // into rooms: the detailed profile, agentOnly and connections are loaded apart (scripts/load-seed.mts).
@@ -225,5 +225,6 @@ export const SEED_EXPECTATIONS = {
   "seed-matrimonio": { purpose: "matrimonio-javiera-tomas" },
   "seed-viaje": { purpose: "vacaciones-familia-gonzalez" },
   "seed-arriendo": { purpose: "arriendo-roomies-2027" },
+  "seed-bomberos": { purpose: "llamado-incendio-los-aromos" },
   "seed-red": {},
 } as const;

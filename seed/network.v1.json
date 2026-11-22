@@ -27,7 +27,8 @@
         {"slug": "benjamin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
         {"slug": "cristobal", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
         {"slug": "ignacio-munoz", "relation": "conocido", "detail": "ingeniero de sonido al que le presta equipos", "closeness": 1},
-        {"slug": "constanza-vidal", "relation": "conocido", "detail": "compañera de un curso de edición fotográfica", "closeness": 1}
+        {"slug": "constanza-vidal", "relation": "conocido", "detail": "compañera de un curso de edición fotográfica", "closeness": 1},
+        {"slug": "simon-vera", "relation": "amistad", "detail": "compañero de básquetbol", "closeness": 2}
       ]
     },
     {
@@ -41,7 +42,22 @@
         {"slug": "benjamin", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
         {"slug": "cristobal", "relation": "trabajo", "detail": "compañero de equipo en el hackathon", "closeness": 2},
         {"slug": "ignacia-silva", "relation": "amistad", "detail": "compañera de running de los domingos", "closeness": 1},
-        {"slug": "tamara-quezada", "relation": "trabajo", "detail": "conocida de una fintech de seguros", "closeness": 1}
+        {"slug": "tamara-quezada", "relation": "trabajo", "detail": "conocida de una fintech de seguros", "closeness": 1},
+        {"slug": "alvaro-cifuentes", "relation": "voluntariado", "detail": "teniente de su compañía", "closeness": 2},
+        {"slug": "gaspar-mella", "relation": "voluntariado", "detail": "maquinista de su compañía", "closeness": 2},
+        {"slug": "fernanda-rios", "relation": "voluntariado", "detail": "voluntaria de su compañía", "closeness": 2},
+        {"slug": "vicente-araya", "relation": "voluntariado", "detail": "voluntario de su compañía", "closeness": 2}
+      ],
+      "constraints": [
+        {
+          "type": "logistica",
+          "detail": "Tiene el traje en el cuartel y está a 600 m: llega a pie en 7 minutos.",
+          "hard": true,
+          "distanceM": 600,
+          "mode": "a pie",
+          "appliesTo": ["bomberos"]
+        },
+        {"type": "preferencia", "detail": "Puede quedarse de guardia si el carro ya sale completo.", "hard": false, "appliesTo": ["bomberos"]}
       ]
     },
     {
@@ -80,7 +96,12 @@
       "comuna": "Ñuñoa",
       "region": "Metropolitana",
       "bio": "Product manager en un banco. Se casa con Tomás y quiere cerrar fecha y lugar antes de fin de año.",
-      "profile": {"profession": "product manager en banca digital", "hobbies": ["pilates", "vinos chilenos"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "profile": {
+        "profession": "product manager en banca digital",
+        "hobbies": ["pilates", "vinos chilenos"],
+        "languages": ["español", "inglés"],
+        "diet": "omnivora"
+      },
       "topics": [
         ["organizar un matrimonio", "busca", 1, ["claude", "chatgpt"]],
         ["gestión de productos digitales", "sabe", 3, ["claude"]],
@@ -115,7 +136,8 @@
           "per": "total",
           "appliesTo": ["matrimonio"]
         },
-        {"type": "preferencia", "detail": "No quiere más de 130 invitados.", "hard": false, "maxGuests": 130, "appliesTo": ["matrimonio"]}
+        {"type": "preferencia", "detail": "No quiere más de 130 invitados.", "hard": false, "maxGuests": 130, "appliesTo": ["matrimonio"]},
+        {"type": "preferencia", "detail": "Sus flores favoritas son las dalias.", "hard": false, "appliesTo": ["matrimonio"]}
       ],
       "friends": [
         {"slug": "martin", "relation": "estudios", "detail": "amigo de la universidad", "closeness": 3},
@@ -191,7 +213,11 @@
       "region": "Biobío",
       "bio": "Papá de Javiera, contador auditor jubilado. Tiene una cirugía de cadera agendada.",
       "profile": {"profession": "contador auditor jubilado", "hobbies": ["pesca", "boleros"], "languages": ["español"], "diet": "omnivora"},
-      "topics": [["finanzas personales", "sabe", 2, ["chatgpt"]], ["pesca deportiva", "hace", 2, ["instagram"]], ["música de boleros", "le_gusta", 2, ["spotify"]]],
+      "topics": [
+        ["finanzas personales", "sabe", 2, ["chatgpt"]],
+        ["pesca deportiva", "hace", 2, ["instagram"]],
+        ["música de boleros", "le_gusta", 2, ["spotify"]]
+      ],
       "experiences": [],
       "constraints": [
         {
@@ -209,7 +235,8 @@
       "friends": [
         {"slug": "javiera-munoz", "relation": "familia", "detail": "hija", "closeness": 3},
         {"slug": "patricia-soto", "relation": "pareja", "detail": "esposa", "closeness": 3},
-        {"slug": "ignacio-munoz", "relation": "familia", "detail": "hijo", "closeness": 3}
+        {"slug": "ignacio-munoz", "relation": "familia", "detail": "hijo", "closeness": 3},
+        {"slug": "raul-munoz", "relation": "familia", "detail": "hermano", "closeness": 3}
       ]
     },
     {
@@ -305,7 +332,17 @@
       "bio": "Papá de Tomás, cardiólogo. Le gusta el vino y quiere invitar a sus amigos del hospital.",
       "profile": {"profession": "médico cardiólogo", "hobbies": ["cata de vinos", "golf"], "languages": ["español", "inglés"], "diet": "omnivora"},
       "topics": [["cardiología", "es", 3, ["chatgpt"]], ["cata de vinos", "sabe", 2, ["instagram", "chatgpt"]], ["golf", "hace", 2, ["instagram"]]],
-      "experiences": [],
+      "experiences": [
+        {
+          "title": "Socio de las catas de una viña de Casablanca",
+          "type": "evento",
+          "place": "Casablanca, Valparaíso",
+          "date": "2026-08",
+          "summary": "Va a las catas de una viña de Casablanca que hace matrimonios: la viña obliga a contratar su propia banquetería, que no tiene cocina separada, y queda a 80 minutos de La Reina.",
+          "facts": {"minutosDesdeLaReina": 80, "banqueteriaExterna": false},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
       "constraints": [
         {"type": "presupuesto", "detail": "Aporta a la fiesta.", "hard": false, "amountClp": 4000000, "per": "total", "appliesTo": ["matrimonio"]},
         {
@@ -362,7 +399,17 @@
       "bio": "Abuela de Tomás. Vive con Jorge y Verónica; se mueve con andador.",
       "profile": {"profession": "dueña de casa", "hobbies": ["tejido", "boleros"], "languages": ["español"], "diet": "omnivora"},
       "topics": [["tejido a palillos con lana", "hace", 3, ["instagram", "chatgpt"]], ["música de boleros", "le_gusta", 2, ["spotify"]]],
-      "experiences": [],
+      "experiences": [
+        {
+          "title": "Clienta de un vivero de dalias",
+          "type": "evento",
+          "place": "Paine, Metropolitana",
+          "date": "2026-03",
+          "summary": "Compra hace 30 años en un vivero de Paine que cultiva dalias; en mayo arman arreglos para eventos por cerca de $700.000, la mitad que una florería.",
+          "facts": {"arreglosMayoClp": 700000},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
       "constraints": [
         {
           "type": "movilidad",
@@ -713,6 +760,15 @@
           "date": "2021-01",
           "summary": "Una torta de tres pisos para 130 personas cuesta cerca de $650.000; la versión sin gluten y sin azúcar va en un piso aparte.",
           "facts": {"tortaPara130Clp": 650000},
+          "usefulFor": ["matrimonio"]
+        },
+        {
+          "title": "Trabaja con una banquetería socia",
+          "type": "trabajo",
+          "place": "Santiago",
+          "date": "2024-06",
+          "summary": "Hace los matrimonios en dupla con una banquetería socia que tiene cocina sin gluten y protocolo sin mariscos; atienden en Santiago y sus alrededores, no en Casablanca.",
+          "facts": {"cocinaSinGluten": true, "protocoloSinMariscos": true},
           "usefulFor": ["matrimonio"]
         }
       ],
@@ -1759,6 +1815,445 @@
         {"slug": "camila-rojas", "relation": "vecindad", "detail": "vecina", "closeness": 1},
         {"slug": "cristobal", "relation": "estudios", "detail": "compañero de universidad", "closeness": 2}
       ]
+    },
+    {
+      "slug": "alvaro-cifuentes",
+      "displayName": "Álvaro Cifuentes",
+      "age": 41,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Teniente de la 5ª Compañía. Es el oficial a cargo de la guardia de esta semana.",
+      "profile": {"profession": "ingeniero civil en obras", "hobbies": ["ciclismo de montaña", "asados"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [
+        ["mando en emergencias", "sabe", 3, ["claude"]],
+        ["voluntariado en bomberos", "hace", 3, ["claude", "instagram"]],
+        ["ciclismo de montaña", "hace", 2, ["instagram"]]
+      ],
+      "experiences": [
+        {
+          "title": "Incendio en un edificio de departamentos",
+          "type": "trabajo",
+          "place": "Ñuñoa, Metropolitana",
+          "date": "2025-07",
+          "summary": "Estuvo a cargo: la dotación llegó incompleta porque tres voluntarios fueron directo al lugar sin traje, y el cuartel quedó vacío 40 minutos.",
+          "facts": {"minutosCuartelVacio": 40},
+          "usefulFor": ["bomberos"]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "logistica",
+          "detail": "Sale en el carro como oficial a cargo; tiene auto y llega al cuartel en 3 minutos.",
+          "hard": true,
+          "distanceM": 1100,
+          "mode": "auto",
+          "appliesTo": ["bomberos"]
+        },
+        {
+          "type": "preferencia",
+          "detail": "El cuartel no puede quedar con menos de dos voluntarios de guardia.",
+          "hard": true,
+          "minGuard": 2,
+          "appliesTo": ["bomberos"]
+        }
+      ],
+      "friends": [
+        {"slug": "jose", "relation": "voluntariado", "detail": "voluntario de su compañía", "closeness": 2},
+        {"slug": "gaspar-mella", "relation": "voluntariado", "detail": "maquinista de su compañía", "closeness": 2},
+        {"slug": "fernanda-rios", "relation": "voluntariado", "detail": "voluntaria de su compañía", "closeness": 2},
+        {"slug": "vicente-araya", "relation": "voluntariado", "detail": "voluntario de su compañía", "closeness": 2},
+        {"slug": "renata-cornejo", "relation": "voluntariado", "detail": "voluntaria de su compañía", "closeness": 2},
+        {"slug": "amanda-pacheco", "relation": "voluntariado", "detail": "voluntaria de su compañía", "closeness": 2},
+        {"slug": "simon-vera", "relation": "voluntariado", "detail": "voluntario de su compañía", "closeness": 2},
+        {"slug": "bastian-ortega", "relation": "voluntariado", "detail": "voluntario de su compañía", "closeness": 2},
+        {"slug": "paulina-carcamo", "relation": "voluntariado", "detail": "voluntaria de su compañía", "closeness": 2},
+        {"slug": "hector-morales", "relation": "voluntariado", "detail": "voluntario de su compañía", "closeness": 2},
+        {"slug": "camilo-baeza", "relation": "voluntariado", "detail": "voluntario de su compañía", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "gaspar-mella",
+      "displayName": "Gaspar Mella",
+      "age": 35,
+      "comuna": "Providencia",
+      "region": "Metropolitana",
+      "bio": "Maquinista de la 5ª Compañía y técnico mecánico.",
+      "profile": {"profession": "técnico mecánico", "hobbies": ["rock chileno", "motos"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [
+        ["conducción de vehículos de emergencia", "sabe", 3, ["claude"]],
+        ["reparación de motores", "es", 3, ["claude", "chatgpt"]],
+        ["rock chileno", "le_gusta", 2, ["spotify"]]
+      ],
+      "experiences": [
+        {
+          "title": "Maquinista de la compañía",
+          "type": "trabajo",
+          "place": "Ñuñoa, Metropolitana",
+          "date": "2022-03",
+          "summary": "Maquinista autorizado desde 2022: sin él o sin otro maquinista el carro no sale.",
+          "usefulFor": ["bomberos"]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "logistica",
+          "detail": "Maquinista autorizado; tiene auto y está a 1,1 km del cuartel.",
+          "hard": true,
+          "distanceM": 1100,
+          "mode": "auto",
+          "license": true,
+          "appliesTo": ["bomberos"]
+        }
+      ],
+      "friends": [
+        {"slug": "alvaro-cifuentes", "relation": "voluntariado", "detail": "teniente de su compañía", "closeness": 2},
+        {"slug": "jose", "relation": "voluntariado", "detail": "voluntario de su compañía", "closeness": 2},
+        {"slug": "maximiliano-fuenzalida", "relation": "estudios", "detail": "compañero del instituto", "closeness": 3}
+      ]
+    },
+    {
+      "slug": "fernanda-rios",
+      "displayName": "Fernanda Ríos",
+      "age": 27,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Voluntaria de la 5ª Compañía. Escala con Germán los fines de semana.",
+      "profile": {"profession": "kinesióloga", "hobbies": ["escalada", "yoga"], "languages": ["español", "inglés"], "diet": "vegetariana"},
+      "topics": [["rescate en altura", "sabe", 2, ["claude"]], ["escalada deportiva", "hace", 2, ["instagram", "claude"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "logistica",
+          "detail": "Tiene el traje en el cuartel y está a 500 m: llega a pie en 6 minutos.",
+          "hard": true,
+          "distanceM": 500,
+          "mode": "a pie",
+          "appliesTo": ["bomberos"]
+        }
+      ],
+      "friends": [
+        {"slug": "alvaro-cifuentes", "relation": "voluntariado", "detail": "teniente de su compañía", "closeness": 2},
+        {"slug": "jose", "relation": "voluntariado", "detail": "voluntario de su compañía", "closeness": 2},
+        {"slug": "german-tapia", "relation": "amistad", "detail": "amigo de escalada", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "vicente-araya",
+      "displayName": "Vicente Araya",
+      "age": 24,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Voluntario de la 5ª Compañía, estudiante de ingeniería.",
+      "profile": {"profession": "estudiante de ingeniería", "hobbies": ["ciclismo", "videojuegos"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [
+        ["voluntariado en bomberos", "hace", 2, ["instagram"]],
+        ["ciclismo urbano", "hace", 2, ["instagram"]],
+        ["programación en python", "sabe", 2, ["github"]]
+      ],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "logistica",
+          "detail": "Tiene el traje en el cuartel y está a 600 m: llega en bicicleta en 3 minutos.",
+          "hard": true,
+          "distanceM": 600,
+          "mode": "bicicleta",
+          "appliesTo": ["bomberos"]
+        }
+      ],
+      "friends": [
+        {"slug": "alvaro-cifuentes", "relation": "voluntariado", "detail": "teniente de su compañía", "closeness": 2},
+        {"slug": "jose", "relation": "voluntariado", "detail": "voluntario de su compañía", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "renata-cornejo",
+      "displayName": "Renata Cornejo",
+      "age": 30,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Voluntaria de la 5ª Compañía y profesora.",
+      "profile": {"profession": "profesora de educación básica", "hobbies": ["lectura", "huerta urbana"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["educación básica", "es", 3, ["claude"]], ["voluntariado en bomberos", "hace", 2, ["claude"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "logistica",
+          "detail": "Tiene el traje en el cuartel y está a 500 m, a pie.",
+          "hard": true,
+          "distanceM": 500,
+          "mode": "a pie",
+          "appliesTo": ["bomberos"]
+        },
+        {"type": "preferencia", "detail": "Puede quedarse de guardia en el cuartel.", "hard": false, "appliesTo": ["bomberos"]}
+      ],
+      "friends": [{"slug": "alvaro-cifuentes", "relation": "voluntariado", "detail": "teniente de su compañía", "closeness": 2}]
+    },
+    {
+      "slug": "amanda-pacheco",
+      "displayName": "Amanda Pacheco",
+      "age": 29,
+      "comuna": "Macul",
+      "region": "Metropolitana",
+      "bio": "Voluntaria de la 5ª Compañía. Vive cerca de Simón.",
+      "profile": {"profession": "diseñadora industrial", "hobbies": ["cerámica", "trekking"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [["diseño de mobiliario", "es", 3, ["claude", "instagram"]], ["voluntariado en bomberos", "hace", 2, ["instagram"]]],
+      "experiences": [],
+      "constraints": [
+        {"type": "logistica", "detail": "Tiene el traje en casa.", "hard": true, "appliesTo": ["bomberos"]},
+        {
+          "type": "movilidad",
+          "detail": "No tiene auto: está a 2,8 km del cuartel y necesita que alguien la lleve.",
+          "hard": true,
+          "distanceM": 2800,
+          "mode": "sin auto",
+          "appliesTo": ["bomberos"]
+        }
+      ],
+      "friends": [
+        {"slug": "alvaro-cifuentes", "relation": "voluntariado", "detail": "teniente de su compañía", "closeness": 2},
+        {"slug": "simon-vera", "relation": "vecindad", "detail": "vecino", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "simon-vera",
+      "displayName": "Simón Vera",
+      "age": 33,
+      "comuna": "Macul",
+      "region": "Metropolitana",
+      "bio": "Voluntario de la 5ª Compañía. Juega básquetbol con Oscar.",
+      "profile": {"profession": "arquitecto paisajista", "hobbies": ["básquetbol", "jardinería"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [
+        ["paisajismo", "es", 3, ["claude", "instagram"]],
+        ["básquetbol", "hace", 2, ["instagram"]],
+        ["voluntariado en bomberos", "hace", 2, ["claude"]]
+      ],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "logistica",
+          "detail": "Tiene el traje en casa y auto con tres asientos libres; está a 2,7 km.",
+          "hard": true,
+          "distanceM": 2700,
+          "mode": "auto",
+          "seats": 3,
+          "appliesTo": ["bomberos"]
+        }
+      ],
+      "friends": [
+        {"slug": "alvaro-cifuentes", "relation": "voluntariado", "detail": "teniente de su compañía", "closeness": 2},
+        {"slug": "amanda-pacheco", "relation": "vecindad", "detail": "vecina", "closeness": 2},
+        {"slug": "oscar", "relation": "amistad", "detail": "compañero de básquetbol", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "bastian-ortega",
+      "displayName": "Bastián Ortega",
+      "age": 31,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Voluntario de la 5ª Compañía. Se lesionó en un entrenamiento.",
+      "profile": {"profession": "contador", "hobbies": ["fútbol", "parrilla"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["voluntariado en bomberos", "hace", 3, ["claude"]], ["fútbol de barrio", "hace", 2, ["instagram"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "salud",
+          "detail": "Está con una lesión y no puede usar el equipo hasta el 5 de diciembre de 2026.",
+          "hard": true,
+          "from": "2026-11-10",
+          "to": "2026-12-05",
+          "appliesTo": ["bomberos"]
+        }
+      ],
+      "friends": [{"slug": "alvaro-cifuentes", "relation": "voluntariado", "detail": "teniente de su compañía", "closeness": 2}]
+    },
+    {
+      "slug": "paulina-carcamo",
+      "displayName": "Paulina Cárcamo",
+      "age": 36,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Voluntaria de la 5ª Compañía. Viaja seguido por trabajo.",
+      "profile": {"profession": "jefa de logística", "hobbies": ["running", "cine"], "languages": ["español", "inglés"], "diet": "pescetariana"},
+      "topics": [["logística de distribución", "sabe", 3, ["claude"]], ["voluntariado en bomberos", "hace", 2, ["claude"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "Está en Concepción por trabajo hasta el domingo 29 de noviembre de 2026.",
+          "hard": true,
+          "from": "2026-11-20",
+          "to": "2026-11-29",
+          "appliesTo": ["bomberos"]
+        }
+      ],
+      "friends": [{"slug": "alvaro-cifuentes", "relation": "voluntariado", "detail": "teniente de su compañía", "closeness": 2}]
+    },
+    {
+      "slug": "hector-morales",
+      "displayName": "Héctor Morales",
+      "age": 45,
+      "comuna": "San Joaquín",
+      "region": "Metropolitana",
+      "bio": "Voluntario de la 5ª Compañía. Primo de Clemente, de la 3ª.",
+      "profile": {"profession": "jefe de mantención en una planta", "hobbies": ["pesca", "carpintería"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["mantención de calderas", "sabe", 3, ["claude"]], ["voluntariado en bomberos", "hace", 3, ["claude"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "fecha",
+          "detail": "De lunes a viernes está de turno en la planta hasta las 20:00 y no puede salir antes.",
+          "hard": true,
+          "until": "20:00",
+          "appliesTo": ["bomberos"]
+        }
+      ],
+      "friends": [
+        {"slug": "alvaro-cifuentes", "relation": "voluntariado", "detail": "teniente de su compañía", "closeness": 2},
+        {"slug": "clemente-ibarra", "relation": "familia", "detail": "primo", "closeness": 3}
+      ]
+    },
+    {
+      "slug": "camilo-baeza",
+      "displayName": "Camilo Baeza",
+      "age": 38,
+      "comuna": "La Florida",
+      "region": "Metropolitana",
+      "bio": "Voluntario de la 5ª Compañía.",
+      "profile": {"profession": "ejecutivo de seguros", "hobbies": ["tenis", "cocina"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["ventas de seguros", "sabe", 3, ["claude"]], ["voluntariado en bomberos", "hace", 2, ["claude"]]],
+      "experiences": [],
+      "constraints": [
+        {
+          "type": "logistica",
+          "detail": "Tiene auto y el traje en el cuartel, pero está a 3,8 km: llega en 12 minutos.",
+          "hard": false,
+          "distanceM": 3800,
+          "mode": "auto",
+          "appliesTo": ["bomberos"]
+        }
+      ],
+      "friends": [{"slug": "alvaro-cifuentes", "relation": "voluntariado", "detail": "teniente de su compañía", "closeness": 2}]
+    },
+    {
+      "slug": "german-tapia",
+      "displayName": "Germán Tapia",
+      "age": 34,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Vive en Av. Los Aromos. Escala con Fernanda.",
+      "profile": {"profession": "periodista", "hobbies": ["escalada", "fotografía"], "languages": ["español", "inglés"], "diet": "omnivora"},
+      "topics": [["escalada deportiva", "hace", 3, ["instagram", "claude"]], ["fotografía urbana", "le_gusta", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Vecino de la cuadra de Av. Los Aromos",
+          "type": "vivienda",
+          "place": "Av. Los Aromos, Ñuñoa",
+          "date": "2021-03",
+          "summary": "Vive al lado de Av. Los Aromos 1450: en el tercer piso de ese edificio vive sola una vecina mayor, y el grifo más cercano está en la esquina con Los Jazmines.",
+          "facts": {"grifo": "esquina con Los Jazmines"},
+          "usefulFor": ["bomberos"]
+        }
+      ],
+      "constraints": [],
+      "friends": [
+        {"slug": "fernanda-rios", "relation": "amistad", "detail": "amiga de escalada", "closeness": 2},
+        {"slug": "leonor-guzman", "relation": "vecindad", "detail": "vecina del edificio de al lado", "closeness": 2}
+      ]
+    },
+    {
+      "slug": "leonor-guzman",
+      "displayName": "Leonor Guzmán",
+      "age": 58,
+      "comuna": "Ñuñoa",
+      "region": "Metropolitana",
+      "bio": "Vecina del edificio de al lado del incendio. Conoce a Germán.",
+      "profile": {"profession": "secretaria ejecutiva", "hobbies": ["jardinería", "teleseries"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["seguridad comunitaria", "sabe", 2, ["claude"]], ["jardinería de balcón", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Comité de seguridad del edificio",
+          "type": "evento",
+          "place": "Av. Los Aromos, Ñuñoa",
+          "date": "2024-05",
+          "summary": "Preside el comité de seguridad del edificio de Av. Los Aromos 1440: sabe que en el tercer piso del 1450 vive sola una vecina mayor, y que el grifo más cercano está en la esquina con Los Jazmines.",
+          "facts": {"grifo": "esquina con Los Jazmines", "personasQueVivenSolas": 1},
+          "usefulFor": ["bomberos"]
+        }
+      ],
+      "constraints": [],
+      "friends": [{"slug": "german-tapia", "relation": "vecindad", "detail": "vecino del edificio de al lado", "closeness": 2}]
+    },
+    {
+      "slug": "maximiliano-fuenzalida",
+      "displayName": "Maximiliano Fuenzalida",
+      "age": 36,
+      "comuna": "Providencia",
+      "region": "Metropolitana",
+      "bio": "Ingeniero eléctrico de turno. Compañero de instituto de Gaspar.",
+      "profile": {
+        "profession": "ingeniero eléctrico",
+        "hobbies": ["trail running", "café de especialidad"],
+        "languages": ["español", "inglés"],
+        "diet": "omnivora"
+      },
+      "topics": [["redes de distribución eléctrica", "sabe", 3, ["claude"]], ["trail running", "hace", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Turnos en el centro de control",
+          "type": "trabajo",
+          "place": "Santiago, Metropolitana",
+          "date": "2023-01",
+          "summary": "Desde el centro de control de la distribuidora puede confirmar si una cuadra ya tiene la luz cortada.",
+          "usefulFor": ["bomberos"]
+        }
+      ],
+      "constraints": [],
+      "friends": [{"slug": "gaspar-mella", "relation": "estudios", "detail": "compañero del instituto", "closeness": 3}]
+    },
+    {
+      "slug": "clemente-ibarra",
+      "displayName": "Clemente Ibarra",
+      "age": 39,
+      "comuna": "San Miguel",
+      "region": "Metropolitana",
+      "bio": "Teniente de la 3ª Compañía. Primo de Héctor.",
+      "profile": {"profession": "abogado", "hobbies": ["remo", "historia de Chile"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["mando en emergencias", "sabe", 2, ["claude"]], ["voluntariado en bomberos", "hace", 3, ["claude"]]],
+      "experiences": [],
+      "constraints": [],
+      "friends": [{"slug": "hector-morales", "relation": "familia", "detail": "primo", "closeness": 3}]
+    },
+    {
+      "slug": "raul-munoz",
+      "displayName": "Raúl Muñoz",
+      "age": 60,
+      "comuna": "Maipú",
+      "region": "Metropolitana",
+      "bio": "Tío de Javiera, hermano de Hernán. Fue hace poco a un matrimonio en Calera de Tango.",
+      "profile": {"profession": "ingeniero comercial", "hobbies": ["vinos", "golf"], "languages": ["español"], "diet": "omnivora"},
+      "topics": [["finanzas de empresas", "sabe", 3, ["claude"]], ["vinos del valle del maipo", "le_gusta", 2, ["instagram"]]],
+      "experiences": [
+        {
+          "title": "Matrimonio de la hija de un colega",
+          "type": "matrimonio",
+          "place": "Calera de Tango, Metropolitana",
+          "date": "2026-10",
+          "summary": "Fue a un matrimonio en una casona de Calera de Tango: arriendo de $1.600.000, salón interior por si llueve, capacidad 150, acceso sin escaleras, banquetería externa permitida, a 40 minutos de La Reina.",
+          "facts": {
+            "arriendoClp": 1600000,
+            "capacidad": 150,
+            "minutosDesdeLaReina": 40,
+            "salonInterior": true,
+            "accesoSinEscaleras": true,
+            "banqueteriaExterna": true
+          },
+          "usefulFor": ["matrimonio"]
+        }
+      ],
+      "constraints": [],
+      "friends": [{"slug": "hernan-munoz", "relation": "familia", "detail": "hermano", "closeness": 3}]
     }
   ],
   "events": [
@@ -1831,30 +2326,40 @@
           ]
         },
         {"variable": "invitados", "range": [110, 170]},
-        {
-          "variable": "presupuesto",
-          "totalClp": 23000000,
-          "breakdown": {"pareja": 14000000, "hernan-munoz": 5000000, "jorge-fuentes": 4000000}
-        },
+        {"variable": "presupuesto", "totalClp": 23000000, "breakdown": {"pareja": 14000000, "hernan-munoz": 5000000, "jorge-fuentes": 4000000}},
         {
           "variable": "menú",
           "mustCover": ["vegano", "sin gluten con cocina separada", "sin mariscos sin contaminación cruzada", "postre sin azúcar", "bajo en sal"]
         },
-        {
-          "variable": "ceremonia",
-          "options": [{"id": "religiosa"}, {"id": "civil-y-simbolica"}]
-        }
+        {"variable": "ceremonia", "options": [{"id": "religiosa"}, {"id": "civil-y-simbolica"}]}
       ],
-      "tensions": ["Ninguna de las tres fechas sirve a todos: el 13 de marzo Ramón está en la esquila; el 10 y el 24 de abril Hernán está recién operado. Además Sebastián tiene tomado el 10 de abril y Constanza el 24.", "El 13 de marzo choca también con el festival de Ignacio y la entrega de Tomás, aunque los dos podrían ceder.", "Una salida es mayo (22 o 29), después del alta de Hernán y antes del viaje de Javiera: pero en mayo hay que sumar carpa ($1.800.000) y las flores suben ($1.400.000 en vez de $900.000).", "Olga no puede ir a más de una hora de La Reina: Olmué queda fuera y Casablanca queda justo en el límite.", "Casablanca obliga a usar la banquetería de la viña, y nadie sabe si tiene cocina separada para Valentina y protocolo sin mariscos para Joaquín; Alonso sí, pero solo trabaja en Santiago y Pirque.", "Jorge quiere 40 invitados de su lado y Javiera un tope de 130.", "Patricia quiere ceremonia religiosa; los novios, civil y simbólica."],
+      "tensions": [
+        "Ninguna de las tres fechas sirve a todos: el 13 de marzo Ramón está en la esquila; el 10 y el 24 de abril Hernán está recién operado. Además Sebastián tiene tomado el 10 de abril y Constanza el 24.",
+        "El 13 de marzo choca también con el festival de Ignacio y la entrega de Tomás, aunque los dos podrían ceder.",
+        "Una salida es mayo (22 o 29), después del alta de Hernán y antes del viaje de Javiera: pero en mayo hay que sumar carpa ($1.800.000) y las flores suben ($1.400.000 en vez de $900.000).",
+        "Olga no puede ir a más de una hora de La Reina: Olmué queda fuera y Casablanca queda justo en el límite.",
+        "Casablanca obliga a usar la banquetería de la viña, y nadie sabe si tiene cocina separada para Valentina y protocolo sin mariscos para Joaquín; Alonso sí, pero solo trabaja en Santiago y Pirque.",
+        "Jorge quiere 40 invitados de su lado y Javiera un tope de 130.",
+        "Patricia quiere ceremonia religiosa; los novios, civil y simbólica."
+      ],
       "helpers": [
         {"slug": "barbara-nunez", "degree": 2, "why": "Trabaja en la viña de Casablanca: capacidad, habitaciones y banquetería obligatoria."},
-        {"slug": "carolina-mendez", "degree": 2, "why": "Hace tortas sin gluten y sin azúcar (Valentina y Hernán)."},
+        {
+          "slug": "carolina-mendez",
+          "degree": 2,
+          "why": "Hace tortas sin gluten y sin azúcar (Valentina y Hernán), y trabaja con una banquetería socia con cocina sin gluten y protocolo sin mariscos."
+        },
         {"slug": "daniel-farias", "degree": 2, "why": "Bus Concepción–Santiago para la familia de la novia."},
         {"slug": "monica-soto", "degree": 2, "why": "Puede alojar a seis personas de Concepción en Maipú."},
         {"slug": "paula-gonzalez", "degree": 2, "why": "Enfermera: puede orientar a Hernán sobre la recuperación de una cirugía de cadera."},
         {"slug": "rocio-araya", "degree": 2, "why": "Se casó en Pirque con 110 invitados: sabe el costo real, lo de la carpa y cómo resolvió lo de la abuela."},
         {"slug": "alonso-vergara", "degree": 3, "why": "Banquetería con cocina sin gluten y protocolo sin mariscos, pero no trabaja en Casablanca."},
-        {"slug": "oscar", "degree": 2, "why": "Tocó en una banda con el dj y tiene equipos de audio: puede cubrir el sonido si algo falla."}
+        {"slug": "oscar", "degree": 2, "why": "Tocó en una banda con el dj y tiene equipos de audio: puede cubrir el sonido si algo falla."},
+        {
+          "slug": "raul-munoz",
+          "degree": 2,
+          "why": "Tío de Javiera: en octubre fue a un matrimonio en una casona de Calera de Tango que cuesta $1.600.000, tiene salón interior y queda a 40 minutos de La Reina."
+        }
       ]
     },
     {
@@ -1984,6 +2489,55 @@
         {"slug": "pedro-alarcon", "degree": 3, "why": "Abogado: garantía, codeudores y cláusulas del contrato."},
         {"slug": "jose", "degree": 2, "why": "Amigo de la universidad de Matías; conoce a Camila, que deja el 3D2B de Ñuñoa."},
         {"slug": "benjamin", "degree": 2, "why": "Sabe de medios de pago: cómo pagar arriendo y gastos comunes desde una cuenta compartida sin que uno adelante todo."}
+      ]
+    },
+    {
+      "id": "llamado-incendio-los-aromos",
+      "type": "bomberos",
+      "roomId": "seed-bomberos",
+      "title": "Llamado de la 5ª: incendio estructural en Av. Los Aromos 1450",
+      "summary": "La Central despacha a la 5ª Compañía a un incendio estructural a 3,5 km del cuartel. Hay que sacar el carro con maquinista, oficial y cuatro voluntarios, mandar apoyo con traje al lugar y no dejar el cuartel con menos de dos de guardia.",
+      "organizers": ["alvaro-cifuentes"],
+      "participants": [
+        {"slug": "alvaro-cifuentes", "role": "teniente, oficial a cargo"},
+        {"slug": "jose", "role": "voluntario"},
+        {"slug": "gaspar-mella", "role": "maquinista"},
+        {"slug": "fernanda-rios", "role": "voluntaria"},
+        {"slug": "vicente-araya", "role": "voluntario"},
+        {"slug": "renata-cornejo", "role": "voluntaria"},
+        {"slug": "amanda-pacheco", "role": "voluntaria"},
+        {"slug": "simon-vera", "role": "voluntario"},
+        {"slug": "bastian-ortega", "role": "voluntario"},
+        {"slug": "paulina-carcamo", "role": "voluntaria"},
+        {"slug": "hector-morales", "role": "voluntario"},
+        {"slug": "camilo-baeza", "role": "voluntario"}
+      ],
+      "decisions": [
+        {"variable": "dotación del carro", "min": 4, "mustHave": ["maquinista", "oficial a cargo"]},
+        {"variable": "guardia en el cuartel", "min": 2},
+        {"variable": "apoyo en el lugar", "note": "Quienes tienen el traje en casa van directo al lugar, si tienen cómo llegar."},
+        {"variable": "segunda salida", "note": "Quién queda disponible si la Central pide otro carro."}
+      ],
+      "tensions": [
+        "Bastián, Paulina y Héctor no pueden salir (lesión, viaje y turno): sus Agentes lo dicen al tiro, antes de que alguien los cuente.",
+        "Amanda tiene el traje en casa pero no tiene auto; Simón pasa cerca de ella con tres asientos libres.",
+        "Si salen todos los que están cerca, el cuartel queda vacío: dos tienen que quedarse de guardia.",
+        "Camilo llegaría en 12 minutos, con el carro ya completo: conviene que quede para una segunda salida.",
+        "Nadie en la compañía conoce el edificio: la red tiene a una vecina que sabe quién vive sola y dónde está el grifo."
+      ],
+      "helpers": [
+        {"slug": "maximiliano-fuenzalida", "degree": 2, "why": "Ingeniero de turno en la distribuidora: confirma si la cuadra ya tiene la luz cortada."},
+        {"slug": "clemente-ibarra", "degree": 2, "why": "Teniente de la 3ª Compañía: si hace falta, pide que salga un segundo carro."},
+        {
+          "slug": "german-tapia",
+          "degree": 2,
+          "why": "Amigo de Fernanda y vecino del edificio: en el tercer piso del 1450 vive sola una vecina mayor, y el grifo está en la esquina con Los Jazmines."
+        },
+        {
+          "slug": "leonor-guzman",
+          "degree": 3,
+          "why": "Vecina del edificio de al lado: en el tercer piso del 1450 vive sola una vecina mayor, y el grifo está en la esquina con Los Jazmines."
+        }
       ]
     }
   ]
