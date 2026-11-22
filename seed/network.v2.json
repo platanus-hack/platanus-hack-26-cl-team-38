@@ -3876,7 +3876,6 @@
       ],
       "decisions": [
         {
-          "variable": "fecha",
           "options": [
             {"id": "2027-03-13", "label": "sábado 13 de marzo de 2027"},
             {"id": "2027-04-10", "label": "sábado 10 de abril de 2027"},
@@ -3949,7 +3948,6 @@
       ],
       "decisions": [
         {
-          "variable": "fechas",
           "window": {"from": "2027-02-01", "to": "2027-02-28"}
         },
         {
@@ -4040,7 +4038,6 @@
         },
         {"variable": "piezas", "note": "Una pieza en suite y dos que comparten baño: quién paga más."},
         {
-          "variable": "fecha de entrada",
           "options": [
             {"id": "2027-03-01"},
             {"id": "2027-03-15"}

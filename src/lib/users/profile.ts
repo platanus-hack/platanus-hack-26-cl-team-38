@@ -36,6 +36,12 @@ export async function authenticate(db: Db, personId: unknown, authorization: str
   return (await call(db, "claim_key", { p_id: personId, p_key_hash: sha256(key) })) === true ? personId : null;
 }
 
+// For what a person can do before their first check-in: creates the user with their key. Someone
+// who already exists is left untouched, so this cannot be used to take over a profile.
+export async function ensureUser(db: Db, personId: string, displayName: string, key: string): Promise<void> {
+  await call(db, "ensure_user", { p_id: personId, p_display_name: displayName, p_key_hash: sha256(key) });
+}
+
 // Writes the public profile: each new topic name's vector once, and which names it matches.
 // False when the topics are the ones already stored, and then nothing was rewritten.
 export async function saveProfile(db: Db, projection: PublicProjection, key?: string): Promise<boolean> {

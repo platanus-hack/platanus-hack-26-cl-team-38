@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useSyncExternalStore } from "react";
+import { Toaster } from "./chrome";
 import { GraphStage } from "./graph-stage";
 
 const QUERY = "(min-width: 1024px)";
@@ -18,7 +19,10 @@ export function DesktopShell({ children }: { children: ReactNode }) {
   return (
     <div className="shell">
       <div className="device">
-        <div className="device-screen">{children}</div>
+        <div className="device-screen">
+          {children}
+          <Toaster />
+        </div>
       </div>
       {desktop && <GraphStage />}
     </div>
