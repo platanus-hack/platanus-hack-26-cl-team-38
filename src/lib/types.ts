@@ -159,6 +159,19 @@ export const ConnectionSchema = z.object({
   createdAt: z.string(),
 }).strict();
 
+// Perfil → Información (src/lib/users/info.ts). Personal data, unlike everything above: only its
+// owner reads it. It never goes into a projection, a room, a log or anything another person gets.
+export const GenderSchema = z.enum(["Mujer", "Hombre", "No binario", "Prefiero no decir"]);
+
+export const UserInfoSchema = z.object({
+  email: z.email().max(120),
+  age: z.number().int().min(13).max(120),
+  gender: GenderSchema,
+  phone: z.string().regex(/^\+?[0-9 ]{8,16}$/),
+  // Optional: missing or empty both mean "not said".
+  occupation: z.string().max(60).default(""),
+}).strict();
+
 // Mesas (src/lib/mesas/). The main decisions of a mesa's agents are the rows of
 // `deliberation_messages`: what changes the state of the mesa and is shown to people. One shape
 // per agent, and the only free text is `motivo`. Anything else an agent did is a log.
@@ -238,6 +251,8 @@ export type SharedTopic = z.infer<typeof SharedTopicSchema>;
 export type Match = z.infer<typeof MatchSchema>;
 export type ConnectionStatus = z.infer<typeof ConnectionStatusSchema>;
 export type Connection = z.infer<typeof ConnectionSchema>;
+export type Gender = z.infer<typeof GenderSchema>;
+export type UserInfo = z.infer<typeof UserInfoSchema>;
 export type MesaDecision = z.infer<typeof MesaDecisionSchema>;
 export type LogEntry = z.input<typeof LogEntrySchema>;
 export type Log = z.infer<typeof LogSchema>;

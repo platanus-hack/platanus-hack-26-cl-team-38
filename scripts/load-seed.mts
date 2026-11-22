@@ -3,7 +3,9 @@ import seed from "../seed/rooms.json" with { type: "json" };
 import { createAdminClient } from "@/lib/supabase/create-admin-client";
 import { PublicProjectionSchema, type PublicProjection } from "@/lib/types";
 import { runConnectionAction } from "@/lib/users/connections";
+import { saveUserInfo } from "@/lib/users/info";
 import { saveProfile } from "@/lib/users/profile";
+import { seedUserInfo } from "../seed/user-info";
 import { network } from "../seed/network";
 
 config({ path: process.env.ENV_FILE ?? ".env.local" });
@@ -44,3 +46,8 @@ for (const { a, b, origin } of network.connections) {
   if (accepted.status !== 200) throw new Error(`conexión ${a} ↔ ${b}: ${JSON.stringify(accepted)}`);
 }
 console.log(`${network.connections.length} conexiones aceptadas`);
+
+// Last, so everything above loads even where the user_info migration is not applied yet.
+const ages = new Map(network.people.map((p) => [p.personId, p.seedOnly.age]));
+for (const personId of profiles.keys()) await saveUserInfo(db, personId, seedUserInfo(personId, ages.get(personId)));
+console.log(`${profiles.size} usuarios con información de relleno`);
