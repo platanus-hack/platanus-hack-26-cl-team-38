@@ -47,7 +47,7 @@ describe("plan y vecindario", () => {
 
   it("de la red se leen los tópicos públicos y el perfil, nunca lo que es solo del agente de esa persona", async () => {
     const all = await networkContext(db, ["dario", "elisa"], null, 50);
-    expect(all.map((l) => l.text).sort()).toEqual(["Hago tortas de novios sin gluten y sin azúcar", "La terraza de la viña recibe 180 personas", "eventos en viña", "tortas sin gluten"]);
+    expect(all.map((l) => l.text).sort()).toEqual(["Como vegetariano.", "Hago tortas de novios sin gluten y sin azúcar", "La terraza de la viña recibe 180 personas", "eventos en viña", "tortas sin gluten"]);
     const best = await networkContext(db, ["dario", "elisa"], await embed(["Falta una torta sin gluten"]), 2);
     expect(best.map((l) => l.userId)).toEqual(["elisa", "elisa"]);
     expect(best[0].score).toBeCloseTo(1);

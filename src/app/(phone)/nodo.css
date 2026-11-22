@@ -1980,14 +1980,62 @@
     font-size: 11px;
     margin-bottom: 2px;
   }
+  .typing {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    height: 20px;
+  }
+  .typing i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.6;
+    animation: nodo-typing 1.2s ease-in-out infinite;
+  }
+  .typing i:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .typing i:nth-child(3) {
+    animation-delay: 0.3s;
+  }
   .aportes {
-    list-style: none;
     margin: 8px 0 0;
     padding: 8px 0 0;
     border-top: 1px solid var(--line);
     font-size: 13px;
     display: grid;
     gap: 6px;
+  }
+  .aportes ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+  .aportes summary {
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--mute);
+    list-style: none;
+  }
+  .aportes summary::-webkit-details-marker {
+    display: none;
+  }
+  .aportes summary::before {
+    content: "+ ";
+  }
+  .aportes details[open] summary::before {
+    content: "− ";
+  }
+  .aportes details[open] ul {
+    margin-top: 6px;
+  }
+  .bubble.me .aportes summary {
+    color: inherit;
+    opacity: 0.7;
   }
   .bubble.me .aportes {
     border-color: color-mix(in srgb, currentColor 25%, transparent);
@@ -2408,6 +2456,18 @@ html:has(.nodo .graph-screen) body {
   }
 }
 
+@keyframes nodo-typing {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
 @keyframes nodo-caret {
   50% {
     opacity: 0;

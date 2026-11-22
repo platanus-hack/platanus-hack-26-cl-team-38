@@ -11,6 +11,7 @@ import { COPY } from "../../_lib/copy";
 import { cap } from "../../_lib/people";
 import { going } from "../../_lib/plan-network";
 import { usePlan } from "../../_lib/plans";
+import { writing } from "@/lib/plans/writing";
 
 // An Iniciativa on the backend: the Agentes of everyone in it, round by round, and the plan they
 // reach. The phone only watches; every line here was written and filtered on the server.
@@ -25,17 +26,71 @@ function statusOf(plan: PlanView): string {
   return `${plan.round === 0 ? C.opening : `Ronda ${plan.round} de ${plan.maxRounds}`} · ${C.deliberating}`;
 }
 
-function Aportes({ message, author }: { message: PlanMessageView; author: string }) {
-  if (message.aportes.length === 0) return null;
+function Aportes({ message, author, mine }: { message: PlanMessageView; author: string; mine: boolean }) {
+  const own = message.aportes.filter((a) => a.origen === "propio");
+  const network = message.aportes.filter((a) => a.origen === "red");
+  if (own.length === 0 && network.length === 0) return null;
   return (
-    <ul className="aportes">
-      {message.aportes.map((a, i) => (
-        <li key={i}>
-          {a.texto}
-          {a.origen === "red" && <Mono className="mute"> {a.contacto ? `${C.yourContact} ${a.contacto}` : `${C.aContactOf} ${author}`}</Mono>}
-        </li>
-      ))}
-    </ul>
+    <div className="aportes">
+      {own.length > 0 && (
+        <ul>
+          {own.map((a, i) => (
+            <li key={i}>{a.texto}</li>
+          ))}
+        </ul>
+      )}
+      {network.length > 0 && (
+        <details>
+          <summary>
+            <Mono>
+              {mine ? C.yourNetwork : `${C.networkOf} ${author}`} · {network.length}
+            </Mono>
+          </summary>
+          <ul>
+            {network.map((a, i) => (
+              <li key={i}>
+                {a.texto}
+                {a.contacto && <Mono className="mute"> {C.yourContact} {a.contacto}</Mono>}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
+  );
+}
+
+const dots = (
+  <span className="typing" role="status" aria-label={C.writing}>
+    <i />
+    <i />
+    <i />
+  </span>
+);
+
+function Writing({ plan, me }: { plan: PlanView; me: string }) {
+  const { members, orchestrator } = writing(plan);
+  return (
+    <>
+      {members.map((id) =>
+        id === me ? (
+          <div key={id} className="bubble me">
+            {dots}
+          </div>
+        ) : (
+          <div key={id} className="msg">
+            <Avatar id={id} />
+            <div className="bubble">{dots}</div>
+          </div>
+        ),
+      )}
+      {orchestrator && (
+        <div className="plan-note">
+          <Mono className="mute">{C.orchestrator}</Mono>
+          {dots}
+        </div>
+      )}
+    </>
   );
 }
 
@@ -54,35 +109,10 @@ function ThePlan({ plan, names, verdict }: { plan: NonNullable<PlanView["plan"]>
           {content.decisiones.map((d, i) => (
             <div key={i}>
               <dt>{cap(d.tema)}</dt>
-              <dd>
-                {d.valor}
-                {d.porque && <span className="mute"> · {d.porque}</span>}
-              </dd>
+              <dd>{d.valor}</dd>
             </div>
           ))}
         </dl>
-      )}
-      {content.pasos.length > 0 && (
-        <>
-          <div className="sec">{C.steps}</div>
-          <ul>
-            {content.pasos.map((p, i) => (
-              <li key={i}>
-                {p.que} <Mono className="mute">{first(names.get(p.responsable) ?? "")}</Mono>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-      {content.abiertos.length > 0 && (
-        <>
-          <div className="sec">{C.open}</div>
-          <ul>
-            {content.abiertos.map((a, i) => (
-              <li key={i}>{a}</li>
-            ))}
-          </ul>
-        </>
       )}
       {content.desacuerdos.length > 0 && (
         <>
@@ -137,7 +167,7 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
   const seen = plan?.messages.length ?? 0;
   const closed = plan ? plan.status !== "deliberando" : false;
   useEffect(() => {
-    if (seen > 0) end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [seen, closed, confirmed.length]);
 
   if (missing)
@@ -189,7 +219,7 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
                 {m.participa !== undefined && <span className={`pchip ${m.participa ? "va" : "nova"}`}>{m.participa ? C.going : C.notGoing}</span>}
               </span>
               {m.text}
-              <Aportes message={m} author={author} />
+              <Aportes message={m} author={author} mine={mine} />
             </>
           );
           return mine ? (
@@ -203,6 +233,7 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
             </div>
           );
         })}
+        <Writing plan={plan} me={me} />
         {plan.plan && <ThePlan plan={plan.plan} names={names} verdict={closed ? statusOf(plan) : undefined} />}
         <Confirmations plan={plan} confirmed={confirmed} />
         <div ref={end} />
