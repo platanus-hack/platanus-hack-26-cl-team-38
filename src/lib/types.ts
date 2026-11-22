@@ -130,6 +130,16 @@ export const ProximityUpdateSchema = z.object({
   leave: z.array(z.string()),
 }).strict();
 
+// POST /api/proximity. Joining proves who you are (device key, checked in to that room); the rest
+// goes by the session secret that join returns, so `leave` also works from sendBeacon.
+export const ProximityRequestSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("join"), personId: z.string().min(1), roomId: z.string().min(1), radius: ProximityJoinSchema.shape.radius }).strict(),
+  z.object({ action: z.literal("report"), session: z.string().min(1), position: ProximityReportSchema }).strict(),
+  z.object({ action: z.literal("heartbeat"), session: z.string().min(1) }).strict(),
+  z.object({ action: z.literal("radius"), session: z.string().min(1), radius: ProximityJoinSchema.shape.radius }).strict(),
+  z.object({ action: z.literal("leave"), session: z.string().min(1) }).strict(),
+]);
+
 // Users and connections (src/lib/users/). What a person gets back about someone else: always seen
 // from their own side, only public topics, never a vector.
 const SharedSideSchema = PublicTopicSchema.pick({ name: true, kind: true, depth: true });
@@ -371,6 +381,7 @@ export type ProximityJoin = z.infer<typeof ProximityJoinSchema>;
 export type ProximityReport = z.infer<typeof ProximityReportSchema>;
 export type ProximityNeighbor = z.infer<typeof ProximityNeighborSchema>;
 export type ProximityUpdate = z.infer<typeof ProximityUpdateSchema>;
+export type ProximityRequest = z.infer<typeof ProximityRequestSchema>;
 export type SharedTopic = z.infer<typeof SharedTopicSchema>;
 export type Match = z.infer<typeof MatchSchema>;
 export type ConnectionStatus = z.infer<typeof ConnectionStatusSchema>;

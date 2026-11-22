@@ -1,6 +1,6 @@
 # Motor de proximidad
 
-Dice quién está dentro del radio de quién mientras la gente se mueve, a partir del GPS que reporta cada teléfono. Es solo la librería: no trae pantalla ni ruta. Viene del experimento 7 de `nodos-lab`, donde se midió y se auditó.
+Dice quién está dentro del radio de quién mientras la gente se mueve, a partir del GPS que reporta cada teléfono. La ruta es `src/app/api/proximity/route.ts` y el teléfono lo usa en Explorar (`src/app/(phone)/_lib/proximity.ts`). Viene del experimento 7 de `nodos-lab`, donde se midió y se auditó.
 
 ## Qué promete y qué no
 
@@ -46,7 +46,7 @@ Cada `ProximityUpdate` trae `anchor`: el `stamp` del reporte del propio teléfon
 
 - Las posiciones viven solo en la memoria del motor y vencen a los 60 s sin reportes. Nada se guarda ni se escribe en logs.
 - A los demás les llega distancia, rumbo e incertidumbre, nunca coordenadas. `ProximityUpdateSchema` es estricto y una prueba lo comprueba.
-- **Pendiente antes de exponer una ruta:** decidir quién puede entrar a una sala. El hub no verifica membresía. Quien pueda entrar y reportar posiciones falsas puede ubicar a los demás por triangulación, así que el código corto del QR no basta como llave; en el experimento era un código de 128 bits en el enlace.
+- El hub no verifica membresía: lo hace la ruta. Solo entra quien tiene la clave del dispositivo de esa persona y una fila suya en `room_members` de esa sala, porque quien reporta posiciones falsas puede ubicar a los demás por triangulación. Los perfiles del seed los abre cualquier dispositivo, como en el resto de las rutas.
 
 ## Qué se midió
 
@@ -58,5 +58,5 @@ En `nodos-lab`, no en este repo:
 ## Sin probar
 
 - Estas correcciones en teléfonos reales.
-- El hub detrás de una ruta de esta app.
+- La ruta en Render: que el proxy no corte el SSE (se manda un ping cada 20 s).
 - Más de una instancia del servidor: el estado es de un proceso, como el buzón del onboarding.

@@ -41,6 +41,21 @@ describe("createProximityHub", () => {
     }
   });
 
+  it("changes the Distancia without dropping the session or the position", () => {
+    const hub = createProximityHub({ engine: { uncertaintyFactor: 0 } });
+    const ana = connect(hub, "ana");
+    const beto = connect(hub, "beto");
+    hub.report(ana.session, { ...at(0), accuracy: 5, stamp: 1 });
+    hub.report(beto.session, { ...at(60), accuracy: 5, stamp: 1 });
+    hub.tick();
+    expect(ana.updates).toEqual([]);
+    expect(hub.setRadius(ana.session, 80)).toBe(true);
+    hub.tick();
+    expect(ana.updates.flatMap((u) => u.enter)).toMatchObject([{ personId: "beto", distance: 60 }]);
+    expect(hub.setRadius(ana.session, 1)).toBe(false);
+    expect(hub.setRadius("nope", 80)).toBe(false);
+  });
+
   it("keeps rooms apart", () => {
     const hub = createProximityHub();
     const ana = connect(hub, "ana", "room-1");
