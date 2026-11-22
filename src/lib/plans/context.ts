@@ -9,6 +9,11 @@ import { neighbourhood, networkContext, ownContext, type Contact, type PlanMembe
 // against what the plan still has open.
 export const NETWORK_BUDGET = 150;
 
+// The network does not come to the plan, so its tastes, diet and wishes do not matter: only what
+// a contact knows, does or offers can become a recommendation. Topics carry their kind as section.
+const TASTE_SECTIONS = new Set(["le_gusta", "quiere_ser", "busca", "Comida y bebida", "Música, cine, lectura y juegos", "Lo que evito o no me gusta", "Lo que busco o quiero aprender"]);
+const recommends = (line: { section: string }) => !TASTE_SECTIONS.has(line.section);
+
 export type AgentLine = {
   // What the agent cites: P# for its owner's lines, R# for the network's.
   ref: string;
@@ -55,7 +60,7 @@ export function createContextBuilder(plan: Pick<PlanSnapshot, "id" | "intent">, 
 
     const numberOf = new Map(around.map((c, i) => [c.contactId, i + 1]));
     const network = (await networkLines(member, around.map((c) => c.contactId), needs))
-      .slice()
+      .filter(recommends)
       .sort((a, b) => numberOf.get(a.userId)! - numberOf.get(b.userId)! || a.lineId.localeCompare(b.lineId));
 
     const shared = mine.filter((line) => line.scope === "red");

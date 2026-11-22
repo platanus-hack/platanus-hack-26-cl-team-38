@@ -51,7 +51,7 @@ export async function createPlanNetwork(): Promise<{ pg: PGlite; db: Db; newPlan
   for (const [id, name, topics] of people) await saveProfile(db, person(id, name, topics));
   for (const [a, b] of [["yo", "ana"], ["yo", "beto"], ["yo", "carla"], ["yo", "gabi"], ["ana", "dario"], ["ana", "elisa"], ["carla", "dario"], ["carla", "fabi"], ["dario", "hugo"]]) await connect(db, a, b);
   await saveContext(db, "dario", "red", "claude", lines(["La terraza de la viña recibe 180 personas"]));
-  await saveContext(db, "elisa", "red", "claude", lines(["Hago tortas de novios sin gluten y sin azúcar"]));
+  await saveContext(db, "elisa", "red", "claude", [...lines(["Hago tortas de novios sin gluten y sin azúcar"]), { lineId: "l2", section: "Comida y bebida", text: "Como vegetariano.", embedding: vec("Como vegetariano.") }]);
   await saveContext(db, "elisa", "propio", "seed", lines(["No puedo trabajar los domingos"], "s"));
   await saveContext(db, "ana", "propio", "seed", lines(["No puedo viajar a más de una hora"], "s"));
 

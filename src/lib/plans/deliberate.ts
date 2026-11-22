@@ -61,8 +61,10 @@ export type Agents = {
 export type DeliberationDeps = { db: Db; agents: Agents; embed: (texts: string[]) => Promise<number[][]> };
 export type Outcome = { status: "consenso" | "decidido"; version: number; decidedBy: PlanDecidedBy };
 
-const MAX_APORTES = 6;
+const MAX_APORTES = 3;
 const MAX_ITEMS = 12;
+// The plan is read on a phone: only what has to be fixed.
+const MAX_DECISIONES = 5;
 
 function clip(text: string, max = 240): string {
   const flat = text.replace(/\s+/g, " ").trim();
@@ -86,7 +88,8 @@ const lineKey = (a: Pick<PlanAporte, "lineId" | "contactId">) => `${a.contactId 
 function checkAportes(raw: Cited[], context: AgentContext, already: Set<string>): { aportes: PlanAporte[]; drops: Drop[] } {
   const aportes: PlanAporte[] = [];
   const drops: Drop[] = [];
-  for (const { cita, texto } of raw.slice(0, MAX_APORTES)) {
+  for (const { cita, texto } of raw.slice(0, MAX_ITEMS)) {
+    if (aportes.length === MAX_APORTES) break;
     const ref = cita.replace(/[^a-z0-9]/gi, "").toUpperCase();
     const line = context.lines.find((l) => l.ref === ref);
     if (!line) {
@@ -118,7 +121,7 @@ function toContent(raw: OrchestratorPlan, plan: PlanSnapshot, keys: Map<string, 
   const resumen = publicLine(raw.resumen, [], 600);
   return {
     resumen: "text" in resumen ? resumen.text : clip(plan.intent, 600),
-    decisiones: keep(raw.decisiones, (d) => [d.tema, d.valor], [], drops).map((d) => ({ tema: clip(d.tema, 80), valor: clip(d.valor), porque: clip(d.porque) })),
+    decisiones: keep(raw.decisiones, (d) => [d.tema, d.valor], [], drops).slice(0, MAX_DECISIONES).map((d) => ({ tema: clip(d.tema, 80), valor: clip(d.valor), porque: clip(d.porque) })),
     pasos: keep(raw.pasos, (p) => [p.que], [], drops).map((p) => ({ que: clip(p.que), responsable: idOf(p.responsable) ?? plan.ownerId })),
     abiertos: keep(raw.abiertos, (a) => [a], [], drops).map((a) => clip(a)),
     desacuerdos: final
@@ -182,9 +185,14 @@ export async function deliberate(planId: string, deps: DeliberationDeps): Promis
     const proposal = plan.versions.find((v) => v.version === round);
     const said = transcript(plan);
 
-    const turns = await Promise.allSettled(
-      pending.map(async (me) => {
-        const context = await buildContext(me, proposal?.content.abiertos ?? []);
+    // Each answer is stored as soon as it arrives, so the phones see who is still writing.
+    await Promise.all(pending.map(async (me) => {
+      const discard = (descartado: "turno" | "aporte" | "texto", razon: Drop | "sin_respuesta") =>
+        recordMessage(db, planId, round, { agent: "verificador", personId: me.personId, content: { descartado, razon } });
+      let context: AgentContext;
+      let answer: ({ kind: "opening" } & Measured<MemberOpening>) | ({ kind: "response" } & Measured<MemberResponse>);
+      try {
+        context = await buildContext(me, proposal?.content.abiertos ?? []);
         const turn: MemberTurn = {
           me,
           members: plan.members,
@@ -196,21 +204,12 @@ export async function deliberate(planId: string, deps: DeliberationDeps): Promis
           maxRounds: plan.maxRounds,
           proposal: proposal ? describePlan(proposal.content, names) : null,
         };
-        const answer = round === 0 ? ({ kind: "opening", ...(await agents.open(turn)) } as const) : ({ kind: "response", ...(await agents.respond(turn)) } as const);
-        return { context, answer };
-      }),
-    );
-
-    for (const [i, me] of pending.entries()) {
-      const settled = turns[i];
-      const discard = (descartado: "turno" | "aporte" | "texto", razon: Drop | "sin_respuesta") =>
-        recordMessage(db, planId, round, { agent: "verificador", personId: me.personId, content: { descartado, razon } });
-      if (settled.status === "rejected") {
-        console.error(`plan ${planId}: el agente de ${me.personId} no respondió en la ronda ${round}:`, settled.reason);
+        answer = round === 0 ? { kind: "opening", ...(await agents.open(turn)) } : { kind: "response", ...(await agents.respond(turn)) };
+      } catch (error) {
+        console.error(`plan ${planId}: el agente de ${me.personId} no respondió en la ronda ${round}:`, error);
         await discard("turno", "sin_respuesta");
-        continue;
+        return;
       }
-      const { context, answer } = settled.value;
       const { aportes, drops } = checkAportes(answer.output.aportes, context, contributedBy(plan, me.personId));
       const textDrops: Drop[] = [];
       let message: PlanMessage;
@@ -242,7 +241,7 @@ export async function deliberate(planId: string, deps: DeliberationDeps): Promis
       await recordMessage(db, planId, round, message, answer.meta);
       for (const drop of drops) await discard("aporte", drop);
       for (const drop of textDrops) await discard("texto", drop);
-    }
+    }));
     await reload();
   }
 

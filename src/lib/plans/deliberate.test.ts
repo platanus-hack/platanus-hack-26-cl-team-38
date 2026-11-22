@@ -59,7 +59,10 @@ describe("deliberación", () => {
     const plan = (await loadPlan(db, id))!;
     expect(plan).toMatchObject({ status: "consenso", round: 1 });
     expect(plan.versions).toMatchObject([{ version: 1, decidedBy: "consenso", content: { pasos: [{ que: "Reservar la terraza", responsable: "ana" }] } }]);
-    expect(kinds(plan)).toEqual(["0:miembro:yo", "0:miembro:ana", "0:miembro:beto", "0:miembro:carla", "1:orquestador", "1:miembro:yo", "1:miembro:ana", "1:miembro:beto", "1:miembro:carla"]);
+    // Within a round the answers are stored as they arrive.
+    expect(kinds(plan).slice(0, 4).sort()).toEqual(["0:miembro:ana", "0:miembro:beto", "0:miembro:carla", "0:miembro:yo"]);
+    expect(kinds(plan)[4]).toBe("1:orquestador");
+    expect(kinds(plan).slice(5).sort()).toEqual(["1:miembro:ana", "1:miembro:beto", "1:miembro:carla", "1:miembro:yo"]);
     expect(seen.propose).toHaveLength(1);
     expect(seen.propose[0].members).toEqual([
       { key: "M1", displayName: "Oscar Pérez", owner: true },
@@ -71,7 +74,7 @@ describe("deliberación", () => {
     expect(await listPlans(db, "gabi")).toEqual([]);
   });
 
-  it("cada agente lee lo suyo, lo privado solo de su persona, y la red de su persona", async () => {
+  it("cada agente lee lo suyo, lo privado solo de su persona, y de la red solo lo que recomienda", async () => {
     const id = await newPlan();
     const { agents, seen } = fakeAgents();
     await deliberate(id, { db, agents, embed });
@@ -88,8 +91,9 @@ describe("deliberación", () => {
       "R4 red 2 Hago tortas de novios sin gluten y sin azúcar",
     ]);
     expect(of("yo").lines.filter((l) => l.origen === "red").map((l) => l.text)).toEqual(["pesca con mosca"]);
-    // Elisa's own restriction is for Elisa's agent, not for Ana's.
+    // Elisa's own restriction is for Elisa's agent, not for Ana's; and her diet is a taste, not a recommendation.
     expect(JSON.stringify(seen.open)).not.toContain("domingos");
+    expect(JSON.stringify(seen.open)).not.toContain("vegetariano");
   });
 
   it("al límite de cinco rondas decide el orquestador, y deja escrito quién quedó en desacuerdo", async () => {
@@ -231,8 +235,8 @@ describe("deliberación", () => {
     let writes = 0;
     const dying: Db = {
       rpc(fn, args) {
-        // Four openings, the proposal and the owner's answer got stored; then the process dies.
-        if (fn === "record_plan_message" && ++writes === 7) throw new Error("proceso muerto");
+        // Four openings, the proposal and the first answer got stored; then the process dies.
+        if (fn === "record_plan_message" && ++writes >= 7) throw new Error("proceso muerto");
         return db.rpc(fn, args);
       },
     };
@@ -248,7 +252,7 @@ describe("deliberación", () => {
     expect(await deliberate(id, { db, agents, embed })).toMatchObject({ status: "consenso", version: 1 });
     expect(seen.open).toHaveLength(0);
     expect(seen.propose).toHaveLength(0);
-    expect(seen.respond.map((t) => t.me.personId).sort()).toEqual(["ana", "beto", "carla"]);
+    expect(seen.respond).toHaveLength(3);
     expect(kinds(await loadPlan(db, id)).filter((k) => k.startsWith("1:miembro"))).toHaveLength(4);
     expect(await deliberate(id, { db, agents, embed })).toMatchObject({ status: "consenso", version: 1 });
   });
