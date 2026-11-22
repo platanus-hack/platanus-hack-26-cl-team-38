@@ -2,12 +2,14 @@ import { readFileSync } from "node:fs";
 import { z } from "zod";
 import { KindSchema, SourceSchema, TopicSchema } from "@/lib/types";
 
-// seed/network.v2.json: 53 synthetic people for three coordination cases (a wedding, a family trip, a
-// flat hunt with roomies), laid out by where each piece goes in the data model:
+// seed/network.v2.json: synthetic people for four coordination cases (a wedding, a family trip, a flat
+// hunt with roomies and a fire brigade call-out), laid out by where each piece goes in the data model:
 //   - personId, displayName, topics            → users, user_topics, room_members (contracts in types.ts)
 //   - profile                                  → perfil detallado (Markdown, renderProfile())
 //   - agentOnly                                → what only the person's own agent reads: member_intents
 //                                                (proposal I1 in docs/infra-propuestas.md, not built)
+//   - teamAgentOnly                            → the same for a teammate a case is about (José, volunteer
+//                                                in the fire brigade one)
 //   - seedOnly                                 → never published (age, comuna, the original bio)
 //   - connections                              → connections; `pending` has what the table has no column for
 //   - rooms                                    → rooms, room_members
@@ -15,7 +17,7 @@ import { KindSchema, SourceSchema, TopicSchema } from "@/lib/types";
 // toV1() rebuilds seed/network.v1.json, the hand-written original, and network.test.ts checks nothing
 // was lost on the way.
 
-const CaseSchema = z.enum(["matrimonio", "viaje", "arriendo"]);
+const CaseSchema = z.enum(["matrimonio", "viaje", "arriendo", "bomberos"]);
 const PersonIdSchema = z.string().regex(/^seed-[a-z0-9-]+$/);
 const Facts = z.record(z.string(), z.union([z.string(), z.number(), z.boolean()]));
 
@@ -46,6 +48,12 @@ const ConstraintSchema = z
   })
   .catchall(z.union([z.string(), z.number(), z.boolean()]));
 
+const AgentOnlySchema = z.object({
+  // Health data: the privacy filter would drop it from the profile, but the plan has to respect it.
+  allergies: z.array(z.string().min(1)).optional(),
+  constraints: z.array(ConstraintSchema),
+});
+
 // Seed topics are written by hand, so publishing them is the author's decision (`decidedBy: "user"`);
 // the level comes from the local layers of the privacy filter (no judge).
 const SeedTopicSchema = TopicSchema.extend({ public: z.literal(true), privacy: TopicSchema.shape.privacy.unwrap() });
@@ -62,15 +70,11 @@ export const PersonSchema = z.object({
     about: z.string().min(1),
     experiences: z.array(ExperienceSchema),
   }),
-  agentOnly: z.object({
-    // Health data: the privacy filter would drop it from the profile, but the plan has to respect it.
-    allergies: z.array(z.string().min(1)).optional(),
-    constraints: z.array(ConstraintSchema),
-  }),
+  agentOnly: AgentOnlySchema,
   seedOnly: z.object({ age: z.number().int().positive(), comuna: z.string().min(1), region: z.string().min(1), bio: z.string().min(1) }),
 });
 
-const RelationSchema = z.enum(["pareja", "familia", "amistad", "trabajo", "estudios", "vecindad", "conocido"]);
+const RelationSchema = z.enum(["pareja", "familia", "amistad", "trabajo", "estudios", "vecindad", "voluntariado", "conocido"]);
 
 export const SeedConnectionSchema = z.object({
   // Same order rule as the table: a < b.
@@ -111,6 +115,8 @@ export const NetworkV2Schema = z.object({
   description: z.string(),
   // Teammates live in seed/team/<slug>.json; here they appear in connections, rooms, roles and helpers.
   team: z.array(PersonIdSchema),
+  // What only the agent of a teammate reads, when a case is about them and not just one they join as a guest.
+  teamAgentOnly: z.record(PersonIdSchema, AgentOnlySchema).default({}),
   people: z.array(PersonSchema).min(50),
   connections: z.array(SeedConnectionSchema),
   rooms: z.array(RoomSchema),
@@ -163,13 +169,16 @@ export function contextOf(person: SeedNetworkPerson): { red: { section: string; 
     if (line.startsWith("## ")) section = line.slice(3);
     else if (line.startsWith("- ")) red.push({ section, text: line.slice(2) });
   }
-  return {
-    red,
-    propio: [
-      ...(person.agentOnly.allergies ?? []).map((allergy) => ({ section: "Condición dura", text: `Alergia: ${allergy}` })),
-      ...person.agentOnly.constraints.map((c) => ({ section: c.hard ? "Condición dura" : "Preferencia", text: c.detail })),
-    ],
-  };
+  return { red, propio: propioOf(person.agentOnly) };
+}
+
+// The "propio" lines of an agentOnly block. Teammates only have this part here (teamAgentOnly): their
+// profile comes from their own assistants.
+export function propioOf(agentOnly: z.infer<typeof AgentOnlySchema>): { section: string; text: string }[] {
+  return [
+    ...(agentOnly.allergies ?? []).map((allergy) => ({ section: "Condición dura", text: `Alergia: ${allergy}` })),
+    ...agentOnly.constraints.map((c) => ({ section: c.hard ? "Condición dura" : "Preferencia", text: c.detail })),
+  ];
 }
 
 // Undirected connection graph over people and teammates.
@@ -212,7 +221,7 @@ export function toV1(net: NetworkV2 = network) {
 
   return {
     description: net.description,
-    team: net.team.map((id) => ({ slug: slugOf(id), friends: friendsOf(id) })),
+    team: net.team.map((id) => ({ slug: slugOf(id), friends: friendsOf(id), ...(net.teamAgentOnly[id] && { constraints: net.teamAgentOnly[id].constraints }) })),
     people: net.people.map((p) => ({
       slug: slugOf(p.personId),
       displayName: p.displayName,

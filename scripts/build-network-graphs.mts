@@ -217,7 +217,7 @@ function select(node) {
 }
 
 const tabs = document.getElementById("tabs");
-const LABEL = { matrimonio: "Matrimonio", viaje: "Viaje familiar", arriendo: "Arriendo con roomies" };
+const LABEL = { matrimonio: "Matrimonio", viaje: "Viaje familiar", arriendo: "Arriendo con roomies", bomberos: "Llamado de bomberos" };
 for (const c of CASES) {
   const b = document.createElement("button");
   b.role = "tab"; b.dataset.id = c.id; b.textContent = LABEL[c.type] + " · " + c.nodes.length;

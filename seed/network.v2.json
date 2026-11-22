@@ -1,7 +1,22 @@
 {
   "version": 2,
-  "description": "Red social sintética para la demo: 3 casos de coordinación (matrimonio, viaje familiar, arriendo con roomies), ordenada según dónde va cada dato en el modelo de datos (ver seed/network.ts). Es la fuente de verdad; seed/network.v1.json es el original escrito a mano y se reconstruye con toV1().",
+  "description": "Red social sintética para la demo: 4 casos de coordinación (matrimonio, viaje familiar, arriendo con roomies y un llamado de bomberos), ordenada según dónde va cada dato en el modelo de datos (ver seed/network.ts). Es la fuente de verdad; seed/network.v1.json es el original escrito a mano y se reconstruye con toV1().",
   "team": ["seed-martin", "seed-oscar", "seed-jose", "seed-cristobal", "seed-benjamin"],
+  "teamAgentOnly": {
+    "seed-jose": {
+      "constraints": [
+        {
+          "type": "logistica",
+          "detail": "Tiene el traje en el cuartel y está a 600 m: llega a pie en 7 minutos.",
+          "hard": true,
+          "distanceM": 600,
+          "mode": "a pie",
+          "appliesTo": ["bomberos"]
+        },
+        {"type": "preferencia", "detail": "Puede quedarse de guardia si el carro ya sale completo.", "hard": false, "appliesTo": ["bomberos"]}
+      ]
+    }
+  },
   "people": [
     {
       "personId": "seed-javiera-munoz",
@@ -14,7 +29,12 @@
           "depth": 1,
           "sources": ["claude", "chatgpt"],
           "public": true,
-          "privacy": {"level": "personal", "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.", "checkedFor": "v1:busca:organizar un matrimonio", "decidedBy": "user"}
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:busca:organizar un matrimonio",
+            "decidedBy": "user"
+          }
         },
         {
           "id": "seed-javiera-munoz.gestion-de-productos-digitales",
@@ -23,7 +43,12 @@
           "depth": 3,
           "sources": ["claude"],
           "public": true,
-          "privacy": {"level": "personal", "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.", "checkedFor": "v1:sabe:gestion de productos digitales", "decidedBy": "user"}
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:gestion de productos digitales",
+            "decidedBy": "user"
+          }
         },
         {
           "id": "seed-javiera-munoz.clases-de-pilates",
@@ -32,7 +57,12 @@
           "depth": 2,
           "sources": ["instagram"],
           "public": true,
-          "privacy": {"level": "personal", "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.", "checkedFor": "v1:hace:clases de pilates", "decidedBy": "user"}
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:clases de pilates",
+            "decidedBy": "user"
+          }
         },
         {
           "id": "seed-javiera-munoz.vinos-del-valle-de-colchagua",
@@ -41,7 +71,12 @@
           "depth": 2,
           "sources": ["instagram"],
           "public": true,
-          "privacy": {"level": "personal", "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.", "checkedFor": "v1:le_gusta:vinos del valle de colchagua", "decidedBy": "user"}
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:le_gusta:vinos del valle de colchagua",
+            "decidedBy": "user"
+          }
         },
         {
           "id": "seed-javiera-munoz.pop-de-los-80",
@@ -50,7 +85,12 @@
           "depth": 2,
           "sources": ["spotify"],
           "public": true,
-          "privacy": {"level": "personal", "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.", "checkedFor": "v1:le_gusta:pop de los 80", "decidedBy": "user"}
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:le_gusta:pop de los 80",
+            "decidedBy": "user"
+          }
         }
       ],
       "profile": {
@@ -89,10 +129,16 @@
             "per": "total",
             "appliesTo": ["matrimonio"]
           },
-          {"type": "preferencia", "detail": "No quiere más de 130 invitados.", "hard": false, "maxGuests": 130, "appliesTo": ["matrimonio"]}
+          {"type": "preferencia", "detail": "No quiere más de 130 invitados.", "hard": false, "maxGuests": 130, "appliesTo": ["matrimonio"]},
+          {"type": "preferencia", "detail": "Sus flores favoritas son las dalias.", "hard": false, "appliesTo": ["matrimonio"]}
         ]
       },
-      "seedOnly": {"age": 31, "comuna": "Ñuñoa", "region": "Metropolitana", "bio": "Product manager en un banco. Se casa con Tomás y quiere cerrar fecha y lugar antes de fin de año."}
+      "seedOnly": {
+        "age": 31,
+        "comuna": "Ñuñoa",
+        "region": "Metropolitana",
+        "bio": "Product manager en un banco. Se casa con Tomás y quiere cerrar fecha y lugar antes de fin de año."
+      }
     },
     {
       "personId": "seed-tomas-fuentes",
@@ -464,7 +510,12 @@
           "depth": 3,
           "sources": ["instagram", "chatgpt"],
           "public": true,
-          "privacy": {"level": "personal", "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.", "checkedFor": "v1:hace:tejido a palillos con lana", "decidedBy": "user"}
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:tejido a palillos con lana",
+            "decidedBy": "user"
+          }
         },
         {
           "id": "seed-olga-cardenas.musica-de-boleros",
@@ -473,7 +524,12 @@
           "depth": 2,
           "sources": ["spotify"],
           "public": true,
-          "privacy": {"level": "personal", "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.", "checkedFor": "v1:le_gusta:musica de boleros", "decidedBy": "user"}
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:le_gusta:musica de boleros",
+            "decidedBy": "user"
+          }
         }
       ],
       "profile": {
@@ -482,11 +538,27 @@
         "languages": ["español"],
         "diet": "omnivora",
         "about": "Disfruto las fiestas familiares, pero necesito lugares cómodos y cerca.",
-        "experiences": []
+        "experiences": [
+          {
+            "title": "Clienta de un vivero de dalias",
+            "type": "evento",
+            "place": "Paine, Metropolitana",
+            "date": "2026-03",
+            "summary": "Compra hace 30 años en un vivero de Paine que cultiva dalias; en mayo arman arreglos para eventos por cerca de $700.000, la mitad que una florería.",
+            "facts": {"arreglosMayoClp": 700000},
+            "usefulFor": ["matrimonio"],
+            "line": "Compro hace 30 años en un vivero de Paine que cultiva dalias: en mayo arman arreglos para eventos por cerca de $700.000, la mitad que una florería."
+          }
+        ]
       },
       "agentOnly": {
         "constraints": [
-          {"type": "movilidad", "detail": "Anda con andador: necesita baño accesible y lugar sin escaleras ni pasto disparejo hasta la mesa.", "hard": true, "appliesTo": ["matrimonio"]},
+          {
+            "type": "movilidad",
+            "detail": "Anda con andador: necesita baño accesible y lugar sin escaleras ni pasto disparejo hasta la mesa.",
+            "hard": true,
+            "appliesTo": ["matrimonio"]
+          },
           {
             "type": "movilidad",
             "detail": "No aguanta más de una hora en auto y tiene que estar de vuelta en casa antes de las 23:00.",
@@ -2793,6 +2865,967 @@
       "profile": {"profession": "ingeniero de datos", "hobbies": ["realidad virtual", "básquetbol"], "languages": ["español", "inglés"], "diet": "omnivora", "about": "Soy ingeniero de datos.", "experiences": []},
       "agentOnly": {"constraints": []},
       "seedOnly": {"age": 30, "comuna": "Ñuñoa", "region": "Metropolitana", "bio": "Compañero de trabajo de José. Vive en el mismo edificio que Camila."}
+    },
+    {
+      "personId": "seed-alvaro-cifuentes",
+      "displayName": "Álvaro Cifuentes",
+      "topics": [
+        {
+          "id": "seed-alvaro-cifuentes.mando-en-emergencias",
+          "name": "mando en emergencias",
+          "kind": "sabe",
+          "depth": 3,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:mando en emergencias",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-alvaro-cifuentes.voluntariado-en-bomberos",
+          "name": "voluntariado en bomberos",
+          "kind": "hace",
+          "depth": 3,
+          "sources": ["claude", "instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:voluntariado en bomberos",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-alvaro-cifuentes.ciclismo-de-montana",
+          "name": "ciclismo de montaña",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:ciclismo de montana",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "ingeniero civil en obras",
+        "hobbies": ["ciclismo de montaña", "asados"],
+        "languages": ["español"],
+        "diet": "omnivora",
+        "about": "Soy ingeniero civil y teniente en una compañía de bomberos: coordino las salidas y las dotaciones.",
+        "experiences": [
+          {
+            "title": "Incendio en un edificio de departamentos",
+            "type": "trabajo",
+            "place": "Ñuñoa, Metropolitana",
+            "date": "2025-07",
+            "summary": "Estuvo a cargo: la dotación llegó incompleta porque tres voluntarios fueron directo al lugar sin traje, y el cuartel quedó vacío 40 minutos.",
+            "facts": {"minutosCuartelVacio": 40},
+            "usefulFor": ["bomberos"],
+            "line": "Estuve a cargo de un incendio en un edificio donde la dotación llegó incompleta y el cuartel quedó vacío 40 minutos: desde entonces pido confirmar quién va antes de salir."
+          }
+        ]
+      },
+      "agentOnly": {
+        "constraints": [
+          {
+            "type": "logistica",
+            "detail": "Sale en el carro como oficial a cargo; tiene auto y llega al cuartel en 3 minutos.",
+            "hard": true,
+            "distanceM": 1100,
+            "mode": "auto",
+            "appliesTo": ["bomberos"]
+          },
+          {
+            "type": "preferencia",
+            "detail": "El cuartel no puede quedar con menos de dos voluntarios de guardia.",
+            "hard": true,
+            "minGuard": 2,
+            "appliesTo": ["bomberos"]
+          }
+        ]
+      },
+      "seedOnly": {
+        "age": 41,
+        "comuna": "Ñuñoa",
+        "region": "Metropolitana",
+        "bio": "Teniente de la 5ª Compañía. Es el oficial a cargo de la guardia de esta semana."
+      }
+    },
+    {
+      "personId": "seed-gaspar-mella",
+      "displayName": "Gaspar Mella",
+      "topics": [
+        {
+          "id": "seed-gaspar-mella.conduccion-de-vehiculos-de-emergencia",
+          "name": "conducción de vehículos de emergencia",
+          "kind": "sabe",
+          "depth": 3,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:conduccion de vehiculos de emergencia",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-gaspar-mella.reparacion-de-motores",
+          "name": "reparación de motores",
+          "kind": "es",
+          "depth": 3,
+          "sources": ["claude", "chatgpt"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:es:reparacion de motores",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-gaspar-mella.rock-chileno",
+          "name": "rock chileno",
+          "kind": "le_gusta",
+          "depth": 2,
+          "sources": ["spotify"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:le_gusta:rock chileno",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "técnico mecánico",
+        "hobbies": ["rock chileno", "motos"],
+        "languages": ["español"],
+        "diet": "omnivora",
+        "about": "Soy técnico mecánico y maquinista en una compañía de bomberos: manejo el carro bomba.",
+        "experiences": [
+          {
+            "title": "Maquinista de la compañía",
+            "type": "trabajo",
+            "place": "Ñuñoa, Metropolitana",
+            "date": "2022-03",
+            "summary": "Maquinista autorizado desde 2022: sin él o sin otro maquinista el carro no sale.",
+            "usefulFor": ["bomberos"],
+            "line": "Soy maquinista autorizado desde 2022: sé manejar el carro bomba y revisar que salga en condiciones."
+          }
+        ]
+      },
+      "agentOnly": {
+        "constraints": [
+          {
+            "type": "logistica",
+            "detail": "Maquinista autorizado; tiene auto y está a 1,1 km del cuartel.",
+            "hard": true,
+            "distanceM": 1100,
+            "mode": "auto",
+            "license": true,
+            "appliesTo": ["bomberos"]
+          }
+        ]
+      },
+      "seedOnly": {"age": 35, "comuna": "Providencia", "region": "Metropolitana", "bio": "Maquinista de la 5ª Compañía y técnico mecánico."}
+    },
+    {
+      "personId": "seed-fernanda-rios",
+      "displayName": "Fernanda Ríos",
+      "topics": [
+        {
+          "id": "seed-fernanda-rios.rescate-en-altura",
+          "name": "rescate en altura",
+          "kind": "sabe",
+          "depth": 2,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:rescate en altura",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-fernanda-rios.escalada-deportiva",
+          "name": "escalada deportiva",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["instagram", "claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:escalada deportiva",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "kinesióloga",
+        "hobbies": ["escalada", "yoga"],
+        "languages": ["español", "inglés"],
+        "diet": "vegetariana",
+        "about": "Soy kinesióloga y voluntaria de bomberos hace cinco años.",
+        "experiences": []
+      },
+      "agentOnly": {
+        "constraints": [
+          {
+            "type": "logistica",
+            "detail": "Tiene el traje en el cuartel y está a 500 m: llega a pie en 6 minutos.",
+            "hard": true,
+            "distanceM": 500,
+            "mode": "a pie",
+            "appliesTo": ["bomberos"]
+          }
+        ]
+      },
+      "seedOnly": {"age": 27, "comuna": "Ñuñoa", "region": "Metropolitana", "bio": "Voluntaria de la 5ª Compañía. Escala con Germán los fines de semana."}
+    },
+    {
+      "personId": "seed-vicente-araya",
+      "displayName": "Vicente Araya",
+      "topics": [
+        {
+          "id": "seed-vicente-araya.voluntariado-en-bomberos",
+          "name": "voluntariado en bomberos",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:voluntariado en bomberos",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-vicente-araya.ciclismo-urbano",
+          "name": "ciclismo urbano",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:ciclismo urbano",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-vicente-araya.programacion-en-python",
+          "name": "programación en python",
+          "kind": "sabe",
+          "depth": 2,
+          "sources": ["github"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:programacion en python",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "estudiante de ingeniería",
+        "hobbies": ["ciclismo", "videojuegos"],
+        "languages": ["español", "inglés"],
+        "diet": "omnivora",
+        "about": "Estudio ingeniería y soy voluntario de bomberos desde los 18.",
+        "experiences": []
+      },
+      "agentOnly": {
+        "constraints": [
+          {
+            "type": "logistica",
+            "detail": "Tiene el traje en el cuartel y está a 600 m: llega en bicicleta en 3 minutos.",
+            "hard": true,
+            "distanceM": 600,
+            "mode": "bicicleta",
+            "appliesTo": ["bomberos"]
+          }
+        ]
+      },
+      "seedOnly": {"age": 24, "comuna": "Ñuñoa", "region": "Metropolitana", "bio": "Voluntario de la 5ª Compañía, estudiante de ingeniería."}
+    },
+    {
+      "personId": "seed-renata-cornejo",
+      "displayName": "Renata Cornejo",
+      "topics": [
+        {
+          "id": "seed-renata-cornejo.educacion-basica",
+          "name": "educación básica",
+          "kind": "es",
+          "depth": 3,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:es:educacion basica",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-renata-cornejo.voluntariado-en-bomberos",
+          "name": "voluntariado en bomberos",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:voluntariado en bomberos",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "profesora de educación básica",
+        "hobbies": ["lectura", "huerta urbana"],
+        "languages": ["español"],
+        "diet": "omnivora",
+        "about": "Soy profesora de educación básica y voluntaria de bomberos.",
+        "experiences": []
+      },
+      "agentOnly": {
+        "constraints": [
+          {
+            "type": "logistica",
+            "detail": "Tiene el traje en el cuartel y está a 500 m, a pie.",
+            "hard": true,
+            "distanceM": 500,
+            "mode": "a pie",
+            "appliesTo": ["bomberos"]
+          },
+          {"type": "preferencia", "detail": "Puede quedarse de guardia en el cuartel.", "hard": false, "appliesTo": ["bomberos"]}
+        ]
+      },
+      "seedOnly": {"age": 30, "comuna": "Ñuñoa", "region": "Metropolitana", "bio": "Voluntaria de la 5ª Compañía y profesora."}
+    },
+    {
+      "personId": "seed-amanda-pacheco",
+      "displayName": "Amanda Pacheco",
+      "topics": [
+        {
+          "id": "seed-amanda-pacheco.diseno-de-mobiliario",
+          "name": "diseño de mobiliario",
+          "kind": "es",
+          "depth": 3,
+          "sources": ["claude", "instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:es:diseno de mobiliario",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-amanda-pacheco.voluntariado-en-bomberos",
+          "name": "voluntariado en bomberos",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:voluntariado en bomberos",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "diseñadora industrial",
+        "hobbies": ["cerámica", "trekking"],
+        "languages": ["español", "inglés"],
+        "diet": "omnivora",
+        "about": "Soy diseñadora industrial y voluntaria de bomberos.",
+        "experiences": []
+      },
+      "agentOnly": {
+        "constraints": [
+          {"type": "logistica", "detail": "Tiene el traje en casa.", "hard": true, "appliesTo": ["bomberos"]},
+          {
+            "type": "movilidad",
+            "detail": "No tiene auto: está a 2,8 km del cuartel y necesita que alguien la lleve.",
+            "hard": true,
+            "distanceM": 2800,
+            "mode": "sin auto",
+            "appliesTo": ["bomberos"]
+          }
+        ]
+      },
+      "seedOnly": {"age": 29, "comuna": "Macul", "region": "Metropolitana", "bio": "Voluntaria de la 5ª Compañía. Vive cerca de Simón."}
+    },
+    {
+      "personId": "seed-simon-vera",
+      "displayName": "Simón Vera",
+      "topics": [
+        {
+          "id": "seed-simon-vera.paisajismo",
+          "name": "paisajismo",
+          "kind": "es",
+          "depth": 3,
+          "sources": ["claude", "instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:es:paisajismo",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-simon-vera.basquetbol",
+          "name": "básquetbol",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:basquetbol",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-simon-vera.voluntariado-en-bomberos",
+          "name": "voluntariado en bomberos",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:voluntariado en bomberos",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "arquitecto paisajista",
+        "hobbies": ["básquetbol", "jardinería"],
+        "languages": ["español"],
+        "diet": "omnivora",
+        "about": "Soy arquitecto paisajista y voluntario de bomberos.",
+        "experiences": []
+      },
+      "agentOnly": {
+        "constraints": [
+          {
+            "type": "logistica",
+            "detail": "Tiene el traje en casa y auto con tres asientos libres; está a 2,7 km.",
+            "hard": true,
+            "distanceM": 2700,
+            "mode": "auto",
+            "seats": 3,
+            "appliesTo": ["bomberos"]
+          }
+        ]
+      },
+      "seedOnly": {"age": 33, "comuna": "Macul", "region": "Metropolitana", "bio": "Voluntario de la 5ª Compañía. Juega básquetbol con Oscar."}
+    },
+    {
+      "personId": "seed-bastian-ortega",
+      "displayName": "Bastián Ortega",
+      "topics": [
+        {
+          "id": "seed-bastian-ortega.voluntariado-en-bomberos",
+          "name": "voluntariado en bomberos",
+          "kind": "hace",
+          "depth": 3,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:voluntariado en bomberos",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-bastian-ortega.futbol-de-barrio",
+          "name": "fútbol de barrio",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:futbol de barrio",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "contador",
+        "hobbies": ["fútbol", "parrilla"],
+        "languages": ["español"],
+        "diet": "omnivora",
+        "about": "Soy contador y voluntario de bomberos hace diez años.",
+        "experiences": []
+      },
+      "agentOnly": {
+        "constraints": [
+          {
+            "type": "salud",
+            "detail": "Está con una lesión y no puede usar el equipo hasta el 5 de diciembre de 2026.",
+            "hard": true,
+            "from": "2026-11-10",
+            "to": "2026-12-05",
+            "appliesTo": ["bomberos"]
+          }
+        ]
+      },
+      "seedOnly": {"age": 31, "comuna": "Ñuñoa", "region": "Metropolitana", "bio": "Voluntario de la 5ª Compañía. Se lesionó en un entrenamiento."}
+    },
+    {
+      "personId": "seed-paulina-carcamo",
+      "displayName": "Paulina Cárcamo",
+      "topics": [
+        {
+          "id": "seed-paulina-carcamo.logistica-de-distribucion",
+          "name": "logística de distribución",
+          "kind": "sabe",
+          "depth": 3,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:logistica de distribucion",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-paulina-carcamo.voluntariado-en-bomberos",
+          "name": "voluntariado en bomberos",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:voluntariado en bomberos",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "jefa de logística",
+        "hobbies": ["running", "cine"],
+        "languages": ["español", "inglés"],
+        "diet": "pescetariana",
+        "about": "Trabajo en logística y soy voluntaria de bomberos.",
+        "experiences": []
+      },
+      "agentOnly": {
+        "constraints": [
+          {
+            "type": "fecha",
+            "detail": "Está en Concepción por trabajo hasta el domingo 29 de noviembre de 2026.",
+            "hard": true,
+            "from": "2026-11-20",
+            "to": "2026-11-29",
+            "appliesTo": ["bomberos"]
+          }
+        ]
+      },
+      "seedOnly": {"age": 36, "comuna": "Ñuñoa", "region": "Metropolitana", "bio": "Voluntaria de la 5ª Compañía. Viaja seguido por trabajo."}
+    },
+    {
+      "personId": "seed-hector-morales",
+      "displayName": "Héctor Morales",
+      "topics": [
+        {
+          "id": "seed-hector-morales.mantencion-de-calderas",
+          "name": "mantención de calderas",
+          "kind": "sabe",
+          "depth": 3,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:mantencion de calderas",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-hector-morales.voluntariado-en-bomberos",
+          "name": "voluntariado en bomberos",
+          "kind": "hace",
+          "depth": 3,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:voluntariado en bomberos",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "jefe de mantención en una planta",
+        "hobbies": ["pesca", "carpintería"],
+        "languages": ["español"],
+        "diet": "omnivora",
+        "about": "Soy jefe de mantención en una planta y voluntario de bomberos hace quince años.",
+        "experiences": []
+      },
+      "agentOnly": {
+        "constraints": [
+          {
+            "type": "fecha",
+            "detail": "De lunes a viernes está de turno en la planta hasta las 20:00 y no puede salir antes.",
+            "hard": true,
+            "until": "20:00",
+            "appliesTo": ["bomberos"]
+          }
+        ]
+      },
+      "seedOnly": {"age": 45, "comuna": "San Joaquín", "region": "Metropolitana", "bio": "Voluntario de la 5ª Compañía. Primo de Clemente, de la 3ª."}
+    },
+    {
+      "personId": "seed-camilo-baeza",
+      "displayName": "Camilo Baeza",
+      "topics": [
+        {
+          "id": "seed-camilo-baeza.ventas-de-seguros",
+          "name": "ventas de seguros",
+          "kind": "sabe",
+          "depth": 3,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:ventas de seguros",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-camilo-baeza.voluntariado-en-bomberos",
+          "name": "voluntariado en bomberos",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:voluntariado en bomberos",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "ejecutivo de seguros",
+        "hobbies": ["tenis", "cocina"],
+        "languages": ["español"],
+        "diet": "omnivora",
+        "about": "Soy ejecutivo de seguros y voluntario de bomberos.",
+        "experiences": []
+      },
+      "agentOnly": {
+        "constraints": [
+          {
+            "type": "logistica",
+            "detail": "Tiene auto y el traje en el cuartel, pero está a 3,8 km: llega en 12 minutos.",
+            "hard": false,
+            "distanceM": 3800,
+            "mode": "auto",
+            "appliesTo": ["bomberos"]
+          }
+        ]
+      },
+      "seedOnly": {"age": 38, "comuna": "La Florida", "region": "Metropolitana", "bio": "Voluntario de la 5ª Compañía."}
+    },
+    {
+      "personId": "seed-german-tapia",
+      "displayName": "Germán Tapia",
+      "topics": [
+        {
+          "id": "seed-german-tapia.escalada-deportiva",
+          "name": "escalada deportiva",
+          "kind": "hace",
+          "depth": 3,
+          "sources": ["instagram", "claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:escalada deportiva",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-german-tapia.fotografia-urbana",
+          "name": "fotografía urbana",
+          "kind": "le_gusta",
+          "depth": 2,
+          "sources": ["instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:le_gusta:fotografia urbana",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "periodista",
+        "hobbies": ["escalada", "fotografía"],
+        "languages": ["español", "inglés"],
+        "diet": "omnivora",
+        "about": "Soy periodista y escalo los fines de semana.",
+        "experiences": []
+      },
+      "agentOnly": {"constraints": []},
+      "seedOnly": {"age": 34, "comuna": "Ñuñoa", "region": "Metropolitana", "bio": "Vive en Av. Los Aromos. Escala con Fernanda."}
+    },
+    {
+      "personId": "seed-leonor-guzman",
+      "displayName": "Leonor Guzmán",
+      "topics": [
+        {
+          "id": "seed-leonor-guzman.seguridad-comunitaria",
+          "name": "seguridad comunitaria",
+          "kind": "sabe",
+          "depth": 2,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:seguridad comunitaria",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-leonor-guzman.jardineria-de-balcon",
+          "name": "jardinería de balcón",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:jardineria de balcon",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "secretaria ejecutiva",
+        "hobbies": ["jardinería", "teleseries"],
+        "languages": ["español"],
+        "diet": "omnivora",
+        "about": "Soy secretaria ejecutiva y presido el comité de seguridad de mi edificio.",
+        "experiences": [
+          {
+            "title": "Comité de seguridad del edificio",
+            "type": "evento",
+            "place": "Av. Los Aromos, Ñuñoa",
+            "date": "2024-05",
+            "summary": "Preside el comité de seguridad del edificio de Av. Los Aromos 1440: sabe que en el tercer piso del 1450 vive sola una vecina mayor, y que el grifo más cercano está en la esquina con Los Jazmines.",
+            "facts": {"grifo": "esquina con Los Jazmines", "personasQueVivenSolas": 1},
+            "usefulFor": ["bomberos"],
+            "line": "Presido el comité de seguridad de mi edificio: sé quién vive solo en la cuadra y dónde están los grifos."
+          }
+        ]
+      },
+      "agentOnly": {"constraints": []},
+      "seedOnly": {"age": 58, "comuna": "Ñuñoa", "region": "Metropolitana", "bio": "Vecina del edificio de al lado del incendio. Conoce a Germán."}
+    },
+    {
+      "personId": "seed-maximiliano-fuenzalida",
+      "displayName": "Maximiliano Fuenzalida",
+      "topics": [
+        {
+          "id": "seed-maximiliano-fuenzalida.redes-de-distribucion-electrica",
+          "name": "redes de distribución eléctrica",
+          "kind": "sabe",
+          "depth": 3,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:redes de distribucion electrica",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-maximiliano-fuenzalida.trail-running",
+          "name": "trail running",
+          "kind": "hace",
+          "depth": 2,
+          "sources": ["instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:trail running",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "ingeniero eléctrico",
+        "hobbies": ["trail running", "café de especialidad"],
+        "languages": ["español", "inglés"],
+        "diet": "omnivora",
+        "about": "Soy ingeniero eléctrico y hago turnos en el centro de control de una distribuidora.",
+        "experiences": [
+          {
+            "title": "Turnos en el centro de control",
+            "type": "trabajo",
+            "place": "Santiago, Metropolitana",
+            "date": "2023-01",
+            "summary": "Desde el centro de control de la distribuidora puede confirmar si una cuadra ya tiene la luz cortada.",
+            "usefulFor": ["bomberos"],
+            "line": "Hago turnos en el centro de control de una distribuidora eléctrica: puedo confirmar si una cuadra tiene la luz cortada."
+          }
+        ]
+      },
+      "agentOnly": {"constraints": []},
+      "seedOnly": {"age": 36, "comuna": "Providencia", "region": "Metropolitana", "bio": "Ingeniero eléctrico de turno. Compañero de instituto de Gaspar."}
+    },
+    {
+      "personId": "seed-clemente-ibarra",
+      "displayName": "Clemente Ibarra",
+      "topics": [
+        {
+          "id": "seed-clemente-ibarra.mando-en-emergencias",
+          "name": "mando en emergencias",
+          "kind": "sabe",
+          "depth": 2,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:mando en emergencias",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-clemente-ibarra.voluntariado-en-bomberos",
+          "name": "voluntariado en bomberos",
+          "kind": "hace",
+          "depth": 3,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:voluntariado en bomberos",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "abogado",
+        "hobbies": ["remo", "historia de Chile"],
+        "languages": ["español"],
+        "diet": "omnivora",
+        "about": "Soy abogado y teniente en otra compañía de bomberos.",
+        "experiences": []
+      },
+      "agentOnly": {"constraints": []},
+      "seedOnly": {"age": 39, "comuna": "San Miguel", "region": "Metropolitana", "bio": "Teniente de la 3ª Compañía. Primo de Héctor."}
+    },
+    {
+      "personId": "seed-raul-munoz",
+      "displayName": "Raúl Muñoz",
+      "topics": [
+        {
+          "id": "seed-raul-munoz.finanzas-de-empresas",
+          "name": "finanzas de empresas",
+          "kind": "sabe",
+          "depth": 3,
+          "sources": ["claude"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:finanzas de empresas",
+            "decidedBy": "user"
+          }
+        },
+        {
+          "id": "seed-raul-munoz.vinos-del-valle-del-maipo",
+          "name": "vinos del valle del maipo",
+          "kind": "le_gusta",
+          "depth": 2,
+          "sources": ["instagram"],
+          "public": true,
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:le_gusta:vinos del valle del maipo",
+            "decidedBy": "user"
+          }
+        }
+      ],
+      "profile": {
+        "profession": "ingeniero comercial",
+        "hobbies": ["vinos", "golf"],
+        "languages": ["español"],
+        "diet": "omnivora",
+        "about": "Soy ingeniero comercial y voy seguido a matrimonios de colegas y familia.",
+        "experiences": [
+          {
+            "title": "Matrimonio de la hija de un colega",
+            "type": "matrimonio",
+            "place": "Calera de Tango, Metropolitana",
+            "date": "2026-10",
+            "summary": "Fue a un matrimonio en una casona de Calera de Tango: arriendo de $1.600.000, salón interior por si llueve, capacidad 150, acceso sin escaleras, banquetería externa permitida, a 40 minutos de La Reina.",
+            "facts": {
+              "arriendoClp": 1600000,
+              "capacidad": 150,
+              "minutosDesdeLaReina": 40,
+              "salonInterior": true,
+              "accesoSinEscaleras": true,
+              "banqueteriaExterna": true
+            },
+            "usefulFor": ["matrimonio"],
+            "line": "En octubre fui a un matrimonio en una casona de Calera de Tango: el arriendo costó $1.600.000, tiene salón interior por si llueve, entran 150 personas, se llega sin escaleras y deja traer banquetería externa. Queda a 40 minutos de La Reina."
+          }
+        ]
+      },
+      "agentOnly": {"constraints": []},
+      "seedOnly": {
+        "age": 60,
+        "comuna": "Maipú",
+        "region": "Metropolitana",
+        "bio": "Tío de Javiera, hermano de Hernán. Fue hace poco a un matrimonio en Calera de Tango."
+      }
     }
   ],
   "connections": [
@@ -3965,6 +4998,196 @@
         "closeness": 1,
         "detail": {"seed-jose": "conocida de una fintech de seguros", "seed-tamara-quezada": "conocido de una fintech de seguros"}
       }
+    },
+    {
+      "a": "seed-alvaro-cifuentes",
+      "b": "seed-jose",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-alvaro-cifuentes": "voluntario de su compañía", "seed-jose": "teniente de su compañía"}
+      }
+    },
+    {
+      "a": "seed-alvaro-cifuentes",
+      "b": "seed-gaspar-mella",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-alvaro-cifuentes": "maquinista de su compañía", "seed-gaspar-mella": "teniente de su compañía"}
+      }
+    },
+    {
+      "a": "seed-alvaro-cifuentes",
+      "b": "seed-fernanda-rios",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-alvaro-cifuentes": "voluntaria de su compañía", "seed-fernanda-rios": "teniente de su compañía"}
+      }
+    },
+    {
+      "a": "seed-alvaro-cifuentes",
+      "b": "seed-vicente-araya",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-alvaro-cifuentes": "voluntario de su compañía", "seed-vicente-araya": "teniente de su compañía"}
+      }
+    },
+    {
+      "a": "seed-alvaro-cifuentes",
+      "b": "seed-renata-cornejo",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-alvaro-cifuentes": "voluntaria de su compañía", "seed-renata-cornejo": "teniente de su compañía"}
+      }
+    },
+    {
+      "a": "seed-alvaro-cifuentes",
+      "b": "seed-amanda-pacheco",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-alvaro-cifuentes": "voluntaria de su compañía", "seed-amanda-pacheco": "teniente de su compañía"}
+      }
+    },
+    {
+      "a": "seed-alvaro-cifuentes",
+      "b": "seed-simon-vera",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-alvaro-cifuentes": "voluntario de su compañía", "seed-simon-vera": "teniente de su compañía"}
+      }
+    },
+    {
+      "a": "seed-alvaro-cifuentes",
+      "b": "seed-bastian-ortega",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-alvaro-cifuentes": "voluntario de su compañía", "seed-bastian-ortega": "teniente de su compañía"}
+      }
+    },
+    {
+      "a": "seed-alvaro-cifuentes",
+      "b": "seed-paulina-carcamo",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-alvaro-cifuentes": "voluntaria de su compañía", "seed-paulina-carcamo": "teniente de su compañía"}
+      }
+    },
+    {
+      "a": "seed-alvaro-cifuentes",
+      "b": "seed-hector-morales",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-alvaro-cifuentes": "voluntario de su compañía", "seed-hector-morales": "teniente de su compañía"}
+      }
+    },
+    {
+      "a": "seed-alvaro-cifuentes",
+      "b": "seed-camilo-baeza",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-alvaro-cifuentes": "voluntario de su compañía", "seed-camilo-baeza": "teniente de su compañía"}
+      }
+    },
+    {
+      "a": "seed-gaspar-mella",
+      "b": "seed-jose",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-gaspar-mella": "voluntario de su compañía", "seed-jose": "maquinista de su compañía"}
+      }
+    },
+    {
+      "a": "seed-fernanda-rios",
+      "b": "seed-jose",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-fernanda-rios": "voluntario de su compañía", "seed-jose": "voluntaria de su compañía"}
+      }
+    },
+    {
+      "a": "seed-jose",
+      "b": "seed-vicente-araya",
+      "origin": {"place": "5ª Compañía"},
+      "pending": {
+        "relation": "voluntariado",
+        "closeness": 2,
+        "detail": {"seed-jose": "voluntario de su compañía", "seed-vicente-araya": "voluntario de su compañía"}
+      }
+    },
+    {
+      "a": "seed-amanda-pacheco",
+      "b": "seed-simon-vera",
+      "origin": {"place": "barrio"},
+      "pending": {"relation": "vecindad", "closeness": 2, "detail": {"seed-amanda-pacheco": "vecino", "seed-simon-vera": "vecina"}}
+    },
+    {
+      "a": "seed-fernanda-rios",
+      "b": "seed-german-tapia",
+      "origin": {"place": "escalada"},
+      "pending": {"relation": "amistad", "closeness": 2, "detail": {"seed-fernanda-rios": "amigo de escalada", "seed-german-tapia": "amiga de escalada"}}
+    },
+    {
+      "a": "seed-german-tapia",
+      "b": "seed-leonor-guzman",
+      "origin": {"place": "Av. Los Aromos"},
+      "pending": {
+        "relation": "vecindad",
+        "closeness": 2,
+        "detail": {"seed-german-tapia": "vecina del edificio de al lado", "seed-leonor-guzman": "vecino del edificio de al lado"}
+      }
+    },
+    {
+      "a": "seed-gaspar-mella",
+      "b": "seed-maximiliano-fuenzalida",
+      "origin": {"place": "instituto"},
+      "pending": {
+        "relation": "estudios",
+        "closeness": 3,
+        "detail": {"seed-gaspar-mella": "compañero del instituto", "seed-maximiliano-fuenzalida": "compañero del instituto"}
+      }
+    },
+    {
+      "a": "seed-clemente-ibarra",
+      "b": "seed-hector-morales",
+      "origin": {"place": "familia"},
+      "pending": {"relation": "familia", "closeness": 3, "detail": {"seed-clemente-ibarra": "primo", "seed-hector-morales": "primo"}}
+    },
+    {
+      "a": "seed-oscar",
+      "b": "seed-simon-vera",
+      "origin": {"place": "básquetbol"},
+      "pending": {"relation": "amistad", "closeness": 2, "detail": {"seed-oscar": "compañero de básquetbol", "seed-simon-vera": "compañero de básquetbol"}}
+    },
+    {
+      "a": "seed-hernan-munoz",
+      "b": "seed-raul-munoz",
+      "origin": {"place": "familia"},
+      "pending": {"relation": "familia", "closeness": 3, "detail": {"seed-hernan-munoz": "hermano", "seed-raul-munoz": "hermano"}}
     }
   ],
   "rooms": [
@@ -4071,7 +5294,42 @@
         "seed-oscar",
         "seed-jose",
         "seed-cristobal",
-        "seed-benjamin"
+        "seed-benjamin",
+        "seed-alvaro-cifuentes",
+        "seed-gaspar-mella",
+        "seed-fernanda-rios",
+        "seed-vicente-araya",
+        "seed-renata-cornejo",
+        "seed-amanda-pacheco",
+        "seed-simon-vera",
+        "seed-bastian-ortega",
+        "seed-paulina-carcamo",
+        "seed-hector-morales",
+        "seed-camilo-baeza",
+        "seed-german-tapia",
+        "seed-leonor-guzman",
+        "seed-maximiliano-fuenzalida",
+        "seed-clemente-ibarra",
+        "seed-raul-munoz"
+      ]
+    },
+    {
+      "id": "seed-bomberos",
+      "code": "BOMB05",
+      "name": "Guardia de la 5ª Compañía",
+      "members": [
+        "seed-alvaro-cifuentes",
+        "seed-jose",
+        "seed-gaspar-mella",
+        "seed-fernanda-rios",
+        "seed-vicente-araya",
+        "seed-renata-cornejo",
+        "seed-amanda-pacheco",
+        "seed-simon-vera",
+        "seed-bastian-ortega",
+        "seed-paulina-carcamo",
+        "seed-hector-morales",
+        "seed-camilo-baeza"
       ]
     }
   ],
@@ -4114,25 +5372,42 @@
         {
           "variable": "lugar",
           "options": [
-            {"id": "pirque", "label": "Parcela en Pirque", "minutosDesdeLaReina": 50, "capacidad": 150, "arriendoClp": 2800000, "alojamiento": false, "banqueteriaExterna": true},
-            {"id": "casablanca", "label": "Terraza de una viña en Casablanca", "minutosDesdeLaReina": 80, "capacidad": 180, "arriendoClp": 3500000, "alojamiento": true, "banqueteriaExterna": false},
-            {"id": "olmue", "label": "Centro de eventos en Olmué", "minutosDesdeLaReina": 135, "capacidad": 200, "todoIncluidoPorPersonaClp": 72000, "alojamiento": true, "banqueteriaExterna": false}
+            {
+              "id": "pirque",
+              "label": "Parcela en Pirque",
+              "minutosDesdeLaReina": 50,
+              "capacidad": 150,
+              "arriendoClp": 2800000,
+              "alojamiento": false,
+              "banqueteriaExterna": true
+            },
+            {
+              "id": "casablanca",
+              "label": "Terraza de una viña en Casablanca",
+              "minutosDesdeLaReina": 80,
+              "capacidad": 180,
+              "arriendoClp": 3500000,
+              "alojamiento": true,
+              "banqueteriaExterna": false
+            },
+            {
+              "id": "olmue",
+              "label": "Centro de eventos en Olmué",
+              "minutosDesdeLaReina": 135,
+              "capacidad": 200,
+              "todoIncluidoPorPersonaClp": 72000,
+              "alojamiento": true,
+              "banqueteriaExterna": false
+            }
           ]
         },
-        {"variable": "invitados", "range": [110,170]},
+        {"variable": "invitados", "range": [110, 170]},
+        {"variable": "presupuesto", "totalClp": 23000000, "breakdown": {"pareja": 14000000, "hernan-munoz": 5000000, "jorge-fuentes": 4000000}},
         {
-          "variable": "presupuesto",
-          "totalClp": 23000000,
-          "breakdown": {"pareja": 14000000, "hernan-munoz": 5000000, "jorge-fuentes": 4000000}
+          "variable": "menú",
+          "mustCover": ["vegano", "sin gluten con cocina separada", "sin mariscos sin contaminación cruzada", "postre sin azúcar", "bajo en sal"]
         },
-        {"variable": "menú", "mustCover": ["vegano", "sin gluten con cocina separada", "sin mariscos sin contaminación cruzada", "postre sin azúcar", "bajo en sal"]},
-        {
-          "variable": "ceremonia",
-          "options": [
-            {"id": "religiosa"},
-            {"id": "civil-y-simbolica"}
-          ]
-        }
+        {"variable": "ceremonia", "options": [{"id": "religiosa"}, {"id": "civil-y-simbolica"}]}
       ],
       "tensions": [
         "Ninguna de las tres fechas sirve a todos: el 13 de marzo Ramón está en la esquila; el 10 y el 24 de abril Hernán está recién operado. Además Sebastián tiene tomado el 10 de abril y Constanza el 24.",
@@ -4149,9 +5424,18 @@
         {"personId": "seed-daniel-farias", "degree": 2, "why": "Bus Concepción–Santiago para la familia de la novia."},
         {"personId": "seed-monica-soto", "degree": 2, "why": "Puede alojar a seis personas de Concepción en Maipú."},
         {"personId": "seed-paula-gonzalez", "degree": 2, "why": "Enfermera: puede orientar a Hernán sobre la recuperación de una cirugía de cadera."},
-        {"personId": "seed-rocio-araya", "degree": 2, "why": "Se casó en Pirque con 110 invitados: sabe el costo real, lo de la carpa y cómo resolvió lo de la abuela."},
+        {
+          "personId": "seed-rocio-araya",
+          "degree": 2,
+          "why": "Se casó en Pirque con 110 invitados: sabe el costo real, lo de la carpa y cómo resolvió lo de la abuela."
+        },
         {"personId": "seed-alonso-vergara", "degree": 3, "why": "Banquetería con cocina sin gluten y protocolo sin mariscos, pero no trabaja en Casablanca."},
-        {"personId": "seed-oscar", "degree": 2, "why": "Tocó en una banda con el dj y tiene equipos de audio: puede cubrir el sonido si algo falla."}
+        {"personId": "seed-oscar", "degree": 2, "why": "Tocó en una banda con el dj y tiene equipos de audio: puede cubrir el sonido si algo falla."},
+        {
+          "personId": "seed-raul-munoz",
+          "degree": 2,
+          "why": "Tío de Javiera: en octubre fue a un matrimonio en una casona de Calera de Tango que cuesta $1.600.000, tiene salón interior y queda a 40 minutos de La Reina."
+        }
       ]
     },
     {
@@ -4297,6 +5581,54 @@
         {"personId": "seed-pedro-alarcon", "degree": 3, "why": "Abogado: garantía, codeudores y cláusulas del contrato."},
         {"personId": "seed-jose", "degree": 2, "why": "Amigo de la universidad de Matías; conoce a Camila, que deja el 3D2B de Ñuñoa."},
         {"personId": "seed-benjamin", "degree": 2, "why": "Sabe de medios de pago: cómo pagar arriendo y gastos comunes desde una cuenta compartida sin que uno adelante todo."}
+      ]
+    },
+    {
+      "eventId": "llamado-incendio-los-aromos",
+      "roomId": "seed-bomberos",
+      "type": "bomberos",
+      "title": "Llamado de la 5ª: incendio estructural en Av. Los Aromos 1450",
+      "summary": "La Central despacha a la 5ª Compañía a un incendio estructural a 3,5 km del cuartel. Hay que sacar el carro con maquinista, oficial y cuatro voluntarios, mandar apoyo con traje al lugar y no dejar el cuartel con menos de dos de guardia.",
+      "organizers": ["seed-alvaro-cifuentes"],
+      "roles": [
+        {"personId": "seed-alvaro-cifuentes", "role": "teniente, oficial a cargo"},
+        {"personId": "seed-jose", "role": "voluntario"},
+        {"personId": "seed-gaspar-mella", "role": "maquinista"},
+        {"personId": "seed-fernanda-rios", "role": "voluntaria"},
+        {"personId": "seed-vicente-araya", "role": "voluntario"},
+        {"personId": "seed-renata-cornejo", "role": "voluntaria"},
+        {"personId": "seed-amanda-pacheco", "role": "voluntaria"},
+        {"personId": "seed-simon-vera", "role": "voluntario"},
+        {"personId": "seed-bastian-ortega", "role": "voluntario"},
+        {"personId": "seed-paulina-carcamo", "role": "voluntaria"},
+        {"personId": "seed-hector-morales", "role": "voluntario"},
+        {"personId": "seed-camilo-baeza", "role": "voluntario"}
+      ],
+      "decisions": [
+        {"variable": "dotación del carro", "min": 4, "mustHave": ["maquinista", "oficial a cargo"]},
+        {"variable": "guardia en el cuartel", "min": 2},
+        {"variable": "apoyo en el lugar", "note": "Quienes tienen el traje en casa van directo al lugar, si tienen cómo llegar."},
+        {"variable": "segunda salida", "note": "Quién queda disponible si la Central pide otro carro."}
+      ],
+      "tensions": [
+        "Bastián, Paulina y Héctor no pueden salir (lesión, viaje y turno): sus Agentes lo dicen al tiro, antes de que alguien los cuente.",
+        "Amanda tiene el traje en casa pero no tiene auto; Simón pasa cerca de ella con tres asientos libres.",
+        "Si salen todos los que están cerca, el cuartel queda vacío: dos tienen que quedarse de guardia.",
+        "Camilo llegaría en 12 minutos, con el carro ya completo: conviene que quede para una segunda salida.",
+        "Nadie en la compañía conoce el edificio: la red tiene a una vecina que sabe quién vive sola y dónde está el grifo."
+      ],
+      "helpers": [
+        {
+          "personId": "seed-maximiliano-fuenzalida",
+          "degree": 2,
+          "why": "Ingeniero de turno en la distribuidora: confirma si la cuadra ya tiene la luz cortada."
+        },
+        {"personId": "seed-clemente-ibarra", "degree": 2, "why": "Teniente de la 3ª Compañía: si hace falta, pide que salga un segundo carro."},
+        {
+          "personId": "seed-leonor-guzman",
+          "degree": 3,
+          "why": "Vecina del edificio de al lado: en el tercer piso del 1450 vive sola una vecina mayor, y el grifo está en la esquina con Los Jazmines."
+        }
       ]
     }
   ]
