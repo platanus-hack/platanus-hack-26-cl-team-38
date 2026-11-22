@@ -1821,11 +1821,14 @@
 /* ============ desktop: framed phone on the left, the graph on the dark right ============ */
 @media (min-width: 1024px) {
   .nodo {
+    /* phone and graph are fixed: a smaller window scrolls the page instead of resizing them */
+    min-width: max-content;
     background: var(--desk);
 
     .shell {
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-columns: auto auto;
+      justify-content: center;
       column-gap: clamp(32px, 5vw, 80px);
       min-height: 100dvh;
       max-width: 1680px;
@@ -1836,7 +1839,6 @@
     .device {
       display: block;
       align-self: center;
-      /* fixed size: the phone never follows the window; a shorter window scrolls the page */
       width: 402px;
       height: 844px;
       padding: 12px;
@@ -1880,7 +1882,8 @@
       flex-direction: column;
       min-height: 0;
       align-self: center;
-      height: min(844px, calc(100dvh - 64px));
+      width: 854px;
+      height: 844px;
       border-radius: 40px;
       background: var(--slate);
       overflow: hidden;
