@@ -10,6 +10,8 @@ import { Sheet, Splash, TabBar, useOnboardedPhone } from "../_components/chrome"
 import { Icon } from "../_components/icons";
 import { TopicItem } from "../_components/topic-item";
 import { ListRow, Mono } from "../_components/ui";
+import { UserInfoSchema } from "@/lib/types";
+import { api } from "../_lib/api";
 import { COPY } from "../_lib/copy";
 import { useLocation } from "../_lib/location";
 import { cap, DEMO, myInterests } from "../_lib/people";
@@ -182,14 +184,25 @@ function SwitchRow({ label, on, busy, onChange }: { label: string; on: boolean; 
 /** Mail, Edad, Género and Teléfono are required; Oficio is optional and starts from what the Fuentes say you are. */
 function InfoForm({ s }: { s: PhoneState }) {
   const [saved, setSaved] = useState(false);
+  const [failed, setFailed] = useState(false);
   const info = s.info;
   const suggested = info?.occupation ? "" : cap(s.node?.topics.find((t) => t.kind === "es")?.name ?? "");
 
   function save(form: HTMLFormElement) {
     const f = new FormData(form);
     const text = (k: string) => String(f.get(k) ?? "").trim();
-    setPhone({ info: { email: text("email"), age: Number(f.get("age")), gender: text("gender"), phone: text("phone"), occupation: text("occupation") } });
+    const parsed = UserInfoSchema.safeParse({ email: text("email"), age: Number(f.get("age")), gender: text("gender"), phone: text("phone"), occupation: text("occupation") });
+    if (!parsed.success) return;
+    const info = parsed.data;
+    // The phone keeps its copy first: a server that is down must not lose what you typed.
+    setPhone({ info });
     setSaved(true);
+    setFailed(false);
+    if (DEMO) return;
+    // displayName lets the server create the user if this phone never checked in.
+    api("/api/users/info", { method: "POST", body: JSON.stringify({ personId: s.personId, displayName: s.displayName, info }) })
+      .then((r) => setFailed(!r.ok))
+      .catch(() => setFailed(true));
   }
 
   return (
@@ -226,7 +239,12 @@ function InfoForm({ s }: { s: PhoneState }) {
         <input name="occupation" maxLength={60} defaultValue={info?.occupation || suggested} />
       </label>
       {suggested && <p className="hint">{C.occupationSuggested}</p>}
-      <button type="submit" className="btn ghost" style={{ marginTop: 16 }} disabled={saved}>
+      {failed && (
+        <p className="err" role="alert">
+          {C.infoLocal}
+        </p>
+      )}
+      <button type="submit" className="btn ghost" style={{ marginTop: 16 }} disabled={saved && !failed}>
         {saved ? C.infoSaved : C.save}
       </button>
     </form>

@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { setShared } from "@/lib/node/node";
-import type { PersonalNode, Signal, Source, SynthesisSignal, Topic } from "@/lib/types";
+import type { PersonalNode, Signal, Source, SynthesisSignal, Topic, UserInfo } from "@/lib/types";
 
 // Phone-local state. Stand-in for front B's IndexedDB store: same PersonalNode contract, kept in
 // localStorage so the flow works today.
@@ -44,13 +44,11 @@ export type PhoneState = {
   affinityQuery: string;
   /** Group Conversaciones you started from Inicio, newest first. */
   initiatives: Initiative[];
-  /** Perfil → Información. Owner-only: stays in this phone, never sent anywhere. */
-  info: ProfileInfo | null;
+  /** Perfil → Información. Owner-only: this copy, plus the server's `user_info` (POST /api/users/info). */
+  info: UserInfo | null;
   /** What you said in a Conversación, and your Agente's answer, by conversation id. */
   replies: Record<string, { id: string; from: string; text: string; at: string }[]>;
 };
-
-export type ProfileInfo = { email: string; age: number; gender: string; phone: string; occupation: string };
 
 const KEY = "nodo.phone.v1";
 // One identity for the whole app: /onboarding and /mi-nodo read team38.person.v1, /grafo and
