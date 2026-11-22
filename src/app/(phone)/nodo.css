@@ -441,6 +441,7 @@
     border-color: var(--accent);
   }
   .field input,
+  .field select,
   .field textarea {
     flex: 1;
     min-width: 0;
@@ -451,6 +452,16 @@
     padding: 8px 0;
     font-size: 16px;
     line-height: 1.4;
+  }
+  /* Perfil → Información: label on the left, value on the right */
+  .info .field {
+    align-items: center;
+  }
+  .info .field span {
+    flex: none;
+    width: 128px;
+    font-size: 13px;
+    color: var(--mute);
   }
   .field ::placeholder {
     color: var(--mute);

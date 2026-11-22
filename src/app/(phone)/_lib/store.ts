@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { setShared } from "@/lib/node/node";
-import type { PersonalNode, Signal, Source, SynthesisSignal, Topic } from "@/lib/types";
+import type { PersonalNode, Signal, Source, SynthesisSignal, Topic, UserInfo } from "@/lib/types";
 
 // Phone-local state. Stand-in for front B's IndexedDB store: same PersonalNode contract, kept in
 // localStorage so the flow works today.
@@ -44,6 +44,8 @@ export type PhoneState = {
   affinityQuery: string;
   /** Group Conversaciones you started from Inicio, newest first. */
   initiatives: Initiative[];
+  /** Perfil → Información. Owner-only: this copy, plus the server's `user_info` (POST /api/users/info). */
+  info: UserInfo | null;
   /** What you said in a Conversación, and your Agente's answer, by conversation id. */
   replies: Record<string, { id: string; from: string; text: string; at: string }[]>;
 };
@@ -93,6 +95,7 @@ function fresh(personId = `p-${randomHex(6)}`): PhoneState {
     relations: {},
     affinityQuery: "",
     initiatives: [],
+    info: null,
     replies: {},
   };
 }
