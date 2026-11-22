@@ -407,7 +407,12 @@
           "depth": 3,
           "sources": ["chatgpt"],
           "public": true,
-          "privacy": {"level": "personal", "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.", "checkedFor": "v1:es:cardiologia", "decidedBy": "user"}
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:es:cardiologia",
+            "decidedBy": "user"
+          }
         },
         {
           "id": "seed-jorge-fuentes.cata-de-vinos",
@@ -416,7 +421,12 @@
           "depth": 2,
           "sources": ["instagram", "chatgpt"],
           "public": true,
-          "privacy": {"level": "personal", "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.", "checkedFor": "v1:sabe:cata de vinos", "decidedBy": "user"}
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:cata de vinos",
+            "decidedBy": "user"
+          }
         },
         {
           "id": "seed-jorge-fuentes.golf",
@@ -425,7 +435,12 @@
           "depth": 2,
           "sources": ["instagram"],
           "public": true,
-          "privacy": {"level": "personal", "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.", "checkedFor": "v1:hace:golf", "decidedBy": "user"}
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:hace:golf",
+            "decidedBy": "user"
+          }
         }
       ],
       "profile": {
@@ -434,7 +449,18 @@
         "languages": ["español", "inglés"],
         "diet": "omnivora",
         "about": "Soy médico, me gustan los vinos y en las fiestas me gusta invitar a mis amigos de toda la vida.",
-        "experiences": []
+        "experiences": [
+          {
+            "title": "Socio de las catas de una viña de Casablanca",
+            "type": "evento",
+            "place": "Casablanca, Valparaíso",
+            "date": "2026-08",
+            "summary": "Va a las catas de una viña de Casablanca que hace matrimonios: la viña obliga a contratar su propia banquetería, que no tiene cocina separada, y queda a 80 minutos de La Reina.",
+            "facts": {"minutosDesdeLaReina": 80, "banqueteriaExterna": false},
+            "usefulFor": ["matrimonio"],
+            "line": "Voy a las catas de una viña de Casablanca que hace matrimonios: obligan a contratar su banquetería, que no tiene cocina separada, y queda a 80 minutos de La Reina."
+          }
+        ]
       },
       "agentOnly": {
         "constraints": [
@@ -448,7 +474,12 @@
           }
         ]
       },
-      "seedOnly": {"age": 64, "comuna": "La Reina", "region": "Metropolitana", "bio": "Papá de Tomás, cardiólogo. Le gusta el vino y quiere invitar a sus amigos del hospital."}
+      "seedOnly": {
+        "age": 64,
+        "comuna": "La Reina",
+        "region": "Metropolitana",
+        "bio": "Papá de Tomás, cardiólogo. Le gusta el vino y quiere invitar a sus amigos del hospital."
+      }
     },
     {
       "personId": "seed-veronica-araneda",
@@ -1072,7 +1103,12 @@
           "depth": 3,
           "sources": ["instagram"],
           "public": true,
-          "privacy": {"level": "personal", "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.", "checkedFor": "v1:ofrece:tortas de matrimonio", "decidedBy": "user"}
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:ofrece:tortas de matrimonio",
+            "decidedBy": "user"
+          }
         },
         {
           "id": "seed-carolina-mendez.reposteria-sin-gluten",
@@ -1081,7 +1117,12 @@
           "depth": 2,
           "sources": ["instagram", "chatgpt"],
           "public": true,
-          "privacy": {"level": "personal", "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.", "checkedFor": "v1:sabe:reposteria sin gluten", "decidedBy": "user"}
+          "privacy": {
+            "level": "personal",
+            "reason": "Seed escrito a mano: revisado con el léxico y las anclas, sin juez.",
+            "checkedFor": "v1:sabe:reposteria sin gluten",
+            "decidedBy": "user"
+          }
         }
       ],
       "profile": {
@@ -1100,11 +1141,26 @@
             "facts": {"tortaPara130Clp": 650000},
             "usefulFor": ["matrimonio"],
             "line": "He hecho tortas para 60 matrimonios: una de tres pisos para 130 personas cuesta cerca de $650.000 y la versión sin gluten y sin azúcar va en un piso aparte."
+          },
+          {
+            "title": "Trabaja con una banquetería socia",
+            "type": "trabajo",
+            "place": "Santiago",
+            "date": "2024-06",
+            "summary": "Hace los matrimonios en dupla con una banquetería socia que tiene cocina sin gluten y protocolo sin mariscos; atienden en Santiago y sus alrededores, no en Casablanca.",
+            "facts": {"cocinaSinGluten": true, "protocoloSinMariscos": true},
+            "usefulFor": ["matrimonio"],
+            "line": "Trabajo en dupla con una banquetería socia que tiene cocina sin gluten y protocolo sin mariscos: atendemos matrimonios en Santiago y sus alrededores, no en Casablanca."
           }
         ]
       },
       "agentOnly": {"constraints": []},
-      "seedOnly": {"age": 36, "comuna": "Macul", "region": "Metropolitana", "bio": "Pastelera con un emprendimiento de tortas de novios. Hace versiones sin gluten y sin azúcar."}
+      "seedOnly": {
+        "age": 36,
+        "comuna": "Macul",
+        "region": "Metropolitana",
+        "bio": "Pastelera con un emprendimiento de tortas de novios. Hace versiones sin gluten y sin azúcar."
+      }
     },
     {
       "personId": "seed-alonso-vergara",
@@ -3602,7 +3658,18 @@
         "languages": ["español", "inglés"],
         "diet": "omnivora",
         "about": "Soy periodista y escalo los fines de semana.",
-        "experiences": []
+        "experiences": [
+          {
+            "title": "Vecino de la cuadra de Av. Los Aromos",
+            "type": "vivienda",
+            "place": "Av. Los Aromos, Ñuñoa",
+            "date": "2021-03",
+            "summary": "Vive al lado de Av. Los Aromos 1450: en el tercer piso de ese edificio vive sola una vecina mayor, y el grifo más cercano está en la esquina con Los Jazmines.",
+            "facts": {"grifo": "esquina con Los Jazmines"},
+            "usefulFor": ["bomberos"],
+            "line": "Conozco bien el edificio de Av. Los Aromos 1450: en el tercer piso vive sola una vecina mayor, y el grifo más cercano está en la esquina con Los Jazmines."
+          }
+        ]
       },
       "agentOnly": {"constraints": []},
       "seedOnly": {"age": 34, "comuna": "Ñuñoa", "region": "Metropolitana", "bio": "Vive en Av. Los Aromos. Escala con Fernanda."}
@@ -5420,7 +5487,11 @@
       ],
       "helpers": [
         {"personId": "seed-barbara-nunez", "degree": 2, "why": "Trabaja en la viña de Casablanca: capacidad, habitaciones y banquetería obligatoria."},
-        {"personId": "seed-carolina-mendez", "degree": 2, "why": "Hace tortas sin gluten y sin azúcar (Valentina y Hernán)."},
+        {
+          "personId": "seed-carolina-mendez",
+          "degree": 2,
+          "why": "Hace tortas sin gluten y sin azúcar (Valentina y Hernán), y trabaja con una banquetería socia con cocina sin gluten y protocolo sin mariscos."
+        },
         {"personId": "seed-daniel-farias", "degree": 2, "why": "Bus Concepción–Santiago para la familia de la novia."},
         {"personId": "seed-monica-soto", "degree": 2, "why": "Puede alojar a seis personas de Concepción en Maipú."},
         {"personId": "seed-paula-gonzalez", "degree": 2, "why": "Enfermera: puede orientar a Hernán sobre la recuperación de una cirugía de cadera."},
@@ -5624,6 +5695,11 @@
           "why": "Ingeniero de turno en la distribuidora: confirma si la cuadra ya tiene la luz cortada."
         },
         {"personId": "seed-clemente-ibarra", "degree": 2, "why": "Teniente de la 3ª Compañía: si hace falta, pide que salga un segundo carro."},
+        {
+          "personId": "seed-german-tapia",
+          "degree": 2,
+          "why": "Amigo de Fernanda y vecino del edificio: en el tercer piso del 1450 vive sola una vecina mayor, y el grifo está en la esquina con Los Jazmines."
+        },
         {
           "personId": "seed-leonor-guzman",
           "degree": 3,

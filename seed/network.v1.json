@@ -332,7 +332,17 @@
       "bio": "Papá de Tomás, cardiólogo. Le gusta el vino y quiere invitar a sus amigos del hospital.",
       "profile": {"profession": "médico cardiólogo", "hobbies": ["cata de vinos", "golf"], "languages": ["español", "inglés"], "diet": "omnivora"},
       "topics": [["cardiología", "es", 3, ["chatgpt"]], ["cata de vinos", "sabe", 2, ["instagram", "chatgpt"]], ["golf", "hace", 2, ["instagram"]]],
-      "experiences": [],
+      "experiences": [
+        {
+          "title": "Socio de las catas de una viña de Casablanca",
+          "type": "evento",
+          "place": "Casablanca, Valparaíso",
+          "date": "2026-08",
+          "summary": "Va a las catas de una viña de Casablanca que hace matrimonios: la viña obliga a contratar su propia banquetería, que no tiene cocina separada, y queda a 80 minutos de La Reina.",
+          "facts": {"minutosDesdeLaReina": 80, "banqueteriaExterna": false},
+          "usefulFor": ["matrimonio"]
+        }
+      ],
       "constraints": [
         {"type": "presupuesto", "detail": "Aporta a la fiesta.", "hard": false, "amountClp": 4000000, "per": "total", "appliesTo": ["matrimonio"]},
         {
@@ -750,6 +760,15 @@
           "date": "2021-01",
           "summary": "Una torta de tres pisos para 130 personas cuesta cerca de $650.000; la versión sin gluten y sin azúcar va en un piso aparte.",
           "facts": {"tortaPara130Clp": 650000},
+          "usefulFor": ["matrimonio"]
+        },
+        {
+          "title": "Trabaja con una banquetería socia",
+          "type": "trabajo",
+          "place": "Santiago",
+          "date": "2024-06",
+          "summary": "Hace los matrimonios en dupla con una banquetería socia que tiene cocina sin gluten y protocolo sin mariscos; atienden en Santiago y sus alrededores, no en Casablanca.",
+          "facts": {"cocinaSinGluten": true, "protocoloSinMariscos": true},
           "usefulFor": ["matrimonio"]
         }
       ],
@@ -2126,7 +2145,17 @@
       "bio": "Vive en Av. Los Aromos. Escala con Fernanda.",
       "profile": {"profession": "periodista", "hobbies": ["escalada", "fotografía"], "languages": ["español", "inglés"], "diet": "omnivora"},
       "topics": [["escalada deportiva", "hace", 3, ["instagram", "claude"]], ["fotografía urbana", "le_gusta", 2, ["instagram"]]],
-      "experiences": [],
+      "experiences": [
+        {
+          "title": "Vecino de la cuadra de Av. Los Aromos",
+          "type": "vivienda",
+          "place": "Av. Los Aromos, Ñuñoa",
+          "date": "2021-03",
+          "summary": "Vive al lado de Av. Los Aromos 1450: en el tercer piso de ese edificio vive sola una vecina mayor, y el grifo más cercano está en la esquina con Los Jazmines.",
+          "facts": {"grifo": "esquina con Los Jazmines"},
+          "usefulFor": ["bomberos"]
+        }
+      ],
       "constraints": [],
       "friends": [
         {"slug": "fernanda-rios", "relation": "amistad", "detail": "amiga de escalada", "closeness": 2},
@@ -2315,7 +2344,11 @@
       ],
       "helpers": [
         {"slug": "barbara-nunez", "degree": 2, "why": "Trabaja en la viña de Casablanca: capacidad, habitaciones y banquetería obligatoria."},
-        {"slug": "carolina-mendez", "degree": 2, "why": "Hace tortas sin gluten y sin azúcar (Valentina y Hernán)."},
+        {
+          "slug": "carolina-mendez",
+          "degree": 2,
+          "why": "Hace tortas sin gluten y sin azúcar (Valentina y Hernán), y trabaja con una banquetería socia con cocina sin gluten y protocolo sin mariscos."
+        },
         {"slug": "daniel-farias", "degree": 2, "why": "Bus Concepción–Santiago para la familia de la novia."},
         {"slug": "monica-soto", "degree": 2, "why": "Puede alojar a seis personas de Concepción en Maipú."},
         {"slug": "paula-gonzalez", "degree": 2, "why": "Enfermera: puede orientar a Hernán sobre la recuperación de una cirugía de cadera."},
@@ -2495,6 +2528,11 @@
       "helpers": [
         {"slug": "maximiliano-fuenzalida", "degree": 2, "why": "Ingeniero de turno en la distribuidora: confirma si la cuadra ya tiene la luz cortada."},
         {"slug": "clemente-ibarra", "degree": 2, "why": "Teniente de la 3ª Compañía: si hace falta, pide que salga un segundo carro."},
+        {
+          "slug": "german-tapia",
+          "degree": 2,
+          "why": "Amigo de Fernanda y vecino del edificio: en el tercer piso del 1450 vive sola una vecina mayor, y el grifo está en la esquina con Los Jazmines."
+        },
         {
           "slug": "leonor-guzman",
           "degree": 3,
