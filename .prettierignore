@@ -1,0 +1,8 @@
+pnpm-lock.yaml
+*.md
+supabase/
+public/
+seed/**/*.json
+docs/red-de-casos.html
+.context/
+docs/*.html

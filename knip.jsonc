@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  // The proximity engine is a library waiting for its route (see src/lib/proximity/README.md).
+  "entry": ["src/lib/proximity/server.ts"],
+  "ignoreIssues": {
+    // The contracts and the room-era agent rule are kept on purpose, used or not (see CLAUDE.md).
+    "src/lib/types.ts": ["exports", "types"],
+    "src/lib/privacy/agent-brief.ts": ["exports"]
+  }
+}
