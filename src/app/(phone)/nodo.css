@@ -2715,6 +2715,36 @@
 .nodo .stage {
   display: none;
 }
+/* desktop only: enters the browser's fullscreen to present; hidden while in it */
+.nodo .fs-toggle {
+  position: fixed;
+  z-index: 40;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(27, 35, 38, 0.08);
+  color: var(--ink);
+  opacity: 0.45;
+  cursor: pointer;
+  transition:
+    opacity 0.15s,
+    background 0.15s;
+}
+.nodo .fs-toggle:hover,
+.nodo .fs-toggle:focus-visible {
+  opacity: 1;
+  background: rgba(27, 35, 38, 0.14);
+}
+.nodo .fs-toggle .ic {
+  width: 18px;
+  height: 18px;
+}
 @media (min-width: 1024px) {
   .nodo .shell .stage {
     display: flex;
