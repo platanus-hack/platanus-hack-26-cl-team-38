@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Avatar } from "../_components/avatar";
 import { Splash, TabBar, useOnboardedPhone } from "../_components/chrome";
+import { Requests } from "../_components/requests";
 import { LargeTitle, ListRow } from "../_components/ui";
 import { allConversations, buildInitiative, type Conversation } from "../_lib/conversations";
 import { COPY } from "../_lib/copy";
@@ -85,6 +86,7 @@ export default function ConversacionesPage() {
     <div className="app with-tabs">
       <LargeTitle title={C.title} />
       <div className="content">
+        <Requests s={s} encounters={encounters} />
         {encounters !== undefined && all.length === 0 && plans.length === 0 ? (
           <div className="empty-state">
             <p className="mute">{DEMO ? C.empty : C.noBackend}</p>

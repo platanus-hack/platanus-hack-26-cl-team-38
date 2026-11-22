@@ -144,6 +144,20 @@ export const COPY = {
     connectFailed: "No pudimos enviar la solicitud. Intenta de nuevo.",
   },
 
+  /** Solicitudes: who asked to be your Contacto, answered from Chats. */
+  solicitudes: {
+    title: "Solicitudes",
+    wants: "Quiere ser tu Contacto",
+    accept: "Aceptar",
+    reject: "Rechazar",
+    accepted: (name: string) => `${name} ya es tu Contacto`,
+    rejected: "Solicitud rechazada",
+    failed: "No pudimos responder la solicitud. Intenta de nuevo.",
+    common: "En común",
+    nothing: "Sin Intereses en común todavía.",
+    topics: "Sus Intereses",
+  },
+
   conversaciones: {
     title: "Chats",
     groups: "Grupos",

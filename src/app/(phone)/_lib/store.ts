@@ -50,6 +50,8 @@ export type PhoneState = {
   explore: "personas" | "temas";
   /** People you asked to add as Contacto and who have not accepted yet. */
   requests: string[];
+  /** Demo mode: the example requests you rejected, so they do not come back. */
+  dismissed: string[];
   /** Your own photo, as a small JPEG data URL. Stays in this phone: nobody else sees it yet. */
   photo: string | null;
   /** What you said in a Conversación, and your Agente's answer, by conversation id. */
@@ -103,6 +105,7 @@ function fresh(personId = `p-${randomHex(6)}`): PhoneState {
     info: null,
     explore: "personas",
     requests: [],
+    dismissed: [],
     photo: null,
     replies: {},
     pendingTopic: null,
