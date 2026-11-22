@@ -2660,12 +2660,10 @@ html:has(.nodo .graph-screen) body {
   font-size: 11px;
   padding-top: 6px;
 }
-/* on a phone: on top of the conversation, and it stays there while the Agentes talk */
+/* on a phone: on top of the conversation. Not sticky: fixed there it covered a third of the
+   screen, and the messages ran under it. */
 .nodo .plan-net {
   align-self: stretch;
-  position: sticky;
-  top: 52px;
-  z-index: 3;
   height: 320px;
   margin: 0 -8px 12px;
   padding: 10px 6px;
