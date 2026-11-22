@@ -43,10 +43,15 @@ export function avatarSvg(id: string): string {
   return `<g clip-path="url(#avc)"><rect width="40" height="40" fill="${color}"/>${back}<path d="M5.5 42c.4-8.8 6.4-13.6 14.5-13.6s14.1 4.8 14.5 13.6z" fill="#fff" fill-opacity=".74"/><circle cx="20" cy="17.6" r="7" fill="#fff"/><g fill="${hair}">${FRONT[style]}</g></g>`;
 }
 
-export function Avatar({ id, className }: { id: string; className?: string }) {
+export function Avatar({ id, className, photo }: { id: string; className?: string; photo?: string | null }) {
   return (
     <span className={`av${className ? ` ${className}` : ""}`}>
-      <svg viewBox="0 0 40 40" aria-hidden="true" dangerouslySetInnerHTML={{ __html: avatarSvg(id) }} />
+      {photo ? (
+        // eslint-disable-next-line @next/next/no-img-element -- a data URL from this phone: nothing to optimize
+        <img src={photo} alt="" width={40} height={40} />
+      ) : (
+        <svg viewBox="0 0 40 40" aria-hidden="true" dangerouslySetInnerHTML={{ __html: avatarSvg(id) }} />
+      )}
     </span>
   );
 }

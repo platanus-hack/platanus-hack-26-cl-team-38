@@ -19,6 +19,21 @@ import { connectedSources, type PhoneState, resetPhone, setPhone, signOut } from
 import { toast } from "../_lib/toast";
 
 const C = COPY.perfil;
+
+/** Your photo: center-cropped to a 256 px square JPEG, small enough to live in localStorage. */
+async function pickPhoto(file: File | undefined) {
+  if (!file) return;
+  try {
+    const bmp = await createImageBitmap(file);
+    const side = Math.min(bmp.width, bmp.height);
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 256;
+    canvas.getContext("2d")!.drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, 256, 256);
+    setPhone({ photo: canvas.toDataURL("image/jpeg", 0.85) });
+  } catch {
+    toast(C.photoFailed);
+  }
+}
 const time = new Intl.DateTimeFormat("es-CL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" });
 
 export default function PerfilPage() {
@@ -55,8 +70,19 @@ export default function PerfilPage() {
     <div className="app with-tabs">
       <div className="content" style={{ paddingTop: 48 }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-          <Avatar id={s.personId} className="lg-face" />
+          <Avatar id={s.personId} className="lg-face" photo={s.photo} />
           <h1 className="t-title">{s.displayName}</h1>
+          <div style={{ display: "flex", gap: 16 }}>
+            <label className="link" style={{ cursor: "pointer" }}>
+              {C.photo}
+              <input type="file" accept="image/*" className="sr" onChange={(e) => (pickPhoto(e.target.files?.[0]), (e.target.value = ""))} />
+            </label>
+            {s.photo && (
+              <button type="button" className="link" onClick={() => setPhone({ photo: null })}>
+                {C.photoRemove}
+              </button>
+            )}
+          </div>
         </div>
 
         <InfoForm s={s} />

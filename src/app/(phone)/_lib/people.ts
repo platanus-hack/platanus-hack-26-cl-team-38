@@ -194,6 +194,11 @@ export function affinities(s: PhoneState, encounters: Encounter[]): Coincidence[
     .sort((a, b) => b.score - a.score || a.distanceM - b.distanceM);
 }
 
+/** Your Contactos: the people you (or the network) marked as Amigo or Conocido. */
+export function contactsOf(s: PhoneState, encounters: Encounter[]): Coincidence[] {
+  return affinities(s, encounters).filter((c) => c.relation !== "cercania");
+}
+
 export function fmtDistance(m: number): string {
   if (m === 0) return "en el mismo lugar";
   return m < 1000 ? `a ${m} m` : `a ${(m / 1000).toLocaleString("es-CL", { maximumFractionDigits: 1 })} km`;
