@@ -2719,31 +2719,35 @@
 .nodo .fs-toggle {
   position: fixed;
   z-index: 40;
-  top: 14px;
-  right: 14px;
-  display: grid;
-  place-items: center;
-  width: 36px;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   height: 36px;
-  padding: 0;
+  padding: 0 14px 0 11px;
   border: 0;
-  border-radius: 10px;
-  background: rgba(27, 35, 38, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 4px 14px -6px rgba(27, 35, 38, 0.35);
   color: var(--ink);
-  opacity: 0.45;
+  font: inherit;
+  font-size: 13px;
   cursor: pointer;
-  transition:
-    opacity 0.15s,
-    background 0.15s;
+  transition: background 0.15s;
 }
 .nodo .fs-toggle:hover,
 .nodo .fs-toggle:focus-visible {
-  opacity: 1;
-  background: rgba(27, 35, 38, 0.14);
+  background: #fff;
 }
 .nodo .fs-toggle .ic {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
+}
+.nodo .fs-toggle kbd {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--mute);
 }
 @media (min-width: 1024px) {
   .nodo .shell .stage {
