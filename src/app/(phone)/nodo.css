@@ -2211,6 +2211,31 @@
 .nodo .gchip.off {
   color: var(--g-mute);
 }
+/* a narrow panel: the Fuentes shrink instead of overlapping (see PITCH in graph-stage.tsx) */
+@container (max-width: 600px) {
+  .nodo .gchip.ghost {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 11px;
+  }
+}
+.nodo .gchip-badge {
+  position: absolute;
+  /* above the chip's border, so the dashes never show through its translucent fill */
+  left: 62%;
+  bottom: calc(100% + 6px);
+  translate: -50% 0;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(242, 241, 238, 0.12);
+  color: rgba(242, 241, 238, 0.6);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 .nodo .gchip.ghost {
   background: transparent;
   border: 1px dashed rgba(242, 241, 238, 0.24);
@@ -2297,26 +2322,30 @@
 /* ============ desktop: framed phone on the left, the graph on the dark right ============ */
 @media (min-width: 1024px) {
   .nodo {
-    /* phone and graph are fixed: a smaller window scrolls the page instead of resizing them */
-    min-width: max-content;
+    /* the page never scrolls: phone and graph shrink to the window, and only the app scrolls inside */
+    --frame-h: min(844px, calc(100dvh - 2 * var(--frame-pad)));
+    --frame-pad: clamp(12px, 3vh, 32px);
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
     background: var(--desk);
 
     .shell {
       display: grid;
-      grid-template-columns: auto auto;
+      grid-template-columns: 402px minmax(0, 700px);
       justify-content: center;
-      column-gap: clamp(32px, 5vw, 80px);
-      min-height: 100dvh;
+      column-gap: clamp(24px, 4vw, 80px);
+      height: 100dvh;
       max-width: 1680px;
       margin: 0 auto;
-      padding: 32px clamp(24px, 4vw, 56px);
+      padding: var(--frame-pad) clamp(24px, 4vw, 56px);
       box-sizing: border-box;
     }
     .device {
       display: block;
       align-self: center;
       width: 402px;
-      height: 844px;
+      height: var(--frame-h);
       padding: 12px;
       box-sizing: border-box;
       border-radius: 56px;
@@ -2329,7 +2358,9 @@
       position: relative;
       height: 100%;
       border-radius: 44px;
-      overflow: hidden;
+      /* .app scrolls itself; screens without it (/onboarding, /mi-nodo) scroll here */
+      overflow: hidden auto;
+      scrollbar-width: none;
       transform: translateZ(0);
       background: var(--paper);
     }
@@ -2359,8 +2390,8 @@
       flex-direction: column;
       min-height: 0;
       align-self: center;
-      width: 700px;
-      height: 844px;
+      width: 100%;
+      height: var(--frame-h);
       border-radius: 40px;
       background: var(--slate);
       overflow: hidden;
@@ -2457,6 +2488,12 @@ html:has(.nodo .app) body {
 html:has(.nodo .graph-screen),
 html:has(.nodo .graph-screen) body {
   background: #1f3138;
+}
+@media (min-width: 1024px) {
+  html:has(.nodo .shell),
+  html:has(.nodo .shell) body {
+    overflow: hidden;
+  }
 }
 /* Safari takes the color of its top bar from a fixed element at the top edge, if there is one */
 .nodo .app::before {
@@ -2744,6 +2781,154 @@ html:has(.nodo .graph-screen) body {
 .nodo .pchip.nova {
   background: rgba(27, 35, 38, 0.08);
   color: var(--mute);
+}
+/* a plan's thread in the steps the server runs: opening, then each proposal and its answers */
+.nodo .plan-step {
+  align-self: stretch;
+  margin: 20px 0 4px;
+  text-align: center;
+}
+.nodo .plan-step .mono {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.nodo .plan-step .mono::before,
+.nodo .plan-step .mono::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.nodo .plan-step p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--accent);
+  animation: nodo-fade 0.3s ease-out;
+}
+.nodo .plan-tally {
+  align-self: center;
+  margin: 4px 0;
+  font-size: 12px;
+  color: var(--mute);
+}
+.nodo .plan-tally.ok {
+  color: #0f8a68;
+}
+.nodo .plan-system {
+  align-self: center;
+  font-size: 12px;
+  color: var(--mute);
+  text-align: center;
+}
+.nodo .plan-card.proposal {
+  margin-top: 4px;
+  animation: nodo-fade 0.3s ease-out;
+}
+.nodo .plan-card.proposal .ai-head {
+  font-size: 13px;
+}
+.nodo .plan-card.proposal.old {
+  padding: 12px 16px;
+  background: transparent;
+}
+.nodo .plan-card.proposal.old summary {
+  list-style: none;
+  cursor: pointer;
+}
+.nodo .plan-card.proposal.old summary::-webkit-details-marker {
+  display: none;
+}
+.nodo .plan-card.proposal.old .plan-summary {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--mute);
+}
+.nodo .plan-card.proposal.old .more {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+}
+.nodo .plan-card.proposal.old[open] .more {
+  display: none;
+}
+.nodo .plan-card.proposal.old[open] dl {
+  margin-top: 10px;
+}
+.nodo .plan-card dt .mark {
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(255, 90, 54, 0.12);
+  color: var(--accent);
+  font-family: var(--mono);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.nodo .dchip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 7px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+.nodo .dchip.accept {
+  background: rgba(15, 138, 104, 0.14);
+  color: #0f8a68;
+}
+.nodo .dchip.adjust {
+  background: rgba(255, 176, 32, 0.18);
+  color: #9a6300;
+}
+.nodo .dchip.block {
+  background: rgba(255, 90, 54, 0.14);
+  color: #c2381a;
+}
+.nodo .bubble.me .dchip,
+.nodo .bubble.me .pchip {
+  background: rgba(242, 241, 238, 0.16);
+  color: inherit;
+}
+/* everyone still writing, side by side in one row */
+.nodo .writing-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: nodo-fade 0.3s ease-out;
+}
+.nodo .writing-row .stack .av {
+  width: 28px;
+  height: 28px;
+  margin-left: -10px;
+  box-shadow: 0 0 0 2px var(--paper);
+}
+.nodo .writing-row .stack .av:first-child {
+  margin-left: 0;
+}
+.nodo .writing-row .bubble {
+  padding: 8px 14px;
+}
+.nodo .writing-row > .mono {
+  font-size: 11px;
+}
+.nodo .plan-drafting {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  color: var(--accent);
+}
+.nodo .plan-drafting .ic {
+  width: 16px;
+  height: 16px;
 }
 .nodo .msg.nova .bubble {
   color: var(--mute);

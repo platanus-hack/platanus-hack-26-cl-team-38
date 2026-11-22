@@ -23,7 +23,7 @@ export type Person = {
   tone?: string;
   onClick?: () => void;
 };
-export type Chip = { kind: "chip"; cls: string; icon?: ReactNode; label: string; n?: number; faces?: string[]; onClick?: () => void };
+export type Chip = { kind: "chip"; cls: string; icon?: ReactNode; label: string; n?: number; faces?: string[]; badge?: string; onClick?: () => void };
 export type Entity = (Person | Chip) & { pose: Pose; from?: string };
 export type Edge = { a: string; b: string; kind: "soft" | "strong" | "focus"; w?: number; dash?: string; o?: number; pulse?: number };
 
@@ -304,6 +304,7 @@ export function GraphCanvas({
         const faces = c.faces && c.faces.length > 0;
         const body = (
           <>
+            {c.badge && <span className="gchip-badge">{c.badge}</span>}
             <span className="gchip-row">
               {c.icon}
               {c.label}
