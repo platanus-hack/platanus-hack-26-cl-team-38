@@ -6,7 +6,7 @@ Documento de trabajo. Lista lo que falta decidir sobre **qué corre dónde**, a 
 
 - Cada propuesta tiene un estado: `propuesta` → `aceptada` → `implementada`, o `descartada`.
 - Al cambiar un estado, anotar la fecha y el porqué en la propuesta. Una propuesta descartada no se borra: queda con su motivo.
-- Al implementar una, mover la decisión a `CLAUDE.md` (sección Decisiones) y actualizar ahí la tabla de base de datos.
+- Al implementar una, mover la decisión a [decisiones](decisiones.md) y actualizar ahí la tabla de base de datos.
 - Propuestas nuevas: siguiente `I<n>`, mismo formato.
 
 ## Resumen

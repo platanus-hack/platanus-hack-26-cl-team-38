@@ -1,11 +1,13 @@
 # Seed
 
+Escritos a mano: `people.ts`, `team/*.json` y `network.v2.json` (más `network.v1.json`, que solo sigue a la v2). Generado: `rooms.json`, que no se edita a mano.
+
 | Archivo | Qué es |
 |---|---|
 | `people.ts` | Las salas y las personas sintéticas, escritas a mano |
 | `team/<slug>.json` | Los integrantes del equipo, con tópicos sacados de sus asistentes |
-| `network.v2.json` | 53 personas sintéticas para tres casos de coordinación (matrimonio, viaje familiar, arriendo con roomies), ordenadas según dónde va cada dato en el modelo (ver `network.ts`). Los cinco integrantes del equipo están en `team` y entran a los casos por sus conexiones, como invitados o ayudantes. `network.v1.json` es el original escrito a mano y solo se toca para seguir a la v2 (al sumar al equipo se le agregaron conexiones, invitados y ayudantes); `network.test.ts` comprueba que la v2 lo reconstruye. `pnpm seed:graphs` dibuja un grafo por caso en `docs/red-de-casos.html` |
-| `rooms.json` | Lo que se carga en Supabase: lo anterior con embeddings (`pnpm seed:build`) |
+| `network.v2.json` | 53 personas sintéticas para cuatro casos de coordinación (matrimonio, viaje familiar, arriendo con roomies y un llamado de bomberos), ordenadas según dónde va cada dato en el modelo (ver `network.ts`). Los cinco integrantes del equipo están en `team` y entran a los casos por sus conexiones, como invitados o ayudantes. `network.v1.json` es el original escrito a mano y solo se toca para seguir a la v2 (al sumar al equipo se le agregaron conexiones, invitados y ayudantes); `network.test.ts` comprueba que la v2 lo reconstruye. `pnpm seed:graphs` dibuja un grafo por caso en `docs/red-de-casos.html` (generado: no se edita a mano) |
+| `rooms.json` | Lo que se carga en Supabase: lo anterior con embeddings. **Generado** con `pnpm seed:build`: no se edita a mano y, si da conflicto al mezclar, se regenera en vez de resolverlo |
 
 ## Agregar tu perfil
 

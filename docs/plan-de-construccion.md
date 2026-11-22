@@ -9,8 +9,8 @@ Pasos para construir [arquitectura-por-capas](arquitectura-por-capas.md). Está 
 - **Leer primero:**
   - [arquitectura-por-capas](arquitectura-por-capas.md): contratos, algoritmos y decisiones.
   - `stack-por-defecto`: Next.js, Supabase, Vercel, Claude, y el espejo del repo para desplegar.
-  - [mcp-ingestion](mcp-ingestion.md): solo para A5.
-- **Documento vivo:** el `CLAUDE.md` del repo. Las decisiones nuevas van ahí, y los contratos en `src/lib/types.ts`. Si una decisión cambia este plan, actualizarlo también.
+  - [mcp-ingestion](archivo/mcp-ingestion.md): solo para A5.
+- **Documento vivo:** el `CLAUDE.md` del repo, con las decisiones en [decisiones](decisiones.md). Las decisiones nuevas van ahí, y los contratos en `src/lib/types.ts`. Si una decisión cambia este plan, actualizarlo también.
 - **Supuestos:** lo marcado **Propuesta** en la arquitectura vale como supuesto para construir. Si un paso obliga a cambiarlo, preguntarle al equipo.
 - **Plazo:** el repo cierra el **dom 22 · 09:30** (`cronograma`).
 
@@ -65,7 +65,7 @@ Cada conector devuelve `Signal[]` validado con `zod`. Van en orden de valor sobr
 | **A2** | GitHub: usuario → repos, lenguajes y temas → señales `sabe`. | Funciona con el usuario de un integrante. |
 | **A3** | Spotify: OAuth PKCE → top artists y podcasts guardados → `le_gusta`. Registrar la app en modo desarrollo y agregar los emails del equipo. Confirmar qué endpoints siguen abiertos. | Login real y señales de un integrante. |
 | **A4** | Instagram: subir el `.zip` del export JSON y leerlo en el cliente (seguidos, intereses inferidos). **Pedir los exports del equipo ahora**, porque tardan. | Señales con el export de un integrante. |
-| **A5** | MCP `submit_profile` según [mcp-ingestion](mcp-ingestion.md), como buzón efímero y con token de desarrollo. | Claude llama la herramienta y el teléfono retira el perfil. |
+| **A5** | MCP `submit_profile` según [mcp-ingestion](archivo/mcp-ingestion.md), como buzón efímero y con token de desarrollo. | Claude llama la herramienta y el teléfono retira el perfil. |
 
 ## Frente B · Nodo personal
 

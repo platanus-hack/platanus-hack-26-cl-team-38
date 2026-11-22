@@ -1,0 +1,11 @@
+# Archivos generados: GitHub los colapsa en los diffs y no los cuenta en las estadísticas de lenguajes.
+# No se editan a mano; se regeneran con su comando:
+#   seed/rooms.json         pnpm seed:build
+#   docs/red-de-casos.html  pnpm seed:graphs
+#   pnpm-lock.yaml          pnpm install
+seed/rooms.json linguist-generated=true
+docs/red-de-casos.html linguist-generated=true
+pnpm-lock.yaml linguist-generated=true
+
+# Documentación: no cuenta como código del proyecto.
+docs/** linguist-documentation=true

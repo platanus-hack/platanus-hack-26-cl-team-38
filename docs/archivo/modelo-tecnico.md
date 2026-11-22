@@ -4,7 +4,7 @@
 
 Nodos agénticos por persona que se conectan por cercanía física. Cada persona lleva un agente con su conocimiento; al compartir un lugar, los agentes encuentran lo que tienen en común y dejan nodos compartidos que representan la conexión.
 
-> **Estado: reemplazado en buena parte por [arquitectura-por-capas](arquitectura-por-capas.md).** Ya no valen la gravedad por pares, los nodos de pareja ni el nodo de grupo como intersección estricta: la sala agrupa todos los tópicos en temas y arma mesas por cobertura de roles. Siguen vigentes la representación (un embedding por tópico), el umbral de coseno 0,60 y la profundidad de 1 a 3. Se conserva como antecedente. El propósito, sin detalle técnico, está en [solucion-core](solucion-core.md).
+> **Estado: reemplazado en buena parte por [arquitectura-por-capas](../arquitectura-por-capas.md).** Ya no valen la gravedad por pares, los nodos de pareja ni el nodo de grupo como intersección estricta: la sala agrupa todos los tópicos en temas y arma mesas por cobertura de roles. Siguen vigentes la representación (un embedding por tópico), el umbral de coseno 0,60 y la profundidad de 1 a 3. Se conserva como antecedente. El propósito, sin detalle técnico, está en [solucion-core](../solucion-core.md).
 
 Este documento usa otros nombres para las mismas cosas:
 
@@ -179,7 +179,7 @@ Observaciones de la simulación, por validar con embeddings reales:
 
 - **Origen del `.md`:** se extraerá del Claude o ChatGPT personal de cada uno. Al principio va mockeado a mano. Propuesta de conector en [mcp-ingestion](mcp-ingestion.md).
 - **Detección de cercanía:** QR, BLE, geocerca o wifi del lugar.
-- **Embeddings reales:** el modelo se eligió el 21-11 (ver `CLAUDE.md` · Decisiones). Se calcula un vector por tópico una sola vez y viaja en la proyección pública.
+- **Embeddings reales:** el modelo se eligió el 21-11 (ver [decisiones](../decisiones.md)). Se calcula un vector por tópico una sola vez y viaja en la proyección pública.
 - **Salida de personas** y disolución de grupos.
 - **Borrado** de un nodo compartido cuando una parte se retira.
 - **Comercios:** un negocio como nodo que ve demanda agregada y le habla al agente, no a la persona.

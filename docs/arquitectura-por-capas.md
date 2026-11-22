@@ -6,7 +6,7 @@ El **cómo** de la idea de [master-idea](master-idea.md), que tiene la visión c
 
 > **Estado (21-11-2026):** solo lo marcado **Decidido** es acuerdo del equipo. Lo marcado **Propuesta** es el supuesto con el que se arma el plan: se puede construir sobre él, pero hay que confirmarlo antes de cambiarlo o de presentarlo como decidido.
 
-En lo que se contradiga, esta nota reemplaza a [modelo-tecnico](modelo-tecnico.md) (gravedad por pares, grupo como intersección estricta), al `public: [...]` de [mcp-ingestion](mcp-ingestion.md) y, para el hack, a lo que [master-idea](master-idea.md) deja como visión (capas por círculo, peer-to-peer, nodos de pareja).
+En lo que se contradiga, esta nota reemplaza a [modelo-tecnico](archivo/modelo-tecnico.md) (gravedad por pares, grupo como intersección estricta), al `public: [...]` de [mcp-ingestion](archivo/mcp-ingestion.md) y, para el hack, a lo que [master-idea](master-idea.md) deja como visión (capas por círculo, peer-to-peer, nodos de pareja).
 
 ## Decisiones
 
@@ -125,7 +125,7 @@ type PublicProjection = {
   topics: Omit<Topic, "public">[];   // solo los tópicos con public: true
 };
 
-// Agregado el 21-11 (CLAUDE.md · Decisiones) para que la pantalla de sala dibuje los temas.
+// Agregado el 21-11 (docs/decisiones.md) para que la pantalla de sala dibuje los temas.
 type Theme = { id: string; name: string; topicIds: string[] };
 
 type Mesa = {
@@ -155,7 +155,7 @@ Tres tipos de conector. Todos devuelven `Signal[]`.
 
 | Fuente | Tipo | Acceso | Aporta | Ojo |
 |---|---|---|---|---|
-| Claude | Agente | MCP remoto ([mcp-ingestion](mcp-ingestion.md)) o prompt para copiar y pegar | sabe, busca, quiere ser | OAuth es lo caro: el prompt va primero. |
+| Claude | Agente | MCP remoto ([mcp-ingestion](archivo/mcp-ingestion.md)) o prompt para copiar y pegar | sabe, busca, quiere ser | OAuth es lo caro: el prompt va primero. |
 | ChatGPT / Gemini | Agente | Prompt para copiar y pegar | Lo mismo que Claude | El soporte de MCP en ChatGPT depende del plan (por confirmar). |
 | Spotify | OAuth | Web API con PKCE (sin secreto en el cliente): top artists, podcasts guardados | le gusta; los podcasts muestran qué aprende | En modo desarrollo hay que agregar el email de cada usuario; el tope de usuarios y los endpoints disponibles para apps nuevas cambiaron (por confirmar). |
 | GitHub | API pública | Repos, lenguajes y temas de un usuario, sin auth | sabe, con evidencia | — |
@@ -181,7 +181,7 @@ Tres tipos de conector. Todos devuelven `Signal[]`.
 
 Calcula sobre todos los presentes a la vez. No calcula pares.
 
-**Temas.** Clustering de todos los tópicos públicos de la sala por embedding, con umbral de coseno 0,60, el de [modelo-tecnico](modelo-tecnico.md). El umbral solo separa bien con el modelo de embeddings elegido el 21-11 (`paraphrase-multilingual-MiniLM-L12-v2`, sin tildes; ver `CLAUDE.md`). Los temas se calculan en memoria con los embeddings que viajan en la proyección. Para que el resultado sea determinista, los tópicos se ordenan por frecuencia y nombre antes de agrupar. El tema se nombra por su tópico más frecuente.
+**Temas.** Clustering de todos los tópicos públicos de la sala por embedding, con umbral de coseno 0,60, el de [modelo-tecnico](archivo/modelo-tecnico.md). El umbral solo separa bien con el modelo de embeddings elegido el 21-11 (`paraphrase-multilingual-MiniLM-L12-v2`, sin tildes; ver `CLAUDE.md`). Los temas se calculan en memoria con los embeddings que viajan en la proyección. Para que el resultado sea determinista, los tópicos se ordenan por frecuencia y nombre antes de agrupar. El tema se nombra por su tópico más frecuente.
 
 **Roles por tema.** Un mismo tópico puede dar más de un rol.
 
