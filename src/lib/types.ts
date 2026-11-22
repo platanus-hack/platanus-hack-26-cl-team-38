@@ -136,12 +136,11 @@ const SharedSideSchema = PublicTopicSchema.pick({ name: true, kind: true, depth:
 // Two topics that match: the same name (cosine 1) or by meaning (cosine >= 0.60).
 export const SharedTopicSchema = z.object({ mine: SharedSideSchema, theirs: SharedSideSchema, cosine: z.number() }).strict();
 
-// What you share with someone you crossed, as last computed. Kept one week.
+// What you share with someone you crossed. Computed on every request, never stored.
 export const MatchSchema = z.object({
   personId: z.string().min(1),
   displayName: z.string().min(1),
   shared: z.array(SharedTopicSchema).min(1),
-  computedAt: z.string(),
 }).strict();
 
 // There is no "rechazada" or "retirada": rejecting or withdrawing deletes the connection.
@@ -153,9 +152,67 @@ export const ConnectionSchema = z.object({
   status: ConnectionStatusSchema,
   proposedByMe: z.boolean(),
   acceptedAt: z.object({ mine: z.string().nullable(), theirs: z.string().nullable() }),
-  origin: z.object({ kind: z.enum(["sala", "lugar"]), roomId: z.string().nullable(), label: z.string().min(1) }),
+  // Where it was born. `label` is the room, place or mesa theme name, copied so it outlives them.
+  origin: z.object({ kind: z.enum(["sala", "lugar", "mesa"]), roomId: z.string().nullable(), mesaId: z.string().nullable(), label: z.string().min(1) }),
   // What they had in common when the second one accepted. Empty while it is a proposal.
   shared: z.array(SharedTopicSchema),
+  createdAt: z.string(),
+}).strict();
+
+// Mesas (src/lib/mesas/). The main decisions of a mesa's agents are the rows of
+// `deliberation_messages`: what changes the state of the mesa and is shown to people. One shape
+// per agent, and the only free text is `motivo`. Anything else an agent did is a log.
+export const MesaDecisionSchema = z.discriminatedUnion("agent", [
+  // The plan itself lives once, in `group_nodes`. A revision is a new group node.
+  z.object({ agent: z.literal("facilitador"), content: z.object({ round: z.union([z.literal(0), z.literal(1)]), groupNodeId: z.string().min(1) }).strict() }).strict(),
+  z.object({
+    agent: z.literal("miembro"),
+    personId: z.string().min(1),
+    // `motivo` is a public line: it does not repeat the day's intent nor name a private topic.
+    content: z.object({ decision: z.enum(["accept", "reject", "adjust"]), motivo: z.string().min(1).max(140) }).strict(),
+  }).strict(),
+  z.object({
+    agent: z.literal("verificador"),
+    content: z.object({
+      descartado: z.enum(["rol", "mesa"]),
+      personId: z.string().min(1).optional(),
+      razon: z.enum(["topico_inexistente", "kind_no_corresponde", "menos_de_tres"]),
+    }).strict(),
+  }).strict(),
+]);
+
+export const LogActorSchema = z.enum(["facilitador", "miembro", "verificador", "motor", "persona"]);
+export const LogEventSchema = z.enum(["llamada", "salida_invalida", "bloqueo_privacidad", "mesa_creada", "acepto", "rechazo"]);
+
+// The measurement of one call or action. No prompt and no intent fit here on purpose.
+export const LogDetailSchema = z.object({
+  model: z.string().max(60),
+  ms: z.number().nonnegative(),
+  tokensIn: z.number().int().nonnegative(),
+  tokensOut: z.number().int().nonnegative(),
+  attempt: z.number().int().positive(),
+  result: z.string().max(40),
+  // An output that did not become a decision. Never from a member agent: it saw private data.
+  output: z.unknown(),
+}).partial().strict();
+
+export const LogEntrySchema = z.object({
+  actor: LogActorSchema,
+  event: LogEventSchema,
+  userId: z.string().min(1).optional(),
+  mesaId: z.string().min(1).optional(),
+  detail: LogDetailSchema.default({}),
+}).strict()
+  .refine((log) => log.userId || log.mesaId, "Un log referencia a un usuario, a una mesa o a ambos")
+  .refine((log) => log.detail.output === undefined || !["miembro", "persona"].includes(log.actor), "El output de un agente de miembro no se guarda");
+
+// What a person reads of their own agent's activity.
+export const LogSchema = z.object({
+  id: z.number().int(),
+  mesaId: z.string().nullable(),
+  actor: LogActorSchema,
+  event: LogEventSchema,
+  detail: LogDetailSchema,
   createdAt: z.string(),
 }).strict();
 
@@ -181,3 +238,6 @@ export type SharedTopic = z.infer<typeof SharedTopicSchema>;
 export type Match = z.infer<typeof MatchSchema>;
 export type ConnectionStatus = z.infer<typeof ConnectionStatusSchema>;
 export type Connection = z.infer<typeof ConnectionSchema>;
+export type MesaDecision = z.infer<typeof MesaDecisionSchema>;
+export type LogEntry = z.input<typeof LogEntrySchema>;
+export type Log = z.infer<typeof LogSchema>;
