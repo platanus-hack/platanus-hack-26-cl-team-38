@@ -14,7 +14,6 @@ export const COPY = {
     placeholder: "Resuelve y coordina con tu red de contactos",
     intentHelp: "Solo la ve tu Agente. La usa para elegir con quién conectarte.",
     saved: "Tu Agente lo sabe",
-    pitch: "Conecta a tu Agente personal con tus contactos y sus Agentes para organizarse.",
     howTitle: "Cómo funciona Minga",
     how: [
       { icon: "sparkle", title: "Tu Agente te conoce", text: "Aprende de tus Fuentes lo que sabes, haces y buscas. Lo privado nunca sale de tu teléfono." },
@@ -23,17 +22,13 @@ export const COPY = {
       { icon: "check", title: "Ustedes deciden", text: "Eliges con quién y qué considerar. Los Agentes proponen el primer paso; ustedes lo hacen realidad." },
     ],
     howMore: "Entendido",
-    tagline: "Conexión entre personas potenciadas por Agentes",
     coincidence: "Coincidencia",
     locationOff: "Activar Ubicación",
     locating: "Buscando…",
     locationDenied: "Ubicación bloqueada en el navegador",
     contacts: "Contactos",
-    seeAll: "Ver todo",
-    contactsEmpty: "Todavía no tienes Contactos.",
     contactsHint: "Agrégalos desde Explorar",
     initiatives: "Iniciativas",
-    recent: "Recientes",
   },
 
   /** Iniciativa: from what you want to do on Inicio to a group Conversación. */

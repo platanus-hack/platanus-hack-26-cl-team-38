@@ -5,8 +5,8 @@ import { z } from "zod";
 import { PlanGraphSchema, PlanSummarySchema, PlanViewSchema, type PlanGraph, type PlanSummary, type PlanView } from "@/lib/types";
 import { api } from "./api";
 import { COPY } from "./copy";
-import { DEMO, type Encounter } from "./people";
-import { getPhone } from "./store";
+import { type Coincidence, contactsOf, DEMO, type Encounter, useEncounters } from "./people";
+import { getPhone, type PhoneState } from "./store";
 import type { Profile } from "../onboarding/store";
 
 // Plans live in the backend: the phone creates one, then watches its Agentes deliberate. Every
@@ -65,6 +65,17 @@ export function connectionEncounters(graph: PlanGraph, encounters: Encounter[]):
     (c): Encounter =>
       ({ ...(known.get(c.personId) ?? { person: { personId: c.personId, displayName: c.displayName, topics: [] }, distanceM: 0, radiusM: 50, at: new Date(0).toISOString(), place: "" }), relation: "conocido" }),
   );
+}
+
+/**
+ * Your Contactos are your connections: the ones both of you accepted, as the backend has them.
+ * Demo mode has no backend, so there they are the seed's Amigos and Conocidos. Undefined while loading.
+ */
+export function useContacts(s: PhoneState | undefined): Coincidence[] | undefined {
+  const encounters = useEncounters();
+  const graph = usePlanGraph();
+  if (!s || !encounters || graph === undefined) return undefined;
+  return contactsOf(s, graph ? connectionEncounters(graph, encounters) : encounters);
 }
 
 /** Your plans, newest first (empty in demo mode and while loading). */
