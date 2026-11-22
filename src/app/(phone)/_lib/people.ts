@@ -140,6 +140,9 @@ function withRelation(s: PhoneState, e: Encounter): Encounter {
   return mine ? { ...e, relation: mine } : e;
 }
 
+/** Graphs show first names only: a surname on some and not others made the labels uneven. */
+export const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? name;
+
 /** Whether others can find you, and you them. Off, Explorar shows nobody. */
 export const isVisible = (s: PhoneState) => s.privacy?.discoverable ?? true;
 

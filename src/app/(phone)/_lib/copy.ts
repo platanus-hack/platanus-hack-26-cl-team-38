@@ -27,6 +27,15 @@ export const COPY = {
   inicio: {
     titles: ["¿Qué quieres lograr?", "Apóyate en tu gente"],
     placeholder: "Resuelve y coordina con tus Contactos",
+    tips: [
+      "Tu Agente habla con los de tus contactos",
+      "Prueba: un viaje al sur en febrero",
+      "Otros Agentes solo ven lo que compartes",
+      "Prueba: buscar depto con dos roomies",
+      "Tus contactos traen lo que sabe su gente",
+      "Prueba: armar un asado el sábado",
+      "Tú eliges con quién y qué considerar",
+    ],
     saved: "Tu Agente lo sabe",
     howTitle: "Cómo funciona Minga",
     how: [
@@ -54,8 +63,6 @@ export const COPY = {
     howMore: "Entendido",
     contacts: "Contactos",
     contactsHint: "Agrégalos desde Explorar",
-    initiatives: "Iniciativas",
-    interests: "Intereses en común",
     with: (name: string) => `Con ${name}.`,
     withRemove: "Quitar",
   },
@@ -187,6 +194,7 @@ export const COPY = {
 
   coincidencias: {
     title: "Explorar",
+    heading: "Descubre tu red",
     filters: "Filtros",
     desc: "Personas con las que has coincidido según lo que te interesa o estás buscando.",
     loading: "Buscando…",
@@ -197,7 +205,6 @@ export const COPY = {
     invisible: "Activa el modo Visible para conectar con otros usuarios cerca tuyo.",
     turnVisible: "Activar modo Visible",
     range: "Rango de distancia",
-    rangeNote: "Solo verás personas dentro de tu rango",
     nobody: (m: number) => `Nadie a ${m} m todavía.`,
     widenHint: "Sube el rango en los filtros para ver más lejos.",
     here: "Aquí",
@@ -214,6 +221,20 @@ export const COPY = {
     requestCanceled: "Solicitud cancelada",
     nowContact: (name: string) => `${name} ya es tu Contacto`,
     connectFailed: "No pudimos enviar la solicitud. Intenta de nuevo.",
+    insights: {
+      label: "En tu red",
+      shared: (names: string[], topic: string) =>
+        names.length > 3
+          ? `${names[0]}, ${names[1]} y ${names.length - 2} más comparten ${topic} contigo`
+          : `${names.join(", ")} y tú comparten ${topic}`,
+      helpsYou: (name: string, topic: string) => `${name} sabe de ${topic}, algo que tú buscas`,
+      youHelp: (name: string, topic: string) => `${name} busca ${topic}, y tú sabes de eso`,
+      closest: (name: string, n: number) => `Con ${name} tienes más en común: ${n} Intereses`,
+      notContact: (name: string, n: number) => `${name} comparte ${n} Intereses contigo y aún no es tu Contacto`,
+      trend: (topic: string, n: number) => `${n} personas cerca se interesan en ${topic}`,
+      pair: (a: string, b: string, n: number) => `${a} y ${b} comparten ${n} Intereses entre sí`,
+      arrived: (name: string, min: number) => (min <= 1 ? `${name} acaba de llegar` : `${name} llegó hace ${min} min`),
+    },
   },
 
   /** Solicitudes: who asked to be your Contacto, answered from Chats. */

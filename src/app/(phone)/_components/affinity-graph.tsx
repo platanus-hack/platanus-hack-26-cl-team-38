@@ -2,7 +2,7 @@
 
 import { type Edge, type Entity, GraphCanvas, onEllipse, pose } from "./graph-canvas";
 import { setFocus } from "./match-graph";
-import type { Coincidence } from "../_lib/people";
+import { type Coincidence, firstName } from "../_lib/people";
 
 // Contactos: the stronger the relation, the closer to you. Strength is being an Amigo plus how
 // much you have in common; the size of each circle is what you have in common. Tap someone to see
@@ -67,7 +67,7 @@ export function AffinityGraph({
     const faded = (focus && !isFocus) || (match && !hit);
     E[id] = {
       kind: "person",
-      name: c.person.displayName,
+      name: firstName(c.person.displayName),
       avatar: c.person.personId,
       tone: rel,
       focus: isFocus,

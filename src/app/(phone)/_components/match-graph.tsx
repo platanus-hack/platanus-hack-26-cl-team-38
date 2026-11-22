@@ -1,7 +1,7 @@
 "use client";
 
 import { type Edge, type Entity, GraphCanvas, onEllipse, pose } from "./graph-canvas";
-import { cap, type TopicGroup } from "../_lib/people";
+import { cap, firstName, type TopicGroup } from "../_lib/people";
 import { setPhone } from "../_lib/store";
 
 // Coincidencias by topic: you in the middle, the topics you share with people around you. Tap a
@@ -33,6 +33,8 @@ function matchScene(W: number, H: number, me: Me, groups: TopicGroup[], focus: F
   };
 
   shown.forEach((g, i) => {
+    // With one open the others leave: faded, they sat under "Tú" at the bottom and covered it.
+    if (selected && g !== selected) return;
     const id = `t:${g.topic}`;
     const isSel = g === selected;
     // Staggered radii so neighbors near the top and bottom don't overlap.
@@ -49,23 +51,16 @@ function matchScene(W: number, H: number, me: Me, groups: TopicGroup[], focus: F
     );
     E[id] = {
       kind: "chip",
-      cls: isSel ? "sel" : selected ? "off" : "",
+      cls: isSel ? "sel" : "",
       label: cap(short(g.topic, compact && !isSel ? 14 : 30)),
       // Up to three faces under the name, the rest as a count. Open, the people are around it instead.
       n: !isSel && g.people.length > 3 ? g.people.length - 3 : undefined,
       faces: isSel ? undefined : g.people.slice(0, 3).map((c) => c.person.personId),
       onClick: () => setFocus({ topic: isSel ? null : g.topic, person: null }),
       from: me.id,
-      pose: isSel ? pose(hub) : pose(ring, selected ? 0.2 : 1),
+      pose: isSel ? pose(hub) : pose(ring),
     };
-    // A dot runs from you to each topic; with one open, only along that line.
-    edges.push({
-      a: me.id,
-      b: id,
-      kind: isSel ? "strong" : "soft",
-      o: selected && !isSel ? 0.25 : 1,
-      pulse: !selected || isSel ? i : undefined,
-    });
+    edges.push({ a: me.id, b: id, kind: isSel ? "strong" : "soft", pulse: i });
   });
 
   if (selected) {
@@ -77,7 +72,7 @@ function matchScene(W: number, H: number, me: Me, groups: TopicGroup[], focus: F
       const isFocus = focus.person === c.person.personId;
       E[id] = {
         kind: "person",
-        name: c.person.displayName,
+        name: firstName(c.person.displayName),
         avatar: c.person.personId,
         focus: isFocus,
         tone: c.relation,
