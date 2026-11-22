@@ -41,8 +41,10 @@ export function FullscreenToggle() {
 
   if (on) return null;
   return (
-    <button type="button" className="fs-toggle" onClick={toggle} aria-label={COPY.fullscreen} title={COPY.fullscreen}>
+    <button type="button" className="fs-toggle" onClick={toggle} aria-keyshortcuts="F">
       <Icon name="expand" />
+      {COPY.fullscreen}
+      <kbd>F</kbd>
     </button>
   );
 }

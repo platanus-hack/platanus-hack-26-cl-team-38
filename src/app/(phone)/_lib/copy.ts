@@ -21,7 +21,7 @@ export const COPY = {
   clearSearch: "Borrar búsqueda",
   whatIsThis: "¿Qué es esto?",
   sections: "Secciones",
-  fullscreen: "Pantalla completa (F)",
+  fullscreen: "Pantalla completa",
 
   tabs: { inicio: "Inicio", coincidencias: "Explorar", conversaciones: "Chats", perfil: "Perfil" },
 
