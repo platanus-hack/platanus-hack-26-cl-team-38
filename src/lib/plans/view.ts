@@ -20,6 +20,7 @@ export function describePlan(content: PlanContent, names: Names): string {
     ...content.pasos.map((p) => `- Paso: ${p.que} · responsable: ${nameOf(names, p.responsable)}`),
     ...content.abiertos.map((a) => `- Abierto: ${a}`),
     ...content.desacuerdos.map((d) => `- Desacuerdo de ${nameOf(names, d.personId)} sobre ${d.tema}: ${d.detalle}`),
+    ...(content.fuentes ?? []).map((f) => `- En internet: ${f.dato} (${f.url})`),
   ].join("\n");
 }
 

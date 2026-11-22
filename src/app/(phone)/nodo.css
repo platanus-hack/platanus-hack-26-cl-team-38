@@ -2055,7 +2055,19 @@
   .bubble.me .aportes {
     border-color: color-mix(in srgb, currentColor 25%, transparent);
   }
-  .plan-card {
+  .plan-card.ai li {
+  padding-left: 20px;
+}
+.plan-card.ai li::before {
+  top: 10px;
+}
+.plan-sources a {
+  color: var(--accent);
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.plan-card {
     align-self: stretch;
     margin-top: 16px;
   }
