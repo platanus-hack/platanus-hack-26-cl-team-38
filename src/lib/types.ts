@@ -269,6 +269,8 @@ export const PlanMessageSchema = z.discriminatedUnion("agent", [
       z.object({
         tipo: z.literal("postura"),
         postura: PlanLine,
+        // False when the person cannot be part of it ("no va"). Missing in plans older than this field.
+        participa: z.boolean().optional(),
         // The condition as the plan needs it, never its cause.
         condiciones: z.array(z.object({ texto: PlanLine, dura: z.boolean() }).strict()),
         aportes: z.array(PlanAporteSchema),
@@ -294,7 +296,9 @@ export const PlanMessageSchema = z.discriminatedUnion("agent", [
 
 // What one participant reads of a plan. An aporte from someone's network says whose contact it
 // was; the contact's name is there only for that participant.
-const PlanAporteViewSchema = z.object({ texto: PlanLine, origen: z.enum(["propio", "red"]), contacto: z.string().optional() }).strict();
+// `fuente` tells apart the contacts one agent quoted (1, 2, …, in the order it first quoted them)
+// without saying who they are: it is what the network view lights up.
+const PlanAporteViewSchema = z.object({ texto: PlanLine, origen: z.enum(["propio", "red"]), contacto: z.string().optional(), fuente: z.number().int().positive().optional() }).strict();
 const PlanMemberSchema = z.object({ personId: z.string().min(1), displayName: z.string().min(1) }).strict();
 
 export const PlanMessageViewSchema = z.object({
@@ -305,6 +309,8 @@ export const PlanMessageViewSchema = z.object({
   // One readable line per message, written by the server from the structured content.
   text: z.string(),
   decision: z.enum(["accept", "adjust", "block"]).optional(),
+  // Only on an opening: whether the person can be part of the plan.
+  participa: z.boolean().optional(),
   aportes: z.array(PlanAporteViewSchema),
   createdAt: z.string(),
 }).strict();
@@ -316,7 +322,8 @@ export const PlanViewSchema = z.object({
   status: PlanStatusSchema,
   round: z.number().int().nonnegative(),
   maxRounds: z.number().int().positive(),
-  members: z.array(PlanMemberSchema),
+  // `contacts`: how many connections outside the plan each one's agent can read (never who).
+  members: z.array(PlanMemberSchema.extend({ contacts: z.number().int().nonnegative() }).strict()),
   myRestrictions: z.array(z.string()),
   // The plan in force: the decided version, or the latest proposal while they deliberate.
   plan: z.object({ version: z.number().int().positive(), content: PlanContentSchema, decidedBy: PlanDecidedBySchema.nullable() }).strict().nullable(),

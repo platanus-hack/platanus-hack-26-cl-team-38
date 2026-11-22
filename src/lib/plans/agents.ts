@@ -15,6 +15,7 @@ export const ORCHESTRATOR_MODEL = "claude-sonnet-5-5";
 const Cited = z.object({ cita: z.string(), texto: z.string() });
 const OpeningSchema = z.object({
   postura: z.string(),
+  participa: z.boolean(),
   condiciones: z.array(z.object({ texto: z.string(), dura: z.boolean() })),
   aportes: z.array(Cited),
 });
@@ -103,7 +104,8 @@ Lo propone ${turn.ownerId === turn.me.personId ? `${n}, a quien representas` : o
   if (turn.proposal === null) {
     return `${head}
 
-Es la ronda de apertura. Entrega la postura de ${n} en una frase, sus condiciones (si tiene) y los aportes de ${n} y de su red que sirvan para armar este plan.`;
+Es la ronda de apertura. Entrega la postura de ${n} en una frase, sus condiciones (si tiene) y los aportes de ${n} y de su red que sirvan para armar este plan.
+"participa" es false solo si ${n} no puede ser parte de esto (no puede asistir, no está disponible): la postura dice entonces que no puede y, si sirve al plan, hasta cuándo. Aunque no participe, entrega igual los aportes de su red.`;
   }
   return `${head}
 

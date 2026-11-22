@@ -2477,3 +2477,214 @@ html:has(.nodo .graph-screen) body {
     transition: none !important;
   }
 }
+
+/* ============ the network of a plan (phone and desktop), drawn on slate ============ */
+.nodo .pnet {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.nodo .pnet-graph {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.nodo .pnet-status {
+  margin: 0;
+  padding-top: 12px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--on-slate-mute);
+  text-align: center;
+}
+/* someone's contacts: a dot each, never a name */
+.nodo .pnet .contact line {
+  stroke: rgba(242, 241, 238, 0.1);
+  stroke-width: 1;
+}
+.nodo .pnet .contact .dot {
+  fill: rgba(242, 241, 238, 0.3);
+  transition: fill 0.4s;
+}
+.nodo .pnet .contact .ask {
+  fill: var(--on-slate);
+  opacity: 0.7;
+}
+/* something in the plan came from this contact */
+.nodo .pnet .contact.lit line {
+  stroke: var(--amigo);
+  stroke-opacity: 0.7;
+  stroke-width: 1.5;
+}
+.nodo .pnet .contact.lit .dot {
+  fill: var(--amigo);
+}
+.nodo .pnet .contact .glow {
+  fill: rgba(255, 176, 32, 0.22);
+  animation: nodo-fade 0.4s ease-out;
+}
+.nodo .pnet .run {
+  fill: var(--accent);
+}
+.nodo .pnet .who .halo {
+  stroke: rgba(242, 241, 238, 0.55);
+  transition: stroke 0.4s;
+}
+.nodo .pnet .who.esperando .halo {
+  stroke-dasharray: 4 6;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nodo-spin 8s linear infinite;
+}
+.nodo .pnet .who.va .halo {
+  stroke: var(--cercania);
+}
+.nodo .pnet .who.no_va .halo {
+  stroke: rgba(242, 241, 238, 0.4);
+  stroke-dasharray: 3 4;
+}
+.nodo .pnet .who.no_va :is(.disc, svg) {
+  opacity: 0.4;
+}
+.nodo .pnet .who .more {
+  fill: var(--g-mute);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.nodo .pnet .chip rect {
+  fill: rgba(242, 241, 238, 0.1);
+}
+.nodo .pnet .chip text {
+  font-family: var(--mono);
+  font-size: 11px;
+  fill: var(--on-slate-mute);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.nodo .pnet .chip.ok rect {
+  fill: rgba(43, 212, 164, 0.18);
+}
+.nodo .pnet .chip.ok text {
+  fill: var(--cercania);
+}
+.nodo .pnet .chip.warn rect {
+  fill: rgba(255, 90, 54, 0.2);
+}
+.nodo .pnet .chip.warn text {
+  fill: var(--accent);
+}
+.nodo .pnet.compact .lbl {
+  font-size: 10px;
+  stroke-width: 3px;
+}
+.nodo .pnet.compact .chip text {
+  font-size: 9px;
+}
+.nodo .pnet.compact .pnet-status {
+  font-size: 11px;
+  padding-top: 6px;
+}
+/* on a phone: on top of the conversation, and it stays there while the Agentes talk */
+.nodo .plan-net {
+  align-self: stretch;
+  position: sticky;
+  top: 52px;
+  z-index: 3;
+  height: 320px;
+  margin: 0 -8px 12px;
+  padding: 10px 6px;
+  box-sizing: border-box;
+  border-radius: 24px;
+  background: var(--slate);
+  display: flex;
+  flex-direction: column;
+}
+.nodo .pnet-legend {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 18px;
+  font-size: 12px;
+  color: var(--on-slate-mute);
+}
+.nodo .pnet-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nodo .pnet-legend .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid var(--cercania);
+  box-sizing: border-box;
+}
+.nodo .pnet-legend .dot.nova {
+  border-color: rgba(242, 241, 238, 0.45);
+  border-style: dashed;
+}
+.nodo .pnet-legend .dot.amigo {
+  border-color: var(--amigo);
+  background: var(--amigo);
+}
+.nodo .pnet-legend .dot.contact {
+  border: 0;
+  width: 7px;
+  height: 7px;
+  background: rgba(242, 241, 238, 0.35);
+}
+@media (min-width: 1024px) {
+  /* the desktop panel already shows it, big */
+  .nodo .plan-net {
+    display: none;
+  }
+}
+/* "Va" / "No va" next to who says it */
+.nodo .pchip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 7px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+.nodo .pchip.va {
+  background: rgba(15, 138, 104, 0.14);
+  color: #0f8a68;
+}
+.nodo .pchip.nova {
+  background: rgba(27, 35, 38, 0.08);
+  color: var(--mute);
+}
+.nodo .msg.nova .bubble {
+  color: var(--mute);
+  background: rgba(27, 35, 38, 0.03);
+}
+.nodo .plan-card.ai .plan-summary {
+  font-size: 15px;
+  margin: 8px 0 12px;
+}
+.nodo .plan-confirm {
+  align-self: stretch;
+  margin-top: 16px;
+}
+.nodo .plan-confirm .sec .all,
+.nodo .plan-confirm .ok {
+  color: #0f8a68;
+}
+.nodo .plan-confirm .ok {
+  font-size: 12px;
+}
+.nodo .plan-confirm .row {
+  min-height: 48px;
+  animation: nodo-fade 0.3s ease-out;
+}
+@keyframes nodo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
