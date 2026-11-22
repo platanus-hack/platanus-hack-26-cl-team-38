@@ -32,7 +32,7 @@
     ["feature flags con posthog", "sabe", 2, ["claude"]],
     ["flujos de trabajo con claude code", "ofrece", 2, ["claude"]],
     ["growth engineering", "le_gusta", 2, ["claude"]],
-    ["hackathons", "hace", 2, ["claude"]],
+    ["hackathon", "hace", 2, ["claude"]],
     ["harness engineering", "le_gusta", 2, ["claude"]],
     ["python", "sabe", 2, ["chatgpt"]],
     ["realidad extendida", "le_gusta", 2, ["chatgpt"]],
