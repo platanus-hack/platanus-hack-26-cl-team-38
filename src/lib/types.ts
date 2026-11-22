@@ -2,7 +2,7 @@ import { z } from "zod";
 import { PRIVACY_CATEGORIES, PRIVACY_LEVELS } from "./privacy/taxonomy";
 
 export const KindSchema = z.enum(["es", "sabe", "hace", "le_gusta", "quiere_ser", "busca", "ofrece"]);
-export const SourceSchema = z.enum(["claude", "chatgpt", "gemini", "spotify", "github", "instagram"]);
+export const SourceSchema = z.enum(["claude", "chatgpt", "gemini", "spotify", "github", "instagram", "google"]);
 export const RoleSchema = z.enum(["aporta", "busca", "comparte"]);
 
 export const SignalSchema = z.object({
@@ -157,6 +157,19 @@ export const ConnectionSchema = z.object({
   // What they had in common when the second one accepted. Empty while it is a proposal.
   shared: z.array(SharedTopicSchema),
   createdAt: z.string(),
+}).strict();
+
+// Perfil → Información (src/lib/users/info.ts). Personal data, unlike everything above: only its
+// owner reads it. It never goes into a projection, a room, a log or anything another person gets.
+export const GenderSchema = z.enum(["Mujer", "Hombre", "No binario", "Prefiero no decir"]);
+
+export const UserInfoSchema = z.object({
+  email: z.email().max(120),
+  age: z.number().int().min(13).max(120),
+  gender: GenderSchema,
+  phone: z.string().regex(/^\+?[0-9 ]{8,16}$/),
+  // Optional: missing or empty both mean "not said".
+  occupation: z.string().max(60).default(""),
 }).strict();
 
 // Mesas (src/lib/mesas/). The main decisions of a mesa's agents are the rows of
@@ -350,6 +363,8 @@ export type SharedTopic = z.infer<typeof SharedTopicSchema>;
 export type Match = z.infer<typeof MatchSchema>;
 export type ConnectionStatus = z.infer<typeof ConnectionStatusSchema>;
 export type Connection = z.infer<typeof ConnectionSchema>;
+export type Gender = z.infer<typeof GenderSchema>;
+export type UserInfo = z.infer<typeof UserInfoSchema>;
 export type MesaDecision = z.infer<typeof MesaDecisionSchema>;
 export type LogEntry = z.input<typeof LogEntrySchema>;
 export type Log = z.infer<typeof LogSchema>;

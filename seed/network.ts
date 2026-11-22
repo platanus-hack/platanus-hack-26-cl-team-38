@@ -98,7 +98,9 @@ const PurposeSchema = z.object({
   organizers: z.array(PersonIdSchema).min(1),
   roles: z.array(z.object({ personId: PersonIdSchema, role: z.string().min(1) })).min(3),
   dependents: z.array(z.object({ name: z.string(), age: z.number().int(), with: PersonIdSchema })).optional(),
-  decisions: z.array(z.object({ variable: z.string().min(1) }).catchall(z.unknown())).min(1),
+  // `variable` names what is decided, never a search query. Date decisions don't carry one: as a
+  // query "fecha" scored over 0,50 against 87 of 106 non-helpers; their options or window say it.
+  decisions: z.array(z.object({ variable: z.string().min(1).optional() }).catchall(z.unknown())).min(1),
   tensions: z.array(z.string().min(1)).min(1),
   // People outside the room whose experience helps, and how many connection steps from the organizers.
   helpers: z.array(z.object({ personId: PersonIdSchema, degree: z.number().int().positive(), why: z.string().min(1) })),

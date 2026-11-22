@@ -11,6 +11,7 @@ import { COPY } from "../_lib/copy";
 import { affinities, cap, type Coincidence, DEMO, RELATION, useEncounters } from "../_lib/people";
 import { connectionEncounters, createPlan, usePlanGraph } from "../_lib/plans";
 import { type Initiative, setPhone } from "../_lib/store";
+import { toast } from "../_lib/toast";
 
 // From Inicio: what you want to do → who you want with you → what your Agente must consider →
 // the group Conversación, where the Agentes start coordinating.
@@ -109,6 +110,7 @@ export default function IniciativaPage() {
       limits,
     );
     setPhone((p) => ({ initiatives: [init, ...(p.initiatives ?? [])] }));
+    toast(C.created);
     router.replace(`/conversaciones/${init.id}`);
   }
 

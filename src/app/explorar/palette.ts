@@ -32,4 +32,5 @@ export const SOURCE_LABEL: Record<Source, string> = {
   spotify: "Spotify",
   github: "GitHub",
   instagram: "Instagram",
+  google: "Google",
 };

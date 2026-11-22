@@ -80,13 +80,46 @@ export function GraphStage() {
     inicio: COPY.desktop.building,
     fuentes: `${n} ${n === 1 ? "Fuente" : "Fuentes"}`,
     compartir: `${shared} públicos · ${topics.length - shared} contigo`,
-    coincidencias: `${coins.length} ${coins.length === 1 ? "Coincidencia" : "Coincidencias"} · ${clampRadius(s.radiusM)} m${selected ? ` · ${cap(selected.topic)}` : ""}`,
+    coincidencias: `${coins.length} ${coins.length === 1 ? "Coincidencia" : "Coincidencias"} · ${(s.nearOnly ?? true) ? `${clampRadius(s.radiusM)} m` : COPY.coincidencias.anyDistance}${selected ? ` · ${cap(selected.topic)}` : ""}`,
   }[phase];
+
+  const affinity = path.startsWith("/afinidades") && phase === "coincidencias";
+  const L = COPY.desktop.legend;
 
   return (
     <section className="stage" aria-label="Grafo">
+      {/* how to read the graph, in the corner */}
+      {affinity ? (
+        <ul className="legend">
+          <li>
+            <i className="dot amigo" />
+            {L.amigos}
+          </li>
+          <li>
+            <i className="dot conocido" />
+            {L.conocidos}
+          </li>
+          <li>
+            <i className="dot cercania" />
+            {L.cercania}
+          </li>
+          <li className="mute">{L.size}</li>
+          <li className="mute">{L.drag}</li>
+        </ul>
+      ) : phase === "coincidencias" ? (
+        <ul className="legend">
+          <li>{L.topics}</li>
+          <li className="mute">{L.tap}</li>
+        </ul>
+      ) : null}
+      {phase === "coincidencias" && !affinity && encounters && groups.length === 0 && (
+        <div className="stage-empty">
+          <p>{L.empty}</p>
+          {(s.nearOnly ?? true) && <p className="mute">{L.emptyHint}</p>}
+        </div>
+      )}
       <div className="gwrap">
-        {path.startsWith("/afinidades") && phase === "coincidencias" ? (
+        {affinity ? (
           <AffinityGraph
             W={W}
             H={H}
@@ -102,7 +135,7 @@ export function GraphStage() {
         )}
       </div>
       <p className="status" role="status">
-        {path.startsWith("/afinidades") && phase === "coincidencias" ? "Afinidades · Amigos, Conocidos y Cercanía" : status}
+        {affinity ? "Afinidades · Amigos, Conocidos y Cercanía" : status}
       </p>
     </section>
   );

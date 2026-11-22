@@ -19,12 +19,12 @@ import {
   coincidences,
   DEMO,
   myInterests,
-  RANGE,
   RELATION,
   relTime,
   useEncounters,
 } from "../_lib/people";
 import { getPhone, setPhone } from "../_lib/store";
+import { toast } from "../_lib/toast";
 
 const C = COPY.coincidencias;
 
@@ -39,7 +39,7 @@ export default function CoincidenciasPage() {
   const selected = groups.find((g) => g.topic === s.focus.topic);
   const person = coins.find((c) => c.person.personId === s.focus.person);
   const close = () => setFocus({ topic: null, person: null });
-  const fill = ((radius - RANGE.min) / (RANGE.max - RANGE.min)) * 100;
+  const near = s.nearOnly ?? true;
 
   return (
     <div className="app with-tabs">
@@ -47,38 +47,40 @@ export default function CoincidenciasPage() {
         <div className="head">
           <h1 className="t-title">{C.title}</h1>
           <p className="desc">{C.desc}</p>
-          <Mono className="mute">
-            {coins.length} · {radius} m{DEMO && !s.locationOn ? ` · ${C.demo}` : ""}
-          </Mono>
+          <div className="near-row">
+            <Mono className="mute">
+              {coins.length} · {near ? `${radius} m` : C.anyDistance}
+              {DEMO && !s.locationOn ? ` · ${C.demoShort}` : ""}
+            </Mono>
+            <label className="near-switch">
+              <span>{C.near}</span>
+              <button type="button" role="switch" aria-checked={near} aria-label={C.near} className="switch" onClick={() => setPhone({ nearOnly: !near })} />
+            </label>
+          </div>
         </div>
         {encounters === undefined ? (
           <div className="empty">{C.loading}</div>
         ) : groups.length === 0 ? (
-          <div className="empty">{C.empty}</div>
+          <div className="empty">
+            <div className="empty-state">
+              <p>{near ? C.empty : C.emptyAll}</p>
+              {near && (
+                <button type="button" className="btn light" onClick={() => setPhone({ nearOnly: false })}>
+                  {C.widen}
+                </button>
+              )}
+            </div>
+          </div>
         ) : (
-          <div className="gwrap" style={{ inset: "148px 0 184px" }}>
+          <div className="gwrap">
             <MatchGraph W={360} H={400} compact me={{ id: s.personId, name: s.displayName }} groups={groups} focus={s.focus} />
           </div>
         )}
-        <label className="range">
-          <span className="sr">Distancia</span>
-          <input
-            type="range"
-            min={RANGE.min}
-            max={RANGE.max}
-            step={RANGE.step}
-            value={radius}
-            style={{ ["--fill" as string]: `${fill}%` }}
-            onChange={(e) => setPhone({ radiusM: Number(e.target.value) })}
-            aria-valuetext={`${radius} metros`}
-          />
-          <Mono>{radius} m</Mono>
-        </label>
       </div>
 
       <Sheet open={!!selected || !!person} size={person ? "detail" : "list"} onClose={close} label={selected?.topic ?? ""}>
         {person ? (
-          <PersonSummary key={person.person.personId} c={person} myTopics={myInterests(s)} onBack={() => setFocus({ person: null })} />
+          <PersonSummary key={person.person.personId} c={person} myTopics={myInterests(s)} />
         ) : (
           selected && (
             <>
@@ -108,15 +110,16 @@ export default function CoincidenciasPage() {
   );
 }
 
-function setRelation(personId: string, rel: "amigo" | "conocido" | null) {
+function setRelation(personId: string, name: string, rel: "amigo" | "conocido" | null) {
   const next = { ...getPhone().relations };
   if (rel) next[personId] = rel;
   else delete next[personId];
   setPhone({ relations: next });
+  toast(rel ? `${name} agregado como ${RELATION[rel].label}` : `${name} ya no está en tus contactos`);
 }
 
 /** Someone's public information, summarized, and the way to add them as Amigo or Conocido. */
-function PersonSummary({ c, myTopics, onBack }: { c: Coincidence; myTopics: PublicTopic[]; onBack: () => void }) {
+function PersonSummary({ c, myTopics }: { c: Coincidence; myTopics: PublicTopic[] }) {
   const shared = new Set(c.items.map((i) => i.topic));
   const rest = c.person.topics.filter((t) => !shared.has(t.name));
   const mine = getPhone().relations?.[c.person.personId] ?? null;
@@ -135,7 +138,7 @@ function PersonSummary({ c, myTopics, onBack }: { c: Coincidence; myTopics: Publ
 
       <div className="segbar" role="radiogroup" aria-label="Agregar como" style={{ marginTop: 24 }}>
         {(["amigo", "conocido"] as const).map((rel) => (
-          <button key={rel} type="button" role="radio" aria-checked={mine === rel} onClick={() => setRelation(c.person.personId, mine === rel ? null : rel)}>
+          <button key={rel} type="button" role="radio" aria-checked={mine === rel} onClick={() => setRelation(c.person.personId, c.person.displayName, mine === rel ? null : rel)}>
             {mine === rel ? `${RELATION[rel].label} ✓` : `Agregar como ${RELATION[rel].label}`}
           </button>
         ))}
@@ -157,9 +160,6 @@ function PersonSummary({ c, myTopics, onBack }: { c: Coincidence; myTopics: Publ
         <Icon name="chat" />
         {COPY.startConversation}
       </Link>
-      <button type="button" className="link" style={{ display: "block", margin: "16px auto 0" }} onClick={onBack}>
-        Volver
-      </button>
     </>
   );
 }

@@ -31,6 +31,8 @@ export const COPY = {
     near: "Cerca",
     seeAll: "Ver todo",
     nearEmpty: "Nadie cerca todavía.",
+    nearHint: "Activa tu Ubicación",
+    recent: "Recientes",
     affinities: "Afinidades",
     affinitiesSub: "Tus contactos y lo que tienen en común",
   },
@@ -38,6 +40,7 @@ export const COPY = {
   /** Iniciativa: from what you want to do on Inicio to a group Conversación. */
   iniciativa: {
     label: "Iniciativa",
+    created: "Iniciativa creada: tu Agente ya escribió al grupo",
     who: "¿Con quién?",
     search: "Buscar por nombre o tema",
     suggested: "Sugeridos",
@@ -126,6 +129,11 @@ export const COPY = {
     rest: "También",
     conversation: "Ver Conversación",
     demo: "Coincidencias de ejemplo",
+    near: "Cercanía",
+    anyDistance: "cualquier distancia",
+    demoShort: "ejemplo",
+    emptyAll: "Sin Coincidencias todavía.",
+    widen: "Ver a cualquier distancia",
   },
 
   conversaciones: {
@@ -136,6 +144,14 @@ export const COPY = {
     empty: "Todavía no hay Conversaciones.",
     noBackend: "Sin registro todavía.",
     notFound: "No encontramos esta Conversación.",
+    yourself: "Tú",
+    confirm: "Confirmo",
+    confirmed: "Confirmaste",
+    otherDate: "Otra fecha",
+    otherDateAsk: "¿Podemos ver otra fecha?",
+    tellAgent: "Dile algo a tu Agente",
+    startOne: "Escribe en Inicio qué quieres lograr y tu Agente arma el grupo.",
+    startCta: "Crear una Iniciativa",
   },
 
   perfil: {
@@ -146,6 +162,7 @@ export const COPY = {
     outbox: "Qué salió de tu teléfono",
     account: "Cuenta",
     privacy: "Privacidad",
+    saved: "Privacidad guardada",
     privacyHelp: "Cada tema decide si se comparte. Lo que no, se queda en tu teléfono.",
     configure: "Configurar",
     byTopic: "Por tema",
@@ -205,6 +222,13 @@ export const COPY = {
     rejected: (n: number) => `El servidor dejó ${n === 1 ? "un Interés" : `${n} Intereses`} en privado.`,
     personal: "Ojo: podría decir de más sobre ti",
     toHome: "Seguir",
+    googleHint: "Trae los canales de YouTube que sigues y más ves, y lo que se repite en tu calendario. Llega como borrador y tú decides qué compartes.",
+    googleExport: "Pide tu exportación en Google Takeout: deja YouTube (historial y suscripciones) y Calendar, y en “Método de entrega” elige Añadir a Drive. Tarda cerca de un minuto.",
+    googleOpenTakeout: "Abrir Google Takeout",
+    googlePickHint: "Después elige el archivo .zip que quedó en tu Drive. Solo vemos ese archivo, no el resto de tu Drive.",
+    googlePick: "Elegir mi exportación",
+    googleOpening: "Abriendo Google…",
+    googleFailed: "No pudimos abrir Google. Intenta de nuevo.",
   },
 
   conectar: {
@@ -231,6 +255,17 @@ export const COPY = {
 
   desktop: {
     building: "Armando tu Nodo",
+    legend: {
+      amigos: "Amigos",
+      conocidos: "Conocidos",
+      cercania: "Cercanía",
+      size: "Más grande, más en común",
+      drag: "Arrastra un círculo para moverlo",
+      topics: "Temas que compartes; las caras son quienes los tienen",
+      tap: "Toca un tema para ver a esas personas",
+      empty: "Cuando coincidas con alguien, aparece aquí.",
+      emptyHint: "Apaga Cercanía para verlos a cualquier distancia.",
+    },
   },
 } as const;
 

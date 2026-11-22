@@ -14,7 +14,7 @@ import { Icon } from "../_components/icons";
 import { MingaMark } from "../_components/minga-mark";
 import { TopicItem } from "../_components/topic-item";
 import { Field, ListRow, Mono, Why } from "../_components/ui";
-import { checkIn, DEFAULT_ROOM } from "../_lib/api";
+import { api, checkIn, DEFAULT_ROOM } from "../_lib/api";
 import { COPY } from "../_lib/copy";
 import { EXAMPLE_SIGNALS, isLocked, isPublished } from "../_lib/node";
 import { type NodeSync, useNodeSync } from "../_lib/node-sync";
@@ -55,6 +55,8 @@ const roomFromLink = () => new URLSearchParams(window.location.search).get("sala
 const AGENTS: Source[] = ["claude", "chatgpt", "gemini"];
 const APPS: Source[] = ["spotify", "github"];
 const SOON: SoonSource[] = ["strava", "letterboxd"];
+// Opens Takeout with only YouTube and Calendar ticked; delivering to Drive is the person's choice there.
+const TAKEOUT_URL = "https://takeout.google.com/settings/takeout/custom/youtube,calendar";
 
 export function Onboarding({ team }: { team: TeamProfile[] }) {
   const s = usePhone();
@@ -165,6 +167,13 @@ function SourcesStep({ s, inbox, next }: { s: PhoneState; inbox: AssistantInbox;
               onClick={() => setOpen(src)}
             />
           ))}
+          <ListRow
+            lead={<BrandLogo source="google" />}
+            title={SOURCE_META.google.label}
+            data={count("google") ? <Icon name="check" /> : undefined}
+            chevron={!count("google")}
+            onClick={() => setOpen("google")}
+          />
           {APPS.map((src) => (
             <ListRow key={src} className="off" lead={<BrandLogo source={src} />} title={SOURCE_META[src].label} data={C.soon} />
           ))}
@@ -184,7 +193,7 @@ function SourcesStep({ s, inbox, next }: { s: PhoneState; inbox: AssistantInbox;
         </button>
       </div>
       <Sheet open={open !== null} size="auto" onClose={() => setOpen(null)} label={C.pasteTitle}>
-        {open && <AssistantSheet source={open} inbox={inbox} arrived={count(open)} />}
+        {open && (open === "google" ? <GoogleSheet arrived={count(open)} /> : <AssistantSheet source={open} inbox={inbox} arrived={count(open)} />)}
       </Sheet>
     </>
   );
@@ -261,6 +270,51 @@ function AssistantSheet({ source, inbox, arrived }: { source: Source; inbox: Ass
       <Link href="/conectar" className="link" style={{ display: "block", margin: "16px auto 0", textAlign: "center" }}>
         {COPY.conectar.fromSheet}
       </Link>
+    </>
+  );
+}
+
+/** Google: the person asks Takeout for an export delivered to their Drive, then picks that one file. */
+function GoogleSheet({ arrived }: { arrived: number }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
+
+  // Leaves the app for Google's permission screen and its file picker. What the server reads comes
+  // back through this phone's inbox (ConnectorInbox), so nothing is lost by navigating away.
+  async function pick() {
+    setBusy(true);
+    setError(false);
+    const response = await api("/api/google/start", { method: "POST" }).catch(() => null);
+    const body = (await response?.json().catch(() => null)) as { url?: string } | null;
+    if (!response?.ok || !body?.url) {
+      setBusy(false);
+      return setError(true);
+    }
+    window.location.assign(body.url);
+  }
+
+  return (
+    <>
+      <h2 className="t-title">
+        {C.pasteTitle} {SOURCE_META.google.label}
+      </h2>
+      <p className="mute" style={{ margin: "8px 0 16px" }}>
+        {C.googleHint}
+      </p>
+      <p className="mute">{C.googleExport}</p>
+      <a className="btn ghost" style={{ marginTop: 8 }} href={TAKEOUT_URL} target="_blank" rel="noopener noreferrer">
+        {C.googleOpenTakeout}
+      </a>
+      <p className="mute" style={{ marginTop: 16 }}>
+        {C.googlePickHint}
+      </p>
+      {error && <div className="err">{C.googleFailed}</div>}
+      <p role="status" className="mute" style={{ margin: "8px 0 0", minHeight: 20 }}>
+        {arrived > 0 ? C.arrived(arrived) : ""}
+      </p>
+      <button className="btn" style={{ marginTop: 8 }} disabled={busy} onClick={pick}>
+        {busy ? C.googleOpening : C.googlePick}
+      </button>
     </>
   );
 }
