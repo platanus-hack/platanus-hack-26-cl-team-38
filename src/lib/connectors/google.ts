@@ -25,10 +25,21 @@ export const googleAuthUrl = (clientId: string, redirectUri: string, state: stri
   `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, state, response_type: "code", scope: DRIVE_FILE_SCOPE })}`;
 
 // null: Google refused the code, or the person left the Drive permission unticked on Google's screen.
-export async function exchangeGoogleCode(config: GoogleConfig, code: string, redirectUri: string, fetcher: typeof fetch = fetch): Promise<string | null> {
+export async function exchangeGoogleCode(
+  config: GoogleConfig,
+  code: string,
+  redirectUri: string,
+  fetcher: typeof fetch = fetch,
+): Promise<string | null> {
   const response = await fetcher("https://oauth2.googleapis.com/token", {
     method: "POST",
-    body: new URLSearchParams({ code, client_id: config.clientId, client_secret: config.clientSecret, redirect_uri: redirectUri, grant_type: "authorization_code" }),
+    body: new URLSearchParams({
+      code,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+      redirect_uri: redirectUri,
+      grant_type: "authorization_code",
+    }),
   });
   const body = (await response.json().catch(() => null)) as { access_token?: unknown; scope?: unknown } | null;
   if (!response.ok || typeof body?.access_token !== "string") return null;
@@ -36,8 +47,14 @@ export async function exchangeGoogleCode(config: GoogleConfig, code: string, red
 }
 
 // shortcut: the whole ZIP goes through memory (300 MB cap), stream it to disk in parts if real exports are larger.
-export async function downloadDriveFile(accessToken: string, fileId: string, fetcher: typeof fetch = fetch): Promise<Buffer | null> {
-  const response = await fetcher(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media`, { headers: { authorization: `Bearer ${accessToken}` } });
+export async function downloadDriveFile(
+  accessToken: string,
+  fileId: string,
+  fetcher: typeof fetch = fetch,
+): Promise<Buffer | null> {
+  const response = await fetcher(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media`, {
+    headers: { authorization: `Bearer ${accessToken}` },
+  });
   if (!response.ok || Number(response.headers.get("content-length") ?? 0) > MAX_ZIP_BYTES) return null;
   const bytes = Buffer.from(await response.arrayBuffer());
   return bytes.length > MAX_ZIP_BYTES ? null : bytes;
@@ -92,7 +109,11 @@ export function unzip(zip: Buffer): ZipEntry[] {
   return entries;
 }
 
-const unescapeHtml = (text: string) => text.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+const unescapeHtml = (text: string) =>
+  text
+    .replace(/&amp;/g, "&")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"');
 
 // Most frequent first; ties by name, so the same export always gives the same signals.
 function tally(values: string[]): [string, number][] {
@@ -116,30 +137,52 @@ export function takeoutSignals(zip: Buffer): SynthesisSignal[] {
     if (/\.csv$/i.test(entry.name)) {
       // subscriptions.csv: channel id, channel url, channel title (quoted when it has a comma).
       for (const row of text.matchAll(/^[^,\n]*,https?:\/\/www\.youtube\.com\/channel\/[^,\n]*,(.+)$/gm)) {
-        subscribed.push(row[1].trim().replace(/^"(.*)"$/, "$1").replaceAll('""', '"'));
+        subscribed.push(
+          row[1]
+            .trim()
+            .replace(/^"(.*)"$/, "$1")
+            .replaceAll('""', '"'),
+        );
       }
     } else if (/\.ics$/i.test(entry.name)) {
       // iCalendar folds long lines: the continuation starts with a space.
-      for (const event of text.replace(/\r?\n[ \t]/g, "").split("BEGIN:VEVENT").slice(1)) {
-        const title = event.match(/^SUMMARY[^:\r\n]*:(.*)$/m)?.[1].replace(/\\([,;\\])/g, "$1").replace(/\\n/gi, " ").trim().toLowerCase();
+      for (const event of text
+        .replace(/\r?\n[ \t]/g, "")
+        .split("BEGIN:VEVENT")
+        .slice(1)) {
+        const title = event
+          .match(/^SUMMARY[^:\r\n]*:(.*)$/m)?.[1]
+          .replace(/\\([,;\\])/g, "$1")
+          .replace(/\\n/gi, " ")
+          .trim()
+          .toLowerCase();
         // A recurring event counts as repeated on its own; a one-off needs to show up three times.
         if (title) events.push(...Array<string>(/^RRULE/m.test(event) ? 3 : 1).fill(title));
       }
     } else {
       // Watch history, as HTML (Takeout's default) or JSON: the channel is the link to /channel/.
-      for (const m of text.matchAll(/href="https:\/\/www\.youtube\.com\/channel\/[^"]*">([^<]+)<\/a>/g)) watched.push(unescapeHtml(m[1]));
-      for (const m of text.matchAll(/"name":\s*"((?:[^"\\]|\\.)*)",\s*"url":\s*"https:\/\/www\.youtube\.com\/channel\//g)) watched.push(JSON.parse(`"${m[1]}"`) as string);
+      for (const m of text.matchAll(/href="https:\/\/www\.youtube\.com\/channel\/[^"]*">([^<]+)<\/a>/g))
+        watched.push(unescapeHtml(m[1]));
+      for (const m of text.matchAll(
+        /"name":\s*"((?:[^"\\]|\\.)*)",\s*"url":\s*"https:\/\/www\.youtube\.com\/channel\//g,
+      ))
+        watched.push(JSON.parse(`"${m[1]}"`) as string);
     }
   }
 
   // One video says nothing about a person; three or more of the same channel does.
-  const most = tally(watched).filter(([, count]) => count >= 3).slice(0, 15);
-  const repeated = tally(events).filter(([, count]) => count >= 3).slice(0, 10);
+  const most = tally(watched)
+    .filter(([, count]) => count >= 3)
+    .slice(0, 15);
+  const repeated = tally(events)
+    .filter(([, count]) => count >= 3)
+    .slice(0, 10);
   const byLabel = new Map<string, SynthesisSignal>();
   const add = (label: string, strength: number) => {
     const name = label.trim().slice(0, 60).trim();
     const key = name.toLowerCase();
-    if (name && (byLabel.get(key)?.strength ?? -1) < strength) byLabel.set(key, { source: "google", kind: "le_gusta", label: name, strength: Math.round(strength * 100) / 100 });
+    if (name && (byLabel.get(key)?.strength ?? -1) < strength)
+      byLabel.set(key, { source: "google", kind: "le_gusta", label: name, strength: Math.round(strength * 100) / 100 });
   };
   for (const [channel, count] of most) add(channel, count / most[0][1]);
   for (const [title] of repeated) add(title, 0.4);
@@ -151,7 +194,11 @@ type Deps = { inbox: Pick<InboxStore, "openFor" | "deliver">; classify: Classify
 
 // Same door as the other connectors: the privacy filter on the way in, then the inbox of the phone
 // that started the flow, which collects it as a private draft (see ConnectorInbox).
-export async function receiveTakeout(owner: string, zip: Buffer, deps: Deps): Promise<{ accepted: number; held: number }> {
+export async function receiveTakeout(
+  owner: string,
+  zip: Buffer,
+  deps: Deps,
+): Promise<{ accepted: number; held: number }> {
   const signals = takeoutSignals(zip);
   if (signals.length === 0) return { accepted: 0, held: 0 };
   const { accepted, held } = await admitSignals(signals, deps.classify);
@@ -159,15 +206,26 @@ export async function receiveTakeout(owner: string, zip: Buffer, deps: Deps): Pr
   return { accepted: accepted.length, held };
 }
 
-const page = (body: string) => `<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+const page = (
+  body: string,
+) => `<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Minga · Google</title><body style="font: 17px/1.5 system-ui, sans-serif; max-width: 26rem; margin: 3rem auto; padding: 0 1.25rem">${body}`;
 
-export const googleMessagePage = (message: string) => page(`<p>${message}</p><p><a href="/bienvenida">Volver a Minga</a></p>`);
+export const googleMessagePage = (message: string) =>
+  page(`<p>${message}</p><p><a href="/bienvenida">Volver a Minga</a></p>`);
 
 // Google's file picker, outside the app's shell so it is plain HTML with one script. `setAppId`
 // (the Cloud project number, the first part of the client id) is what lets `drive.file` download
 // the file the person picks.
-export function googlePickerPage({ accessToken, clientId, pick }: { accessToken: string; clientId: string; pick: string }): string {
+export function googlePickerPage({
+  accessToken,
+  clientId,
+  pick,
+}: {
+  accessToken: string;
+  clientId: string;
+  pick: string;
+}): string {
   const data = JSON.stringify({ accessToken, appId: clientId.split("-")[0], pick }).replaceAll("<", "\\u003c");
   return page(`<h1 style="font-size: 1.4rem">Elige tu exportación</h1>
 <p id="status">Está en la carpeta “Takeout” de tu Drive y su nombre empieza con “takeout-”.</p>

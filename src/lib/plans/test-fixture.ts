@@ -25,17 +25,29 @@ export const embed = async (texts: string[]) => texts.map(vec);
 export const person = (personId: string, displayName: string, topics: string[]): PublicProjection => ({
   personId,
   displayName,
-  topics: topics.map((name) => ({ id: `${personId}.${name}`, name, kind: "sabe", depth: 2, sources: ["claude"], embedding: vec(name) })),
+  topics: topics.map((name) => ({
+    id: `${personId}.${name}`,
+    name,
+    kind: "sabe",
+    depth: 2,
+    sources: ["claude"],
+    embedding: vec(name),
+  })),
 });
 
-export const lines = (texts: string[], prefix = "l") => texts.map((text, i) => ({ lineId: `${prefix}${i + 1}`, section: "Oficio", text, embedding: vec(text) }));
+export const lines = (texts: string[], prefix = "l") =>
+  texts.map((text, i) => ({ lineId: `${prefix}${i + 1}`, section: "Oficio", text, embedding: vec(text) }));
 
 export async function connect(db: Db, a: string, b: string) {
   await runConnectionAction(db, { personId: a, otherId: b, action: "propose", origin: { place: "test" } });
   await runConnectionAction(db, { personId: b, otherId: a, action: "accept" });
 }
 
-export async function createPlanNetwork(): Promise<{ pg: PGlite; db: Db; newPlan: (others?: string[], restrictions?: string[]) => Promise<string> }> {
+export async function createPlanNetwork(): Promise<{
+  pg: PGlite;
+  db: Db;
+  newPlan: (others?: string[], restrictions?: string[]) => Promise<string>;
+}> {
   const { pg, db } = await createTestDb();
   const people: [string, string, string[]][] = [
     ["yo", "Oscar Pérez", ["pagos"]],
@@ -49,16 +61,39 @@ export async function createPlanNetwork(): Promise<{ pg: PGlite; db: Db; newPlan
     ["hugo", "Hugo Vera", ["banquetería sin gluten"]],
   ];
   for (const [id, name, topics] of people) await saveProfile(db, person(id, name, topics));
-  for (const [a, b] of [["yo", "ana"], ["yo", "beto"], ["yo", "carla"], ["yo", "gabi"], ["ana", "dario"], ["ana", "elisa"], ["carla", "dario"], ["carla", "fabi"], ["dario", "hugo"]]) await connect(db, a, b);
+  for (const [a, b] of [
+    ["yo", "ana"],
+    ["yo", "beto"],
+    ["yo", "carla"],
+    ["yo", "gabi"],
+    ["ana", "dario"],
+    ["ana", "elisa"],
+    ["carla", "dario"],
+    ["carla", "fabi"],
+    ["dario", "hugo"],
+  ])
+    await connect(db, a, b);
   await saveContext(db, "dario", "red", "claude", lines(["La terraza de la viña recibe 180 personas"]));
-  await saveContext(db, "elisa", "red", "claude", [...lines(["Hago tortas de novios sin gluten y sin azúcar"]), { lineId: "l2", section: "Comida y bebida", text: "Como vegetariano.", embedding: vec("Como vegetariano.") }]);
+  await saveContext(db, "elisa", "red", "claude", [
+    ...lines(["Hago tortas de novios sin gluten y sin azúcar"]),
+    { lineId: "l2", section: "Comida y bebida", text: "Como vegetariano.", embedding: vec("Como vegetariano.") },
+  ]);
   await saveContext(db, "elisa", "propio", "seed", lines(["No puedo trabajar los domingos"], "s"));
   await saveContext(db, "ana", "propio", "seed", lines(["No puedo viajar a más de una hora"], "s"));
 
   let count = 0;
   async function newPlan(others = ["ana", "beto", "carla"], restrictions = ["Solo fines de semana"]) {
     const id = `plan-${++count}`;
-    if (!(await createPlan(db, { id, ownerId: "yo", intent: "Celebrar los 30 de Oscar en una viña", others, restrictions }))) throw new Error("no se pudo crear el plan de prueba");
+    if (
+      !(await createPlan(db, {
+        id,
+        ownerId: "yo",
+        intent: "Celebrar los 30 de Oscar en una viña",
+        others,
+        restrictions,
+      }))
+    )
+      throw new Error("no se pudo crear el plan de prueba");
     return id;
   }
   return { pg, db, newPlan };

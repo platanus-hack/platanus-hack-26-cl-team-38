@@ -17,10 +17,16 @@ export type Conversation = {
   messages: ConvMessage[];
 };
 
-const list = (xs: string[]) => (xs.length <= 1 ? (xs[0] ?? "") : `${xs.slice(0, -1).join(", ")} y ${xs[xs.length - 1]}`);
+const list = (xs: string[]) =>
+  xs.length <= 1 ? (xs[0] ?? "") : `${xs.slice(0, -1).join(", ")} y ${xs[xs.length - 1]}`;
 
 function stamp(lines: [string, string][], start: number, idBase: string): ConvMessage[] {
-  return lines.map(([from, text], i) => ({ id: `${idBase}-${i}`, from, text, at: new Date(start + i * 40_000).toISOString() }));
+  return lines.map(([from, text], i) => ({
+    id: `${idBase}-${i}`,
+    from,
+    text,
+    at: new Date(start + i * 40_000).toISOString(),
+  }));
 }
 
 const fold = (s: string) =>
@@ -28,11 +34,33 @@ const fold = (s: string) =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
-const STOP = new Set(["quiero", "hacer", "para", "como", "with", "sobre", "entre", "este", "esta", "unos", "unas", "algo", "todo", "tener", "armar"]);
+const STOP = new Set([
+  "quiero",
+  "hacer",
+  "para",
+  "como",
+  "with",
+  "sobre",
+  "entre",
+  "este",
+  "esta",
+  "unos",
+  "unas",
+  "algo",
+  "todo",
+  "tener",
+  "armar",
+]);
 
 /** The words of an intent worth matching against topics ("viaje", "brasil"). */
 export function intentWords(intent: string): string[] {
-  return [...new Set(fold(intent).split(/[^a-z0-9ñ]+/).filter((w) => w.length >= 4 && !STOP.has(w)))];
+  return [
+    ...new Set(
+      fold(intent)
+        .split(/[^a-z0-9ñ]+/)
+        .filter((w) => w.length >= 4 && !STOP.has(w)),
+    ),
+  ];
 }
 
 /** The public topic of theirs closest to what you want to do, if any ("viajes" for "un viaje"). */
@@ -50,7 +78,8 @@ function wants(goal: string): string {
   const m = goal.match(/^(?:yo\s+)?(quiero|quisiera|me gustar[ií]a|necesito|busco|tengo que)\s+(.*)$/i);
   if (!m) return `quiere ${goal.charAt(0).toLowerCase()}${goal.slice(1)}`;
   const verb = m[1].toLowerCase();
-  const third = verb === "necesito" ? "necesita" : verb === "busco" ? "busca" : verb === "tengo que" ? "tiene que" : "quiere";
+  const third =
+    verb === "necesito" ? "necesita" : verb === "busco" ? "busca" : verb === "tengo que" ? "tiene que" : "quiere";
   return `${third} ${m[2]}`;
 }
 
@@ -58,7 +87,9 @@ const hash = (s: string) => [...s].reduce((h, ch) => (h * 31 + ch.charCodeAt(0))
 
 /** An Iniciativa: your Agente opens with what you want, the others' Agentes answer. */
 export function buildInitiative(myName: string, init: Initiative, contacts: Coincidence[]): Conversation {
-  const people = init.members.map((id) => contacts.find((c) => c.person.personId === id)).filter((c): c is Coincidence => !!c);
+  const people = init.members
+    .map((id) => contacts.find((c) => c.person.personId === id))
+    .filter((c): c is Coincidence => !!c);
   const words = intentWords(init.intent);
   const goal = init.intent.trim().replace(/[.!]+$/, "");
   const theme = cap(goal.length > 48 ? `${goal.slice(0, 47)}…` : goal);
@@ -68,11 +99,17 @@ export function buildInitiative(myName: string, init: Initiative, contacts: Coin
     [
       "me",
       `Hola a todos. Soy el Agente de ${myName}: ${wants(goal)}. ${
-        experts.length ? `Los invité porque ${list(experts.slice(0, 2).map((x) => `${x.p.person.displayName} sabe de ${x.topic}`))}.` : "Los invité porque son su gente."
+        experts.length
+          ? `Los invité porque ${list(experts.slice(0, 2).map((x) => `${x.p.person.displayName} sabe de ${x.topic}`))}.`
+          : "Los invité porque son su gente."
       }`,
     ],
   ];
-  if (init.restrictions.length) lines.push(["me", `${myName} pidió considerar: ${list(init.restrictions.map((r) => r.charAt(0).toLowerCase() + r.slice(1)))}.`]);
+  if (init.restrictions.length)
+    lines.push([
+      "me",
+      `${myName} pidió considerar: ${list(init.restrictions.map((r) => r.charAt(0).toLowerCase() + r.slice(1)))}.`,
+    ]);
 
   const replies = [
     (n: string) => `${n} se suma. ¿Qué día les acomoda?`,
@@ -94,7 +131,10 @@ export function buildInitiative(myName: string, init: Initiative, contacts: Coin
     lines.push([p.person.personId, text]);
   });
   const weekend = init.restrictions.some((r) => /fin(es)? de semana/i.test(r));
-  lines.push(["me", `Propongo un primer paso: ${weekend ? "juntarnos este sábado" : "una llamada corta de 15 minutos esta semana"}. Les aviso cuando todos confirmen.`]);
+  lines.push([
+    "me",
+    `Propongo un primer paso: ${weekend ? "juntarnos este sábado" : "una llamada corta de 15 minutos esta semana"}. Les aviso cuando todos confirmen.`,
+  ]);
 
   const messages = stamp(lines, new Date(init.at).getTime(), init.id);
   return { id: init.id, theme, members: people, at: messages[messages.length - 1].at, messages };

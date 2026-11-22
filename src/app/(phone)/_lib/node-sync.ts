@@ -44,11 +44,18 @@ export function useNodeSync(s: PhoneState | undefined): NodeSync {
   const node = s?.node;
   const [attempt, setAttempt] = useState(0);
   // The outcome of the last review, tied to what it reviewed: "reviewing" is derived, not stored.
-  const [result, setResult] = useState<{ key: string; held: number; error?: string; dropped: string[] }>({ key: "", held: 0, dropped: [] });
+  const [result, setResult] = useState<{ key: string; held: number; error?: string; dropped: string[] }>({
+    key: "",
+    held: 0,
+    dropped: [],
+  });
 
   const drafts = useMemo(() => (signals && personId ? draftsFromSignals(personId, signals) : []), [signals, personId]);
   // What the filter called `sensible` never enters the node, so it would look unreviewed forever.
-  const missing = useMemo(() => needsVerdict(node ?? undefined, drafts).filter((d) => !result.dropped.includes(draftKey(d))), [node, drafts, result.dropped]);
+  const missing = useMemo(
+    () => needsVerdict(node ?? undefined, drafts).filter((d) => !result.dropped.includes(draftKey(d))),
+    [node, drafts, result.dropped],
+  );
   const key = `${attempt}|${missing.map(draftKey).join(",")}`;
 
   useEffect(() => {
@@ -59,7 +66,11 @@ export function useNodeSync(s: PhoneState | undefined): NodeSync {
     fetchVerdicts(missing)
       .then((verdicts) => {
         if (cancelled) return;
-        apply(personId, drafts, missing.map((draft, i) => ({ draft, verdict: verdicts[i] })));
+        apply(
+          personId,
+          drafts,
+          missing.map((draft, i) => ({ draft, verdict: verdicts[i] })),
+        );
         const dropped = missing.filter((_, i) => verdicts[i].level === "sensible").map(draftKey);
         setResult((r) => ({ key, held: dropped.length, dropped: [...r.dropped, ...dropped] }));
       })

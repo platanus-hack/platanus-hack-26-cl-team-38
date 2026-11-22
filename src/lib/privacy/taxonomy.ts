@@ -62,7 +62,9 @@ const PERSONAL_REASONS: Record<PersonalCategory, string> = {
 // Fixed copy instead of model-written text: it is faster (no output tokens) and says the same thing every time.
 export function reasonFor(category: PrivacyCategory | undefined): string {
   if (!category) return "Podría decir de más sobre ti.";
-  return category in PERSONAL_REASONS ? PERSONAL_REASONS[category as PersonalCategory] : `Toca un tema de ${CATEGORY_LABELS[category]}.`;
+  return category in PERSONAL_REASONS
+    ? PERSONAL_REASONS[category as PersonalCategory]
+    : `Toca un tema de ${CATEGORY_LABELS[category]}.`;
 }
 
 export type Finding = {

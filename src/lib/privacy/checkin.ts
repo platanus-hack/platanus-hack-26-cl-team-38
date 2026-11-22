@@ -10,7 +10,13 @@ export const CheckInSchema = z
     roomCode: z.string().min(1).max(40),
     personId: z.string().min(1).max(80),
     displayName: z.string().min(1).max(40),
-    topics: z.array(PublicTopicSchema.omit({ embedding: true }).extend({ name: z.string().min(1).max(80) }).strict()).max(60),
+    topics: z
+      .array(
+        PublicTopicSchema.omit({ embedding: true })
+          .extend({ name: z.string().min(1).max(80) })
+          .strict(),
+      )
+      .max(60),
   })
   .strict();
 
@@ -27,7 +33,10 @@ type Deps = {
 export async function admitCheckIn(
   body: unknown,
   deps: Deps,
-): Promise<{ ok: false; error: string } | { ok: true; roomCode: string; projection: PublicProjection; rejected: CheckInRejection[] }> {
+): Promise<
+  | { ok: false; error: string }
+  | { ok: true; roomCode: string; projection: PublicProjection; rejected: CheckInRejection[] }
+> {
   const parsed = CheckInSchema.safeParse(body);
   if (!parsed.success) return { ok: false, error: z.prettifyError(parsed.error) };
   const { roomCode, personId, displayName, topics } = parsed.data;
@@ -45,5 +54,10 @@ export async function admitCheckIn(
     return [];
   });
 
-  return { ok: true, roomCode, projection: PublicProjectionSchema.parse({ personId, displayName, topics: admitted }), rejected };
+  return {
+    ok: true,
+    roomCode,
+    projection: PublicProjectionSchema.parse({ personId, displayName, topics: admitted }),
+    rejected,
+  };
 }

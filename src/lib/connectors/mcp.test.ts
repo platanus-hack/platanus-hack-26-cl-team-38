@@ -6,7 +6,12 @@ import { createConnectorServer } from "./mcp";
 
 // Stands in for the privacy filter: a topic or line is sensitive when it contains the word.
 const classifier = (sensible: string[] = []) =>
-  vi.fn(async (topics: { name: string }[]) => topics.map((t) => ({ privacy: { level: sensible.some((word) => t.name.includes(word)) ? ("sensible" as const) : ("segura" as const) }, judged: true })));
+  vi.fn(async (topics: { name: string }[]) =>
+    topics.map((t) => ({
+      privacy: { level: sensible.some((word) => t.name.includes(word)) ? ("sensible" as const) : ("segura" as const) },
+      judged: true,
+    })),
+  );
 
 const OWNER = "a".repeat(64);
 
@@ -34,9 +39,17 @@ describe("createConnectorServer", () => {
 
   it("subir_perfil filters the file line by line and leaves it in the authorized phone's inbox", async () => {
     const { store, call } = await setup(["medicación"]);
-    const result = await call("subir_perfil", { source: "claude", markdown: "## Viajes\n- Prefiero hostales.\n- Tomo medicación para dormir." });
-    expect(result).toEqual({ isError: false, text: expect.stringContaining("Recibido el perfil: 1 líneas. 1 líneas se descartaron") });
-    expect(store.drainOwner(OWNER).profiles).toEqual([{ source: "claude", markdown: "## Viajes\n- Prefiero hostales." }]);
+    const result = await call("subir_perfil", {
+      source: "claude",
+      markdown: "## Viajes\n- Prefiero hostales.\n- Tomo medicación para dormir.",
+    });
+    expect(result).toEqual({
+      isError: false,
+      text: expect.stringContaining("Recibido el perfil: 1 líneas. 1 líneas se descartaron"),
+    });
+    expect(store.drainOwner(OWNER).profiles).toEqual([
+      { source: "claude", markdown: "## Viajes\n- Prefiero hostales." },
+    ]);
   });
 
   it("subir_senales filters the signals and leaves them in the authorized phone's inbox", async () => {
@@ -50,7 +63,9 @@ describe("createConnectorServer", () => {
 
   it("refuses signals that carry evidence", async () => {
     const { store, call } = await setup();
-    const result = await call("subir_senales", { signals: [{ source: "claude", kind: "sabe", label: "pagos", strength: 0.8, evidence: "me lo contó" }] });
+    const result = await call("subir_senales", {
+      signals: [{ source: "claude", kind: "sabe", label: "pagos", strength: 0.8, evidence: "me lo contó" }],
+    });
     expect(result.isError).toBe(true);
     expect(store.drainOwner(OWNER).signals).toEqual([]);
   });

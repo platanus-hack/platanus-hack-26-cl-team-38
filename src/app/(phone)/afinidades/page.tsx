@@ -42,13 +42,23 @@ export default function AfinidadesPage() {
       <div className="graph-screen">
         <div className="head" style={{ pointerEvents: "auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <BackLink fallback="/" style={{ display: "inline-flex", transform: "scaleX(-1)", padding: 8, margin: -8 }} />
+            <BackLink
+              fallback="/"
+              style={{ display: "inline-flex", transform: "scaleX(-1)", padding: 8, margin: -8 }}
+            />
             <h1 className="t-title">{C.title}</h1>
           </div>
           <p className="desc">{C.desc}</p>
           <div className="gsearch" role="search">
             <Icon name="search" />
-            <input type="search" value={query} placeholder={C.search} aria-label={C.search} enterKeyHint="search" onChange={(e) => search(e.target.value)} />
+            <input
+              type="search"
+              value={query}
+              placeholder={C.search}
+              aria-label={C.search}
+              enterKeyHint="search"
+              onChange={(e) => search(e.target.value)}
+            />
             {query && (
               <button type="button" aria-label={C.clear} onClick={() => search("")}>
                 <Icon name="x" />
@@ -58,7 +68,13 @@ export default function AfinidadesPage() {
           {common.length > 0 && (
             <div className="gsearch-out" role="group" aria-label={C.common}>
               {common.map((t) => (
-                <button key={t} type="button" className="gsuggest" aria-pressed={same(t)} onClick={() => search(same(t) ? "" : t)}>
+                <button
+                  key={t}
+                  type="button"
+                  className="gsuggest"
+                  aria-pressed={same(t)}
+                  onClick={() => search(same(t) ? "" : t)}
+                >
                   {t}
                 </button>
               ))}
@@ -81,12 +97,24 @@ export default function AfinidadesPage() {
           <div className="empty">{COPY.coincidencias.loading}</div>
         ) : (
           <div className="gwrap">
-            <AffinityGraph W={360} H={460} me={{ id: s.personId }} contacts={contacts} focus={s.focus.person} match={found?.ids ?? null} />
+            <AffinityGraph
+              W={360}
+              H={460}
+              me={{ id: s.personId }}
+              contacts={contacts}
+              focus={s.focus.person}
+              match={found?.ids ?? null}
+            />
           </div>
         )}
       </div>
 
-      <Sheet open={!!person} size="detail" onClose={() => setFocus({ person: null })} label={person?.person.displayName ?? ""}>
+      <Sheet
+        open={!!person}
+        size="detail"
+        onClose={() => setFocus({ person: null })}
+        label={person?.person.displayName ?? ""}
+      >
         {person && (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -103,12 +131,23 @@ export default function AfinidadesPage() {
               key={person.person.personId}
               prompt={COPY.ai.afinidades}
               listLabel={COPY.ai.found}
-              insight={discover(myInterests(s), { name: person.person.displayName, topics: person.person.topics, items: person.items })}
+              insight={discover(myInterests(s), {
+                name: person.person.displayName,
+                topics: person.person.topics,
+                items: person.items,
+              })}
             />
             <div className="sec">{C.common}</div>
-            {person.items.length ? <p style={{ margin: 0 }}>{person.items.map(matchPhrase).join(" · ")}</p> : <p className="mute">{C.nothing}</p>}
+            {person.items.length ? (
+              <p style={{ margin: 0 }}>{person.items.map(matchPhrase).join(" · ")}</p>
+            ) : (
+              <p className="mute">{C.nothing}</p>
+            )}
             <div className="sec">{C.rest}</div>
-            <MoreTopics key={`m-${person.person.personId}`} topics={person.person.topics.filter((t) => !person.items.some((i) => i.topic === t.name))} />
+            <MoreTopics
+              key={`m-${person.person.personId}`}
+              topics={person.person.topics.filter((t) => !person.items.some((i) => i.topic === t.name))}
+            />
             {/* There is no one-to-one chat: with one person it is still an Iniciativa, of two. */}
             <button
               type="button"

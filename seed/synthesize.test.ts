@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest";
 import type { Signal } from "@/lib/types";
 import { synthesizeSeedTopics } from "./synthesize";
 
-const signal = (over: Partial<Signal>): Signal => ({ source: "chatgpt", kind: "sabe", label: "x", strength: 0.7, evidence: "", ...over });
+const signal = (over: Partial<Signal>): Signal => ({
+  source: "chatgpt",
+  kind: "sabe",
+  label: "x",
+  strength: 0.7,
+  evidence: "",
+  ...over,
+});
 
 describe("synthesizeSeedTopics", () => {
   it("merges the same label across sources and raises depth for corroboration", () => {

@@ -27,7 +27,11 @@ function setStoredMe(personId?: string) {
   meListeners.forEach((l) => l());
 }
 function useMe() {
-  return useSyncExternalStore(subscribeMe, () => localStorage.getItem(ME_KEY) ?? undefined, () => undefined);
+  return useSyncExternalStore(
+    subscribeMe,
+    () => localStorage.getItem(ME_KEY) ?? undefined,
+    () => undefined,
+  );
 }
 
 export function GraphExplorer() {
@@ -59,9 +63,14 @@ export function GraphExplorer() {
 
   const everyone = useMemo(() => {
     const byId = new Map(memberships.map((m) => [m.person_id, m.display_name]));
-    return [...byId].map(([personId, displayName]) => ({ personId, displayName })).sort((a, b) => a.displayName.localeCompare(b.displayName));
+    return [...byId]
+      .map(([personId, displayName]) => ({ personId, displayName }))
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
   }, [memberships]);
-  const myRoomIds = useMemo(() => new Set(memberships.filter((m) => m.person_id === me).map((m) => m.room_id)), [memberships, me]);
+  const myRoomIds = useMemo(
+    () => new Set(memberships.filter((m) => m.person_id === me).map((m) => m.room_id)),
+    [memberships, me],
+  );
   const visibleRooms = onlyMyRooms && me ? rooms.filter((r) => myRoomIds.has(r.id)) : rooms;
   const roomId = visibleRooms.some((r) => r.id === pickedRoom) ? pickedRoom : visibleRooms[0]?.id;
 
@@ -83,7 +92,10 @@ export function GraphExplorer() {
   const full = useMemo(() => topicGraph(projections, threshold), [projections, threshold]);
   const graph = useMemo(() => filterGraph(full, { me: egoOn ? me : undefined, types }), [full, egoOn, me, types]);
   const linked = useMemo(() => new Set(graph.links.flatMap((l) => [l.source, l.target])), [graph]);
-  const nodes = useMemo(() => graph.nodes.filter((n) => linked.has(n.id) || (egoOn && n.personId === me)), [graph, linked, egoOn, me]);
+  const nodes = useMemo(
+    () => graph.nodes.filter((n) => linked.has(n.id) || (egoOn && n.personId === me)),
+    [graph, linked, egoOn, me],
+  );
   const people = useMemo(() => {
     const shown = new Set(nodes.map((n) => n.personId));
     return projections
@@ -101,7 +113,12 @@ export function GraphExplorer() {
   const focus: Focus = useMemo(() => {
     if (theme) {
       const names = new Set(theme.topicNames);
-      return { nodeIds: new Set([...graph.nodes.filter((n) => names.has(n.name)).map((n) => n.id), ...peopleOf(theme).map((p) => `person:${p}`)]) };
+      return {
+        nodeIds: new Set([
+          ...graph.nodes.filter((n) => names.has(n.name)).map((n) => n.id),
+          ...peopleOf(theme).map((p) => `person:${p}`),
+        ]),
+      };
     }
     if (!selectedPerson) return undefined;
     const own = new Set(graph.nodes.filter((n) => n.personId === selectedPerson).map((n) => n.id));
@@ -109,12 +126,18 @@ export function GraphExplorer() {
     const ids = new Set([`person:${selectedPerson}`, ...own]);
     for (const l of graph.links) {
       if (!own.has(l.source) && !own.has(l.target)) continue;
-      ids.add(l.source).add(l.target).add(`person:${owner.get(l.source)}`).add(`person:${owner.get(l.target)}`);
+      ids
+        .add(l.source)
+        .add(l.target)
+        .add(`person:${owner.get(l.source)}`)
+        .add(`person:${owner.get(l.target)}`);
     }
     return { nodeIds: ids };
   }, [graph, selectedPerson, theme]);
 
-  const counts = Object.fromEntries(LINK_TYPES.map((t) => [t, graph.links.filter((l) => l.type === t).length])) as Record<LinkType, number>;
+  const counts = Object.fromEntries(
+    LINK_TYPES.map((t) => [t, graph.links.filter((l) => l.type === t).length]),
+  ) as Record<LinkType, number>;
 
   const clearSelection = () => {
     setSelectedPerson(undefined);
@@ -237,7 +260,12 @@ export function GraphExplorer() {
               />
               <span className="font-medium">
                 {room.name}
-                {myRoomIds.has(room.id) && <span className="ml-1.5 inline-block size-2 rounded-full align-middle" style={{ background: ME_COLOR }} />}
+                {myRoomIds.has(room.id) && (
+                  <span
+                    className="ml-1.5 inline-block size-2 rounded-full align-middle"
+                    style={{ background: ME_COLOR }}
+                  />
+                )}
               </span>
               <span className="text-xs text-[#18212F]/55">código {room.code}</span>
             </label>
@@ -293,10 +321,26 @@ function peopleOf(theme: PreviewTheme): string[] {
   return [...new Set(Object.values(theme.roles).flat())];
 }
 
-function Toggle({ checked, disabled, onChange, children }: { checked: boolean; disabled?: boolean; onChange: (v: boolean) => void; children: React.ReactNode }) {
+function Toggle({
+  checked,
+  disabled,
+  onChange,
+  children,
+}: {
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (v: boolean) => void;
+  children: React.ReactNode;
+}) {
   return (
     <label className="flex items-center gap-2 text-sm has-disabled:opacity-45">
-      <input type="checkbox" checked={checked && !disabled} disabled={disabled} onChange={(e) => onChange(e.target.checked)} className="accent-[#18212F]" />
+      <input
+        type="checkbox"
+        checked={checked && !disabled}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+        className="accent-[#18212F]"
+      />
       {children}
     </label>
   );
@@ -330,11 +374,18 @@ function ThemeList({
             >
               <span className="flex w-full justify-between gap-2 font-medium">
                 {t.name}
-                <span className="text-xs font-normal group-aria-pressed:text-white" style={{ color: OUTCOME[t.outcome].text }}>
+                <span
+                  className="text-xs font-normal group-aria-pressed:text-white"
+                  style={{ color: OUTCOME[t.outcome].text }}
+                >
                   {OUTCOME[t.outcome].label} · {t.personCount}
                 </span>
               </span>
-              <span className="text-xs opacity-65">{peopleOf(t).map((p) => names.get(p) ?? p).join(", ")}</span>
+              <span className="text-xs opacity-65">
+                {peopleOf(t)
+                  .map((p) => names.get(p) ?? p)
+                  .join(", ")}
+              </span>
             </button>
           </li>
         ))}
@@ -358,7 +409,11 @@ function PersonPanel({
     <section className="flex flex-col gap-4">
       <div className="flex items-baseline justify-between">
         <h2 className="font-heading text-2xl font-semibold">{person.displayName}</h2>
-        <button type="button" onClick={onClose} className="text-sm text-[#18212F]/60 underline-offset-4 hover:underline">
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-sm text-[#18212F]/60 underline-offset-4 hover:underline"
+        >
           Ver a todos
         </button>
       </div>
@@ -411,7 +466,8 @@ function Legend() {
     <div className="pointer-events-none flex flex-wrap items-center gap-x-5 gap-y-2 px-4 pb-4 text-xs text-[#18212F]/75 lg:absolute lg:bottom-6 lg:left-20 lg:p-0">
       {(["aporta", "comparte"] as const).map((role) => (
         <span key={role} className="flex items-center gap-1.5">
-          <span className="size-3 rounded-full" style={{ background: ROLE[role].color }} /> {ROLE[role].label.toLowerCase()}
+          <span className="size-3 rounded-full" style={{ background: ROLE[role].color }} />{" "}
+          {ROLE[role].label.toLowerCase()}
         </span>
       ))}
       <span className="flex items-center gap-1.5">

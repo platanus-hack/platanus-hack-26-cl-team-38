@@ -20,13 +20,24 @@ export function layoutPreview(topics: PreviewInput[], previous: Map<string, Poin
     const band = BANDS[t.public ? "public" : "private"];
     const prev = previous.get(t.id);
     const angle = (i / Math.max(1, topics.length)) * 2 * Math.PI;
-    return { ...t, r: nodeRadius(t.depth), x: prev?.x ?? Math.cos(angle) * band.target, y: prev?.y ?? Math.sin(angle) * band.target };
+    return {
+      ...t,
+      r: nodeRadius(t.depth),
+      x: prev?.x ?? Math.cos(angle) * band.target,
+      y: prev?.y ?? Math.sin(angle) * band.target,
+    };
   });
   const owner: Sim = { id: "", public: true, depth: 3, r: 24, x: 0, y: 0, fx: 0, fy: 0 };
 
   forceSimulation<Sim>([owner, ...nodes])
-    .force("radial", forceRadial<Sim>((d) => (d === owner ? 0 : BANDS[d.public ? "public" : "private"].target)).strength(0.8))
-    .force("collide", forceCollide<Sim>((d) => d.r + 16))
+    .force(
+      "radial",
+      forceRadial<Sim>((d) => (d === owner ? 0 : BANDS[d.public ? "public" : "private"].target)).strength(0.8),
+    )
+    .force(
+      "collide",
+      forceCollide<Sim>((d) => d.r + 16),
+    )
     .force("charge", forceManyBody<Sim>().strength(-25))
     .stop()
     .tick(160);

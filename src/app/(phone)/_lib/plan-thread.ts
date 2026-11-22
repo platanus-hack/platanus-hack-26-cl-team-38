@@ -32,7 +32,12 @@ export type Thread = {
 function tally(messages: PlanMessageView[]): Tally {
   const decisions = messages.flatMap((m) => (m.decision ? [m.decision] : []));
   const count = (d: string) => decisions.filter((x) => x === d).length;
-  return { accept: count("accept"), adjust: count("adjust"), block: count("block"), all: decisions.length > 0 && decisions.every((d) => d === "accept") };
+  return {
+    accept: count("accept"),
+    adjust: count("adjust"),
+    block: count("block"),
+    all: decisions.length > 0 && decisions.every((d) => d === "accept"),
+  };
 }
 
 export function threadOf(plan: PlanView): Thread {
@@ -40,7 +45,13 @@ export function threadOf(plan: PlanView): Thread {
   for (const m of plan.messages) {
     if (m.agent === "orquestador" && m.proposal) {
       const previous = steps.findLast((s) => s.kind === "proposal");
-      steps.push({ kind: "proposal", proposal: m.proposal, previous: previous?.kind === "proposal" ? previous.proposal.content : undefined, messages: [], current: false });
+      steps.push({
+        kind: "proposal",
+        proposal: m.proposal,
+        previous: previous?.kind === "proposal" ? previous.proposal.content : undefined,
+        messages: [],
+        current: false,
+      });
     } else steps.at(-1)!.messages.push(m);
   }
 
@@ -49,7 +60,8 @@ export function threadOf(plan: PlanView): Thread {
   steps.forEach((step, i) => {
     const last = i === steps.length - 1;
     step.current = open && last && !orchestrator;
-    if (step.kind === "proposal" && !step.proposal.final && (!last || !open || orchestrator)) step.tally = tally(step.messages);
+    if (step.kind === "proposal" && !step.proposal.final && (!last || !open || orchestrator))
+      step.tally = tally(step.messages);
   });
 
   const lastVersion = steps.findLast((s) => s.kind === "proposal")?.proposal.version ?? 0;
@@ -60,12 +72,7 @@ export function threadOf(plan: PlanView): Thread {
   };
 }
 
-const norm = (text: string) =>
-  text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .trim();
+const norm = (text: string) => text.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").trim();
 
 /** For each decision of a proposal: new, changed since the previous one, or the same. */
 export function changes(content: PlanContent, previous?: PlanContent): ("nuevo" | "cambio" | null)[] {

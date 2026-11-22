@@ -57,7 +57,9 @@ export function AddTopic({ s, sync }: { s: PhoneState; sync: NodeSync }) {
         <TopicForm
           key={String(open)}
           onAdd={(name, kind, depth, share) => {
-            setPhone({ pendingTopic: { id: idFor(s.personId, name.trim().toLowerCase()), name, share, held: sync.held } });
+            setPhone({
+              pendingTopic: { id: idFor(s.personId, name.trim().toLowerCase()), name, share, held: sync.held },
+            });
             mergeSignals([{ source: "manual", kind, label: name, strength: STRENGTH[depth] }]);
             setOpen(false);
           }}
@@ -68,7 +70,13 @@ export function AddTopic({ s, sync }: { s: PhoneState; sync: NodeSync }) {
   );
 }
 
-function TopicForm({ onAdd, exists }: { onAdd: (name: string, kind: Kind, depth: 1 | 2 | 3, share: boolean) => void; exists: (name: string) => boolean }) {
+function TopicForm({
+  onAdd,
+  exists,
+}: {
+  onAdd: (name: string, kind: Kind, depth: 1 | 2 | 3, share: boolean) => void;
+  exists: (name: string) => boolean;
+}) {
   const [name, setName] = useState("");
   const [kind, setKind] = useState<Kind>("sabe");
   const [depth, setDepth] = useState<1 | 2 | 3>(2);
@@ -142,7 +150,14 @@ function TopicForm({ onAdd, exists }: { onAdd: (name: string, kind: Kind, depth:
             {C.shareHelp}
           </span>
         </span>
-        <button type="button" role="switch" aria-checked={share} aria-label={C.share} className="switch" onClick={() => setShare(!share)} />
+        <button
+          type="button"
+          role="switch"
+          aria-checked={share}
+          aria-label={C.share}
+          className="switch"
+          onClick={() => setShare(!share)}
+        />
       </div>
 
       <button type="submit" className="btn" disabled={!name.trim()}>

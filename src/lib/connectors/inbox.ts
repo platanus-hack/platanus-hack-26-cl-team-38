@@ -15,7 +15,10 @@ export type OpenInbox = { token: string; inbox: string; expiresAt: number };
 
 export function createInboxStore(ttlMs = TOKEN_MINUTES * 60_000) {
   const tokens = new Map<string, { inbox: string; expiresAt: number }>();
-  const inboxes = new Map<string, { signals: Map<string, SynthesisSignal>; profiles: Map<Source, string>; expiresAt: number }>();
+  const inboxes = new Map<
+    string,
+    { signals: Map<string, SynthesisSignal>; profiles: Map<Source, string>; expiresAt: number }
+  >();
   const secret = () => crypto.randomUUID().replaceAll("-", "");
 
   function sweep(now: number) {
@@ -65,7 +68,10 @@ export function createInboxStore(ttlMs = TOKEN_MINUTES * 60_000) {
       return { token, inbox, expiresAt };
     },
 
-    drainOwner(owner: string, now = Date.now()): { signals: SynthesisSignal[]; profiles: { source: Source; markdown: string }[] } {
+    drainOwner(
+      owner: string,
+      now = Date.now(),
+    ): { signals: SynthesisSignal[]; profiles: { source: Source; markdown: string }[] } {
       const id = ownerInbox(owner);
       return { signals: drain(id, now) ?? [], profiles: drainProfiles(id, now) ?? [] };
     },

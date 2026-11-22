@@ -10,7 +10,8 @@ function formatPhone(raw: string): string {
   let digits = raw.replace(/\D/g, "").slice(0, 15);
   // A mobile typed the local way: nine digits starting with 9.
   if (!plus && digits.length === 9 && digits.startsWith("9")) digits = `56${digits}`;
-  if (digits.length === 11 && digits.startsWith("56")) return `+56 ${digits[2]} ${digits.slice(3, 7)} ${digits.slice(7)}`;
+  if (digits.length === 11 && digits.startsWith("56"))
+    return `+56 ${digits[2]} ${digits.slice(3, 7)} ${digits.slice(7)}`;
   return (plus ? "+" : "") + digits;
 }
 
@@ -26,7 +27,9 @@ export const FORMAT: Record<Exclude<InfoField, "gender">, (raw: string) => strin
 };
 
 /** The form's raw text → the contract, or the first field that does not fit it. */
-export function parseInfo(raw: Record<InfoField, string>): { ok: true; info: UserInfo } | { ok: false; field: InfoField } {
+export function parseInfo(
+  raw: Record<InfoField, string>,
+): { ok: true; info: UserInfo } | { ok: false; field: InfoField } {
   const age = FORMAT.age(raw.age);
   const parsed = UserInfoSchema.safeParse({
     email: FORMAT.email(raw.email),

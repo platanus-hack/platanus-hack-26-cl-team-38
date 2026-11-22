@@ -31,7 +31,13 @@ export function buildThemes(projections: PublicProjection[], threshold = THEME_T
     for (const topic of person.topics) {
       if (!topic.embedding) continue;
       const key = normalizeName(topic.name);
-      const group = groups.get(key) ?? { key, name: topic.name.trim(), embedding: topic.embedding, topicIds: [], people: new Set() };
+      const group = groups.get(key) ?? {
+        key,
+        name: topic.name.trim(),
+        embedding: topic.embedding,
+        topicIds: [],
+        people: new Set(),
+      };
       group.topicIds.push(topic.id);
       group.people.add(person.personId);
       groups.set(key, group);

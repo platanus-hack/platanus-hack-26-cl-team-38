@@ -50,7 +50,9 @@ const synthesized = synthesizeSeedTopics(signals);
 // said about a teammate gets there without going through the privacy filter.
 const hasKey = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
 if (!hasKey && !args.includes("--sin-juez")) {
-  console.error("Falta ANTHROPIC_API_KEY en .env.local para el filtro de privacidad. Con --sin-juez se usan solo las capas locales.");
+  console.error(
+    "Falta ANTHROPIC_API_KEY en .env.local para el filtro de privacidad. Con --sin-juez se usan solo las capas locales.",
+  );
   process.exit(1);
 }
 const judgeErrors: unknown[] = [];
@@ -59,10 +61,14 @@ const verdicts = await classifyTopics(
   { judge: hasKey ? createAnthropicJudge({ onError: (e) => judgeErrors.push(e) }) : undefined },
 );
 if (judgeErrors.length > 0) {
-  console.error(`El filtro de privacidad no pudo consultar al juez: ${String(judgeErrors[0])}\nNo se escribió nada. Reintenta, o usa --sin-juez.`);
+  console.error(
+    `El filtro de privacidad no pudo consultar al juez: ${String(judgeErrors[0])}\nNo se escribió nada. Reintenta, o usa --sin-juez.`,
+  );
   process.exit(1);
 }
-const kept = synthesized.filter((_, i) => verdicts[i].privacy.level === "segura" || (!hasKey && verdicts[i].by === "sin_juez"));
+const kept = synthesized.filter(
+  (_, i) => verdicts[i].privacy.level === "segura" || (!hasKey && verdicts[i].by === "sin_juez"),
+);
 
 const person: TeamPerson = {
   slug,
@@ -91,7 +97,9 @@ const body = [
 writeFileSync(target, body);
 
 const bySource = Object.entries(Object.groupBy(signals, (s) => s.source)).map(([s, list]) => `${list!.length} de ${s}`);
-console.log(`${existed ? "Reescrito" : "Creado"} seed/team/${slug}.json: ${person.topics.length} tópicos desde ${bySource.join(", ")}.`);
+console.log(
+  `${existed ? "Reescrito" : "Creado"} seed/team/${slug}.json: ${person.topics.length} tópicos desde ${bySource.join(", ")}.`,
+);
 
 const left = synthesized.flatMap((topic, i) => (kept.includes(topic) ? [] : [{ topic, privacy: verdicts[i].privacy }]));
 if (left.length > 0) {
@@ -102,21 +110,25 @@ if (left.length > 0) {
   }
   console.log("  Para publicar uno personal, agrégalo a mano al JSON, tal cual o con su versión general.");
 }
-if (!hasKey) console.log("\nSin juez: solo se aplicaron el léxico y las anclas. Revisa el JSON a mano antes de subirlo.");
+if (!hasKey)
+  console.log("\nSin juez: solo se aplicaron el léxico y las anclas. Revisa el JSON a mano antes de subirlo.");
 
 // Same review done by hand for the first teammate: what will link, and what links only by noise.
 const others = SEED_ROOMS.filter((r) => person.rooms.includes(r.id as TeamPerson["rooms"][number]))
   .flatMap((r) => r.people)
   .filter((p) => p.slug !== slug);
 const owners = new Map<string, Set<string>>();
-for (const p of others) for (const [name] of p.topics) owners.set(name, (owners.get(name) ?? new Set()).add(p.displayName));
+for (const p of others)
+  for (const [name] of p.topics) owners.set(name, (owners.get(name) ?? new Set()).add(p.displayName));
 
 const mine = person.topics.map(([name]) => name);
 const theirs = [...owners.keys()];
 const vectors = await embed([...mine, ...theirs]);
 const vecOf = (i: number) => vectors[i];
 
-console.log(`\nSe enlaza con (coseno ≥ ${THRESHOLD}). Si un par no tiene relación, cambia el nombre del tópico en el JSON:`);
+console.log(
+  `\nSe enlaza con (coseno ≥ ${THRESHOLD}). Si un par no tiene relación, cambia el nombre del tópico en el JSON:`,
+);
 let links = 0;
 mine.forEach((name, i) => {
   const hits = theirs
@@ -137,6 +149,9 @@ for (let i = 0; i < mine.length; i++) {
     if (score >= SAME_PERSON_DUPLICATE) duplicates.push(`  ${score.toFixed(2)}  ${mine[i]} ~ ${mine[j]}`);
   }
 }
-if (duplicates.length > 0) console.log(`\nTópicos tuyos casi iguales (conviene juntarlos en uno):\n${duplicates.join("\n")}`);
+if (duplicates.length > 0)
+  console.log(`\nTópicos tuyos casi iguales (conviene juntarlos en uno):\n${duplicates.join("\n")}`);
 
-console.log("\nSiguiente: revisa el JSON, después `pnpm seed:build && pnpm seed` y haz commit de seed/team y seed/rooms.json.");
+console.log(
+  "\nSiguiente: revisa el JSON, después `pnpm seed:build && pnpm seed` y haz commit de seed/team y seed/rooms.json.",
+);

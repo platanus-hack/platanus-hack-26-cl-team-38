@@ -41,7 +41,12 @@ function phoneCode(): string {
   return `${code.slice(0, 4)}-${code.slice(4)}`;
 }
 
-const ClientSchema = z.object({ typ: z.literal("client"), r: z.array(z.string()), m: z.enum(["none", "client_secret_post", "client_secret_basic"]), n: z.string().optional() });
+const ClientSchema = z.object({
+  typ: z.literal("client"),
+  r: z.array(z.string()),
+  m: z.enum(["none", "client_secret_post", "client_secret_basic"]),
+  n: z.string().optional(),
+});
 const GrantSchema = z.object({ typ: z.enum(["at", "rt"]), cid: z.string(), own: z.string(), exp: z.number() });
 type Client = z.infer<typeof ClientSchema>;
 
@@ -65,11 +70,17 @@ const AuthorizeSchema = z.object({
 
 export type OAuthResult = { status: number; json: Record<string, unknown> };
 export type AuthorizeResult = { redirect: string } | { status: number; error: string };
-const oauthError = (status: number, error: string, description: string): OAuthResult => ({ status, json: { error, error_description: description } });
+const oauthError = (status: number, error: string, description: string): OAuthResult => ({
+  status,
+  json: { error, error_description: description },
+});
 
 export function createOAuth({ secret, now = () => Date.now() }: { secret: string; now?: () => number }) {
   const phoneCodes = new Map<string, { owner: string; expiresAt: number }>();
-  const authCodes = new Map<string, { clientId: string; redirectUri: string; challenge: string; owner: string; expiresAt: number }>();
+  const authCodes = new Map<
+    string,
+    { clientId: string; redirectUri: string; challenge: string; owner: string; expiresAt: number }
+  >();
 
   const sign = (body: string) => b64(createHmac("sha256", secret).update(body).digest());
 
@@ -112,7 +123,10 @@ export function createOAuth({ secret, now = () => Date.now() }: { secret: string
   }
 
   // A secret client proves itself with the secret we derived for it; a public one with PKCE alone.
-  function authenticateClient(form: URLSearchParams, basic: { id: string; secret: string } | null): { clientId: string } | OAuthResult {
+  function authenticateClient(
+    form: URLSearchParams,
+    basic: { id: string; secret: string } | null,
+  ): { clientId: string } | OAuthResult {
     const clientId = basic?.id ?? form.get("client_id");
     const client = clientId ? unseal(clientId, ClientSchema) : null;
     if (!clientId || !client) return oauthError(401, "invalid_client", "Cliente desconocido.");
@@ -166,23 +180,36 @@ export function createOAuth({ secret, now = () => Date.now() }: { secret: string
       const at = now();
       sweep(at);
       const parsed = AuthorizeSchema.safeParse(body);
-      if (!parsed.success) return { status: 400, error: "El pedido de autorización está incompleto. Vuelve a conectar desde tu asistente." };
+      if (!parsed.success)
+        return {
+          status: 400,
+          error: "El pedido de autorización está incompleto. Vuelve a conectar desde tu asistente.",
+        };
       const request = parsed.data;
       const client = unseal(request.client_id, ClientSchema);
-      if (!client) return { status: 400, error: "El asistente no está registrado. Vuelve a conectar desde tu asistente." };
+      if (!client)
+        return { status: 400, error: "El asistente no está registrado. Vuelve a conectar desde tu asistente." };
       const redirectUri = request.redirect_uri ?? (client.r.length === 1 ? client.r[0] : undefined);
-      if (!redirectUri || !client.r.includes(redirectUri)) return { status: 400, error: "La dirección de regreso no corresponde a este asistente." };
+      if (!redirectUri || !client.r.includes(redirectUri))
+        return { status: 400, error: "La dirección de regreso no corresponde a este asistente." };
       if (request.response_type !== "code" || request.code_challenge_method !== "S256") {
         return { status: 400, error: "El asistente pidió un tipo de autorización que no aceptamos." };
       }
 
       const key = normalizeCode(request.code);
       const phone = phoneCodes.get(key);
-      if (!phone || at > phone.expiresAt) return { status: 400, error: "Ese código no existe o venció. Pide uno nuevo en tu teléfono." };
+      if (!phone || at > phone.expiresAt)
+        return { status: 400, error: "Ese código no existe o venció. Pide uno nuevo en tu teléfono." };
       phoneCodes.delete(key);
 
       const code = random();
-      authCodes.set(code, { clientId: request.client_id, redirectUri, challenge: request.code_challenge, owner: phone.owner, expiresAt: at + AUTH_CODE_TTL_MS });
+      authCodes.set(code, {
+        clientId: request.client_id,
+        redirectUri,
+        challenge: request.code_challenge,
+        owner: phone.owner,
+        expiresAt: at + AUTH_CODE_TTL_MS,
+      });
       const target = new URL(redirectUri);
       target.searchParams.set("code", code);
       if (request.state !== undefined) target.searchParams.set("state", request.state);
@@ -200,11 +227,14 @@ export function createOAuth({ secret, now = () => Date.now() }: { secret: string
         const code = form.get("code") ?? "";
         const entry = authCodes.get(code);
         authCodes.delete(code);
-        if (!entry || at > entry.expiresAt || entry.clientId !== client.clientId) return oauthError(400, "invalid_grant", "El código no existe, venció o ya se usó.");
+        if (!entry || at > entry.expiresAt || entry.clientId !== client.clientId)
+          return oauthError(400, "invalid_grant", "El código no existe, venció o ya se usó.");
         const redirectUri = form.get("redirect_uri");
-        if (redirectUri !== null && redirectUri !== entry.redirectUri) return oauthError(400, "invalid_grant", "La dirección de regreso no corresponde.");
+        if (redirectUri !== null && redirectUri !== entry.redirectUri)
+          return oauthError(400, "invalid_grant", "La dirección de regreso no corresponde.");
         const verifier = form.get("code_verifier") ?? "";
-        if (b64(createHash("sha256").update(verifier).digest()) !== entry.challenge) return oauthError(400, "invalid_grant", "code_verifier no corresponde (PKCE).");
+        if (b64(createHash("sha256").update(verifier).digest()) !== entry.challenge)
+          return oauthError(400, "invalid_grant", "code_verifier no corresponde (PKCE).");
         return tokens(client.clientId, entry.owner);
       }
       if (grant === "refresh_token") {
@@ -248,7 +278,12 @@ const MCP_PATH = "/api/mcp";
 export const resourceMetadataUrl = (origin: string) => `${origin}/.well-known/oauth-protected-resource${MCP_PATH}`;
 
 export function protectedResourceMetadata(origin: string) {
-  return { resource: `${origin}${MCP_PATH}`, authorization_servers: [origin], bearer_methods_supported: ["header"], resource_name: APP_NAME };
+  return {
+    resource: `${origin}${MCP_PATH}`,
+    authorization_servers: [origin],
+    bearer_methods_supported: ["header"],
+    resource_name: APP_NAME,
+  };
 }
 
 // Without client_id_metadata_document_supported, claude.ai registers through registration_endpoint.

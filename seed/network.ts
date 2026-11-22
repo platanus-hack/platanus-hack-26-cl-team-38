@@ -36,7 +36,17 @@ const ExperienceSchema = z.object({
 
 const ConstraintSchema = z
   .object({
-    type: z.enum(["fecha", "presupuesto", "salud", "movilidad", "alimentacion", "vivienda", "logistica", "preferencia", "idioma"]),
+    type: z.enum([
+      "fecha",
+      "presupuesto",
+      "salud",
+      "movilidad",
+      "alimentacion",
+      "vivienda",
+      "logistica",
+      "preferencia",
+      "idioma",
+    ]),
     detail: z.string().min(1),
     // true: can't be negotiated; false: a preference the plan can trade off.
     hard: z.boolean(),
@@ -71,10 +81,24 @@ const PersonSchema = z.object({
     experiences: z.array(ExperienceSchema),
   }),
   agentOnly: AgentOnlySchema,
-  seedOnly: z.object({ age: z.number().int().positive(), comuna: z.string().min(1), region: z.string().min(1), bio: z.string().min(1) }),
+  seedOnly: z.object({
+    age: z.number().int().positive(),
+    comuna: z.string().min(1),
+    region: z.string().min(1),
+    bio: z.string().min(1),
+  }),
 });
 
-const RelationSchema = z.enum(["pareja", "familia", "amistad", "trabajo", "estudios", "vecindad", "voluntariado", "conocido"]);
+const RelationSchema = z.enum([
+  "pareja",
+  "familia",
+  "amistad",
+  "trabajo",
+  "estudios",
+  "vecindad",
+  "voluntariado",
+  "conocido",
+]);
 
 const SeedConnectionSchema = z.object({
   // Same order rule as the table: a < b.
@@ -91,7 +115,12 @@ const SeedConnectionSchema = z.object({
   }),
 });
 
-const RoomSchema = z.object({ id: z.string().regex(/^seed-[a-z0-9-]+$/), code: z.string().length(6), name: z.string().min(1), members: z.array(PersonIdSchema).min(3) });
+const RoomSchema = z.object({
+  id: z.string().regex(/^seed-[a-z0-9-]+$/),
+  code: z.string().length(6),
+  name: z.string().min(1),
+  members: z.array(PersonIdSchema).min(3),
+});
 
 const PurposeSchema = z.object({
   eventId: z.string().min(1),
@@ -125,7 +154,9 @@ const NetworkV2Schema = z.object({
 
 export type NetworkV2 = z.infer<typeof NetworkV2Schema>;
 export type SeedNetworkPerson = z.infer<typeof PersonSchema>;
-export const network: NetworkV2 = NetworkV2Schema.parse(JSON.parse(readFileSync(new URL("./network.v2.json", import.meta.url), "utf8")));
+export const network: NetworkV2 = NetworkV2Schema.parse(
+  JSON.parse(readFileSync(new URL("./network.v2.json", import.meta.url), "utf8")),
+);
 
 export const slugOf = (personId: string) => personId.replace(/^seed-/, "");
 
@@ -140,16 +171,29 @@ const DIET_LINE: Record<SeedNetworkPerson["profile"]["diet"], string> = {
   kosher: "Como kosher.",
 };
 
-const listOf = (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} y ${items.at(-1)}`);
+const listOf = (items: string[]) =>
+  items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} y ${items.at(-1)}`;
 
 export function renderProfile(person: SeedNetworkPerson): string {
   const { profile } = person;
   const sections: [string, string[]][] = [
-    ["Oficio y experiencia", [profile.about, ...profile.experiences.filter((x) => x.type === "trabajo" || x.type === "estudios").map((x) => x.line)]],
+    [
+      "Oficio y experiencia",
+      [
+        profile.about,
+        ...profile.experiences.filter((x) => x.type === "trabajo" || x.type === "estudios").map((x) => x.line),
+      ],
+    ],
     ["Hobbies y tiempo libre", profile.hobbies.length ? [`En mi tiempo libre: ${listOf(profile.hobbies)}.`] : []],
     ["Viajes", profile.experiences.filter((x) => x.type === "viaje" || x.type === "vivienda").map((x) => x.line)],
     ["Comida y bebida", [DIET_LINE[profile.diet]]],
-    ["Cómo planeo y decido en grupo", [`Puedo conversar en ${listOf(profile.languages)}.`, ...profile.experiences.filter((x) => x.type === "matrimonio" || x.type === "evento").map((x) => x.line)]],
+    [
+      "Cómo planeo y decido en grupo",
+      [
+        `Puedo conversar en ${listOf(profile.languages)}.`,
+        ...profile.experiences.filter((x) => x.type === "matrimonio" || x.type === "evento").map((x) => x.line),
+      ],
+    ],
   ];
   return sections
     .filter(([, lines]) => lines.length > 0)
@@ -159,7 +203,10 @@ export function renderProfile(person: SeedNetworkPerson): string {
 
 // What goes to `user_context` for each person: the profile, which the agents of their connections
 // can also read ("red"), and what only their own agent reads ("propio").
-export function contextOf(person: SeedNetworkPerson): { red: { section: string; text: string }[]; propio: { section: string; text: string }[] } {
+export function contextOf(person: SeedNetworkPerson): {
+  red: { section: string; text: string }[];
+  propio: { section: string; text: string }[];
+} {
   let section = "";
   const red: { section: string; text: string }[] = [];
   for (const line of renderProfile(person).split("\n")) {
@@ -180,7 +227,9 @@ export function propioOf(agentOnly: z.infer<typeof AgentOnlySchema>): { section:
 
 // Undirected connection graph over people and teammates.
 export function connectionGraph(net: NetworkV2 = network): Map<string, Set<string>> {
-  const graph = new Map<string, Set<string>>([...net.team, ...net.people.map((p) => p.personId)].map((id) => [id, new Set()]));
+  const graph = new Map<string, Set<string>>(
+    [...net.team, ...net.people.map((p) => p.personId)].map((id) => [id, new Set()]),
+  );
   for (const { a, b } of net.connections) {
     graph.get(a)?.add(b);
     graph.get(b)?.add(a);
@@ -213,12 +262,21 @@ export function toV1(net: NetworkV2 = network) {
       .filter((c) => c.a === personId || c.b === personId)
       .map((c) => {
         const other = c.a === personId ? c.b : c.a;
-        return { slug: slugOf(other), relation: c.pending.relation, detail: c.pending.detail[personId], closeness: c.pending.closeness };
+        return {
+          slug: slugOf(other),
+          relation: c.pending.relation,
+          detail: c.pending.detail[personId],
+          closeness: c.pending.closeness,
+        };
       });
 
   return {
     description: net.description,
-    team: net.team.map((id) => ({ slug: slugOf(id), friends: friendsOf(id), ...(net.teamAgentOnly[id] && { constraints: net.teamAgentOnly[id].constraints }) })),
+    team: net.team.map((id) => ({
+      slug: slugOf(id),
+      friends: friendsOf(id),
+      ...(net.teamAgentOnly[id] && { constraints: net.teamAgentOnly[id].constraints }),
+    })),
     people: net.people.map((p) => ({
       slug: slugOf(p.personId),
       displayName: p.displayName,
@@ -233,7 +291,15 @@ export function toV1(net: NetworkV2 = network) {
         diet: p.profile.diet,
         ...(p.agentOnly.allergies && { allergies: p.agentOnly.allergies }),
       },
-      topics: p.topics.map((t) => [t.name, t.kind, t.depth, t.sources] as [string, z.infer<typeof KindSchema>, 1 | 2 | 3, z.infer<typeof SourceSchema>[]]),
+      topics: p.topics.map(
+        (t) =>
+          [t.name, t.kind, t.depth, t.sources] as [
+            string,
+            z.infer<typeof KindSchema>,
+            1 | 2 | 3,
+            z.infer<typeof SourceSchema>[],
+          ],
+      ),
       experiences: p.profile.experiences.map(({ line, ...x }) => (void line, x)),
       constraints: p.agentOnly.constraints,
       friends: friendsOf(p.personId),

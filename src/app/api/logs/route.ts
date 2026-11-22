@@ -7,6 +7,7 @@ import { authenticate } from "@/lib/users/profile";
 export async function GET(request: Request) {
   const query = new URL(request.url).searchParams;
   const me = await authenticate(supabaseAdmin, query.get("personId"), request.headers.get("authorization"));
-  if (!me) return Response.json({ error: "Falta la clave del dispositivo, o no es la de esa persona" }, { status: 401 });
+  if (!me)
+    return Response.json({ error: "Falta la clave del dispositivo, o no es la de esa persona" }, { status: 401 });
   return Response.json({ logs: await listLogs(supabaseAdmin, me, query.get("mesaId") ?? undefined) });
 }

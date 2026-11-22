@@ -9,7 +9,16 @@ const TeamPersonSchema = z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/),
   displayName: z.string().min(1),
   rooms: z.array(z.enum(["seed-hack", "seed-mut"])).default(["seed-hack"]),
-  topics: z.array(z.tuple([z.string().min(1), KindSchema, z.union([z.literal(1), z.literal(2), z.literal(3)]), z.array(SourceSchema).min(1)])).min(1),
+  topics: z
+    .array(
+      z.tuple([
+        z.string().min(1),
+        KindSchema,
+        z.union([z.literal(1), z.literal(2), z.literal(3)]),
+        z.array(SourceSchema).min(1),
+      ]),
+    )
+    .min(1),
 });
 
 export type TeamPerson = z.infer<typeof TeamPersonSchema>;

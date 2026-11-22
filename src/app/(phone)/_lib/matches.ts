@@ -9,12 +9,7 @@ export type MatchItem = { type: MatchType; topic: string };
 const WANTS: Kind[] = ["busca", "quiere_ser"];
 const KNOWS: Kind[] = ["sabe", "hace", "es", "ofrece"];
 
-const norm = (s: string) =>
-  s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .trim();
+const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 
 function classify(mine: PublicTopic, theirs: PublicTopic): MatchItem {
   if (WANTS.includes(mine.kind) && KNOWS.includes(theirs.kind)) return { type: "te_ayuda", topic: mine.name };

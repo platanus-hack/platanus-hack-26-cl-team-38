@@ -42,17 +42,24 @@ type Row = {
   created_at: string;
 };
 
-const toConnection = (me: string) => (row: Row): Connection =>
-  ConnectionSchema.parse({
-    personId: row.other_id,
-    displayName: row.other_name,
-    status: row.status,
-    proposedByMe: row.proposed_by_me,
-    acceptedAt: { mine: row.my_accepted_at, theirs: row.their_accepted_at },
-    origin: { kind: row.origin_kind, roomId: row.origin_room_id, mesaId: row.origin_mesa_id, label: row.origin_label },
-    shared: toShared(row.shared, me, row.other_id),
-    createdAt: row.created_at,
-  });
+const toConnection =
+  (me: string) =>
+  (row: Row): Connection =>
+    ConnectionSchema.parse({
+      personId: row.other_id,
+      displayName: row.other_name,
+      status: row.status,
+      proposedByMe: row.proposed_by_me,
+      acceptedAt: { mine: row.my_accepted_at, theirs: row.their_accepted_at },
+      origin: {
+        kind: row.origin_kind,
+        roomId: row.origin_room_id,
+        mesaId: row.origin_mesa_id,
+        label: row.origin_label,
+      },
+      shared: toShared(row.shared, me, row.other_id),
+      createdAt: row.created_at,
+    });
 
 // Only ever the caller's own: there is no way to ask for someone else's connections.
 export async function listConnections(db: Db, me: string): Promise<Connection[]> {
@@ -65,18 +72,25 @@ const FOREIGN_KEY = "23503";
 const NOT_NULL = "23502";
 
 // `request.personId` must already be authenticated: this trusts it.
-export async function runConnectionAction(db: Db, { personId: me, otherId: other, action, origin }: ConnectionRequest): Promise<Outcome> {
+export async function runConnectionAction(
+  db: Db,
+  { personId: me, otherId: other, action, origin }: ConnectionRequest,
+): Promise<Outcome> {
   if (me === other) return { status: 400, error: "No puedes conectarte contigo" };
   const one = (rows: unknown) => (rows as Row[]).map(toConnection(me))[0] ?? null;
 
   if (action === "close") {
     const closed = await call(db, "close_connection", { p_me: me, p_other: other });
-    return closed === true ? { status: 200, connection: null } : { status: 404, error: "No hay una conexión con esa persona" };
+    return closed === true
+      ? { status: 200, connection: null }
+      : { status: 404, error: "No hay una conexión con esa persona" };
   }
 
   if (action === "accept") {
     const connection = one(await call(db, "accept_connection", { p_me: me, p_other: other }));
-    return connection ? { status: 200, connection } : { status: 409, error: "No hay una propuesta de esa persona por aceptar" };
+    return connection
+      ? { status: 200, connection }
+      : { status: 409, error: "No hay una propuesta de esa persona por aceptar" };
   }
 
   if (!origin) return { status: 400, error: "Una propuesta necesita origin: { mesaId }, { roomId } o { place }" };

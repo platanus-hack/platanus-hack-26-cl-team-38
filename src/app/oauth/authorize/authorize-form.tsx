@@ -4,7 +4,14 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 
-const FIELDS = ["client_id", "redirect_uri", "response_type", "code_challenge", "code_challenge_method", "state"] as const;
+const FIELDS = [
+  "client_id",
+  "redirect_uri",
+  "response_type",
+  "code_challenge",
+  "code_challenge_method",
+  "state",
+] as const;
 
 // Minga's own state on this browser, read without creating one (see (phone)/_lib/store.ts).
 const PHONE_KEY = "nodo.phone.v1";
@@ -25,14 +32,21 @@ export function AuthorizeForm() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
-  const stored = useSyncExternalStore(noSubscription, () => localStorage.getItem(PHONE_KEY), () => null);
+  const stored = useSyncExternalStore(
+    noSubscription,
+    () => localStorage.getItem(PHONE_KEY),
+    () => null,
+  );
   const here = useMemo(() => phoneHere(stored), [stored]);
 
   async function submit(phoneCode: string) {
     setBusy(true);
     setError(undefined);
     const request = Object.fromEntries(FIELDS.flatMap((f) => (params.get(f) === null ? [] : [[f, params.get(f)]])));
-    const response = await fetch("/api/oauth/authorize", { method: "POST", body: JSON.stringify({ ...request, code: phoneCode }) }).catch(() => null);
+    const response = await fetch("/api/oauth/authorize", {
+      method: "POST",
+      body: JSON.stringify({ ...request, code: phoneCode }),
+    }).catch(() => null);
     const body = (await response?.json().catch(() => null)) as { redirect?: string; error?: string } | null;
     if (body?.redirect) return window.location.assign(body.redirect);
     setError(body?.error ?? "No pudimos conectar. Revisa tu conexión e intenta de nuevo.");
@@ -43,7 +57,10 @@ export function AuthorizeForm() {
   async function asThisBrowser() {
     if (!here) return;
     setBusy(true);
-    const response = await fetch("/api/oauth/code", { method: "POST", headers: { authorization: `Bearer ${here.deviceKey}` } }).catch(() => null);
+    const response = await fetch("/api/oauth/code", {
+      method: "POST",
+      headers: { authorization: `Bearer ${here.deviceKey}` },
+    }).catch(() => null);
     const body = (await response?.json().catch(() => null)) as { code?: string } | null;
     if (body?.code) return submit(body.code);
     setError("No pudimos conectar. Intenta con el código de tu teléfono.");

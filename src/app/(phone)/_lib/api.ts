@@ -35,7 +35,10 @@ export type CheckInResult = { ok: true; shared: number; rejected: number } | { o
  * what it rejects goes back to private here too. The first time, it also claims your personId for
  * this phone's key. In demo mode there is no backend and nothing leaves the phone.
  */
-export async function checkIn(roomCode = getPhone().room?.code ?? DEFAULT_ROOM, { quiet = false } = {}): Promise<CheckInResult> {
+export async function checkIn(
+  roomCode = getPhone().room?.code ?? DEFAULT_ROOM,
+  { quiet = false } = {},
+): Promise<CheckInResult> {
   const s = getPhone();
   if (!s.node) return { ok: false, error: C.noNode };
   if (!s.displayName.trim()) return { ok: false, error: C.noName };

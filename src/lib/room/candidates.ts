@@ -16,7 +16,12 @@ function sharedThemes(anchorThemeId: string, members: Entry[], index: RoomIndex)
 
 // The seat that raises the mesa's score the most for this person (ties: their first entry), even
 // if no seat raises it: "nadie solo" needs a seat anyway. With `within`, only seats in those themes.
-export function bestSeat(members: Entry[], personId: string, index: RoomIndex, within?: Set<string>): { entry: Entry; score: number } | undefined {
+export function bestSeat(
+  members: Entry[],
+  personId: string,
+  index: RoomIndex,
+  within?: Set<string>,
+): { entry: Entry; score: number } | undefined {
   let best: { entry: Entry; score: number } | undefined;
   for (const entry of index.entriesOf.get(personId) ?? []) {
     if (within && !within.has(entry.themeId)) continue;
@@ -58,7 +63,10 @@ export function candidateMesas(index: RoomIndex): Draft[] {
   const push = (draft: Draft) => {
     if (draft.members.length < MESA_MIN) return;
     // Same people on another theme is another mesa: only the same people on the same theme repeat.
-    const key = `${draft.anchorThemeId}|${draft.members.map((m) => m.personId).sort().join("+")}`;
+    const key = `${draft.anchorThemeId}|${draft.members
+      .map((m) => m.personId)
+      .sort()
+      .join("+")}`;
     if (seen.has(key)) return;
     seen.add(key);
     drafts.push(draft);
@@ -73,13 +81,15 @@ export function candidateMesas(index: RoomIndex): Draft[] {
     });
 
     if (pairs.length > 0) {
-      for (const seed of pairs.slice(0, SEEDS_PER_THEME)) push({ anchorThemeId: theme.id, kind: "complemento", members: grow(theme.id, seed, index) });
+      for (const seed of pairs.slice(0, SEEDS_PER_THEME))
+        push({ anchorThemeId: theme.id, kind: "complemento", members: grow(theme.id, seed, index) });
       continue;
     }
 
     // Backup: no one here teaches what someone seeks, but 3 or more people share it.
     const sharing = bestPerPerson(index, theme.id, "comparte");
-    if (sharing.length >= MESA_MIN) push({ anchorThemeId: theme.id, kind: "afinidad", members: sharing.slice(0, MESA_MAX) });
+    if (sharing.length >= MESA_MIN)
+      push({ anchorThemeId: theme.id, kind: "afinidad", members: sharing.slice(0, MESA_MAX) });
   }
   return drafts;
 }

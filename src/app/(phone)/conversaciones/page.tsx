@@ -40,7 +40,9 @@ function Row({ cv, replies }: { cv: Conversation; replies?: { text: string }[] }
 function PlanRow({ plan, me }: { plan: PlanSummary; me: string }) {
   const others = plan.members.filter((m) => m.personId !== me);
   const state =
-    plan.status === "deliberando" ? `${COPY.plan.deliberating} · ${plan.round} de ${plan.maxRounds}` : (plan.resumen ?? (plan.status === "consenso" ? COPY.plan.consensus : COPY.plan.decided));
+    plan.status === "deliberando"
+      ? `${COPY.plan.deliberating} · ${plan.round} de ${plan.maxRounds}`
+      : (plan.resumen ?? (plan.status === "consenso" ? COPY.plan.consensus : COPY.plan.decided));
   return (
     <ListRow
       lead={
@@ -70,7 +72,8 @@ export default function ConversacionesPage() {
 
   // Demo mode keeps your Iniciativas on the phone; with a backend they are plans.
   const contacts = encounters ? affinities(s, encounters) : [];
-  const mine = DEMO && encounters ? localInitiatives(s, encounters).map((i) => buildInitiative(s.displayName, i, contacts)) : [];
+  const mine =
+    DEMO && encounters ? localInitiatives(s, encounters).map((i) => buildInitiative(s.displayName, i, contacts)) : [];
 
   return (
     <div className="app with-tabs">

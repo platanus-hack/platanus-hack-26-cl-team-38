@@ -74,7 +74,11 @@ export function createReporter({
     // one from start-up stays as the official position for several seconds.
     const muchBetter = accuracy < 0.6 * lastReportedAccuracy;
     if (timeMs - lastReportAt < minIntervalMs && !muchBetter) return null;
-    if (!lastReported || muchBetter || distanceMeters(lastReported, estimate) >= Math.max(threshold, accuracyFraction * accuracy)) {
+    if (
+      !lastReported ||
+      muchBetter ||
+      distanceMeters(lastReported, estimate) >= Math.max(threshold, accuracyFraction * accuracy)
+    ) {
       lastReported = estimate;
       lastReportAt = timeMs;
       lastReportedAccuracy = accuracy;

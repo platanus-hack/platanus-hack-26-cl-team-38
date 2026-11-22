@@ -91,13 +91,7 @@ export function FloorPlan({
       onClick={() => onSelect(undefined)}
     >
       {tables.map((table) => (
-        <TableView
-          key={table.theme.id}
-          table={table}
-          names={names}
-          selected={selected}
-          onSelect={onSelect}
-        />
+        <TableView key={table.theme.id} table={table} names={names} selected={selected} onSelect={onSelect} />
       ))}
     </svg>
   );
@@ -136,7 +130,8 @@ function TableView({
     mergedText.length * GLYPH * detailSize <= surface * 1.6 ? mergedText : `y ${others.length} tópicos parecidos`;
   const showMerged = merged && surface > 44;
   const lineHeight = title.size * 1.1;
-  const blockHeight = title.lines.length * lineHeight + (showMerged ? detailSize * 1.4 : 0) + (showStatus ? detailSize * 1.6 : 0);
+  const blockHeight =
+    title.lines.length * lineHeight + (showMerged ? detailSize * 1.4 : 0) + (showStatus ? detailSize * 1.6 : 0);
   const top = -blockHeight / 2 + title.size * 0.8;
 
   return (
@@ -168,7 +163,13 @@ function TableView({
         ))}
       </text>
       {showMerged && (
-        <text textAnchor="middle" y={top + (title.lines.length - 1) * lineHeight + detailSize * 1.5} fontSize={detailSize} fill={INK} fillOpacity={0.6}>
+        <text
+          textAnchor="middle"
+          y={top + (title.lines.length - 1) * lineHeight + detailSize * 1.5}
+          fontSize={detailSize}
+          fill={INK}
+          fillOpacity={0.6}
+        >
           {mergedLabel}
         </text>
       )}

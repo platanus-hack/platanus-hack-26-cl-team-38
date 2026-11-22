@@ -13,17 +13,28 @@ const ids = new Set([...network.team, ...network.people.map((p) => p.personId)])
 
 // Friend lists are unordered: compare them sorted.
 const bySlug = (a: { slug: string }, b: { slug: string }) => a.slug.localeCompare(b.slug);
-const sortFriends = <T extends { friends: { slug: string }[] }>(nodes: T[]) => nodes.map((n) => ({ ...n, friends: [...n.friends].sort(bySlug) }));
+const sortFriends = <T extends { friends: { slug: string }[] }>(nodes: T[]) =>
+  nodes.map((n) => ({ ...n, friends: [...n.friends].sort(bySlug) }));
 
 // v2 drops the names of the date decisions on purpose (see PurposeSchema): everything else must match.
 const DROPPED_VARIABLES = new Set(["fecha", "fechas", "fecha de entrada"]);
 const withoutDroppedVariables = (events: { decisions: { variable?: string }[] }[]) =>
-  events.map((e) => ({ ...e, decisions: e.decisions.map(({ variable, ...d }) => (variable && !DROPPED_VARIABLES.has(variable) ? { variable, ...d } : d)) }));
+  events.map((e) => ({
+    ...e,
+    decisions: e.decisions.map(({ variable, ...d }) =>
+      variable && !DROPPED_VARIABLES.has(variable) ? { variable, ...d } : d,
+    ),
+  }));
 
 describe("seed/network.v2.json", () => {
   it("loses nothing from the hand-written v1", () => {
     const rebuilt = toV1();
-    expect({ ...rebuilt, description: undefined, team: sortFriends(rebuilt.team), people: sortFriends(rebuilt.people) }).toEqual({
+    expect({
+      ...rebuilt,
+      description: undefined,
+      team: sortFriends(rebuilt.team),
+      people: sortFriends(rebuilt.people),
+    }).toEqual({
       ...v1,
       description: undefined,
       team: sortFriends(v1.team),
@@ -41,9 +52,15 @@ describe("seed/network.v2.json", () => {
     expect(new Set(network.people.map((p) => p.personId)).size).toBe(network.people.length);
     // Person ids are seed-<slug> in every room, so a repeated slug would merge two people. The hack room
     // brings some network people on purpose: those must be the same person, with the same topics.
-    const others = SEED_ROOMS.filter((r) => ["seed-mut", "seed-hack", "seed-control"].includes(r.id)).flatMap((r) => r.people);
+    const others = SEED_ROOMS.filter((r) => ["seed-mut", "seed-hack", "seed-control"].includes(r.id)).flatMap(
+      (r) => r.people,
+    );
     for (const p of network.people)
-      for (const other of others.filter((o) => `seed-${o.slug}` === p.personId)) expect(other.topics.map(([name]) => name), p.personId).toEqual(p.topics.map((t) => t.name));
+      for (const other of others.filter((o) => `seed-${o.slug}` === p.personId))
+        expect(
+          other.topics.map(([name]) => name),
+          p.personId,
+        ).toEqual(p.topics.map((t) => t.name));
   });
 
   it("only names teammates that exist in seed/team", () => {
@@ -51,12 +68,20 @@ describe("seed/network.v2.json", () => {
   });
 
   describe("public part, against the contracts in types.ts", () => {
-    it.each(network.people.map((p) => [p.personId, p] as const))("%s publishes every topic through projectNode()", (_id, person) => {
-      const { projection, withheld } = projectNode({ personId: person.personId, displayName: person.displayName, version: 1, topics: person.topics });
-      expect(withheld).toEqual([]);
-      expect(projection.topics.map((t) => t.id)).toEqual(person.topics.map((t) => t.id));
-      for (const topic of person.topics) expect(topic.privacy.checkedFor, topic.id).toBe(fingerprint(topic));
-    });
+    it.each(network.people.map((p) => [p.personId, p] as const))(
+      "%s publishes every topic through projectNode()",
+      (_id, person) => {
+        const { projection, withheld } = projectNode({
+          personId: person.personId,
+          displayName: person.displayName,
+          version: 1,
+          topics: person.topics,
+        });
+        expect(withheld).toEqual([]);
+        expect(projection.topics.map((t) => t.id)).toEqual(person.topics.map((t) => t.id));
+        for (const topic of person.topics) expect(topic.privacy.checkedFor, topic.id).toBe(fingerprint(topic));
+      },
+    );
 
     it("follows the synthesizer's depth caps", () => {
       for (const topic of network.people.flatMap((p) => p.topics)) {
@@ -68,20 +93,26 @@ describe("seed/network.v2.json", () => {
   });
 
   describe("detailed profile", () => {
-    it.each(network.people.map((p) => [p.personId, renderProfile(p)] as const))("%s fits the limits and no line trips the privacy lexicon", (_id, markdown) => {
-      expect(markdown.length).toBeLessThanOrEqual(PROFILE_MAX_CHARS);
-      expect(markdown.split("\n").length).toBeLessThanOrEqual(PROFILE_MAX_LINES);
-      for (const line of markdown.split("\n").filter((l) => l.startsWith("- "))) {
-        expect(screenText(line.slice(2)), line).toBeNull();
-        expect(hasIdentifier(line), line).toBe(false);
-      }
-    });
+    it.each(network.people.map((p) => [p.personId, renderProfile(p)] as const))(
+      "%s fits the limits and no line trips the privacy lexicon",
+      (_id, markdown) => {
+        expect(markdown.length).toBeLessThanOrEqual(PROFILE_MAX_CHARS);
+        expect(markdown.split("\n").length).toBeLessThanOrEqual(PROFILE_MAX_LINES);
+        for (const line of markdown.split("\n").filter((l) => l.startsWith("- "))) {
+          expect(screenText(line.slice(2)), line).toBeNull();
+          expect(hasIdentifier(line), line).toBe(false);
+        }
+      },
+    );
 
     // "San Pedro de Atacama" is a place, not Pedro.
     it("doesn't name anyone in the network", () => {
       const names = network.people.map((p) => p.displayName.split(" ")[0]).filter((n) => n.length > 3);
       for (const person of network.people)
-        for (const name of names) expect(renderProfile(person), `${person.personId}: ${name}`).not.toMatch(new RegExp(`(?<!San )\\b${name}\\b`));
+        for (const name of names)
+          expect(renderProfile(person), `${person.personId}: ${name}`).not.toMatch(
+            new RegExp(`(?<!San )\\b${name}\\b`),
+          );
     });
   });
 
@@ -103,7 +134,8 @@ describe("seed/network.v2.json", () => {
       expect(network.connections.length / ((n * (n - 1)) / 2)).toBeLessThan(0.1);
       const degrees = degreesFrom(network.team);
       for (const p of network.people) expect(degrees.get(p.personId), p.personId).toBeLessThanOrEqual(3);
-      for (const d of [1, 2, 3]) expect(network.people.filter((p) => degrees.get(p.personId) === d).length).toBeGreaterThan(5);
+      for (const d of [1, 2, 3])
+        expect(network.people.filter((p) => degrees.get(p.personId) === d).length).toBeGreaterThan(5);
     });
   });
 
@@ -122,7 +154,10 @@ describe("seed/network.v2.json", () => {
     it("gives every synthetic participant something only their agent reads for this case", () => {
       for (const id of inRoom.filter((id) => !network.team.includes(id) || network.teamAgentOnly[id])) {
         const agentOnly = network.people.find((p) => p.personId === id)?.agentOnly ?? network.teamAgentOnly[id];
-        expect(agentOnly.constraints.some((c) => c.appliesTo.includes(purpose.type)), id).toBe(true);
+        expect(
+          agentOnly.constraints.some((c) => c.appliesTo.includes(purpose.type)),
+          id,
+        ).toBe(true);
       }
     });
 

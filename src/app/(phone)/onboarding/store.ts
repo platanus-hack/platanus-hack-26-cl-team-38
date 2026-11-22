@@ -1,6 +1,13 @@
 import { useState, useSyncExternalStore } from "react";
 import { z } from "zod";
-import { PersonalNodeSchema, SignalSchema, SourceSchema, type PersonalNode, type Signal, type SynthesisSignal } from "@/lib/types";
+import {
+  PersonalNodeSchema,
+  SignalSchema,
+  SourceSchema,
+  type PersonalNode,
+  type Signal,
+  type SynthesisSignal,
+} from "@/lib/types";
 
 // Everything the onboarding knows lives on this phone. The server forgets signals as soon as the
 // phone collects them, so they are saved here before anything else: a reload must not lose them.
@@ -94,7 +101,17 @@ export function removeProfileLine(source: Profile["source"], index: number) {
   profileStore.set(
     profileStore
       .get()
-      .map((profile) => (profile.source === source ? { ...profile, markdown: profile.markdown.split("\n").filter((_, i) => i !== index).join("\n") } : profile))
+      .map((profile) =>
+        profile.source === source
+          ? {
+              ...profile,
+              markdown: profile.markdown
+                .split("\n")
+                .filter((_, i) => i !== index)
+                .join("\n"),
+            }
+          : profile,
+      )
       .filter((profile) => profile.markdown.trim() !== ""),
   );
 }
@@ -122,7 +139,9 @@ export function usePerson(): [Person, (person: Person) => void] {
 }
 
 export function useStoredNode(): [PersonalNode | undefined, (node: PersonalNode | undefined) => void] {
-  const [node, setNode] = useState<PersonalNode | undefined>(() => parse(read(NODE_KEY), PersonalNodeSchema.optional(), undefined));
+  const [node, setNode] = useState<PersonalNode | undefined>(() =>
+    parse(read(NODE_KEY), PersonalNodeSchema.optional(), undefined),
+  );
   return [
     node,
     (next) => {

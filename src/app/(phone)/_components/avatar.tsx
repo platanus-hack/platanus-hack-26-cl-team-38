@@ -1,4 +1,3 @@
-
 // Illustrated avatars from the v3 mockup. Color and hair come from a hash of the person id, so the
 // same person looks the same on every phone and on the projector.
 
@@ -15,7 +14,8 @@ const BACK: Partial<Record<(typeof STYLES)[number], string>> = {
 };
 const FRONT: Record<(typeof STYLES)[number], string> = {
   short: SHORT,
-  beard: SHORT + '<path d="M13.2 19.2c.3 4.7 3 7.1 6.8 7.1s6.5-2.4 6.8-7.1c-1.4 1.7-3.7 2.5-6.8 2.5s-5.4-.8-6.8-2.5z"/>',
+  beard:
+    SHORT + '<path d="M13.2 19.2c.3 4.7 3 7.1 6.8 7.1s6.5-2.4 6.8-7.1c-1.4 1.7-3.7 2.5-6.8 2.5s-5.4-.8-6.8-2.5z"/>',
   curly:
     '<circle cx="14" cy="14.2" r="3.4"/><circle cx="17" cy="10.8" r="3.6"/><circle cx="21.6" cy="10.3" r="3.7"/><circle cx="25.6" cy="13.4" r="3.4"/><circle cx="26.7" cy="17" r="2.3"/><circle cx="13.2" cy="17.4" r="2.2"/>',
   long: FRINGE,

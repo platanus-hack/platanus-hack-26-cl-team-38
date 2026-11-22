@@ -1,4 +1,10 @@
-import { PublicProjectionSchema, type PersonalNode, type PublicProjection, type PublicTopic, type Topic } from "@/lib/types";
+import {
+  PublicProjectionSchema,
+  type PersonalNode,
+  type PublicProjection,
+  type PublicTopic,
+  type Topic,
+} from "@/lib/types";
 import { hasIdentifier, screen } from "./screen";
 import { fingerprint } from "./taxonomy";
 
@@ -31,7 +37,15 @@ export function projectNode(node: PersonalNode): {
   for (const topic of node.topics) {
     const reason = withheld(topic);
     if (reason) held.push({ topicId: topic.id, reason });
-    else topics.push({ id: topic.id, name: topic.name, kind: topic.kind, depth: topic.depth, sources: topic.sources, embedding: topic.embedding });
+    else
+      topics.push({
+        id: topic.id,
+        name: topic.name,
+        kind: topic.kind,
+        depth: topic.depth,
+        sources: topic.sources,
+        embedding: topic.embedding,
+      });
   }
   assertPublishableName(node.displayName);
   return {

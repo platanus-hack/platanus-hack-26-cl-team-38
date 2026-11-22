@@ -198,7 +198,12 @@ function writeSaved(list: PhoneState[]) {
 export function signOut() {
   const current = getPhone();
   if (current.onboarded) {
-    writeSaved([{ ...current, focus: { topic: null, person: null } }, ...savedSessions().filter((x) => x.personId !== current.personId)].slice(0, 6));
+    writeSaved(
+      [
+        { ...current, focus: { topic: null, person: null } },
+        ...savedSessions().filter((x) => x.personId !== current.personId),
+      ].slice(0, 6),
+    );
   }
   replace(fresh());
 }
@@ -215,7 +220,9 @@ export function resumeSession(personId: string): boolean {
 
 /** Your depth for a topic. Survives a resync: see useNodeSync. */
 export function setDepth(id: string, depth: Topic["depth"]) {
-  setPhone((p) => (p.node ? { node: { ...p.node, topics: p.node.topics.map((t) => (t.id === id ? { ...t, depth } : t)) } } : {}));
+  setPhone((p) =>
+    p.node ? { node: { ...p.node, topics: p.node.topics.map((t) => (t.id === id ? { ...t, depth } : t)) } } : {},
+  );
 }
 
 /** Public or private, decided by you: only a topic you decided on can be published. */

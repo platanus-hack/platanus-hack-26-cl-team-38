@@ -5,6 +5,6 @@
   "ignoreIssues": {
     // The contracts and the room-era agent rule are kept on purpose, used or not (see CLAUDE.md).
     "src/lib/types.ts": ["exports", "types"],
-    "src/lib/privacy/agent-brief.ts": ["exports"]
-  }
+    "src/lib/privacy/agent-brief.ts": ["exports"],
+  },
 }

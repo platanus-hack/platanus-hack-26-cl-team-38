@@ -9,40 +9,63 @@ function clientAnswering(answer: (items: { i: number; name: string }[]) => unkno
   const respond = async (params: { messages: { content: string }[] }) => answer(JSON.parse(params.messages[0].content));
   const parse = vi.fn(respond);
   const betaParse = vi.fn(respond);
-  return { client: { messages: { parse }, beta: { messages: { parse: betaParse } } } as unknown as Anthropic, parse, betaParse };
+  return {
+    client: { messages: { parse }, beta: { messages: { parse: betaParse } } } as unknown as Anthropic,
+    parse,
+    betaParse,
+  };
 }
 
 afterEach(() => vi.unstubAllEnvs());
 
 const ok = (verdicts: RawVerdict[]) => ({ stop_reason: "end_turn", parsed_output: { verdicts } });
 const safe = (i: number): RawVerdict => ({ i, level: "segura", category: "ninguna", saferName: "" });
-const topics = (n: number): JudgeInput[] => Array.from({ length: n }, (_, i) => ({ kind: "hace", name: `tema ${i}`, sources: ["claude"] }));
+const topics = (n: number): JudgeInput[] =>
+  Array.from({ length: n }, (_, i) => ({ kind: "hace", name: `tema ${i}`, sources: ["claude"] }));
 
 describe("createAnthropicJudge", () => {
   it("sends kind, name and sources only, to the fast model, without thinking", async () => {
     const { client, parse } = clientAnswering((items) => ok(items.map((item) => safe(item.i))));
     await createAnthropicJudge({ client })([{ kind: "sabe", name: "python", sources: ["github"] }]);
-    const [params, requestOptions] = parse.mock.calls[0] as unknown as [Record<string, unknown>, Record<string, unknown>];
+    const [params, requestOptions] = parse.mock.calls[0] as unknown as [
+      Record<string, unknown>,
+      Record<string, unknown>,
+    ];
     expect(params.model).toBe("claude-haiku-5-5");
     expect(params.thinking).toEqual({ type: "disabled" });
     expect(requestOptions.timeout).toBe(6000);
-    expect(JSON.parse((params.messages as { content: string }[])[0].content)).toEqual([{ i: 0, kind: "sabe", name: "python", sources: ["github"] }]);
+    expect(JSON.parse((params.messages as { content: string }[])[0].content)).toEqual([
+      { i: 0, kind: "sabe", name: "python", sources: ["github"] },
+    ]);
   });
 
   it("runs on Opus when the deploy asks for it, with a refusal fallback and a longer timeout", async () => {
     vi.stubEnv("PRIVACY_JUDGE_MODEL", "opus");
     const { client, parse, betaParse } = clientAnswering((items) => ok(items.map((item) => safe(item.i))));
-    expect(await createAnthropicJudge({ client })(topics(1))).toEqual([{ level: "segura", category: undefined, saferName: undefined }]);
+    expect(await createAnthropicJudge({ client })(topics(1))).toEqual([
+      { level: "segura", category: undefined, saferName: undefined },
+    ]);
     expect(parse).not.toHaveBeenCalled();
-    const [params, requestOptions] = betaParse.mock.calls[0] as unknown as [Record<string, unknown>, Record<string, unknown>];
-    expect(params).toMatchObject({ model: "claude-opus-5-5", fallbacks: "default", betas: ["server-side-fallback-2026-07-01"] });
+    const [params, requestOptions] = betaParse.mock.calls[0] as unknown as [
+      Record<string, unknown>,
+      Record<string, unknown>,
+    ];
+    expect(params).toMatchObject({
+      model: "claude-opus-5-5",
+      fallbacks: "default",
+      betas: ["server-side-fallback-2026-07-01"],
+    });
     expect(params).not.toHaveProperty("thinking");
     expect(requestOptions.timeout).toBe(12000);
   });
 
   it("splits a long list into parallel chunks and keeps the order", async () => {
     const { client, parse } = clientAnswering((items) =>
-      ok(items.map((item) => (item.name === "tema 20" ? { i: item.i, level: "sensible", category: "salud", saferName: "" } : safe(item.i)))),
+      ok(
+        items.map((item) =>
+          item.name === "tema 20" ? { i: item.i, level: "sensible", category: "salud", saferName: "" } : safe(item.i),
+        ),
+      ),
     );
     const verdicts = await createAnthropicJudge({ client })(topics(30));
     expect(parse).toHaveBeenCalledTimes(8);
@@ -101,7 +124,9 @@ describe("resolveJudge", () => {
     vi.stubEnv("ANTHROPIC_API_KEY", "test-key");
     expect(describeJudge("opus")).toBe("[privacy] juez: claude-opus-5-5");
     expect(describeJudge(undefined)).toBe("[privacy] juez: claude-haiku-5-5");
-    expect(describeJudge("opus-5.5")).toContain('PRIVACY_JUDGE_MODEL="opus-5.5" no es "haiku" ni "opus": el juez corre con claude-haiku-5-5');
+    expect(describeJudge("opus-5.5")).toContain(
+      'PRIVACY_JUDGE_MODEL="opus-5.5" no es "haiku" ni "opus": el juez corre con claude-haiku-5-5',
+    );
     vi.stubEnv("ANTHROPIC_API_KEY", "");
     vi.stubEnv("ANTHROPIC_AUTH_TOKEN", "");
     expect(describeJudge("opus")).toContain("sin ANTHROPIC_API_KEY");

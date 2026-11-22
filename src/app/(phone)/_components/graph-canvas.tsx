@@ -1,6 +1,13 @@
 "use client";
 
-import { type PointerEvent as ReactPointerEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Avatar, avatarSvg } from "./avatar";
 import { usePhone } from "../_lib/store";
 
@@ -23,14 +30,40 @@ type Person = {
   tone?: string;
   onClick?: () => void;
 };
-type Chip = { kind: "chip"; cls: string; icon?: ReactNode; label: string; n?: number; faces?: string[]; badge?: string; onClick?: () => void };
+type Chip = {
+  kind: "chip";
+  cls: string;
+  icon?: ReactNode;
+  label: string;
+  n?: number;
+  faces?: string[];
+  badge?: string;
+  onClick?: () => void;
+};
 export type Entity = (Person | Chip) & { pose: Pose; from?: string };
-export type Edge = { a: string; b: string; kind: "soft" | "strong" | "focus"; w?: number; dash?: string; o?: number; pulse?: number };
+export type Edge = {
+  a: string;
+  b: string;
+  kind: "soft" | "strong" | "focus";
+  w?: number;
+  dash?: string;
+  o?: number;
+  pulse?: number;
+};
 
 export const pose = (p: { x: number; y: number }, o = 1, s = 1): Pose => ({ ...p, o, s });
 
 /** A point on an ellipse; n points spread from `from` to `to` degrees (a full turn has no duplicate end). */
-export function onEllipse(i: number, n: number, rx: number, ry: number, cx: number, cy: number, from: number, to: number) {
+export function onEllipse(
+  i: number,
+  n: number,
+  rx: number,
+  ry: number,
+  cx: number,
+  cy: number,
+  from: number,
+  to: number,
+) {
   const full = to - from >= 359;
   const deg = n === 1 ? (full ? from : (from + to) / 2) : from + ((to - from) * i) / (n - (full ? 0 : 1));
   const a = (deg * Math.PI) / 180;
@@ -102,8 +135,20 @@ function useTween(targets: Record<string, Pose>, spawnFrom: Record<string, strin
             next = { ...next, x: t.x, y: t.y };
           } else moving = true;
         } else {
-          next = { x: p.x + (t.x - p.x) * k, y: p.y + (t.y - p.y) * k, o: p.o + (t.o - p.o) * ko, s: p.s + (t.s - p.s) * k };
-          if (Math.abs(next.x - t.x) + Math.abs(next.y - t.y) + Math.abs(next.o - t.o) * 50 + Math.abs(next.s - t.s) * 50 > 0.15) moving = true;
+          next = {
+            x: p.x + (t.x - p.x) * k,
+            y: p.y + (t.y - p.y) * k,
+            o: p.o + (t.o - p.o) * ko,
+            s: p.s + (t.s - p.s) * k,
+          };
+          if (
+            Math.abs(next.x - t.x) +
+              Math.abs(next.y - t.y) +
+              Math.abs(next.o - t.o) * 50 +
+              Math.abs(next.s - t.s) * 50 >
+            0.15
+          )
+            moving = true;
           else Object.assign(next, t);
         }
         if (!g[id] && next.o < 0.02) delete c[id];
@@ -140,7 +185,17 @@ function useTween(targets: Record<string, Pose>, spawnFrom: Record<string, strin
   return { poses, hold, release };
 }
 
-function PersonNode({ id, n, p, onGrab }: { id: string; n: Person; p: Pose; onGrab?: (e: ReactPointerEvent, id: string) => void }) {
+function PersonNode({
+  id,
+  n,
+  p,
+  onGrab,
+}: {
+  id: string;
+  n: Person;
+  p: Pose;
+  onGrab?: (e: ReactPointerEvent, id: string) => void;
+}) {
   const r = n.focus ? 26 : 23;
   const phone = usePhone();
   const photo = n.me ? phone?.photo : null;
@@ -161,11 +216,31 @@ function PersonNode({ id, n, p, onGrab }: { id: string; n: Person; p: Pose; onGr
         <g className="breathe">
           {n.silo && <circle r={56} fill="none" className="me-ring" strokeWidth={1.5} strokeDasharray="4 8" />}
           <circle r={r} className="disc" />
-          <circle r={r} fill="none" className={n.focus ? "ring" : n.tone ? `ring ${n.tone}` : "me-ring"} strokeWidth={n.focus ? 2.5 : n.me ? 3 : n.tone ? 2.5 : 2} />
+          <circle
+            r={r}
+            fill="none"
+            className={n.focus ? "ring" : n.tone ? `ring ${n.tone}` : "me-ring"}
+            strokeWidth={n.focus ? 2.5 : n.me ? 3 : n.tone ? 2.5 : 2}
+          />
           {photo ? (
-            <image href={photo} x={-20} y={-20} width={40} height={40} preserveAspectRatio="xMidYMid slice" clipPath="circle(50%)" />
+            <image
+              href={photo}
+              x={-20}
+              y={-20}
+              width={40}
+              height={40}
+              preserveAspectRatio="xMidYMid slice"
+              clipPath="circle(50%)"
+            />
           ) : (
-            <svg x={-20} y={-20} width={40} height={40} viewBox="0 0 40 40" dangerouslySetInnerHTML={{ __html: avatarSvg(n.avatar ?? id) }} />
+            <svg
+              x={-20}
+              y={-20}
+              width={40}
+              height={40}
+              viewBox="0 0 40 40"
+              dangerouslySetInnerHTML={{ __html: avatarSvg(n.avatar ?? id) }}
+            />
           )}
         </g>
       </g>
@@ -216,7 +291,14 @@ export function GraphCanvas({
   const { poses: P, hold, release } = useTween(targets, spawnFrom);
   const svg = useRef<SVGSVGElement>(null);
   // The gesture in progress: where it started, whether it moved, and the last two samples for the throw.
-  const grab = useRef<{ id: string; pid: number; sx: number; sy: number; moved: boolean; last: { x: number; y: number; t: number }[] } | null>(null);
+  const grab = useRef<{
+    id: string;
+    pid: number;
+    sx: number;
+    sy: number;
+    moved: boolean;
+    last: { x: number; y: number; t: number }[];
+  } | null>(null);
 
   const toSvg = (e: { clientX: number; clientY: number }) => {
     const m = svg.current?.getScreenCTM();
@@ -274,14 +356,25 @@ export function GraphCanvas({
           if (!a || !b) return null;
           return (
             <g key={`${e.a}>${e.b}`} opacity={Math.min(a.o, b.o) * (e.o ?? 1)} pointerEvents="none">
-              <line className={`edge ${e.kind}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} strokeWidth={e.w ?? 1.5} strokeDasharray={e.dash} strokeLinecap="round" />
+              <line
+                className={`edge ${e.kind}`}
+                x1={a.x}
+                y1={a.y}
+                x2={b.x}
+                y2={b.y}
+                strokeWidth={e.w ?? 1.5}
+                strokeDasharray={e.dash}
+                strokeLinecap="round"
+              />
               {e.pulse !== undefined && <Pulse a={a} b={b} delay={e.pulse * 0.37} />}
             </g>
           );
         })}
         {Object.keys(P).map((id) => {
           const n = E[id];
-          return n?.kind === "person" ? <PersonNode key={id} id={id} n={n} p={P[id]} onGrab={draggable ? onGrab : undefined} /> : null;
+          return n?.kind === "person" ? (
+            <PersonNode key={id} id={id} n={n} p={P[id]} onGrab={draggable ? onGrab : undefined} />
+          ) : null;
         })}
         {Object.keys(P).map((id) => {
           const n = E[id];
@@ -322,7 +415,14 @@ export function GraphCanvas({
         );
         const cls = `gchip ${c.cls}${faces ? " stacked" : ""}`;
         return c.onClick ? (
-          <button key={id} type="button" className={cls} style={style} onClick={c.onClick} aria-pressed={c.cls.includes("sel")}>
+          <button
+            key={id}
+            type="button"
+            className={cls}
+            style={style}
+            onClick={c.onClick}
+            aria-pressed={c.cls.includes("sel")}
+          >
             {body}
           </button>
         ) : (

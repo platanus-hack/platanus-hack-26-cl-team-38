@@ -10,7 +10,9 @@ const TEAM: TeamProfile[] = readdirSync(path.join(process.cwd(), "seed/team"))
   .filter((f) => f.endsWith(".json"))
   .sort()
   .map((f) => {
-    const { slug, displayName, topics } = JSON.parse(readFileSync(path.join(process.cwd(), "seed/team", f), "utf8")) as TeamProfile;
+    const { slug, displayName, topics } = JSON.parse(
+      readFileSync(path.join(process.cwd(), "seed/team", f), "utf8"),
+    ) as TeamProfile;
     return { slug, displayName, topics };
   });
 

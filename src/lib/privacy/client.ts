@@ -13,7 +13,9 @@ export async function fetchVerdicts(topics: ClassifyInput[]): Promise<TopicPriva
     const response = await fetch("/api/privacy/classify", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ topics: topics.slice(i, i + MAX_TOPICS_PER_REQUEST).map(({ kind, name, sources }) => ({ kind, name, sources })) }),
+      body: JSON.stringify({
+        topics: topics.slice(i, i + MAX_TOPICS_PER_REQUEST).map(({ kind, name, sources }) => ({ kind, name, sources })),
+      }),
     });
     if (!response.ok) throw new Error(`classify respondió ${response.status}`);
     verdicts.push(...VerdictsSchema.parse(await response.json()).verdicts);

@@ -60,11 +60,7 @@ export const ANCHORS: Record<SensitiveCategory, string[]> = {
     "peleo la custodia y las visitas de mis hijos",
     "necesito un abogado defensor",
   ],
-  menores: [
-    "llevo a mi hijo al colegio",
-    "mi hija pequeña va al jardín infantil",
-    "soy el papá de un niño",
-  ],
+  menores: ["llevo a mi hijo al colegio", "mi hija pequeña va al jardín infantil", "soy el papá de un niño"],
 };
 
 // Calibrated on eval-set.ts: at 0.66 half of the subtle sensitive cases hit and, among safe topics
@@ -98,7 +94,10 @@ async function nearestAnchors(names: string[], vectors?: number[][]): Promise<An
 
 // `vectors` skips the embedding call when the caller already has the topic embeddings.
 export async function screenByAnchors(topics: TopicInput[], vectors?: number[][]): Promise<(Finding | null)[]> {
-  const hits = await nearestAnchors(topics.map((t) => t.name), vectors);
+  const hits = await nearestAnchors(
+    topics.map((t) => t.name),
+    vectors,
+  );
   return hits.map((hit, i) =>
     hit.score >= ANCHOR_THRESHOLD && !EXPERTISE.includes(topics[i].kind)
       ? { level: "personal", category: hit.category, by: "ancla" }

@@ -17,7 +17,12 @@ const node: PersonalNode = {
   personId: "p1",
   displayName: "Ana",
   version: 1,
-  topics: [topic("jazz", true), topic("poesía japonesa", false), topic("cocina vegana", false, "personal"), topic("ansiedad", true, "sensible")],
+  topics: [
+    topic("jazz", true),
+    topic("poesía japonesa", false),
+    topic("cocina vegana", false, "personal"),
+    topic("ansiedad", true, "sensible"),
+  ],
 };
 
 describe("agentBrief", () => {

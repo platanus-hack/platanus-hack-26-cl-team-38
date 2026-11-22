@@ -53,7 +53,10 @@ type Person<D> = {
 
 /** Local plane in metres around `origin`; the error is negligible within tens of km. */
 function toMeters(origin: { lat: number; lon: number }, lat: number, lon: number): [number, number] {
-  return [(lon - origin.lon) * RAD * EARTH_RADIUS_M * Math.cos(origin.lat * RAD), (lat - origin.lat) * RAD * EARTH_RADIUS_M];
+  return [
+    (lon - origin.lon) * RAD * EARTH_RADIUS_M * Math.cos(origin.lat * RAD),
+    (lat - origin.lat) * RAD * EARTH_RADIUS_M,
+  ];
 }
 
 // Defaults are the variant measured for indoor GPS (±14 to ±25 m declared, real error up to twice
@@ -100,7 +103,9 @@ export function createProximityEngine<D = unknown>({
     const distance = Math.hypot(other.x - viewer.x, other.y - viewer.y);
     const last = viewer.sees.get(other);
     // With an imprecise GPS nobody can be said to be outside: the limit moves with both accuracies.
-    const limit = viewer.radius + Math.min(uncertaintyFactor * Math.hypot(viewer.accuracy, other.accuracy), marginCap(viewer.radius));
+    const limit =
+      viewer.radius +
+      Math.min(uncertaintyFactor * Math.hypot(viewer.accuracy, other.accuracy), marginCap(viewer.radius));
     if (!last) {
       if (distance > limit) return;
       viewer.sees.set(other, [other.x, other.y]);
@@ -150,7 +155,22 @@ export function createProximityEngine<D = unknown>({
     join(id: string, { radius, data }: { radius: number; data: D }) {
       let person = people.get(id);
       if (!person) {
-        person = { id, data, radius, placed: false, x: 0, y: 0, cell: 0, accuracy: 0, seenAt: 0, listener: null, urgent: false, sees: new Map(), seenBy: new Set(), pending: new Map() };
+        person = {
+          id,
+          data,
+          radius,
+          placed: false,
+          x: 0,
+          y: 0,
+          cell: 0,
+          accuracy: 0,
+          seenAt: 0,
+          listener: null,
+          urgent: false,
+          sees: new Map(),
+          seenBy: new Set(),
+          pending: new Map(),
+        };
         people.set(id, person);
       }
       person.radius = radius;
@@ -229,7 +249,14 @@ export function createProximityEngine<D = unknown>({
           const dx = other.x - person.x;
           const dy = other.y - person.y;
           person.sees.set(other, [other.x, other.y]);
-          batch.push({ type, id: other.id, data: other.data, distance: Math.hypot(dx, dy), bearing: (Math.atan2(dx, dy) / RAD + 360) % 360, uncertainty: Math.hypot(person.accuracy, other.accuracy) });
+          batch.push({
+            type,
+            id: other.id,
+            data: other.data,
+            distance: Math.hypot(dx, dy),
+            bearing: (Math.atan2(dx, dy) / RAD + 360) % 360,
+            uncertainty: Math.hypot(person.accuracy, other.accuracy),
+          });
         }
         person.pending.clear();
         person.urgent = false;

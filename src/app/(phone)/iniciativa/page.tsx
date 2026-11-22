@@ -19,18 +19,12 @@ import { toast } from "../_lib/toast";
 const C = COPY.iniciativa;
 const RANK = { amigo: 0, conocido: 1, cercania: 2 } as const;
 
-
 /** A new Iniciativa, stamped now (outside render). */
 function newInitiative(intent: string, members: string[], restrictions: string[]): Initiative {
   return { id: `i-${Date.now().toString(36)}`, intent, members, restrictions, at: new Date().toISOString() };
 }
 
-const fold = (s: string) =>
-  s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .trim();
+const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 
 export default function IniciativaPage() {
   const s = useOnboardedPhone();
@@ -58,7 +52,9 @@ export default function IniciativaPage() {
 
   const words = intentWords(intent);
   const network = new Map(graph?.connections.map((c) => [c.personId, c.contacts]));
-  const contacts = contactsOf(s, graph ? connectionEncounters(graph, encounters) : encounters).sort((a, b) => RANK[a.relation] - RANK[b.relation]);
+  const contacts = contactsOf(s, graph ? connectionEncounters(graph, encounters) : encounters).sort(
+    (a, b) => RANK[a.relation] - RANK[b.relation],
+  );
   // Your Agente's picks: first who knows about it, then close people you already share topics with.
   const withReason = contacts.map((c) => {
     const topic = relevantTopic(c, words);
@@ -66,7 +62,10 @@ export default function IniciativaPage() {
     if (c.relation !== "cercania" && c.items.length) return { c, why: `comparten ${cap(c.items[0].topic)}`, rank: 1 };
     return { c, why: null, rank: 2 };
   });
-  const suggested = withReason.filter((x) => x.why).sort((a, b) => a.rank - b.rank).slice(0, 5);
+  const suggested = withReason
+    .filter((x) => x.why)
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, 5);
   const picks = new Set(suggested.map((x) => x.c.person.personId));
   // Until you touch the list, who you came with is checked; else your Agente's picks, the first
   // three who know about it.
@@ -80,7 +79,8 @@ export default function IniciativaPage() {
   };
 
   const q = fold(query);
-  const matches = (c: Coincidence) => !q || fold(c.person.displayName).includes(q) || c.person.topics.some((t) => fold(t.name).includes(q));
+  const matches = (c: Coincidence) =>
+    !q || fold(c.person.displayName).includes(q) || c.person.topics.some((t) => fold(t.name).includes(q));
   // While searching by topic, each row says which of their topics matched.
   const hit = (c: Coincidence) => {
     const t = q ? c.person.topics.find((x) => fold(x.name).includes(q)) : undefined;
@@ -101,7 +101,11 @@ export default function IniciativaPage() {
     if (!DEMO) {
       setCreating(true);
       setError(undefined);
-      const created = await createPlan(intent, people.map((c) => c.person.personId), limits);
+      const created = await createPlan(
+        intent,
+        people.map((c) => c.person.personId),
+        limits,
+      );
       if (created.ok) return (setPhone({ invite: null }), router.replace(`/conversaciones/${created.planId}`));
       setCreating(false);
       return setError(created.error);
@@ -116,14 +120,18 @@ export default function IniciativaPage() {
     router.replace(`/conversaciones/${init.id}`);
   }
 
-
   return (
     <div className="app">
       <div className="progress" aria-hidden="true">
         <i style={{ width: step === "who" ? "50%" : "100%" }} />
       </div>
       <div className="content step init">
-        <button type="button" className="init-back" aria-label={C.back} onClick={() => (step === "limits" ? setStep("who") : router.back())}>
+        <button
+          type="button"
+          className="init-back"
+          aria-label={C.back}
+          onClick={() => (step === "limits" ? setStep("who") : router.back())}
+        >
           <Icon name="arrow" />
         </button>
         <p className="init-intent">
@@ -136,7 +144,14 @@ export default function IniciativaPage() {
             <h1 className="t-hero">{C.who}</h1>
             <div className="gsearch light" role="search">
               <Icon name="search" />
-              <input type="search" value={query} placeholder={C.search} aria-label={C.search} enterKeyHint="search" onChange={(e) => setQuery(e.target.value)} />
+              <input
+                type="search"
+                value={query}
+                placeholder={C.search}
+                aria-label={C.search}
+                enterKeyHint="search"
+                onChange={(e) => setQuery(e.target.value)}
+              />
               {query && (
                 <button type="button" aria-label={COPY.clearSearch} onClick={() => setQuery("")}>
                   <Icon name="x" />
@@ -152,7 +167,13 @@ export default function IniciativaPage() {
                 </div>
                 <div className="rows">
                   {shownSuggested.map(({ c, why }) => (
-                    <PersonCheck key={c.person.personId} c={c} sub={[hit(c) ?? why, reach(c)].filter(Boolean).join(" · ") || undefined} on={chosen.has(c.person.personId)} onToggle={toggle} />
+                    <PersonCheck
+                      key={c.person.personId}
+                      c={c}
+                      sub={[hit(c) ?? why, reach(c)].filter(Boolean).join(" · ") || undefined}
+                      on={chosen.has(c.person.personId)}
+                      onToggle={toggle}
+                    />
                   ))}
                 </div>
               </>
@@ -162,7 +183,13 @@ export default function IniciativaPage() {
                 <div className="sec">{C.everyone}</div>
                 <div className="rows">
                   {rest.map(({ c }) => (
-                    <PersonCheck key={c.person.personId} c={c} sub={[hit(c), reach(c)].filter(Boolean).join(" · ") || undefined} on={chosen.has(c.person.personId)} onToggle={toggle} />
+                    <PersonCheck
+                      key={c.person.personId}
+                      c={c}
+                      sub={[hit(c), reach(c)].filter(Boolean).join(" · ") || undefined}
+                      on={chosen.has(c.person.personId)}
+                      onToggle={toggle}
+                    />
                   ))}
                 </div>
               </>
@@ -223,7 +250,17 @@ export default function IniciativaPage() {
   );
 }
 
-function PersonCheck({ c, sub, on, onToggle }: { c: Coincidence; sub?: string; on: boolean; onToggle: (id: string) => void }) {
+function PersonCheck({
+  c,
+  sub,
+  on,
+  onToggle,
+}: {
+  c: Coincidence;
+  sub?: string;
+  on: boolean;
+  onToggle: (id: string) => void;
+}) {
   return (
     <button type="button" role="checkbox" aria-checked={on} className="row" onClick={() => onToggle(c.person.personId)}>
       <span className="lead">
@@ -238,7 +275,7 @@ function PersonCheck({ c, sub, on, onToggle }: { c: Coincidence; sub?: string; o
           {sub && ` · ${sub}`}
         </span>
       </span>
-      <span className={`check${on ? " on" : ""}`} aria-hidden="true">
+      <span className={`check${on ? "on" : ""}`} aria-hidden="true">
         {on && <Icon name="check" />}
       </span>
     </button>

@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { admitSignals, APP_NAME, buildAssistantPrompt, IncomingSignalsSchema, parsePastedSignals, type ClassifySignals } from "@/lib/connectors/assistant";
+import {
+  admitSignals,
+  APP_NAME,
+  buildAssistantPrompt,
+  IncomingSignalsSchema,
+  parsePastedSignals,
+  type ClassifySignals,
+} from "@/lib/connectors/assistant";
 import { buildProfilePrompt, PROFILE_MAX_CHARS } from "@/lib/connectors/profile";
 import { SynthesisSignalSchema, type Signal, type SynthesisSignal } from "@/lib/types";
 import { addProfiles, addSignals, ProfilesSchema, removeProfileLine, writeSignals, type Profile } from "./store";
@@ -14,7 +21,9 @@ import { addProfiles, addSignals, ProfilesSchema, removeProfileLine, writeSignal
 export const classifyOnApi: ClassifySignals = async (topics) => {
   const response = await fetch("/api/privacy/classify", { method: "POST", body: JSON.stringify({ topics }) });
   if (!response.ok) throw new Error("classify");
-  const { verdicts } = z.object({ verdicts: z.array(z.object({ level: z.enum(["segura", "personal", "sensible"]) })) }).parse(await response.json());
+  const { verdicts } = z
+    .object({ verdicts: z.array(z.object({ level: z.enum(["segura", "personal", "sensible"]) })) })
+    .parse(await response.json());
   return verdicts.map((privacy) => ({ privacy }));
 };
 
@@ -34,7 +43,10 @@ export function useAssistantInbox({ onSignals, onProfiles }: InboxSink = ONBOARD
   useEffect(() => {
     if (!ticket) return;
     const poll = setInterval(async () => {
-      const response = await fetch("/api/onboarding/inbox", { method: "POST", body: JSON.stringify({ inbox: ticket.inbox }) }).catch(() => null);
+      const response = await fetch("/api/onboarding/inbox", {
+        method: "POST",
+        body: JSON.stringify({ inbox: ticket.inbox }),
+      }).catch(() => null);
       if (!response) return; // offline for a moment: try again on the next tick
       if (!response.ok) return setTicket(null);
       const body = await response.json();
@@ -91,15 +103,24 @@ export function useCopy(message: () => Promise<string>, pasteInto: string) {
       // Safari only keeps the tap's permission to copy if the clipboard call starts before the
       // request resolves, so it gets the pending text instead of waiting for it.
       if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
-        await navigator.clipboard.write([new ClipboardItem({ "text/plain": pending.then((t) => new Blob([t], { type: "text/plain" })) })]);
+        await navigator.clipboard.write([
+          new ClipboardItem({ "text/plain": pending.then((t) => new Blob([t], { type: "text/plain" })) }),
+        ]);
       } else {
         await navigator.clipboard.writeText(await pending);
       }
       setStatus(`Copiado. Pégalo en ${pasteInto}.`);
       setCopied(true);
     } catch {
-      const ready = await pending.then(() => true, () => false);
-      setStatus(ready ? "No se pudo copiar solo. Abre “Ver el mensaje” y cópialo a mano." : "No se pudo preparar el mensaje. Revisa tu conexión e intenta de nuevo.");
+      const ready = await pending.then(
+        () => true,
+        () => false,
+      );
+      setStatus(
+        ready
+          ? "No se pudo copiar solo. Abre “Ver el mensaje” y cópialo a mano."
+          : "No se pudo preparar el mensaje. Revisa tu conexión e intenta de nuevo.",
+      );
     }
   }
 
@@ -111,7 +132,9 @@ function MessagePreview({ text }: { text: string }) {
   return (
     <details className="text-sm">
       <summary className="cursor-pointer font-medium">Ver el mensaje</summary>
-      <pre className="mt-2 max-h-64 overflow-auto rounded-lg bg-muted p-3 text-xs whitespace-pre-wrap select-all">{text}</pre>
+      <pre className="mt-2 max-h-64 overflow-auto rounded-lg bg-muted p-3 text-xs whitespace-pre-wrap select-all">
+        {text}
+      </pre>
     </details>
   );
 }
@@ -137,7 +160,15 @@ const ASSISTANTS: Record<Assistant, { name: string; url: string; steps: string[]
   },
 };
 
-function AssistantCard({ assistant, arrived, message }: { assistant: Assistant; arrived: number; message: () => Promise<string> }) {
+function AssistantCard({
+  assistant,
+  arrived,
+  message,
+}: {
+  assistant: Assistant;
+  arrived: number;
+  message: () => Promise<string>;
+}) {
   const { name, url, steps } = ASSISTANTS[assistant];
   const { status, text, copy } = useCopy(message, name);
 
@@ -177,7 +208,13 @@ const PROFILE_SOURCES = [
 
 // Proof of concept: signals are a few words each; this brings the detail an agent needs to plan
 // with a group, as a markdown file the assistant writes.
-function DetailedProfile({ profiles, inbox }: { profiles: Profile[]; inbox: Pick<AssistantInbox, "profileMessage" | "uploadProfile"> }) {
+function DetailedProfile({
+  profiles,
+  inbox,
+}: {
+  profiles: Profile[];
+  inbox: Pick<AssistantInbox, "profileMessage" | "uploadProfile">;
+}) {
   const { status: copyStatus, text, copy } = useCopy(inbox.profileMessage, "tu asistente");
   const [source, setSource] = useState<(typeof PROFILE_SOURCES)[number][0]>("claude");
   const [pasted, setPasted] = useState("");
@@ -185,7 +222,8 @@ function DetailedProfile({ profiles, inbox }: { profiles: Profile[]; inbox: Pick
 
   async function upload(markdown: string) {
     if (markdown.trim() === "") return;
-    if (markdown.length > PROFILE_MAX_CHARS) return setStatus("El archivo es muy largo. Pídele a tu asistente una versión más corta.");
+    if (markdown.length > PROFILE_MAX_CHARS)
+      return setStatus("El archivo es muy largo. Pídele a tu asistente una versión más corta.");
     setStatus("Revisando que no haya datos sensibles…");
     try {
       setStatus(await inbox.uploadProfile(source, markdown));
@@ -199,8 +237,9 @@ function DetailedProfile({ profiles, inbox }: { profiles: Profile[]; inbox: Pick
     <section className="flex flex-col gap-2 rounded-lg border p-4">
       <h3 className="font-medium">Perfil detallado</h3>
       <p className="text-sm text-muted-foreground">
-        Tu asistente escribe un archivo con tus gustos y tu forma de planear, para que tu agente te represente en un grupo. Claude Code lo sube solo. Desde el chat te
-        entrega el archivo y lo subes aquí. Pasa línea por línea por el filtro de privacidad.
+        Tu asistente escribe un archivo con tus gustos y tu forma de planear, para que tu agente te represente en un
+        grupo. Claude Code lo sube solo. Desde el chat te entrega el archivo y lo subes aquí. Pasa línea por línea por
+        el filtro de privacidad.
       </p>
       <Button onClick={copy}>Copiar mensaje del perfil detallado</Button>
       <p role="status" className="text-sm text-muted-foreground">
@@ -213,7 +252,11 @@ function DetailedProfile({ profiles, inbox }: { profiles: Profile[]; inbox: Pick
         <div className="mt-2 flex flex-col gap-2">
           <label className="flex items-center gap-2">
             <span className="text-muted-foreground">Viene de</span>
-            <select value={source} onChange={(event) => setSource(event.target.value as typeof source)} className="rounded-lg border bg-background p-1">
+            <select
+              value={source}
+              onChange={(event) => setSource(event.target.value as typeof source)}
+              className="rounded-lg border bg-background p-1"
+            >
               {PROFILE_SOURCES.map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
@@ -234,7 +277,13 @@ function DetailedProfile({ profiles, inbox }: { profiles: Profile[]; inbox: Pick
           />
           <label className="flex flex-col gap-1">
             <span className="text-muted-foreground">O pega aquí su contenido.</span>
-            <textarea value={pasted} onChange={(event) => setPasted(event.target.value)} rows={5} spellCheck={false} className="rounded-lg border bg-background p-2 font-mono text-xs" />
+            <textarea
+              value={pasted}
+              onChange={(event) => setPasted(event.target.value)}
+              rows={5}
+              spellCheck={false}
+              className="rounded-lg border bg-background p-2 font-mono text-xs"
+            />
           </label>
           <Button variant="outline" onClick={() => upload(pasted)}>
             Subir
@@ -248,14 +297,23 @@ function DetailedProfile({ profiles, inbox }: { profiles: Profile[]; inbox: Pick
       {profiles.map((profile) => (
         <details key={profile.source} className="text-sm">
           <summary className="cursor-pointer font-medium">
-            Llegó de {PROFILE_SOURCES.find(([value]) => value === profile.source)?.[1] ?? profile.source}: {profile.markdown.split("\n").filter((line) => line.startsWith("- ")).length} líneas
+            Llegó de {PROFILE_SOURCES.find(([value]) => value === profile.source)?.[1] ?? profile.source}:{" "}
+            {profile.markdown.split("\n").filter((line) => line.startsWith("- ")).length} líneas
           </summary>
           <ul className="mt-2 flex flex-col gap-1">
             {profile.markdown.split("\n").map((line, i) =>
               line.trim() === "" ? null : (
-                <li key={`${i}:${line}`} className={`flex items-start justify-between gap-2 ${line.startsWith("#") ? "mt-2 font-medium" : "text-muted-foreground"}`}>
+                <li
+                  key={`${i}:${line}`}
+                  className={`flex items-start justify-between gap-2 ${line.startsWith("#") ? "mt-2 font-medium" : "text-muted-foreground"}`}
+                >
                   <span>{line.replace(/^(?:#+|-)\s+/, "")}</span>
-                  <button type="button" aria-label={`Quitar: ${line}`} className="shrink-0 underline underline-offset-4" onClick={() => removeProfileLine(profile.source, i)}>
+                  <button
+                    type="button"
+                    aria-label={`Quitar: ${line}`}
+                    className="shrink-0 underline underline-offset-4"
+                    onClick={() => removeProfileLine(profile.source, i)}
+                  >
                     Quitar
                   </button>
                 </li>
@@ -331,15 +389,23 @@ function ConnectorSetup() {
   );
 }
 
-export function ConnectAssistant({ signals, profiles, inbox }: { signals: Signal[]; profiles: Profile[]; inbox: AssistantInbox }) {
+export function ConnectAssistant({
+  signals,
+  profiles,
+  inbox,
+}: {
+  signals: Signal[];
+  profiles: Profile[];
+  inbox: AssistantInbox;
+}) {
   const from = (source: Signal["source"]) => signals.filter((s) => s.source === source).length;
   return (
     <div className="flex flex-col gap-4">
       <AssistantCard assistant="claude" arrived={from("claude")} message={inbox.message} />
       <AssistantCard assistant="chatgpt" arrived={from("chatgpt")} message={inbox.message} />
       <p className="text-sm text-muted-foreground">
-        Puedes usar los dos: lo que se repite cuenta más. ¿Usas Gemini? El mismo mensaje sirve. Antes de guardar, todo pasa por el filtro de privacidad y lo sensible
-        (salud, pareja, dinero, política…) se descarta.
+        Puedes usar los dos: lo que se repite cuenta más. ¿Usas Gemini? El mismo mensaje sirve. Antes de guardar, todo
+        pasa por el filtro de privacidad y lo sensible (salud, pareja, dinero, política…) se descarta.
       </p>
       <PasteFallback />
       <DetailedProfile profiles={profiles} inbox={inbox} />

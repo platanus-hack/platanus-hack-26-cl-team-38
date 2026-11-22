@@ -15,10 +15,16 @@ type AssistantSource = z.infer<typeof AssistantSourceSchema>;
 
 // `judged` matters here, unlike for signals: a signal nobody reviewed is still shown to its owner
 // before anything happens, while these lines go straight into an agent's context.
-export type ClassifyLines = (topics: { kind: Kind; name: string; sources: Source[] }[]) => Promise<{ privacy: { level: PrivacyLevel }; judged: boolean }[]>;
+export type ClassifyLines = (
+  topics: { kind: Kind; name: string; sources: Source[] }[],
+) => Promise<{ privacy: { level: PrivacyLevel }; judged: boolean }[]>;
 
 const HEADING = /^\s*(#{1,6})\s/;
-const plain = (line: string) => line.replace(/^\s*(?:#{1,6}|[-*+]|\d+\.)\s+/, "").replace(/[*_`]/g, "").trim();
+const plain = (line: string) =>
+  line
+    .replace(/^\s*(?:#{1,6}|[-*+]|\d+\.)\s+/, "")
+    .replace(/[*_`]/g, "")
+    .trim();
 const headingLevel = (line: string) => HEADING.exec(line)?.[1].length ?? 0;
 
 function linesOf(markdown: string): string[] {
@@ -31,7 +37,11 @@ function linesOf(markdown: string): string[] {
 // The filter reviews a line at a time, as free text (the message asks for first person, which is
 // what the lexicon is written for): nothing in it counts as expertise ("es"), the
 // same reading `screenText()` gives plans and citas. A line is all or nothing, never rewritten.
-export async function admitProfile(markdown: string, source: AssistantSource, classify: ClassifyLines): Promise<{ markdown: string; kept: number; held: number; unreviewed: number }> {
+export async function admitProfile(
+  markdown: string,
+  source: AssistantSource,
+  classify: ClassifyLines,
+): Promise<{ markdown: string; kept: number; held: number; unreviewed: number }> {
   const lines = linesOf(markdown);
   const verdicts = await classify(lines.map((line) => ({ kind: "es", name: plain(line), sources: [source] })));
 
@@ -62,31 +72,65 @@ export async function admitProfile(markdown: string, source: AssistantSource, cl
 type Deps = { inbox: Pick<InboxStore, "has" | "deliverProfile">; classify: ClassifyLines };
 
 // The message is plain text because an assistant reads it and may have to fix its request.
-export async function receiveProfile(token: string | undefined, source: unknown, markdown: string, deps: Deps): Promise<{ status: number; message: string }> {
+export async function receiveProfile(
+  token: string | undefined,
+  source: unknown,
+  markdown: string,
+  deps: Deps,
+): Promise<{ status: number; message: string }> {
   const expired = { status: 401, message: "El permiso no existe o venció. Pide un mensaje nuevo en la app." };
   // Before the filter: classifying calls a model, and nobody without a live token gets to spend it.
   if (!token || !deps.inbox.has(token)) return expired;
 
   const from = AssistantSourceSchema.safeParse(source);
-  if (!from.success) return { status: 400, message: 'Falta decir de qué asistente viene: agrega ?source=claude, ?source=chatgpt o ?source=gemini a la dirección.' };
+  if (!from.success)
+    return {
+      status: 400,
+      message:
+        "Falta decir de qué asistente viene: agrega ?source=claude, ?source=chatgpt o ?source=gemini a la dirección.",
+    };
   const lines = linesOf(markdown);
-  if (lines.length === 0) return { status: 400, message: "El archivo llegó vacío. Se espera Markdown con títulos y viñetas en el cuerpo del pedido." };
+  if (lines.length === 0)
+    return {
+      status: 400,
+      message: "El archivo llegó vacío. Se espera Markdown con títulos y viñetas en el cuerpo del pedido.",
+    };
   if (markdown.length > PROFILE_MAX_CHARS || lines.length > PROFILE_MAX_LINES) {
-    return { status: 400, message: `El archivo es muy largo: máximo ${PROFILE_MAX_LINES} líneas y ${PROFILE_MAX_CHARS} caracteres. Resume y vuelve a enviar.` };
+    return {
+      status: 400,
+      message: `El archivo es muy largo: máximo ${PROFILE_MAX_LINES} líneas y ${PROFILE_MAX_CHARS} caracteres. Resume y vuelve a enviar.`,
+    };
   }
 
   const admitted = await admitProfile(markdown, from.data, deps.classify);
   if (admitted.kept === 0 && admitted.unreviewed > 0) {
-    return { status: 503, message: "No pudimos revisar la privacidad del archivo ahora, así que no se guardó nada. Intenta de nuevo en un minuto." };
+    return {
+      status: 503,
+      message:
+        "No pudimos revisar la privacidad del archivo ahora, así que no se guardó nada. Intenta de nuevo en un minuto.",
+    };
   }
   if (!deps.inbox.deliverProfile(token, from.data, admitted.markdown)) return expired;
 
-  const held = admitted.held ? ` ${admitted.held} líneas se descartaron por tocar datos sensibles: no las reescribas ni las vuelvas a enviar.` : "";
+  const held = admitted.held
+    ? ` ${admitted.held} líneas se descartaron por tocar datos sensibles: no las reescribas ni las vuelvas a enviar.`
+    : "";
   const unreviewed = admitted.unreviewed ? ` ${admitted.unreviewed} no se pudieron revisar y quedaron fuera.` : "";
-  return { status: 200, message: `Recibido el perfil: ${admitted.kept} líneas.${held}${unreviewed} Nada se publicó: queda como borrador en el teléfono de la persona.` };
+  return {
+    status: 200,
+    message: `Recibido el perfil: ${admitted.kept} líneas.${held}${unreviewed} Nada se publicó: queda como borrador en el teléfono de la persona.`,
+  };
 }
 
-export function buildProfilePrompt({ origin, token, minutes = TOKEN_MINUTES }: { origin: string; token: string; minutes?: number }): string {
+export function buildProfilePrompt({
+  origin,
+  token,
+  minutes = TOKEN_MINUTES,
+}: {
+  origin: string;
+  token: string;
+  minutes?: number;
+}): string {
   return `Soy yo quien te pide esto, y es mi decisión. Uso ${APP_NAME}, una app donde un agente me representa cuando planeo algo con un grupo (un viaje, una salida, un proyecto). Quiero cargar ahí un resumen detallado de mi perfil, hecho con lo que tú sabes de mí, para que ese agente proponga y negocie como lo haría yo.
 
 QUÉ NECESITO

@@ -46,7 +46,8 @@ export function Conversation({ params }: { params: Promise<{ id: string }> }) {
         sub={
           cv && (
             <Mono className="mute">
-              {COPY.plan.label} · {COPY.agents(cv.members.length + 1)} · {cv.members.map((m) => m.person.displayName).join(", ")}
+              {COPY.plan.label} · {COPY.agents(cv.members.length + 1)} ·{" "}
+              {cv.members.map((m) => m.person.displayName).join(", ")}
             </Mono>
           )
         }
@@ -78,7 +79,7 @@ export function Conversation({ params }: { params: Promise<{ id: string }> }) {
                     </div>
                   </div>
                 )}
-                {last && <Mono className={`stamp${mine ? " me" : ""}`}>{time.format(new Date(m.at))}</Mono>}
+                {last && <Mono className={`stamp${mine ? "me" : ""}`}>{time.format(new Date(m.at))}</Mono>}
               </div>
             );
           })}
@@ -122,7 +123,10 @@ function Actions({ convId, name, count }: { convId: string; name: string; count:
           <Icon name="check" />
           {C.confirm}
         </button>
-        <button type="button" onClick={() => say(convId, C.otherDateAsk, `${name} propone otra fecha. ¿Qué día les acomoda a cada uno?`)}>
+        <button
+          type="button"
+          onClick={() => say(convId, C.otherDateAsk, `${name} propone otra fecha. ¿Qué día les acomoda a cada uno?`)}
+        >
           <Icon name="clock" />
           {C.otherDate}
         </button>
@@ -134,7 +138,14 @@ function Actions({ convId, name, count }: { convId: string; name: string; count:
           send();
         }}
       >
-        <input value={text} placeholder={C.tellAgent} aria-label={C.tellAgent} maxLength={280} onChange={(e) => setText(e.target.value)} enterKeyHint="send" />
+        <input
+          value={text}
+          placeholder={C.tellAgent}
+          aria-label={C.tellAgent}
+          maxLength={280}
+          onChange={(e) => setText(e.target.value)}
+          enterKeyHint="send"
+        />
         <button type="submit" aria-label={COPY.send} disabled={!text.trim()}>
           <Icon name="send" />
         </button>

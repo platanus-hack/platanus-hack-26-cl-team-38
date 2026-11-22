@@ -9,9 +9,12 @@ describe("screen", () => {
     expect(screen(c)).toMatchObject({ level: "sensible", category: c.category });
   });
 
-  it.each([...SAFE, ...SAFE_HARD, ...PERSONAL].map((c) => [`${c.kind} · ${c.name}`, c] as const))("does not block %s", (_label, c) => {
-    expect(screen(c)).toBeNull();
-  });
+  it.each([...SAFE, ...SAFE_HARD, ...PERSONAL].map((c) => [`${c.kind} · ${c.name}`, c] as const))(
+    "does not block %s",
+    (_label, c) => {
+      expect(screen(c)).toBeNull();
+    },
+  );
 
   it("does not block any topic of the seed", () => {
     const flagged = SEED_ROOMS.flatMap((r) => r.people.flatMap((p) => p.topics))
@@ -46,6 +49,8 @@ describe("taxonomy", () => {
   it("ties a verdict to the exact kind and name", () => {
     expect(fingerprint({ kind: "sabe", name: "Cerámica " })).toBe(fingerprint({ kind: "sabe", name: "ceramica" }));
     expect(fingerprint({ kind: "sabe", name: "ceramica" })).not.toBe(fingerprint({ kind: "busca", name: "ceramica" }));
-    expect(fingerprint({ kind: "sabe", name: "ceramica" })).not.toBe(fingerprint({ kind: "sabe", name: "ceramica gres" }));
+    expect(fingerprint({ kind: "sabe", name: "ceramica" })).not.toBe(
+      fingerprint({ kind: "sabe", name: "ceramica gres" }),
+    );
   });
 });

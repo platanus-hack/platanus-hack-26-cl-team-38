@@ -36,7 +36,8 @@ describe("admitProfile", () => {
   it("drops the lines the filter calls sensible and the sections left empty, and keeps the rest as markdown", async () => {
     const result = await admitProfile(PROFILE, "claude", classifier({ sensible: ["pareja", "medicación"] }));
     expect(result).toEqual({
-      markdown: "# Perfil\n\n## Viajes\n- Prefiere hostales y moverse en bus.\n\n## Comida\n- Le gusta la comida callejera.",
+      markdown:
+        "# Perfil\n\n## Viajes\n- Prefiere hostales y moverse en bus.\n\n## Comida\n- Le gusta la comida callejera.",
       kept: 2,
       held: 2,
       unreviewed: 0,
@@ -114,6 +115,8 @@ describe("buildProfilePrompt", () => {
     expect(prompt).toContain("Authorization: Bearer tok");
     expect(prompt).toContain("vence en 15 minutos");
     expect(prompt).toContain("salud física o mental");
-    expect(prompt).toContain('la herramienta "subir_perfil"), úsala con el asistente que eres y el contenido del archivo');
+    expect(prompt).toContain(
+      'la herramienta "subir_perfil"), úsala con el asistente que eres y el contenido del archivo',
+    );
   });
 });

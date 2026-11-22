@@ -27,7 +27,9 @@ export default function Home() {
   if (!s) return <Splash />;
   const everyone = encounters ? affinities(s, encounters) : [];
   const contacts = known ?? [];
-  const initiatives = (encounters ? localInitiatives(s, encounters) : []).map((i) => buildInitiative(s.displayName, i, everyone));
+  const initiatives = (encounters ? localInitiatives(s, encounters) : []).map((i) =>
+    buildInitiative(s.displayName, i, everyone),
+  );
   const invited = contacts.find((c) => c.person.personId === s.invite);
   const text = draft ?? s.intent;
   const saved = draft === null ? !!s.intent : draft.trim() === s.intent;
@@ -39,13 +41,21 @@ export default function Home() {
         {COPY.app}
         {/* Your Contactos, small: the faces lead to the whole view (or to Explorar while you have none). */}
         {known && (
-          <Link href={contacts.length ? "/afinidades" : "/coincidencias"} className="home-contacts" aria-label={contacts.length ? `${C.contacts}: ${contacts.length}` : C.contactsHint}>
+          <Link
+            href={contacts.length ? "/afinidades" : "/coincidencias"}
+            className="home-contacts"
+            aria-label={contacts.length ? `${C.contacts}: ${contacts.length}` : C.contactsHint}
+          >
             <span className="stack">
               {contacts.slice(0, 3).map((c) => (
                 <Avatar key={c.person.personId} id={c.person.personId} />
               ))}
             </span>
-            {contacts.length > 3 ? <Mono>+{contacts.length - 3}</Mono> : contacts.length === 0 ? <Icon name="users" /> : null}
+            {contacts.length > 3 ? (
+              <Mono>+{contacts.length - 3}</Mono>
+            ) : contacts.length === 0 ? (
+              <Icon name="users" />
+            ) : null}
           </Link>
         )}
       </header>
@@ -53,7 +63,13 @@ export default function Home() {
       <div className="content">
         <div className="home-title">
           <h1 className="t-hero">{C.titles[0]}</h1>
-          <button type="button" className="q" aria-haspopup="dialog" aria-label={C.howTitle} onClick={() => setHow(!how)}>
+          <button
+            type="button"
+            className="q"
+            aria-haspopup="dialog"
+            aria-label={C.howTitle}
+            onClick={() => setHow(!how)}
+          >
             i
           </button>
         </div>

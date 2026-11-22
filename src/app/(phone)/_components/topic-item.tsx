@@ -49,7 +49,15 @@ export function TopicItem({ topic, editDepth }: { topic: Topic; editDepth?: bool
           <Icon name="lock" />
         </span>
       ) : (
-        <Toggle on={topic.public} label={topic.name} onChange={(v) => (setPublic(topic.id, v), scheduleCheckIn(), toast(`${cap(topic.name)}: ${v ? COPY.isPublic : COPY.onlyYou}`))} />
+        <Toggle
+          on={topic.public}
+          label={topic.name}
+          onChange={(v) => (
+            setPublic(topic.id, v),
+            scheduleCheckIn(),
+            toast(`${cap(topic.name)}: ${v ? COPY.isPublic : COPY.onlyYou}`)
+          )}
+        />
       )}
     </div>
   );

@@ -7,7 +7,8 @@ import { PLAN_MAX_ROUNDS } from "@/lib/types";
 import { authenticate } from "@/lib/users/profile";
 
 // Both need `Authorization: Bearer <device key>`: a plan is read only by its participants.
-const denied = () => Response.json({ error: "Falta la clave del dispositivo, o no es la de esa persona" }, { status: 401 });
+const denied = () =>
+  Response.json({ error: "Falta la clave del dispositivo, o no es la de esa persona" }, { status: 401 });
 
 const PersonId = z.string().min(1).max(80);
 const NewPlanSchema = z
@@ -22,7 +23,11 @@ const NewPlanSchema = z
 
 // GET /api/plans?personId=… → { plans }
 export async function GET(request: Request) {
-  const me = await authenticate(supabaseAdmin, new URL(request.url).searchParams.get("personId"), request.headers.get("authorization"));
+  const me = await authenticate(
+    supabaseAdmin,
+    new URL(request.url).searchParams.get("personId"),
+    request.headers.get("authorization"),
+  );
   if (!me) return denied();
   return Response.json({ plans: await listPlans(supabaseAdmin, me) });
 }
@@ -36,7 +41,14 @@ export async function POST(request: Request) {
   if (!(await authenticate(supabaseAdmin, personId, request.headers.get("authorization")))) return denied();
 
   const planId = `plan-${crypto.randomUUID().replaceAll("-", "").slice(0, 16)}`;
-  const created = await createPlan(supabaseAdmin, { id: planId, ownerId: personId, intent, others: memberIds, restrictions, maxRounds: PLAN_MAX_ROUNDS });
+  const created = await createPlan(supabaseAdmin, {
+    id: planId,
+    ownerId: personId,
+    intent,
+    others: memberIds,
+    restrictions,
+    maxRounds: PLAN_MAX_ROUNDS,
+  });
   if (!created) return Response.json({ error: "Un plan se arma solo con tus conexiones aceptadas" }, { status: 409 });
 
   after(() => runDeliberation(planId));

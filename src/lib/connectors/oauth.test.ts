@@ -11,12 +11,31 @@ function setup() {
   let clock = 1_000_000;
   const oauth = createOAuth({ secret: "s".repeat(64), now: () => clock });
   const advance = (ms: number) => (clock += ms);
-  const register = (body: object = { redirect_uris: [CLAUDE] }) => oauth.register(body).json as { client_id: string; client_secret?: string };
+  const register = (body: object = { redirect_uris: [CLAUDE] }) =>
+    oauth.register(body).json as { client_id: string; client_secret?: string };
   const authorize = (clientId: string, extra: object = {}) =>
-    oauth.authorize({ client_id: clientId, redirect_uri: CLAUDE, response_type: "code", code_challenge: CHALLENGE, code_challenge_method: "S256", state: "xyz", code: oauth.phoneCode(OWNER).code, ...extra });
-  const codeFrom = (result: ReturnType<typeof authorize>) => ("redirect" in result ? new URL(result.redirect).searchParams.get("code")! : "");
+    oauth.authorize({
+      client_id: clientId,
+      redirect_uri: CLAUDE,
+      response_type: "code",
+      code_challenge: CHALLENGE,
+      code_challenge_method: "S256",
+      state: "xyz",
+      code: oauth.phoneCode(OWNER).code,
+      ...extra,
+    });
+  const codeFrom = (result: ReturnType<typeof authorize>) =>
+    "redirect" in result ? new URL(result.redirect).searchParams.get("code")! : "";
   const exchange = (clientId: string, code: string, verifier = VERIFIER) =>
-    oauth.token(new URLSearchParams({ grant_type: "authorization_code", client_id: clientId, code, redirect_uri: CLAUDE, code_verifier: verifier }));
+    oauth.token(
+      new URLSearchParams({
+        grant_type: "authorization_code",
+        client_id: clientId,
+        code,
+        redirect_uri: CLAUDE,
+        code_verifier: verifier,
+      }),
+    );
   return { oauth, advance, register, authorize, codeFrom, exchange };
 }
 
@@ -45,13 +64,21 @@ describe("createOAuth", () => {
     const { register, authorize } = setup();
     const { client_id } = register();
     expect(authorize(`${client_id.split(".")[0]}.forged`)).toMatchObject({ status: 400 });
-    expect(authorize(client_id, { redirect_uri: "https://claude.com/api/mcp/auth_callback" })).toMatchObject({ status: 400 });
+    expect(authorize(client_id, { redirect_uri: "https://claude.com/api/mcp/auth_callback" })).toMatchObject({
+      status: 400,
+    });
   });
 
   it("uses a phone code once, and not after it expires", () => {
     const { oauth, advance, register } = setup();
     const { client_id } = register();
-    const request = { client_id, redirect_uri: CLAUDE, response_type: "code", code_challenge: CHALLENGE, code_challenge_method: "S256" };
+    const request = {
+      client_id,
+      redirect_uri: CLAUDE,
+      response_type: "code",
+      code_challenge: CHALLENGE,
+      code_challenge_method: "S256",
+    };
     const { code } = oauth.phoneCode(OWNER);
     expect("redirect" in oauth.authorize({ ...request, code: code.toLowerCase().replace("-", " ") })).toBe(true);
     expect(oauth.authorize({ ...request, code })).toMatchObject({ status: 400 });
@@ -83,13 +110,23 @@ describe("createOAuth", () => {
     advance(2 * 60 * 60_000);
     expect(oauth.verify(`Bearer ${first.access_token}`)).toBeNull();
 
-    const refreshed = oauth.token(new URLSearchParams({ grant_type: "refresh_token", client_id, refresh_token: String(first.refresh_token) }));
+    const refreshed = oauth.token(
+      new URLSearchParams({ grant_type: "refresh_token", client_id, refresh_token: String(first.refresh_token) }),
+    );
     expect(refreshed.status).toBe(200);
     expect(oauth.verify(`Bearer ${refreshed.json.access_token}`)?.owner).toBe(OWNER);
 
-    expect(oauth.token(new URLSearchParams({ grant_type: "refresh_token", client_id, refresh_token: String(first.access_token) })).status).toBe(400);
+    expect(
+      oauth.token(
+        new URLSearchParams({ grant_type: "refresh_token", client_id, refresh_token: String(first.access_token) }),
+      ).status,
+    ).toBe(400);
     advance(REFRESH_TTL_S * 1000);
-    expect(oauth.token(new URLSearchParams({ grant_type: "refresh_token", client_id, refresh_token: String(first.refresh_token) })).status).toBe(400);
+    expect(
+      oauth.token(
+        new URLSearchParams({ grant_type: "refresh_token", client_id, refresh_token: String(first.refresh_token) }),
+      ).status,
+    ).toBe(400);
   });
 
   it("does not accept a token signed with another secret, or a refresh token as access", () => {
@@ -104,18 +141,28 @@ describe("createOAuth", () => {
 
   it("asks a confidential client for its secret, in the body or as Basic", () => {
     const { oauth, register, authorize, codeFrom } = setup();
-    const { client_id, client_secret } = register({ redirect_uris: [CLAUDE], token_endpoint_auth_method: "client_secret_basic" });
-    const form = (code: string) => new URLSearchParams({ grant_type: "authorization_code", code, code_verifier: VERIFIER });
-    expect(oauth.token(new URLSearchParams([...form(codeFrom(authorize(client_id))), ["client_id", client_id]])).status).toBe(401);
+    const { client_id, client_secret } = register({
+      redirect_uris: [CLAUDE],
+      token_endpoint_auth_method: "client_secret_basic",
+    });
+    const form = (code: string) =>
+      new URLSearchParams({ grant_type: "authorization_code", code, code_verifier: VERIFIER });
+    expect(
+      oauth.token(new URLSearchParams([...form(codeFrom(authorize(client_id))), ["client_id", client_id]])).status,
+    ).toBe(401);
 
-    const basic = basicCredentials(`Basic ${Buffer.from(`${encodeURIComponent(client_id)}:${client_secret}`).toString("base64")}`);
+    const basic = basicCredentials(
+      `Basic ${Buffer.from(`${encodeURIComponent(client_id)}:${client_secret}`).toString("base64")}`,
+    );
     expect(oauth.token(form(codeFrom(authorize(client_id))), basic).status).toBe(200);
   });
 });
 
 describe("publicOrigin", () => {
   it("trusts the proxy's protocol and host", () => {
-    const request = new Request("http://localhost:10000/api/mcp", { headers: { host: "team-38.onrender.com", "x-forwarded-proto": "https" } });
+    const request = new Request("http://localhost:10000/api/mcp", {
+      headers: { host: "team-38.onrender.com", "x-forwarded-proto": "https" },
+    });
     expect(publicOrigin(request)).toBe("https://team-38.onrender.com");
   });
 });

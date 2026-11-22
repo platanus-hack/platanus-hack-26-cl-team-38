@@ -15,18 +15,36 @@ export type HubOptions = {
   now?: () => number;
 };
 
-type Session = { roomId: string; personId: string; anchor: number; lastSeenAt: number; send: ((update: ProximityUpdate) => void) | null };
+type Session = {
+  roomId: string;
+  personId: string;
+  anchor: number;
+  lastSeenAt: number;
+  send: ((update: ProximityUpdate) => void) | null;
+};
 
 function toUpdate(events: ProximityEvent<string>[], anchor: number): ProximityUpdate {
   const update: ProximityUpdate = { anchor, enter: [], move: [], leave: [] };
   for (const event of events) {
     if (event.type === "leave") update.leave.push(event.id);
-    else update[event.type].push({ personId: event.id, displayName: event.data, distance: Math.round(event.distance), bearing: Math.round(event.bearing) % 360, uncertainty: Math.round(event.uncertainty) });
+    else
+      update[event.type].push({
+        personId: event.id,
+        displayName: event.data,
+        distance: Math.round(event.distance),
+        bearing: Math.round(event.bearing) % 360,
+        uncertainty: Math.round(event.uncertainty),
+      });
   }
   return update;
 }
 
-export function createProximityHub({ engine: engineOptions, maxPeoplePerRoom = 300, sessionTtlMs = 5 * 60_000, now = Date.now }: HubOptions = {}) {
+export function createProximityHub({
+  engine: engineOptions,
+  maxPeoplePerRoom = 300,
+  sessionTtlMs = 5 * 60_000,
+  now = Date.now,
+}: HubOptions = {}) {
   const rooms = new Map<string, ProximityEngine<string>>();
   const sessions = new Map<string, Session>();
   const byPerson = new Map<string, string>();

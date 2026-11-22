@@ -72,7 +72,9 @@ export function previewThemes(projections: PublicProjection[], threshold: number
       }
       const complement = roles.aporta.some((p) => roles.busca.some((q) => q !== p));
       const people = new Set(ROLE_ORDER.flatMap((r) => roles[r]));
-      const anchor = [...group].sort((x, y) => y.personIds.length - x.personIds.length || x.name.localeCompare(y.name))[0];
+      const anchor = [...group].sort(
+        (x, y) => y.personIds.length - x.personIds.length || x.name.localeCompare(y.name),
+      )[0];
       return {
         id: anchor.name,
         name: anchor.name,

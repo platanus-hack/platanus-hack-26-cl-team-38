@@ -9,7 +9,10 @@ import { MatchSchema, type Match, type PublicProjection, type SharedTopic } from
 
 // The slice of the Supabase client used here, so the tests can run the real SQL in-process.
 export type Db = {
-  rpc(fn: string, args: Record<string, unknown>): PromiseLike<{ data: unknown; error: { message: string; code?: string } | null }>;
+  rpc(
+    fn: string,
+    args: Record<string, unknown>,
+  ): PromiseLike<{ data: unknown; error: { message: string; code?: string } | null }>;
 };
 
 export async function call(db: Db, fn: string, args: Record<string, unknown>): Promise<unknown> {
@@ -35,7 +38,12 @@ export function bearerKey(authorization: string | null): string | undefined {
 //
 // A seed profile is a demo identity the team opens from several browsers, each with its own key, so
 // any device gets in. `ownerOnly` keeps the first-key rule for what is personal data.
-export async function authenticate(db: Db, personId: unknown, authorization: string | null, { ownerOnly = false } = {}): Promise<string | null> {
+export async function authenticate(
+  db: Db,
+  personId: unknown,
+  authorization: string | null,
+  { ownerOnly = false } = {},
+): Promise<string | null> {
   const key = bearerKey(authorization);
   if (typeof personId !== "string" || !personId || !key) return null;
   // true: the key is theirs. false: they hold another key. null: nobody has that id.
@@ -53,7 +61,9 @@ export async function ensureUser(db: Db, personId: string, displayName: string, 
 // Writes the public profile: each new topic name's vector once, and which names it matches.
 // False when the topics are the ones already stored, and then nothing was rewritten.
 export async function saveProfile(db: Db, projection: PublicProjection, key?: string): Promise<boolean> {
-  const topics = projection.topics.filter((t) => t.embedding).map((t) => ({ ...t, nameKey: stripAccents(t.name).trim() }));
+  const topics = projection.topics
+    .filter((t) => t.embedding)
+    .map((t) => ({ ...t, nameKey: stripAccents(t.name).trim() }));
   const hash = sha256(JSON.stringify(topics.map((t) => [t.id, t.name, t.kind, t.depth, t.sources]).sort()));
   const changed = await call(db, "save_profile", {
     p_id: projection.personId,
@@ -69,7 +79,11 @@ type StoredShared = { cosine: number; topics: Record<string, unknown> };
 
 // The stored record names both sides by id; whoever reads gets it as "mine" and "theirs".
 export function toShared(stored: unknown, me: string, other: string): SharedTopic[] {
-  return (stored as StoredShared[]).map((s) => ({ mine: s.topics[me], theirs: s.topics[other], cosine: s.cosine })) as SharedTopic[];
+  return (stored as StoredShared[]).map((s) => ({
+    mine: s.topics[me],
+    theirs: s.topics[other],
+    cosine: s.cosine,
+  })) as SharedTopic[];
 }
 
 type MatchRow = { other_id: string; other_name: string; shared: unknown };
@@ -79,6 +93,10 @@ type MatchRow = { other_id: string; other_name: string; shared: unknown };
 // Whoever shares nothing is left out.
 export async function matchUsers(db: Db, me: string, others: string[]): Promise<Match[]> {
   return ((await call(db, "shared_topics", { p_me: me, p_others: others })) as MatchRow[]).map((row) =>
-    MatchSchema.parse({ personId: row.other_id, displayName: row.other_name, shared: toShared(row.shared, me, row.other_id) }),
+    MatchSchema.parse({
+      personId: row.other_id,
+      displayName: row.other_name,
+      shared: toShared(row.shared, me, row.other_id),
+    }),
   );
 }

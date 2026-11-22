@@ -28,7 +28,10 @@ for (const room of seed.rooms) {
   const members = room.projections.map((raw) => {
     const projection = PublicProjectionSchema.parse(raw);
     const known = profiles.get(projection.personId)?.topics ?? [];
-    profiles.set(projection.personId, { ...projection, topics: [...known, ...projection.topics.filter((t) => !known.some((k) => k.id === t.id))] });
+    profiles.set(projection.personId, {
+      ...projection,
+      topics: [...known, ...projection.topics.filter((t) => !known.some((k) => k.id === t.id))],
+    });
     return { room_id: room.id, person_id: projection.personId, display_name: projection.displayName, projection };
   });
   await run(`miembros de ${room.id}`, db.from("room_members").insert(members));
@@ -53,16 +56,31 @@ console.log(`${network.connections.length} conexiones aceptadas`);
 // agent ("propio"). Saving replaces what the seed had left there.
 let contextLines = 0;
 for (const person of network.people) {
-  for (const [scope, lines] of Object.entries(contextOf(person)) as ["red" | "propio", { section: string; text: string }[]][]) {
+  for (const [scope, lines] of Object.entries(contextOf(person)) as [
+    "red" | "propio",
+    { section: string; text: string }[],
+  ][]) {
     const vectors = await embed(lines.map((line) => line.text));
-    contextLines += await saveContext(db, person.personId, scope, "seed", lines.map((line, i) => ({ lineId: `seed-${scope}-${i + 1}`, ...line, embedding: vectors[i] })));
+    contextLines += await saveContext(
+      db,
+      person.personId,
+      scope,
+      "seed",
+      lines.map((line, i) => ({ lineId: `seed-${scope}-${i + 1}`, ...line, embedding: vectors[i] })),
+    );
   }
 }
 // A teammate a case is about (José in the fire brigade one) has only the "propio" part in the seed.
 for (const [personId, agentOnly] of Object.entries(network.teamAgentOnly)) {
   const lines = propioOf(agentOnly);
   const vectors = await embed(lines.map((line) => line.text));
-  contextLines += await saveContext(db, personId, "propio", "seed", lines.map((line, i) => ({ lineId: `seed-propio-${i + 1}`, ...line, embedding: vectors[i] })));
+  contextLines += await saveContext(
+    db,
+    personId,
+    "propio",
+    "seed",
+    lines.map((line, i) => ({ lineId: `seed-propio-${i + 1}`, ...line, embedding: vectors[i] })),
+  );
 }
 console.log(`${contextLines} líneas de contexto para los agentes`);
 

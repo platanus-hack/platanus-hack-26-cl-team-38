@@ -57,7 +57,13 @@ export default function CoincidenciasPage() {
           <h1 className="sr">{C.title}</h1>
           <div className="segbar" role="radiogroup" aria-label={C.title}>
             {(["personas", "temas"] as const).map((v) => (
-              <button key={v} type="button" role="radio" aria-checked={view === v} onClick={() => (setPhone({ explore: v }), close())}>
+              <button
+                key={v}
+                type="button"
+                role="radio"
+                aria-checked={view === v}
+                onClick={() => (setPhone({ explore: v }), close())}
+              >
                 {v === "personas" ? C.people : C.topics}
               </button>
             ))}
@@ -69,7 +75,14 @@ export default function CoincidenciasPage() {
             </Mono>
             <label className="near-switch">
               <span>{C.visible}</span>
-              <button type="button" role="switch" aria-checked={visible} aria-label={C.visible} className="switch" onClick={() => setVisible(!visible)} />
+              <button
+                type="button"
+                role="switch"
+                aria-checked={visible}
+                aria-label={C.visible}
+                className="switch"
+                onClick={() => setVisible(!visible)}
+              />
             </label>
           </div>
         </div>
@@ -96,7 +109,14 @@ export default function CoincidenciasPage() {
             {view === "personas" ? (
               <AffinityGraph W={360} H={400} me={{ id: s.personId }} contacts={coins} focus={s.focus.person} />
             ) : (
-              <MatchGraph W={360} H={400} compact me={{ id: s.personId, name: s.displayName }} groups={groups} focus={s.focus} />
+              <MatchGraph
+                W={360}
+                H={400}
+                compact
+                me={{ id: s.personId, name: s.displayName }}
+                groups={groups}
+                focus={s.focus}
+              />
             )}
           </div>
         )}
@@ -119,13 +139,24 @@ export default function CoincidenciasPage() {
         )}
       </div>
 
-      <Sheet open={!!selected || !!person} size={person ? "detail" : "list"} onClose={close} label={selected?.topic ?? ""}>
+      <Sheet
+        open={!!selected || !!person}
+        size={person ? "detail" : "list"}
+        onClose={close}
+        label={selected?.topic ?? ""}
+      >
         {person ? (
           <PersonSummary
             key={person.person.personId}
             c={person}
             myTopics={myInterests(s)}
-            state={contacts?.some((x) => x.person.personId === person.person.personId) ? "contact" : (s.requests ?? []).includes(person.person.personId) ? "requested" : "none"}
+            state={
+              contacts?.some((x) => x.person.personId === person.person.personId)
+                ? "contact"
+                : (s.requests ?? []).includes(person.person.personId)
+                  ? "requested"
+                  : "none"
+            }
           />
         ) : (
           selected && (
@@ -139,7 +170,8 @@ export default function CoincidenciasPage() {
                     title={c.person.displayName}
                     sub={
                       <>
-                        <span className={`rel ${c.relation}`}>{RELATION[c.relation].label}</span> · {c.items.map(matchPhrase).join(" · ")}
+                        <span className={`rel ${c.relation}`}>{RELATION[c.relation].label}</span> ·{" "}
+                        {c.items.map(matchPhrase).join(" · ")}
                       </>
                     }
                     data={fmtMeters(c.distanceM)}
@@ -159,11 +191,21 @@ export default function CoincidenciasPage() {
 /** Asks to become Contactos (or takes the request back). It is a connection: both must accept. */
 async function requestContact(c: Coincidence, on: boolean) {
   const { personId, displayName: name } = c.person;
-  const mark = (add: boolean) => setPhone((p) => ({ requests: add ? [...new Set([...(p.requests ?? []), personId])] : (p.requests ?? []).filter((id) => id !== personId) }));
+  const mark = (add: boolean) =>
+    setPhone((p) => ({
+      requests: add
+        ? [...new Set([...(p.requests ?? []), personId])]
+        : (p.requests ?? []).filter((id) => id !== personId),
+    }));
   mark(on);
   // Demo mode has no backend: the request stays pending on this phone.
   if (DEMO) return toast(on ? C.requested(name) : C.requestCanceled);
-  const body = { personId: getPhone().personId, otherId: personId, action: on ? "propose" : "close", ...(on ? { origin: { place: c.place || "Cerca tuyo" } } : {}) };
+  const body = {
+    personId: getPhone().personId,
+    otherId: personId,
+    action: on ? "propose" : "close",
+    ...(on ? { origin: { place: c.place || "Cerca tuyo" } } : {}),
+  };
   const reply = await api("/api/connections", { method: "POST", body: JSON.stringify(body) })
     .then(async (r) => (r.ok ? ((await r.json()) as { connection: { status: string } | null }) : null))
     .catch(() => null);
@@ -174,7 +216,15 @@ async function requestContact(c: Coincidence, on: boolean) {
 }
 
 /** Someone's public information, summarized, and the way to ask them to be your Contacto. */
-function PersonSummary({ c, myTopics, state }: { c: Coincidence; myTopics: PublicTopic[]; state: "none" | "requested" | "contact" }) {
+function PersonSummary({
+  c,
+  myTopics,
+  state,
+}: {
+  c: Coincidence;
+  myTopics: PublicTopic[];
+  state: "none" | "requested" | "contact";
+}) {
   const shared = new Set(c.items.map((i) => i.topic));
   const rest = c.person.topics.filter((t) => !shared.has(t.name));
   return (
@@ -197,7 +247,13 @@ function PersonSummary({ c, myTopics, state }: { c: Coincidence; myTopics: Publi
         </p>
       ) : state === "requested" ? (
         <>
-          <button type="button" className="btn ghost" style={{ marginTop: 24 }} aria-pressed="true" onClick={() => requestContact(c, false)}>
+          <button
+            type="button"
+            className="btn ghost"
+            style={{ marginTop: 24 }}
+            aria-pressed="true"
+            onClick={() => requestContact(c, false)}
+          >
             <Icon name="check" />
             {C.requestSent}
           </button>
@@ -212,7 +268,10 @@ function PersonSummary({ c, myTopics, state }: { c: Coincidence; myTopics: Publi
         </button>
       )}
 
-      <AiCard prompt={COPY.ai.coincidencias} insight={recommend(myTopics, { name: c.person.displayName, topics: c.person.topics, items: c.items })} />
+      <AiCard
+        prompt={COPY.ai.coincidencias}
+        insight={recommend(myTopics, { name: c.person.displayName, topics: c.person.topics, items: c.items })}
+      />
 
       <div className="sec">{C.common}</div>
       <p style={{ margin: 0 }}>{c.items.map(matchPhrase).join(" · ")}</p>
@@ -223,7 +282,6 @@ function PersonSummary({ c, myTopics, state }: { c: Coincidence; myTopics: Publi
           <MoreTopics topics={rest} />
         </>
       )}
-
     </>
   );
 }

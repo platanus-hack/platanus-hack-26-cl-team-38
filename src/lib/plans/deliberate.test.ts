@@ -1,7 +1,14 @@
 import type { PGlite } from "@electric-sql/pglite";
 import { beforeAll, describe, expect, it } from "vitest";
 import type { Db } from "@/lib/users/profile";
-import { deliberate, type Agents, type MemberResponse, type MemberTurn, type OrchestratorPlan, type OrchestratorTurn } from "./deliberate";
+import {
+  deliberate,
+  type Agents,
+  type MemberResponse,
+  type MemberTurn,
+  type OrchestratorPlan,
+  type OrchestratorTurn,
+} from "./deliberate";
 import { claimPlan, listPlans, loadPlan } from "./store";
 import { createPlanNetwork, embed } from "./test-fixture";
 import { transcript, viewPlan } from "./view";
@@ -34,7 +41,10 @@ function fakeAgents(script: Script = {}) {
   const agents: Agents = {
     async open(turn) {
       seen.open.push(turn);
-      return { output: { postura: `${turn.me.displayName} se suma.`, condiciones: [], aportes: script.open?.(turn) ?? [] }, meta: { model: "fake", ms: 1 } };
+      return {
+        output: { postura: `${turn.me.displayName} se suma.`, condiciones: [], aportes: script.open?.(turn) ?? [] },
+        meta: { model: "fake", ms: 1 },
+      };
     },
     async respond(turn) {
       seen.respond.push(turn);
@@ -48,7 +58,11 @@ function fakeAgents(script: Script = {}) {
   return { agents, seen };
 }
 
-const kinds = (plan: Awaited<ReturnType<typeof loadPlan>>) => plan!.messages.map(({ round, message }) => `${round}:${message.agent}${"personId" in message && message.personId ? `:${message.personId}` : ""}`);
+const kinds = (plan: Awaited<ReturnType<typeof loadPlan>>) =>
+  plan!.messages.map(
+    ({ round, message }) =>
+      `${round}:${message.agent}${"personId" in message && message.personId ? `:${message.personId}` : ""}`,
+  );
 
 describe("deliberación", () => {
   it("lo que el orquestador trae de internet queda con su dirección, y lo que no es una página se descarta", async () => {
@@ -65,22 +79,37 @@ describe("deliberación", () => {
     });
     await deliberate(id, { db, agents, embed });
     const plan = (await loadPlan(db, id))!;
-    expect(plan.versions[0].content.fuentes).toEqual([{ dato: "La terraza de la viña abre los sábados desde las 12:00", url: "https://vina.example.cl/terraza" }]);
+    expect(plan.versions[0].content.fuentes).toEqual([
+      { dato: "La terraza de la viña abre los sábados desde las 12:00", url: "https://vina.example.cl/terraza" },
+    ]);
     expect(plan.versions[0].content.decisiones[0].valor).toBe("Oscar, Ana y Beto");
     // The members read it with the proposal.
-    expect(seen.respond[0].proposal).toContain("En internet: La terraza de la viña abre los sábados desde las 12:00 (https://vina.example.cl/terraza)");
+    expect(seen.respond[0].proposal).toContain(
+      "En internet: La terraza de la viña abre los sábados desde las 12:00 (https://vina.example.cl/terraza)",
+    );
   });
 
   it("cierra por consenso cuando los cuatro aceptan", async () => {
     const id = await newPlan();
     const { agents, seen } = fakeAgents();
-    expect(await deliberate(id, { db, agents, embed })).toEqual({ status: "consenso", version: 1, decidedBy: "consenso" });
+    expect(await deliberate(id, { db, agents, embed })).toEqual({
+      status: "consenso",
+      version: 1,
+      decidedBy: "consenso",
+    });
 
     const plan = (await loadPlan(db, id))!;
     expect(plan).toMatchObject({ status: "consenso", round: 1 });
-    expect(plan.versions).toMatchObject([{ version: 1, decidedBy: "consenso", content: { pasos: [{ que: "Reservar la terraza", responsable: "ana" }] } }]);
+    expect(plan.versions).toMatchObject([
+      { version: 1, decidedBy: "consenso", content: { pasos: [{ que: "Reservar la terraza", responsable: "ana" }] } },
+    ]);
     // Within a round the answers are stored as they arrive.
-    expect(kinds(plan).slice(0, 4).sort()).toEqual(["0:miembro:ana", "0:miembro:beto", "0:miembro:carla", "0:miembro:yo"]);
+    expect(kinds(plan).slice(0, 4).sort()).toEqual([
+      "0:miembro:ana",
+      "0:miembro:beto",
+      "0:miembro:carla",
+      "0:miembro:yo",
+    ]);
     expect(kinds(plan)[4]).toBe("1:orquestador");
     expect(kinds(plan).slice(5).sort()).toEqual(["1:miembro:ana", "1:miembro:beto", "1:miembro:carla", "1:miembro:yo"]);
     expect(seen.propose).toHaveLength(1);
@@ -90,7 +119,10 @@ describe("deliberación", () => {
       { key: "M3", displayName: "Beto Lagos", owner: false },
       { key: "M4", displayName: "Carla Soto", owner: false },
     ]);
-    expect((await listPlans(db, "carla")).find((p) => p.id === id)).toMatchObject({ status: "consenso", resumen: "Almuerzo en una viña el sábado" });
+    expect((await listPlans(db, "carla")).find((p) => p.id === id)).toMatchObject({
+      status: "consenso",
+      resumen: "Almuerzo en una viña el sábado",
+    });
     expect(await listPlans(db, "gabi")).toEqual([]);
   });
 
@@ -110,7 +142,11 @@ describe("deliberación", () => {
       "R3 red 2 tortas sin gluten",
       "R4 red 2 Hago tortas de novios sin gluten y sin azúcar",
     ]);
-    expect(of("yo").lines.filter((l) => l.origen === "red").map((l) => l.text)).toEqual(["pesca con mosca"]);
+    expect(
+      of("yo")
+        .lines.filter((l) => l.origen === "red")
+        .map((l) => l.text),
+    ).toEqual(["pesca con mosca"]);
     // Elisa's own restriction is for Elisa's agent, not for Ana's; and her diet is a taste, not a recommendation.
     expect(JSON.stringify(seen.open)).not.toContain("domingos");
     expect(JSON.stringify(seen.open)).not.toContain("vegetariano");
@@ -119,21 +155,70 @@ describe("deliberación", () => {
   it("al límite de cinco rondas decide el orquestador, y deja escrito quién quedó en desacuerdo", async () => {
     const id = await newPlan();
     const { agents, seen } = fakeAgents({
-      respond: (turn) => (turn.me.personId === "beto" ? { motivo: "Prefiere otro día.", decision: "adjust", ajustes: [{ tema: "fecha", pide: "Que sea domingo" }], aportes: [] } : accept),
-      propose: (turn) => proposal(turn.final ? { resumen: "Se hace el sábado", abiertos: [], desacuerdos: [{ miembro: "M3", tema: "fecha", detalle: "Pedía domingo" }, { miembro: "M9", tema: "x", detalle: "no existe" }] } : {}),
+      respond: (turn) =>
+        turn.me.personId === "beto"
+          ? {
+              motivo: "Prefiere otro día.",
+              decision: "adjust",
+              ajustes: [{ tema: "fecha", pide: "Que sea domingo" }],
+              aportes: [],
+            }
+          : accept,
+      propose: (turn) =>
+        proposal(
+          turn.final
+            ? {
+                resumen: "Se hace el sábado",
+                abiertos: [],
+                desacuerdos: [
+                  { miembro: "M3", tema: "fecha", detalle: "Pedía domingo" },
+                  { miembro: "M9", tema: "x", detalle: "no existe" },
+                ],
+              }
+            : {},
+        ),
     });
-    expect(await deliberate(id, { db, agents, embed })).toEqual({ status: "decidido", version: 6, decidedBy: "orquestador" });
+    expect(await deliberate(id, { db, agents, embed })).toEqual({
+      status: "decidido",
+      version: 6,
+      decidedBy: "orquestador",
+    });
 
-    expect(seen.propose.map((t) => [t.round, t.final])).toEqual([[1, false], [2, false], [3, false], [4, false], [5, false], [5, true]]);
+    expect(seen.propose.map((t) => [t.round, t.final])).toEqual([
+      [1, false],
+      [2, false],
+      [3, false],
+      [4, false],
+      [5, false],
+      [5, true],
+    ]);
     expect(seen.respond).toHaveLength(20);
     const plan = (await loadPlan(db, id))!;
     expect(plan.status).toBe("decidido");
-    expect(plan.versions.at(-1)).toMatchObject({ version: 6, decidedBy: "orquestador", content: { resumen: "Se hace el sábado", desacuerdos: [{ personId: "beto", tema: "fecha", detalle: "Pedía domingo" }] } });
-    expect(plan.versions.slice(0, 5).every((v) => v.decidedBy === null && v.content.desacuerdos.length === 0)).toBe(true);
+    expect(plan.versions.at(-1)).toMatchObject({
+      version: 6,
+      decidedBy: "orquestador",
+      content: {
+        resumen: "Se hace el sábado",
+        desacuerdos: [{ personId: "beto", tema: "fecha", detalle: "Pedía domingo" }],
+      },
+    });
+    expect(plan.versions.slice(0, 5).every((v) => v.decidedBy === null && v.content.desacuerdos.length === 0)).toBe(
+      true,
+    );
     const view = viewPlan(plan, "yo")!;
     expect(view).toMatchObject({ round: 5, maxRounds: 5, plan: { version: 6, decidedBy: "orquestador" } });
     // Each orchestrator message carries the version it published, so the thread shows it in place.
-    expect(view.messages.filter((m) => m.agent === "orquestador").map((m) => [m.proposal?.version, m.proposal?.final])).toEqual([[1, false], [2, false], [3, false], [4, false], [5, false], [6, true]]);
+    expect(
+      view.messages.filter((m) => m.agent === "orquestador").map((m) => [m.proposal?.version, m.proposal?.final]),
+    ).toEqual([
+      [1, false],
+      [2, false],
+      [3, false],
+      [4, false],
+      [5, false],
+      [6, true],
+    ]);
     expect(view.messages.at(-1)!.proposal!.content.resumen).toBe("Se hace el sábado");
   });
 
@@ -153,18 +238,41 @@ describe("deliberación", () => {
     await deliberate(id, { db, agents, embed });
     const plan = (await loadPlan(db, id))!;
 
-    const ana = plan.messages.find(({ round, message }) => round === 0 && message.agent === "miembro" && message.personId === "ana")!.message;
+    const ana = plan.messages.find(
+      ({ round, message }) => round === 0 && message.agent === "miembro" && message.personId === "ana",
+    )!.message;
     expect(ana.agent === "miembro" && ana.content.aportes).toEqual([
-      { lineId: "l1", contactId: "elisa", texto: "Un contacto de Ana hace tortas sin gluten y sin azúcar", origen: "red" },
+      {
+        lineId: "l1",
+        contactId: "elisa",
+        texto: "Un contacto de Ana hace tortas sin gluten y sin azúcar",
+        origen: "red",
+      },
       { lineId: "ana.diseño", texto: "Ana puede diseñar las invitaciones", origen: "propio" },
     ]);
-    const discarded = plan.messages.flatMap(({ message }) => (message.agent === "verificador" ? [`${message.personId}:${message.content.descartado}:${message.content.razon}`] : []));
+    const discarded = plan.messages.flatMap(({ message }) =>
+      message.agent === "verificador"
+        ? [`${message.personId}:${message.content.descartado}:${message.content.razon}`]
+        : [],
+    );
     expect(discarded).toEqual(["ana:aporte:cita_inventada", "ana:aporte:nombra_contacto"]);
 
-    const aportesFor = (reader: string) => viewPlan(plan, reader, new Map([["elisa", "Elisa Mora"]]))!.messages.find((m) => m.personId === "ana" && m.round === 0)!.aportes;
+    const aportesFor = (reader: string) =>
+      viewPlan(plan, reader, new Map([["elisa", "Elisa Mora"]]))!.messages.find(
+        (m) => m.personId === "ana" && m.round === 0,
+      )!.aportes;
     // `fuente` numbers the contact for everyone (the network view lights it up); only Ana reads the name.
-    expect(aportesFor("ana")[0]).toEqual({ texto: "Un contacto de Ana hace tortas sin gluten y sin azúcar", origen: "red", contacto: "Elisa Mora", fuente: 1 });
-    expect(aportesFor("yo")[0]).toEqual({ texto: "Un contacto de Ana hace tortas sin gluten y sin azúcar", origen: "red", fuente: 1 });
+    expect(aportesFor("ana")[0]).toEqual({
+      texto: "Un contacto de Ana hace tortas sin gluten y sin azúcar",
+      origen: "red",
+      contacto: "Elisa Mora",
+      fuente: 1,
+    });
+    expect(aportesFor("yo")[0]).toEqual({
+      texto: "Un contacto de Ana hace tortas sin gluten y sin azúcar",
+      origen: "red",
+      fuente: 1,
+    });
     expect(aportesFor("yo")[1]).toEqual({ texto: "Ana puede diseñar las invitaciones", origen: "propio" });
     expect(transcript(plan)).toContain("aporta (de un contacto de Ana Rojas): Un contacto de Ana hace tortas");
     expect(transcript(plan)).not.toMatch(/Elisa|Darío/);
@@ -177,12 +285,25 @@ describe("deliberación", () => {
     const open = agents.open;
     agents.open = async (turn) => {
       const answer = await open(turn);
-      return turn.me.personId === "beto" ? { ...answer, output: { ...answer.output, postura: "Beto no puede ir: está fuera hasta el domingo.", participa: false } } : { ...answer, output: { ...answer.output, participa: true } };
+      return turn.me.personId === "beto"
+        ? {
+            ...answer,
+            output: { ...answer.output, postura: "Beto no puede ir: está fuera hasta el domingo.", participa: false },
+          }
+        : { ...answer, output: { ...answer.output, participa: true } };
     };
     await deliberate(id, { db, agents, embed });
     const plan = (await loadPlan(db, id))!;
 
-    const view = viewPlan(plan, "yo", new Map(), new Map([["ana", 2], ["carla", 2]]))!;
+    const view = viewPlan(
+      plan,
+      "yo",
+      new Map(),
+      new Map([
+        ["ana", 2],
+        ["carla", 2],
+      ]),
+    )!;
     const opening = (personId: string) => view.messages.find((m) => m.round === 0 && m.personId === personId)!;
     expect(opening("beto")).toMatchObject({ participa: false, text: "Beto no puede ir: está fuera hasta el domingo." });
     expect(opening("ana").participa).toBe(true);
@@ -199,12 +320,26 @@ describe("deliberación", () => {
   it("lo que el léxico bloquea no llega a la conversación", async () => {
     const id = await newPlan();
     const { agents } = fakeAgents({
-      respond: (turn) => (turn.round === 1 && turn.me.personId === "carla" ? { motivo: "Carla tiene diabetes y ese día tiene control", decision: "adjust", ajustes: [{ tema: "fecha", pide: "Que sea el domingo" }], aportes: [] } : accept),
+      respond: (turn) =>
+        turn.round === 1 && turn.me.personId === "carla"
+          ? {
+              motivo: "Carla tiene diabetes y ese día tiene control",
+              decision: "adjust",
+              ajustes: [{ tema: "fecha", pide: "Que sea el domingo" }],
+              aportes: [],
+            }
+          : accept,
     });
     await deliberate(id, { db, agents, embed });
     const plan = (await loadPlan(db, id))!;
-    const carla = plan.messages.find(({ round, message }) => round === 1 && message.agent === "miembro" && message.personId === "carla")!.message;
-    expect(carla.agent === "miembro" && carla.content).toMatchObject({ decision: "adjust", motivo: "Pide un cambio a la propuesta.", ajustes: [{ tema: "fecha", pide: "Que sea el domingo" }] });
+    const carla = plan.messages.find(
+      ({ round, message }) => round === 1 && message.agent === "miembro" && message.personId === "carla",
+    )!.message;
+    expect(carla.agent === "miembro" && carla.content).toMatchObject({
+      decision: "adjust",
+      motivo: "Pide un cambio a la propuesta.",
+      ajustes: [{ tema: "fecha", pide: "Que sea el domingo" }],
+    });
     expect(JSON.stringify(viewPlan(plan, "yo"))).not.toContain("diabetes");
   });
 
@@ -223,9 +358,13 @@ describe("deliberación", () => {
   it("bloquear es para quien declaró una condición dura", async () => {
     const id = await newPlan();
     const block: MemberResponse = { motivo: "No le sirve.", decision: "block", ajustes: [], aportes: [] };
-    const { agents } = fakeAgents({ respond: (turn) => (turn.round === 1 && turn.me.personId === "beto" ? block : accept) });
+    const { agents } = fakeAgents({
+      respond: (turn) => (turn.round === 1 && turn.me.personId === "beto" ? block : accept),
+    });
     await deliberate(id, { db, agents, embed });
-    const beto = (await loadPlan(db, id))!.messages.find(({ round, message }) => round === 1 && message.agent === "miembro" && message.personId === "beto")!.message;
+    const beto = (await loadPlan(db, id))!.messages.find(
+      ({ round, message }) => round === 1 && message.agent === "miembro" && message.personId === "beto",
+    )!.message;
     expect(beto.agent === "miembro" && beto.content).toMatchObject({ decision: "adjust" });
   });
 
@@ -236,10 +375,19 @@ describe("deliberación", () => {
         throw new Error("api caída");
       },
     });
-    expect(await deliberate(id, { db, agents, embed })).toEqual({ status: "decidido", version: 1, decidedBy: "codigo" });
+    expect(await deliberate(id, { db, agents, embed })).toEqual({
+      status: "decidido",
+      version: 1,
+      decidedBy: "codigo",
+    });
     expect(seen.propose).toHaveLength(2);
     const plan = (await loadPlan(db, id))!;
-    expect(plan.versions).toMatchObject([{ decidedBy: "codigo", content: { resumen: "Celebrar los 30 de Oscar en una viña", pasos: [{ responsable: "yo" }] } }]);
+    expect(plan.versions).toMatchObject([
+      {
+        decidedBy: "codigo",
+        content: { resumen: "Celebrar los 30 de Oscar en una viña", pasos: [{ responsable: "yo" }] },
+      },
+    ]);
     expect(viewPlan(plan, "yo")!.messages.at(-1)!.text).toMatch(/orquestador no respondió/);
 
     const later = await newPlan();
@@ -251,7 +399,11 @@ describe("deliberación", () => {
         return proposal();
       },
     });
-    expect(await deliberate(later, { db, agents: flaky.agents, embed })).toEqual({ status: "decidido", version: 2, decidedBy: "codigo" });
+    expect(await deliberate(later, { db, agents: flaky.agents, embed })).toEqual({
+      status: "decidido",
+      version: 2,
+      decidedBy: "codigo",
+    });
   });
 
   it("retoma donde quedó si el proceso muere a mitad de camino", async () => {

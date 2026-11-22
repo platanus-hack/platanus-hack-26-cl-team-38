@@ -15,7 +15,11 @@ function subscribe(cb: () => void) {
 
 /** Phones get only the app. Desktops get the app in a phone frame plus the graph behind it. */
 export function DesktopShell({ children }: { children: ReactNode }) {
-  const desktop = useSyncExternalStore(subscribe, () => window.matchMedia(QUERY).matches, () => false);
+  const desktop = useSyncExternalStore(
+    subscribe,
+    () => window.matchMedia(QUERY).matches,
+    () => false,
+  );
   return (
     <div className="shell">
       <div className="device">

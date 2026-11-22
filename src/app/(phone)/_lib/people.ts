@@ -88,7 +88,11 @@ async function loadSupabase(): Promise<Encounter[]> {
   const { data, error } = await supabase.from("room_members").select("projection, checked_in_at, rooms(name)");
   if (error) throw new Error(error.message);
   const byId = new Map<string, Encounter>();
-  for (const row of data as unknown as { projection: PublicProjection; checked_in_at: string; rooms: { name: string } | null }[]) {
+  for (const row of data as unknown as {
+    projection: PublicProjection;
+    checked_in_at: string;
+    rooms: { name: string } | null;
+  }[]) {
     byId.set(row.projection.personId, {
       person: row.projection,
       distanceM: 0,

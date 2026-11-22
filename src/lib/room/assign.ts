@@ -2,7 +2,11 @@ import { bestSeat } from "./candidates";
 import { EPS, MESA_MAX, MESAS_PER_PERSON, type Draft, type RoomIndex } from "./model";
 import { scoreMesa } from "./score";
 
-const memberKey = (d: Draft) => `${d.anchorThemeId}|${d.members.map((m) => m.personId).sort().join("+")}`;
+const memberKey = (d: Draft) =>
+  `${d.anchorThemeId}|${d.members
+    .map((m) => m.personId)
+    .sort()
+    .join("+")}`;
 
 function overlap(a: Draft, b: Draft): number {
   const ids = new Set(a.members.map((m) => m.personId));
@@ -18,7 +22,10 @@ function overlap(a: Draft, b: Draft): number {
 export function assign(drafts: Draft[], index: RoomIndex): Draft[] {
   const score = (d: Draft) => scoreMesa(d.members, index);
   const rank = (a: Draft, b: Draft) => score(b).total - score(a).total || (memberKey(a) < memberKey(b) ? -1 : 1);
-  const ordered = [...drafts.filter((d) => d.kind === "complemento").sort(rank), ...drafts.filter((d) => d.kind === "afinidad").sort(rank)];
+  const ordered = [
+    ...drafts.filter((d) => d.kind === "complemento").sort(rank),
+    ...drafts.filter((d) => d.kind === "afinidad").sort(rank),
+  ];
 
   const count = new Map<string, number>();
   const accepted: Draft[] = [];
