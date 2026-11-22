@@ -175,6 +175,13 @@ export const COPY = {
     rejected: (n: number) => `El servidor dejó ${n === 1 ? "un Interés" : `${n} Intereses`} en privado.`,
     personal: "Ojo: podría decir de más sobre ti",
     toHome: "Seguir",
+    googleHint: "Trae los canales de YouTube que sigues y más ves, y lo que se repite en tu calendario. Llega como borrador y tú decides qué compartes.",
+    googleExport: "Pide tu exportación en Google Takeout: deja YouTube (historial y suscripciones) y Calendar, y en “Método de entrega” elige Añadir a Drive. Tarda cerca de un minuto.",
+    googleOpenTakeout: "Abrir Google Takeout",
+    googlePickHint: "Después elige el archivo .zip que quedó en tu Drive. Solo vemos ese archivo, no el resto de tu Drive.",
+    googlePick: "Elegir mi exportación",
+    googleOpening: "Abriendo Google…",
+    googleFailed: "No pudimos abrir Google. Intenta de nuevo.",
   },
 
   conectar: {
