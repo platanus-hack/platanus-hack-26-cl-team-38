@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { z } from "zod";
 import { PlanGraphSchema, PlanSummarySchema, PlanViewSchema, type PlanGraph, type PlanSummary, type PlanView } from "@/lib/types";
 import { api } from "./api";
 import { COPY } from "./copy";
 import { type Coincidence, contactsOf, DEMO, type Encounter, useEncounters } from "./people";
+import { going, paced } from "./plan-network";
 import { getPhone, type PhoneState } from "./store";
 import type { Profile } from "../onboarding/store";
 
@@ -95,36 +96,109 @@ export function usePlans(): PlanSummary[] {
   return plans;
 }
 
-/** One plan, followed while its Agentes deliberate. */
-export function usePlan(id: string): { plan?: PlanView; missing?: boolean } {
-  const [state, setState] = useState<{ plan?: PlanView; missing?: boolean }>({});
-  useEffect(() => {
-    let alive = true;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const tick = async () => {
-      const response = await api(`/api/plans/${encodeURIComponent(id)}?personId=${me()}`).catch(() => null);
-      if (!alive) return;
-      let open = true;
-      if (response?.ok) {
-        const parsed = z.object({ plan: PlanViewSchema }).safeParse(await response.json().catch(() => null));
-        if (!alive) return;
-        if (parsed.success) {
-          setState({ plan: parsed.data.plan });
-          open = parsed.data.plan.status === "deliberando";
-        }
-      } else if (response && (response.status === 404 || response.status === 401)) {
-        setState({ missing: true });
-        open = false;
+// One plan, followed while its Agentes deliberate. The phone and the desktop panel watch the same
+// plan at once, so there is one poller per plan and both read the same state: the messages come
+// out one at a time (a whole round lands together), and once the plan closes whoever is in it
+// confirms on their own, a little apart, so nobody has to tap behind the scenes in a demo.
+// Those confirmations are only shown: nothing is saved.
+const REVEAL_MS = 750;
+const CONFIRM_MS = 450;
+
+export type PlanState = { plan?: PlanView; missing?: boolean; confirmed: string[] };
+const EMPTY: PlanState = { confirmed: [] };
+
+type Watch = {
+  raw?: PlanView;
+  missing?: boolean;
+  /** Messages already out, and how many of `going(raw)` have confirmed. */
+  shown: number;
+  confirmed: number;
+  state: PlanState;
+  listeners: Set<() => void>;
+  poll?: ReturnType<typeof setTimeout>;
+  pace?: ReturnType<typeof setTimeout>;
+  alive: boolean;
+};
+const watches = new Map<string, Watch>();
+
+function emit(w: Watch) {
+  w.state = w.missing ? { missing: true, confirmed: [] } : w.raw ? { plan: paced(w.raw, w.shown), confirmed: going(w.raw).slice(0, w.confirmed) } : EMPTY;
+  for (const listener of w.listeners) listener();
+}
+
+// What is left to show, one step at a time.
+function pace(w: Watch) {
+  if (w.pace || !w.raw) return;
+  const { raw } = w;
+  const revealing = w.shown < raw.messages.length;
+  const confirming = !revealing && raw.status !== "deliberando" && w.confirmed < going(raw).length;
+  if (!revealing && !confirming) return;
+  w.pace = setTimeout(
+    () => {
+      w.pace = undefined;
+      if (!w.alive) return;
+      if (revealing) w.shown += 1;
+      else w.confirmed += 1;
+      emit(w);
+      pace(w);
+    },
+    revealing ? REVEAL_MS : w.confirmed === 0 ? CONFIRM_MS * 2 : CONFIRM_MS,
+  );
+}
+
+function take(w: Watch, plan: PlanView) {
+  // What was already there when you opened the plan is not replayed.
+  if (!w.raw) {
+    w.shown = plan.messages.length;
+    w.confirmed = plan.status === "deliberando" ? 0 : going(plan).length;
+  }
+  w.raw = plan;
+  emit(w);
+  pace(w);
+}
+
+function watch(id: string): Watch {
+  const w: Watch = { shown: 0, confirmed: 0, state: EMPTY, listeners: new Set(), alive: true };
+  const tick = async () => {
+    const response = await api(`/api/plans/${encodeURIComponent(id)}?personId=${me()}`).catch(() => null);
+    if (!w.alive) return;
+    let open = true;
+    if (response?.ok) {
+      const parsed = z.object({ plan: PlanViewSchema }).safeParse(await response.json().catch(() => null));
+      if (!w.alive) return;
+      if (parsed.success) {
+        take(w, parsed.data.plan);
+        open = parsed.data.plan.status === "deliberando";
       }
-      if (open) timer = setTimeout(tick, POLL_MS);
-    };
-    void tick();
-    return () => {
-      alive = false;
-      clearTimeout(timer);
-    };
-  }, [id]);
-  return state;
+    } else if (response && (response.status === 404 || response.status === 401)) {
+      w.missing = true;
+      emit(w);
+      open = false;
+    }
+    if (open) w.poll = setTimeout(tick, POLL_MS);
+  };
+  void tick();
+  return w;
+}
+
+export function usePlan(id: string): PlanState {
+  const subscribe = useCallback(
+    (listener: () => void) => {
+      const w = watches.get(id) ?? watch(id);
+      watches.set(id, w);
+      w.listeners.add(listener);
+      return () => {
+        w.listeners.delete(listener);
+        if (w.listeners.size > 0) return;
+        w.alive = false;
+        clearTimeout(w.poll);
+        clearTimeout(w.pace);
+        watches.delete(id);
+      };
+    },
+    [id],
+  );
+  return useSyncExternalStore(subscribe, () => watches.get(id)?.state ?? EMPTY, () => EMPTY);
 }
 
 const SYNCED_KEY = "team38.profiles.synced";

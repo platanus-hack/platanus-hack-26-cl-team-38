@@ -134,11 +134,38 @@ describe("deliberación", () => {
     expect(discarded).toEqual(["ana:aporte:cita_inventada", "ana:aporte:nombra_contacto"]);
 
     const aportesFor = (reader: string) => viewPlan(plan, reader, new Map([["elisa", "Elisa Mora"]]))!.messages.find((m) => m.personId === "ana" && m.round === 0)!.aportes;
-    expect(aportesFor("ana")[0]).toEqual({ texto: "Un contacto de Ana hace tortas sin gluten y sin azúcar", origen: "red", contacto: "Elisa Mora" });
-    expect(aportesFor("yo")[0]).toEqual({ texto: "Un contacto de Ana hace tortas sin gluten y sin azúcar", origen: "red" });
+    // `fuente` numbers the contact for everyone (the network view lights it up); only Ana reads the name.
+    expect(aportesFor("ana")[0]).toEqual({ texto: "Un contacto de Ana hace tortas sin gluten y sin azúcar", origen: "red", contacto: "Elisa Mora", fuente: 1 });
+    expect(aportesFor("yo")[0]).toEqual({ texto: "Un contacto de Ana hace tortas sin gluten y sin azúcar", origen: "red", fuente: 1 });
+    expect(aportesFor("yo")[1]).toEqual({ texto: "Ana puede diseñar las invitaciones", origen: "propio" });
     expect(transcript(plan)).toContain("aporta (de un contacto de Ana Rojas): Un contacto de Ana hace tortas");
     expect(transcript(plan)).not.toMatch(/Elisa|Darío/);
     expect(viewPlan(plan, "gabi")).toBeNull();
+  });
+
+  it("quien no puede ser parte lo dice en la apertura, y la vista cuenta los contactos de cada uno", async () => {
+    const id = await newPlan();
+    const { agents } = fakeAgents();
+    const open = agents.open;
+    agents.open = async (turn) => {
+      const answer = await open(turn);
+      return turn.me.personId === "beto" ? { ...answer, output: { ...answer.output, postura: "Beto no puede ir: está fuera hasta el domingo.", participa: false } } : { ...answer, output: { ...answer.output, participa: true } };
+    };
+    await deliberate(id, { db, agents, embed });
+    const plan = (await loadPlan(db, id))!;
+
+    const view = viewPlan(plan, "yo", new Map(), new Map([["ana", 2], ["carla", 2]]))!;
+    const opening = (personId: string) => view.messages.find((m) => m.round === 0 && m.personId === personId)!;
+    expect(opening("beto")).toMatchObject({ participa: false, text: "Beto no puede ir: está fuera hasta el domingo." });
+    expect(opening("ana").participa).toBe(true);
+    expect(view.messages.filter((m) => m.round > 0).every((m) => m.participa === undefined)).toBe(true);
+    expect(view.members).toEqual([
+      { personId: "yo", displayName: "Oscar Pérez", contacts: 0 },
+      { personId: "ana", displayName: "Ana Rojas", contacts: 2 },
+      { personId: "beto", displayName: "Beto Lagos", contacts: 0 },
+      { personId: "carla", displayName: "Carla Soto", contacts: 2 },
+    ]);
+    expect(transcript(plan)).toContain("Agente de Beto Lagos [no participa]: Beto no puede ir");
   });
 
   it("lo que el léxico bloquea no llega a la conversación", async () => {

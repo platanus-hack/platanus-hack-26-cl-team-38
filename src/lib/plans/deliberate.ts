@@ -17,7 +17,7 @@ export type Measured<T> = { output: T; meta: CallMeta };
 
 // What the models return: no ids and no length limits. Everything is cut and checked here.
 type Cited = { cita: string; texto: string };
-export type MemberOpening = { postura: string; condiciones: { texto: string; dura: boolean }[]; aportes: Cited[] };
+export type MemberOpening = { postura: string; participa?: boolean; condiciones: { texto: string; dura: boolean }[]; aportes: Cited[] };
 export type MemberResponse = { motivo: string; decision: "accept" | "adjust" | "block"; ajustes: { tema: string; pide: string }[]; aportes: Cited[] };
 export type OrchestratorPlan = {
   resumen: string;
@@ -223,7 +223,8 @@ export async function deliberate(planId: string, deps: DeliberationDeps): Promis
           personId: me.personId,
           content: {
             tipo: "postura",
-            postura: "text" in postura ? postura.text : "Se suma al plan.",
+            postura: "text" in postura ? postura.text : output.participa === false ? "No puede ser parte de este plan." : "Se suma al plan.",
+            ...(typeof output.participa === "boolean" && { participa: output.participa }),
             condiciones: keep(output.condiciones, (c) => [c.texto], context.contactNames, textDrops).map((c) => ({ texto: clip(c.texto), dura: c.dura })),
             aportes,
           },

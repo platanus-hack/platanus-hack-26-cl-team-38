@@ -4,9 +4,12 @@ import { useEffect, useRef } from "react";
 import type { PlanMessageView, PlanView } from "@/lib/types";
 import { Avatar } from "../../_components/avatar";
 import { Splash, TabBar } from "../../_components/chrome";
+import { Icon } from "../../_components/icons";
+import { PlanNetwork } from "../../_components/plan-network";
 import { LargeTitle, Mono } from "../../_components/ui";
 import { COPY } from "../../_lib/copy";
 import { cap } from "../../_lib/people";
+import { going } from "../../_lib/plan-network";
 import { usePlan } from "../../_lib/plans";
 
 // An Iniciativa on the backend: the Agentes of everyone in it, round by round, and the plan they
@@ -36,11 +39,15 @@ function Aportes({ message, author }: { message: PlanMessageView; author: string
   );
 }
 
-function ThePlan({ plan, names }: { plan: NonNullable<PlanView["plan"]>; names: Map<string, string> }) {
+function ThePlan({ plan, names, verdict }: { plan: NonNullable<PlanView["plan"]>; names: Map<string, string>; verdict?: string }) {
   const { content } = plan;
   return (
-    <section className="plan-card">
-      <div className="sec u">{plan.decidedBy ? C.thePlan : C.proposal}</div>
+    <section className="plan-card ai">
+      <div className="ai-head">
+        <Icon name="sparkle" />
+        {plan.decidedBy ? C.thePlan : C.proposal}
+      </div>
+      {verdict && <div className="ai-verdict si">{verdict}</div>}
       <p className="plan-summary">{content.resumen}</p>
       {content.decisiones.length > 0 && (
         <dl>
@@ -93,14 +100,45 @@ function ThePlan({ plan, names }: { plan: NonNullable<PlanView["plan"]>; names: 
   );
 }
 
+/** Whoever is in the plan confirming it, one after the other (see usePlan: shown, not saved). */
+function Confirmations({ plan, confirmed }: { plan: PlanView; confirmed: string[] }) {
+  const expected = going(plan);
+  if (confirmed.length === 0) return null;
+  return (
+    <section className="plan-confirm">
+      <div className="sec">
+        {C.confirmations}
+        <Mono className={confirmed.length === expected.length ? "all" : "mute"}>
+          {confirmed.length}/{expected.length}
+        </Mono>
+      </div>
+      <div className="rows">
+        {plan.members
+          .filter((m) => confirmed.includes(m.personId))
+          .map((m) => (
+            <div key={m.personId} className="row">
+              <span className="lead">
+                <Avatar id={m.personId} />
+              </span>
+              <span className="main">
+                <span className="title">{m.displayName}</span>
+              </span>
+              <Mono className="ok">{C.confirmed}</Mono>
+            </div>
+          ))}
+      </div>
+    </section>
+  );
+}
+
 export function PlanConversation({ id, me }: { id: string; me: string }) {
-  const { plan, missing } = usePlan(id);
+  const { plan, missing, confirmed } = usePlan(id);
   const end = useRef<HTMLDivElement>(null);
   const seen = plan?.messages.length ?? 0;
   const closed = plan ? plan.status !== "deliberando" : false;
   useEffect(() => {
     if (seen > 0) end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [seen, closed]);
+  }, [seen, closed, confirmed.length]);
 
   if (missing)
     return (
@@ -128,6 +166,10 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
         }
       />
       <div className="thread">
+        {/* on a phone the network goes on top of the conversation; on a desktop it fills the panel */}
+        <div className="plan-net">
+          <PlanNetwork plan={plan} me={me} confirmed={confirmed} W={340} H={300} compact />
+        </div>
         <Mono className={`plan-status${closed ? " done" : ""}`}>{statusOf(plan)}</Mono>
         {plan.messages.map((m) => {
           if (m.agent !== "miembro")
@@ -144,6 +186,7 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
               <span className="who">
                 {mine ? C.you : `Agente de ${author}`}
                 {m.decision && ` · ${decision[m.decision]}`}
+                {m.participa !== undefined && <span className={`pchip ${m.participa ? "va" : "nova"}`}>{m.participa ? C.going : C.notGoing}</span>}
               </span>
               {m.text}
               <Aportes message={m} author={author} />
@@ -154,13 +197,14 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
               {body}
             </div>
           ) : (
-            <div key={m.id} className="msg">
+            <div key={m.id} className={`msg${m.participa === false ? " nova" : ""}`}>
               <Avatar id={m.personId ?? ""} />
               <div className="bubble">{body}</div>
             </div>
           );
         })}
-        {plan.plan && <ThePlan plan={plan.plan} names={names} />}
+        {plan.plan && <ThePlan plan={plan.plan} names={names} verdict={closed ? statusOf(plan) : undefined} />}
+        <Confirmations plan={plan} confirmed={confirmed} />
         <div ref={end} />
       </div>
       <TabBar />
