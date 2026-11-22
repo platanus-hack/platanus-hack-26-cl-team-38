@@ -210,6 +210,89 @@
     height: 28px;
   }
 
+  /* Inicio, clean: your Contactos as a few faces on the right, then one question */
+  .home-contacts {
+    margin-left: auto;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--mute);
+  }
+  .home-contacts .stack .av {
+    width: 28px;
+    height: 28px;
+  }
+  .home-contacts .ic {
+    width: 24px;
+    height: 24px;
+  }
+  .home .content {
+    padding-top: 56px;
+  }
+  .home-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .home-title h1 {
+    flex: 1;
+    text-wrap: balance;
+  }
+  .home-title .q {
+    margin-top: 8px;
+    font-family: var(--mono);
+  }
+  .home-title .q[aria-expanded="true"] {
+    background: var(--slate);
+    border-color: var(--slate);
+    color: var(--on-slate);
+  }
+  /* the question is a white box with room around the text, and the send button sits in it */
+  .home .field {
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 8px 8px 8px 16px;
+    border: 1px solid rgba(27, 35, 38, 0.1);
+    border-radius: 20px;
+    background: #fff;
+  }
+  .home .field:focus-within {
+    border-color: var(--accent);
+  }
+  .home .field textarea {
+    padding: 4px 0;
+  }
+  .home .field .go {
+    width: 44px;
+    height: 44px;
+    background: rgba(27, 35, 38, 0.06);
+  }
+  .home .field .go.on {
+    background: var(--accent);
+    color: #fff;
+  }
+  .home .field .go .ic {
+    translate: -1px 1px;
+  }
+  .home .field .go.done {
+    background: rgba(43, 212, 164, 0.16);
+    color: #0f8f6c;
+  }
+  /* how Minga works opens as a slate card on the paper */
+  .home .how.open > div {
+    background: var(--slate);
+    border-color: var(--slate);
+    color: var(--on-slate);
+  }
+  .home .sec {
+    margin-top: 40px;
+  }
+
   /* LargeTitle: a big title that hands over to a compact bar on scroll */
   .lt-bar {
     position: sticky;
@@ -957,7 +1040,7 @@
     padding: 4px 8px;
     border-radius: 26px;
     /* darker than slate, so the bar stands out on the slate screens too */
-    background: rgba(17, 28, 33, 0.94);
+    background: rgba(26, 41, 47, 0.94);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     display: flex;
@@ -1489,6 +1572,7 @@
     margin-left: 0;
   }
   .rows .stack .av,
+  .topbar .stack .av,
   .sheet .stack .av {
     box-shadow: 0 0 0 2px var(--paper);
   }
