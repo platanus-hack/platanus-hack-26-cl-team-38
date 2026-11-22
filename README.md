@@ -269,7 +269,7 @@ Minga already covers the full loop: building your Node, discovering your people,
 
 ## Docs
 
-The design notes live in [`docs/`](docs/README.md), in Spanish: the [vision](docs/master-idea.md), the [core solution](docs/solucion-core.md), the [layered architecture](docs/arquitectura-por-capas.md), the [data model](docs/modelo-de-datos.md), [onboarding and privacy](docs/onboarding-privacidad.md) and the [privacy filter review](docs/revision-filtro-privacidad.md). Team decisions are recorded with their dates in [`CLAUDE.md`](CLAUDE.md).
+The design notes live in [`docs/`](docs/README.md), in Spanish: the [vision](docs/master-idea.md), the [core solution](docs/solucion-core.md), the [layered architecture](docs/arquitectura-por-capas.md), the [data model](docs/modelo-de-datos.md), [onboarding and privacy](docs/onboarding-privacidad.md) and the [privacy filter review](docs/revision-filtro-privacidad.md). Team decisions are recorded with their dates in [`docs/decisiones.md`](docs/decisiones.md).
 
 ## Potential use cases
 
