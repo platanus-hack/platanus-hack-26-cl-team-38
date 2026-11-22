@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { assistantInbox } from "@/lib/connectors/server";
 
-const BodySchema = z.object({ inbox: z.string().min(1).max(64) }).strict();
+// Only the ids open() makes: an owner inbox is read with the device key, in ./mine.
+const BodySchema = z.object({ inbox: z.string().regex(/^[0-9a-f]{32}$/) }).strict();
 
 // The phone collects what its assistant delivered. POST, not GET, because reading empties the inbox.
 export async function POST(request: Request) {

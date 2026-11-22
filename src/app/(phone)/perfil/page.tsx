@@ -87,6 +87,7 @@ export default function PerfilPage() {
         <div className="rows">
           <ListRow title={C.outbox} data={s.outbox.length} onClick={() => setOutbox(true)} chevron />
           <ListRow title={C.myNode} data={`${interests.length} · ${kept}`} href="/nodo" chevron />
+          <ListRow title={COPY.conectar.row} href="/conectar" chevron />
           <ListRow title={C.signOut} onClick={leave} />
           <ListRow title={C.wipe} onClick={() => setConfirmWipe(true)} className="danger" />
         </div>

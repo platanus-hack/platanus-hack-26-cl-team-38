@@ -21,3 +21,6 @@ services:
       # "haiku" (por defecto) u "opus": el modelo del juez de privacidad. Se cambia en el panel de Render.
       - key: PRIVACY_JUDGE_MODEL
         sync: false
+      # Firma los tokens del conector MCP (OAuth). Si cambia, cada asistente conectado tiene que volver a autorizar.
+      - key: MCP_OAUTH_SECRET
+        generateValue: true

@@ -177,6 +177,20 @@ export const COPY = {
     toHome: "Seguir",
   },
 
+  conectar: {
+    title: "Conectar asistente",
+    row: "Conectar asistente",
+    fromSheet: "¿Agregaste Minga como conector? Conéctalo aquí",
+    hint: "Escribe este código en la página donde tu asistente te pidió conectar Minga.",
+    loading: "Pidiendo código…",
+    failed: "No pudimos pedir el código. Revisa tu conexión.",
+    again: "Otro código",
+    expires: (min: number) => `Vence en ${min} min`,
+    then: "Después pídele a tu asistente: “Sube mi perfil a Minga”. Llega a tu teléfono como borrador y tú decides qué compartes.",
+    setupTitle: "¿Cómo lo agrego?",
+    setup: (url: string) => `En claude.ai, desde el computador: Configuración → Conectores → Agregar conector personalizado, con el nombre Minga y la dirección ${url}. Al conectarlo te pide este código.`,
+  },
+
   sala: {
     noNode: "Primero arma tu Nodo.",
     noName: "Falta tu nombre.",

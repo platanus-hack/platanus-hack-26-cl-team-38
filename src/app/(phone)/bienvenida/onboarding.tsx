@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { SeedTopic } from "../../../../seed/people";
@@ -257,6 +258,9 @@ function AssistantSheet({ source, inbox, arrived }: { source: Source; inbox: Ass
       <button className="btn" style={{ marginTop: 16 }} disabled={!raw.trim() || busy} onClick={read}>
         {busy ? C.reading : C.read}
       </button>
+      <Link href="/conectar" className="link" style={{ display: "block", margin: "16px auto 0", textAlign: "center" }}>
+        {COPY.conectar.fromSheet}
+      </Link>
     </>
   );
 }
