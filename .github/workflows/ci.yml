@@ -1,6 +1,9 @@
 name: CI
 
-on: push
+on:
+  pull_request:
+  push:
+    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -8,8 +11,8 @@ concurrency:
 
 jobs:
   check:
-    # Only on the mirror: the org repo can't connect integrations (see README).
-    if: github.repository == 'oerlandsen/platanus-hack-26-cl-team-38'
+    # The checks run where the PRs are; the mirror only deploys (deploy.yml).
+    if: github.repository == 'platanus-hack/platanus-hack-26-cl-team-38'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
