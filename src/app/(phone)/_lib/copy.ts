@@ -190,6 +190,13 @@ export const COPY = {
     infoHelp: "Solo la ves tú.",
     infoLocal: "Quedó guardada en tu teléfono, pero no se pudo subir. Vuelve a intentar.",
     infoMissing: "Falta completar",
+    infoInvalid: {
+      email: "Escribe un mail válido, como nombre@ejemplo.cl",
+      age: "Escribe tu edad, entre 13 y 120",
+      gender: "Elige una opción",
+      phone: "Escribe tu teléfono con 8 a 15 dígitos, como +56 9 1234 5678",
+      occupation: "Hasta 60 caracteres",
+    },
     email: "Mail",
     age: "Edad",
     gender: "Género",

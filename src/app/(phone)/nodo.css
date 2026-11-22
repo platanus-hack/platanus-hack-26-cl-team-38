@@ -465,6 +465,27 @@
     font-size: 13px;
     color: var(--mute);
   }
+  /* every value starts on the same line: no native padding, arrows or autofill tint */
+  .info .field :is(input, select) {
+    font: inherit;
+    font-size: 16px;
+    color: inherit;
+    border-radius: 0;
+    text-overflow: ellipsis;
+  }
+  .info .field select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 24px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%231b2326' stroke-opacity='.5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E") no-repeat right center / 16px;
+  }
+  .info .field select:invalid {
+    color: var(--mute);
+  }
+  .info .field input:-webkit-autofill {
+    -webkit-text-fill-color: var(--ink);
+    transition: background-color 9999s;
+  }
   .field ::placeholder {
     color: var(--mute);
   }
