@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useSyncExternalStore } from "react";
 import { Toaster } from "./chrome";
+import { FullscreenToggle } from "./fullscreen-toggle";
 import { GraphStage } from "./graph-stage";
 
 const QUERY = "(min-width: 1024px)";
@@ -29,6 +30,7 @@ export function DesktopShell({ children }: { children: ReactNode }) {
         </div>
       </div>
       {desktop && <GraphStage />}
+      {desktop && <FullscreenToggle />}
     </div>
   );
 }
