@@ -45,9 +45,9 @@ function chooseTeammate(p: TeamProfile) {
   setPhone({ personId, displayName: p.displayName, signals, node: null, room: null, onboarded: false, focus: { topic: null, person: null } });
 }
 
-/** As in the seed, a teammate shares everything the filter lets through. */
-function shareEverything(node: PersonalNode): PersonalNode {
-  return node.topics.filter((t) => !isLocked(t)).reduce((n, t) => setShared(n, t.id, true), node);
+/** Everything the filter lets through, shared or kept: what a teammate from the seed starts with, and "Seleccionar todos". */
+function shareEverything(node: PersonalNode, shared = true): PersonalNode {
+  return node.topics.filter((t) => !isLocked(t)).reduce((n, t) => setShared(n, t.id, shared), node);
 }
 
 const roomFromLink = () => new URLSearchParams(window.location.search).get("sala")?.trim().toUpperCase() || DEFAULT_ROOM;
@@ -387,6 +387,9 @@ function ShareStep({ s }: { s: PhoneState }) {
   const shared = topics.filter(isPublished).length;
   // "Lo recomendado": what the filter found safe and you haven't decided on yet.
   const recommended = topics.filter((t) => t.privacy?.level === "segura" && t.privacy.decidedBy === "default").length;
+  // "Seleccionar todos" covers what can be shared at all; what is locked stays out.
+  const open = topics.filter((t) => !isLocked(t));
+  const all = open.length > 0 && open.every(isPublished);
 
   async function done() {
     if (rejected) return router.replace("/");
@@ -409,11 +412,18 @@ function ShareStep({ s }: { s: PhoneState }) {
           </h1>
           <Why text={C.shareHelp} />
         </div>
-        {recommended > 0 && (
-          <button type="button" className="link" onClick={() => setPhone((p) => (p.node ? { node: shareRecommended(p.node) } : {}))}>
-            {C.shareAll}
-          </button>
-        )}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 24px" }}>
+          {open.length > 0 && (
+            <button type="button" className="link" onClick={() => setPhone((p) => (p.node ? { node: shareEverything(p.node, !all) } : {}))}>
+              {all ? C.selectNone : C.selectAll}
+            </button>
+          )}
+          {recommended > 0 && (
+            <button type="button" className="link" onClick={() => setPhone((p) => (p.node ? { node: shareRecommended(p.node) } : {}))}>
+              {C.shareAll}
+            </button>
+          )}
+        </div>
         <div className="rows">
           {topics.map((t) => (
             <TopicItem key={t.id} topic={t} />

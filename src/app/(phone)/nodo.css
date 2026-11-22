@@ -834,6 +834,21 @@
     background: var(--paper);
     border-top: 1px solid var(--line);
   }
+  /* On a phone the page itself must not scroll under a footer: the bounce at the end of the page
+     (and the browser bar hiding) lifts a sticky footer off the bottom. The screen takes exactly
+     the visible height and only the content scrolls, so the button never leaves the edge. */
+  @media (max-width: 1023px) {
+    .app:has(> .foot) {
+      height: 100vh;
+      height: 100dvh;
+      min-height: 0;
+    }
+    .app:has(> .foot) > .content {
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+  }
 
   /* Tag: text, weight by depth */
   .tags {

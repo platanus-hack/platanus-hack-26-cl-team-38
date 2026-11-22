@@ -300,6 +300,8 @@ export const COPY = {
     building: "Armando tu Nodo",
     share: "¿Qué compartes?",
     shareAll: "Compartir lo recomendado",
+    selectAll: "Seleccionar todos",
+    selectNone: "Quitar todos",
     shareHelp: "Lo público es lo que te interesa conectar. Lo demás se queda en tu teléfono.",
     example: "Probar con un ejemplo",
     soon: "pronto",
