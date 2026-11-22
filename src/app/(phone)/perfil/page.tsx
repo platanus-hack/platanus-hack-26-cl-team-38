@@ -3,15 +3,16 @@
 import { useRouter } from "next/navigation";
 import { shareRecommended } from "@/lib/node/node";
 import { useState } from "react";
+import { MoreTopics } from "../_components/ai-card";
 import { Avatar } from "../_components/avatar";
 import { BrandLogo } from "../_components/brand";
 import { Sheet, Splash, TabBar, useOnboardedPhone } from "../_components/chrome";
 import { Icon } from "../_components/icons";
 import { TopicItem } from "../_components/topic-item";
-import { ListRow, Mono, Tags } from "../_components/ui";
+import { ListRow, Mono } from "../_components/ui";
 import { COPY } from "../_lib/copy";
 import { useLocation } from "../_lib/location";
-import { cap, DEMO, myInterests } from "../_lib/people";
+import { DEMO, myInterests } from "../_lib/people";
 import { connectedSources, resetPhone, setPhone, signOut } from "../_lib/store";
 
 const C = COPY.perfil;
@@ -53,7 +54,7 @@ export default function PerfilPage() {
         </div>
 
         <div className="sec u">{C.interests}</div>
-        {interests.length ? <Tags topics={interests.map((t) => ({ ...t, name: cap(t.name) }))} /> : <p className="mute">{C.noInterests}</p>}
+        {interests.length ? <MoreTopics topics={interests} limit={10} /> : <p className="mute">{C.noInterests}</p>}
 
         <div className="sec u">{C.sources}</div>
         <div className="logos" aria-label={C.sources}>

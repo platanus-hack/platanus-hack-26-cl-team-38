@@ -1487,6 +1487,29 @@
   .gsearch.light button {
     color: var(--ink);
   }
+  .limits-text {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+    border: 1px solid rgba(27, 35, 38, 0.18);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.4);
+    font: inherit;
+    /* 16px or iOS zooms in on focus */
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .limits-text:focus {
+    border-color: var(--accent);
+  }
+  .limits-text::placeholder {
+    color: var(--mute);
+  }
   .check {
     width: 26px;
     height: 26px;
@@ -1508,34 +1531,6 @@
   .check .ic {
     width: 16px;
     height: 16px;
-  }
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 40px;
-    padding: 0 16px;
-    border-radius: 20px;
-    border: 1px solid rgba(27, 35, 38, 0.18);
-    font-size: 15px;
-    transition:
-      background 0.2s,
-      color 0.2s;
-  }
-  .chip[aria-pressed="true"] {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: var(--paper);
-  }
-  .chip .ic {
-    width: 16px;
-    height: 16px;
-    color: var(--accent);
   }
   .init-foot {
     display: flex;

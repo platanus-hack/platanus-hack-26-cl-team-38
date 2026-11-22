@@ -72,16 +72,16 @@ export function AiCard({ prompt, insight, listLabel = C.opportunities }: { promp
   );
 }
 
-/** "También": the first three topics, the rest behind "Ver más". */
-export function MoreTopics({ topics }: { topics: Pick<Topic, "id" | "name" | "depth">[] }) {
+/** Topics as running text: the first `limit`, the rest behind "Ver más". */
+export function MoreTopics({ topics, limit = 3 }: { topics: Pick<Topic, "id" | "name" | "depth">[]; limit?: number }) {
   const [open, setOpen] = useState(false);
-  const shown = open ? topics : topics.slice(0, 3);
+  const shown = open ? topics : topics.slice(0, limit);
   return (
     <>
       <Tags topics={shown.map((t) => ({ ...t, name: cap(t.name) }))} />
-      {topics.length > 3 && (
+      {topics.length > limit && (
         <button type="button" className="more-btn" aria-expanded={open} onClick={() => setOpen(!open)}>
-          {open ? COPY.less : `${COPY.more} (${topics.length - 3})`}
+          {open ? COPY.less : `${COPY.more} (${topics.length - limit})`}
         </button>
       )}
     </>

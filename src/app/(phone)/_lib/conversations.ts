@@ -119,7 +119,7 @@ export function buildInitiative(myName: string, init: Initiative, contacts: Coin
       }`,
     ],
   ];
-  if (init.restrictions.length) lines.push(["me", `${myName} pidió considerar: ${list(init.restrictions.map((r) => r.toLowerCase()))}.`]);
+  if (init.restrictions.length) lines.push(["me", `${myName} pidió considerar: ${list(init.restrictions.map((r) => r.charAt(0).toLowerCase() + r.slice(1)))}.`]);
 
   const replies = [
     (n: string) => `${n} se suma. ¿Qué día les acomoda?`,

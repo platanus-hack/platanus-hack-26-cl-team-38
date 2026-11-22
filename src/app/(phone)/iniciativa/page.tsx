@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Avatar } from "../_components/avatar";
 import { Splash, useOnboardedPhone } from "../_components/chrome";
 import { Icon } from "../_components/icons";
-import { Field, Mono, Why } from "../_components/ui";
+import { Mono, Why } from "../_components/ui";
 import { intentWords, relevantTopic } from "../_lib/conversations";
 import { COPY } from "../_lib/copy";
 import { affinities, cap, type Coincidence, RELATION, useEncounters } from "../_lib/people";
@@ -17,7 +17,6 @@ import { type Initiative, setPhone } from "../_lib/store";
 const C = COPY.iniciativa;
 const RANK = { amigo: 0, conocido: 1, cercania: 2 } as const;
 
-const PRESETS: readonly string[] = C.presets;
 
 /** A new Iniciativa, stamped now (outside render). */
 function newInitiative(intent: string, members: string[], restrictions: string[]): Initiative {
@@ -38,8 +37,12 @@ export default function IniciativaPage() {
   const [step, setStep] = useState<"who" | "limits">("who");
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<Set<string> | null>(null);
-  const [limits, setLimits] = useState<string[]>([]);
-  const [custom, setCustom] = useState("");
+  const [note, setNote] = useState("");
+  // Free text: each line (or sentence ended in a period) is one thing to consider.
+  const limits = note
+    .split(/\n+|(?<=\.)\s+/)
+    .map((l) => l.trim().replace(/[.;]+$/, ""))
+    .filter(Boolean);
 
   const intent = s?.intent.trim() ?? "";
   useEffect(() => {
@@ -88,13 +91,6 @@ export default function IniciativaPage() {
     router.replace(`/conversaciones/${init.id}`);
   }
 
-  const addCustom = () => {
-    const v = custom.trim();
-    if (v) setLimits((ls) => (ls.includes(v) ? ls : [...ls, v]));
-    setCustom("");
-  };
-  const toggleLimit = (l: string) => setLimits((ls) => (ls.includes(l) ? ls.filter((x) => x !== l) : [...ls, l]));
-  const extra = limits.filter((l) => !PRESETS.includes(l));
 
   return (
     <div className="app">
@@ -154,17 +150,16 @@ export default function IniciativaPage() {
             <p className="mute" style={{ margin: "-16px 0 24px", fontSize: 13 }}>
               {C.limitsHelp}
             </p>
-            <div className="chips" role="group" aria-label={C.limits}>
-              {[...C.presets, ...extra].map((l) => (
-                <button key={l} type="button" className="chip" aria-pressed={limits.includes(l)} onClick={() => toggleLimit(l)}>
-                  {limits.includes(l) && <Icon name="check" />}
-                  {l}
-                </button>
-              ))}
-            </div>
-            <div style={{ marginTop: 24 }}>
-              <Field label={C.addLimit} value={custom} placeholder={C.addLimit} maxLength={60} onChange={setCustom} onSubmit={addCustom} />
-            </div>
+            <textarea
+              className="limits-text"
+              aria-label={C.limits}
+              value={note}
+              placeholder={C.limitsPlaceholder}
+              maxLength={400}
+              rows={6}
+              autoFocus
+              onChange={(e) => setNote(e.target.value)}
+            />
           </>
         )}
       </div>
