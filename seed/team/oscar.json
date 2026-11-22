@@ -10,7 +10,7 @@
     ["agentes de inteligencia artificial", "hace", 3, ["claude"]],
     ["terraform", "sabe", 2, ["claude"]],
     ["python", "hace", 2, ["claude"]],
-    ["hackathons", "hace", 2, ["claude"]],
+    ["hackathon", "hace", 2, ["claude"]],
     ["guitarra eléctrica", "hace", 3, ["claude", "chatgpt"]],
     ["equipamiento de audio", "sabe", 2, ["chatgpt"]],
     ["entrenamiento de fuerza", "hace", 3, ["chatgpt"]],
