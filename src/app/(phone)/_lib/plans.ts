@@ -69,14 +69,20 @@ export function connectionEncounters(graph: PlanGraph, encounters: Encounter[]):
 }
 
 /**
- * Your Contactos are your connections: the ones both of you accepted, as the backend has them.
- * Demo mode has no backend, so there they are the seed's Amigos and Conocidos. Undefined while loading.
+ * Your Contactos are your connections, the ones both of you accepted, never who only shares
+ * Intereses with you. Demo mode has no backend: there they are the requests you accepted on this phone.
  */
+export function connectionsOf(s: PhoneState, graph: PlanGraph | null, encounters: Encounter[]): Coincidence[] {
+  if (graph) return contactsOf(s, connectionEncounters(graph, encounters));
+  return contactsOf(s, encounters).filter((c) => s.relations?.[c.person.personId]);
+}
+
+/** Your Contactos (undefined while loading). */
 export function useContacts(s: PhoneState | undefined): Coincidence[] | undefined {
   const encounters = useEncounters();
   const graph = usePlanGraph();
   if (!s || !encounters || graph === undefined) return undefined;
-  return contactsOf(s, graph ? connectionEncounters(graph, encounters) : encounters);
+  return connectionsOf(s, graph, encounters);
 }
 
 /** Your plans, newest first (empty in demo mode and while loading). */

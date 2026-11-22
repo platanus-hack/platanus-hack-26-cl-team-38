@@ -7,10 +7,10 @@ import { Avatar } from "./_components/avatar";
 import { Sheet, Splash, TabBar, useOnboardedPhone } from "./_components/chrome";
 import { MingaMark } from "./_components/minga-mark";
 import { Icon } from "./_components/icons";
-import { Field, ListRow, Mono } from "./_components/ui";
-import { buildInitiative, localInitiatives } from "./_lib/conversations";
+import { Initiatives } from "./_components/initiatives";
+import { Field, Mono } from "./_components/ui";
 import { COPY } from "./_lib/copy";
-import { affinities, relTime, useEncounters } from "./_lib/people";
+import { useEncounters } from "./_lib/people";
 import { useContacts } from "./_lib/plans";
 import { setPhone } from "./_lib/store";
 
@@ -25,9 +25,7 @@ export default function Home() {
   const [how, setHow] = useState(false);
 
   if (!s) return <Splash />;
-  const everyone = encounters ? affinities(s, encounters) : [];
   const contacts = known ?? [];
-  const initiatives = (encounters ? localInitiatives(s, encounters) : []).map((i) => buildInitiative(s.displayName, i, everyone));
   const invited = contacts.find((c) => c.person.personId === s.invite);
   const text = draft ?? s.intent;
   const saved = draft === null ? !!s.intent : draft.trim() === s.intent;
@@ -80,29 +78,7 @@ export default function Home() {
             </button>
           </p>
         )}
-        {initiatives.length > 0 && (
-          <>
-            <div className="sec">{C.initiatives}</div>
-            <div className="rows">
-              {initiatives.map((cv) => (
-                <ListRow
-                  key={cv.id}
-                  lead={
-                    <span className="stack">
-                      {cv.members.slice(0, 2).map((m) => (
-                        <Avatar key={m.person.personId} id={m.person.personId} />
-                      ))}
-                    </span>
-                  }
-                  title={cv.theme}
-                  sub={cv.members.map((m) => m.person.displayName.split(" ")[0]).join(", ")}
-                  data={<Mono>{relTime(cv.at).replace("hace ", "")}</Mono>}
-                  href={`/conversaciones/${encodeURIComponent(cv.id)}`}
-                />
-              ))}
-            </div>
-          </>
-        )}
+        <Initiatives s={s} encounters={encounters} max={3} head={<div className="sec">{C.initiatives}</div>} />
       </div>
 
       {/* A sheet opens over the tab bar, so the whole explanation fits on screen. */}

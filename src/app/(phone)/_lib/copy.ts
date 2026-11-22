@@ -179,6 +179,7 @@ export const COPY = {
     invisible: "Activa el modo Visible para conectar con otros usuarios cerca tuyo.",
     turnVisible: "Activar modo Visible",
     range: "Rango de distancia",
+    rangeNote: "Solo verás personas dentro de tu rango",
     nobody: (m: number) => `Nadie a ${m} m todavía.`,
     widenHint: "Sube el rango para ver más lejos.",
     request: "Enviar solicitud",

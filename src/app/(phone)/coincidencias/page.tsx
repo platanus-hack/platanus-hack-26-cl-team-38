@@ -72,6 +72,7 @@ export default function CoincidenciasPage() {
               <button type="button" role="switch" aria-checked={visible} aria-label={C.visible} className="switch" onClick={() => setVisible(!visible)} />
             </label>
           </div>
+          {visible && <p className="range-note">{C.rangeNote}</p>}
         </div>
         {encounters === undefined ? (
           <div className="empty">{C.loading}</div>

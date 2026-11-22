@@ -1637,6 +1637,14 @@
     color: var(--on-slate-mute);
   }
 
+  /* Explorar: one line over the graph */
+  .range-note {
+    margin: 12px 0 0;
+    font-size: 13px;
+    text-align: center;
+    color: var(--on-slate);
+  }
+
   /* Afinidades search: a pill on slate, suggestions as small chips under it */
   .gsearch {
     display: flex;
