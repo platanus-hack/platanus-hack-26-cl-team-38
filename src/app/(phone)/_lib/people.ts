@@ -194,7 +194,7 @@ export function affinities(s: PhoneState, encounters: Encounter[]): Coincidence[
     .sort((a, b) => b.score - a.score || a.distanceM - b.distanceM);
 }
 
-/** Your Contactos: the people you (or the network) marked as Amigo or Conocido. */
+/** Of these people, the ones marked as Amigo or Conocido. For your Contactos use useContacts() (plans.ts). */
 export function contactsOf(s: PhoneState, encounters: Encounter[]): Coincidence[] {
   return affinities(s, encounters).filter((c) => c.relation !== "cercania");
 }

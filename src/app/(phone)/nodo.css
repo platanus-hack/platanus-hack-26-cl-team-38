@@ -246,11 +246,6 @@
     margin-top: 8px;
     font-family: var(--mono);
   }
-  .home-title .q[aria-expanded="true"] {
-    background: var(--slate);
-    border-color: var(--slate);
-    color: var(--on-slate);
-  }
   /* the question is a white box with room around the text, and the send button sits in it */
   .home .field {
     align-items: center;
@@ -282,12 +277,6 @@
   .home .field .go.done {
     background: rgba(43, 212, 164, 0.16);
     color: #0f8f6c;
-  }
-  /* how Minga works opens as a slate card on the paper */
-  .home .how.open > div {
-    background: var(--slate);
-    border-color: var(--slate);
-    color: var(--on-slate);
   }
   .home .sec {
     margin-top: 40px;
@@ -458,59 +447,6 @@
     width: max(100%, 44px);
     height: max(100%, 44px);
     translate: -50% -50%;
-  }
-
-  /* the slate panel: rounded on top, it runs to the bottom of the screen */
-  .slate {
-    flex: 1;
-    background:
-      radial-gradient(110% 70% at 100% 0%, rgba(255, 90, 54, 0.24), transparent 55%),
-      radial-gradient(90% 60% at 0% 100%, rgba(43, 212, 164, 0.16), transparent 60%),
-      var(--slate);
-    color: var(--on-slate);
-    border-radius: 32px 32px 0 0;
-    padding: 28px 24px calc(112px + env(safe-area-inset-bottom, 0px));
-    --line: rgba(242, 241, 238, 0.1);
-    --mute: var(--on-slate-mute);
-  }
-  /* on Inicio the field is a box with room around the text, and the send button sits in it */
-  .slate .field {
-    align-items: center;
-    gap: 12px;
-    margin-top: 16px;
-    padding: 8px 8px 8px 16px;
-    border: 1px solid rgba(242, 241, 238, 0.18);
-    border-radius: 20px;
-    background: rgba(242, 241, 238, 0.05);
-  }
-  .slate .field:focus-within {
-    border-color: var(--accent);
-  }
-  .slate .field textarea {
-    padding: 4px 0;
-  }
-  .slate .field .go {
-    width: 44px;
-    height: 44px;
-    background: rgba(242, 241, 238, 0.08);
-  }
-  .slate .field .go.on {
-    background: var(--accent);
-    color: #fff;
-  }
-  /* the paper plane leans right: nudge it to look centered */
-  .slate .field .go .ic {
-    translate: -1px 1px;
-  }
-  .slate .field .go.done {
-    background: rgba(43, 212, 164, 0.16);
-    color: var(--cercania);
-  }
-  .slate .field + div {
-    padding: 0 4px;
-  }
-  .slate .q {
-    border-color: rgba(242, 241, 238, 0.24);
   }
 
   /* Field: a line, and an arrow */
@@ -851,75 +787,10 @@
     background: #fff;
   }
 
-  /* Inicio */
-  .tagline {
-    margin: 0;
-    padding: 0 24px;
-    font-size: 13px;
-    color: var(--mute);
-    text-wrap: balance;
-  }
-  .near-wrap {
-    padding: 0 24px 20px;
-  }
-  .near-wrap .sec {
-    margin-top: 20px;
-  }
   .loc {
     display: block;
     padding: 0 24px;
     color: var(--mute);
-  }
-  /* one line on a phone: the phrase types and erases without moving the field below */
-  .hero {
-    margin: 0 0 8px;
-    font-size: clamp(24px, 8vw, 34px);
-    white-space: nowrap;
-    min-height: 1.2em;
-  }
-  .caret {
-    display: inline-block;
-    width: 2px;
-    height: 0.9em;
-    margin-left: 2px;
-    vertical-align: -0.08em;
-    background: var(--accent);
-    animation: nodo-caret 1s steps(1) infinite;
-  }
-  .near {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    margin: 0 -24px;
-    padding: 8px 24px 4px;
-    scrollbar-width: none;
-    /* the last face fades out at the edge of the screen instead of being cut */
-    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
-    mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
-  }
-  .near::-webkit-scrollbar {
-    display: none;
-  }
-  .face {
-    flex: none;
-    width: 88px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    text-align: center;
-  }
-  .face .av {
-    width: 56px;
-    height: 56px;
-    margin-bottom: 4px;
-  }
-  .face span {
-    font-size: 13px;
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   /* Sheet: list and detail heights */
@@ -1400,9 +1271,6 @@
   .rel.coincidencia {
     color: #c23d1f;
   }
-  .face .av.coincidencia {
-    box-shadow: 0 0 0 3px var(--accent);
-  }
   .slate .rel.amigo,
   .graph-screen .rel.amigo {
     color: var(--amigo);
@@ -1415,89 +1283,10 @@
   .graph-screen .rel.cercania {
     color: var(--cercania);
   }
-  .face .rel {
-    justify-content: center;
-    width: 100%;
-    font-size: 12px;
-    gap: 4px;
-  }
-  .face .rel::before {
-    width: 6px;
-    height: 6px;
-  }
-  .face .topic {
-    font-size: 12px;
-    color: var(--mute);
-  }
-  .face .av.amigo {
-    box-shadow: 0 0 0 3px var(--amigo);
-  }
-  .face .av.conocido {
-    box-shadow: 0 0 0 3px var(--conocido);
-  }
-  .face .av.cercania {
-    box-shadow: 0 0 0 3px var(--cercania);
-  }
 
-  /* small, quiet entry to Afinidades inside the slate */
-  /* under the field: what Minga does, and an (i) that opens how it works */
-  .pitch {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    margin-top: 16px;
-    padding: 0 4px;
-  }
-  .pitch p {
-    flex: 1;
-    margin: 0;
-    font-size: 13px;
-    color: var(--on-slate-mute);
-    text-wrap: pretty;
-  }
-  .pitch .q {
-    font-family: var(--mono);
-    transition:
-      background 0.2s,
-      color 0.2s;
-  }
-  .pitch .q[aria-expanded="true"] {
-    background: var(--on-slate);
-    border-color: var(--on-slate);
-    color: var(--slate);
-  }
-  /* the dropdown: grid rows from 0fr to 1fr, so it opens to its own height */
+  /* how Minga works: four steps, in a sheet */
   .how {
-    display: grid;
-    grid-template-rows: 0fr;
-    opacity: 0;
-    transition:
-      grid-template-rows 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
-      opacity 0.25s;
-  }
-  .how.open {
-    grid-template-rows: 1fr;
-    opacity: 1;
-  }
-  .how > div {
-    overflow: hidden;
-    min-height: 0;
-  }
-  .how.open > div {
-    margin-top: 16px;
-    padding: 20px;
-    border-radius: 24px;
-    background:
-      radial-gradient(120% 80% at 100% 0%, rgba(255, 90, 54, 0.18), transparent 60%),
-      rgba(242, 241, 238, 0.06);
-    border: 1px solid rgba(242, 241, 238, 0.12);
-  }
-  .how-title {
-    font-size: 18px;
-    font-weight: 500;
-  }
-  .how ol {
-    margin: 16px 0 0;
+    margin: 20px 0 24px;
     padding: 0;
     list-style: none;
     display: grid;
@@ -1507,14 +1296,14 @@
     display: flex;
     gap: 12px;
     font-size: 13px;
-    color: var(--on-slate-mute);
+    color: var(--mute);
   }
   .how li strong {
     display: block;
     margin-bottom: 2px;
     font-size: 15px;
     font-weight: 500;
-    color: var(--on-slate);
+    color: var(--ink);
   }
   .how-ic {
     width: 36px;
@@ -1535,26 +1324,6 @@
     display: block;
     font-size: 12px;
     color: var(--accent);
-  }
-  .how-close {
-    margin-top: 20px;
-    width: 100%;
-    height: 44px;
-    border-radius: 16px;
-    background: var(--on-slate);
-    color: var(--slate);
-    font-weight: 500;
-    text-align: center;
-  }
-
-  .near-rows {
-    margin-top: 4px;
-  }
-  .slate .rows .row {
-    border-color: rgba(242, 241, 238, 0.1);
-  }
-  .slate .stack .av {
-    box-shadow: 0 0 0 2px var(--slate);
   }
 
   /* Afinidades: its own card, well apart from the question */
@@ -2516,8 +2285,6 @@ html:has(.nodo .app),
 html:has(.nodo .app) body {
   background: #e7e1d7;
 }
-html:has(.nodo .slate),
-html:has(.nodo .slate) body,
 html:has(.nodo .graph-screen),
 html:has(.nodo .graph-screen) body {
   background: #1f3138;

@@ -9,7 +9,8 @@ import { AffinityGraph } from "./affinity-graph";
 import { MatchGraph } from "./match-graph";
 import { COPY } from "../_lib/copy";
 import { isPublished } from "../_lib/node";
-import { byTopic, cap, clampRadius, coincidences, contactsOf, searchTopics, useEncounters } from "../_lib/people";
+import { byTopic, cap, clampRadius, coincidences, searchTopics, useEncounters } from "../_lib/people";
+import { useContacts } from "../_lib/plans";
 import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 
 // The graph behind the phone, on slate: your Fuentes and topics while you build your Nodo, then
@@ -78,6 +79,7 @@ export function GraphStage() {
   const s = usePhone();
   const path = usePathname();
   const encounters = useEncounters();
+  const contacts = useContacts(s);
   if (!s) return null;
 
   const phase = phaseOf(s, path);
@@ -133,9 +135,9 @@ export function GraphStage() {
             W={W}
             H={H}
             me={{ id: s.personId }}
-            contacts={encounters ? contactsOf(s, encounters) : []}
+            contacts={contacts ?? []}
             focus={s.focus.person}
-            match={encounters ? (searchTopics(contactsOf(s, encounters), s.affinityQuery ?? "")?.ids ?? null) : null}
+            match={contacts ? (searchTopics(contacts, s.affinityQuery ?? "")?.ids ?? null) : null}
           />
         ) : phase === "coincidencias" ? (
           <MatchGraph W={W} H={H} me={{ id: s.personId, name: s.displayName }} groups={groups} focus={s.focus} />

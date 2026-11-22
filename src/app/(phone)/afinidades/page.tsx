@@ -11,17 +11,18 @@ import { BackLink, Mono } from "../_components/ui";
 import { COPY } from "../_lib/copy";
 import { discover } from "../_lib/insight";
 import { matchPhrase } from "../_lib/matches";
-import { byTopic, cap, contactsOf, fmtDistance, myInterests, RELATION, relTime, searchTopics, useEncounters } from "../_lib/people";
+import { byTopic, cap, fmtDistance, myInterests, RELATION, relTime, searchTopics } from "../_lib/people";
+import { useContacts } from "../_lib/plans";
 import { setPhone } from "../_lib/store";
 
 const C = COPY.afinidades;
 
 export default function AfinidadesPage() {
   const s = useOnboardedPhone();
-  const encounters = useEncounters();
+  const known = useContacts(s);
   if (!s) return <Splash />;
 
-  const contacts = encounters ? contactsOf(s, encounters) : [];
+  const contacts = known ?? [];
   const person = contacts.find((c) => c.person.personId === s.focus.person);
   const query = s.affinityQuery ?? "";
   const found = searchTopics(contacts, query);
@@ -75,7 +76,7 @@ export default function AfinidadesPage() {
             </div>
           )}
         </div>
-        {encounters === undefined ? (
+        {known === undefined ? (
           <div className="empty">{COPY.coincidencias.loading}</div>
         ) : (
           <div className="gwrap">
