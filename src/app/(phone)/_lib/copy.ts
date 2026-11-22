@@ -39,6 +39,7 @@ export const COPY = {
     contacts: "Contactos",
     contactsHint: "Agrégalos desde Explorar",
     initiatives: "Iniciativas",
+    interests: "Intereses en común",
     with: (name: string) => `Con ${name}.`,
     withRemove: "Quitar",
   },
@@ -168,8 +169,7 @@ export const COPY = {
 
   coincidencias: {
     title: "Explorar",
-    people: "Personas",
-    topics: "Intereses",
+    filters: "Filtros",
     desc: "Personas con las que has coincidido según lo que te interesa o estás buscando.",
     loading: "Buscando…",
     common: "En común",
@@ -181,7 +181,7 @@ export const COPY = {
     range: "Rango de distancia",
     rangeNote: "Solo verás personas dentro de tu rango",
     nobody: (m: number) => `Nadie a ${m} m todavía.`,
-    widenHint: "Sube el rango para ver más lejos.",
+    widenHint: "Sube el rango en los filtros para ver más lejos.",
     here: "Aquí",
     needLocation: "Activa tu Ubicación para ver quién está cerca tuyo.",
     turnLocation: "Activar Ubicación",

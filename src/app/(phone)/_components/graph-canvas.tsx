@@ -187,7 +187,7 @@ function PersonLabel({ n, p }: { n: Person; p: Pose }) {
 function Pulse({ a, b, delay = 0 }: { a: Pose; b: Pose; delay?: number }) {
   const path = `M${a.x.toFixed(1)} ${a.y.toFixed(1)} L${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
   return (
-    <circle r={3} fill="#f2f1ee" opacity={0.8}>
+    <circle r={3} style={{ fill: "var(--g-pulse, #f2f1ee)" }} opacity={0.8}>
       <animateMotion dur="2.6s" begin={`${delay}s`} repeatCount="indefinite" path={path} />
     </circle>
   );
