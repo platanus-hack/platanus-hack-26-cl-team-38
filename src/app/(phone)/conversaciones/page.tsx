@@ -3,9 +3,9 @@
 import { Avatar } from "../_components/avatar";
 import { Splash, TabBar, useOnboardedPhone } from "../_components/chrome";
 import { LargeTitle, ListRow } from "../_components/ui";
-import { allConversations, type Conversation } from "../_lib/conversations";
+import { allConversations, buildInitiative, type Conversation } from "../_lib/conversations";
 import { COPY } from "../_lib/copy";
-import { byTopic, coincidences, DEMO, RANGE, relTime, useEncounters } from "../_lib/people";
+import { affinities, byTopic, coincidences, DEMO, RANGE, relTime, useEncounters } from "../_lib/people";
 
 const C = COPY.conversaciones;
 
@@ -25,7 +25,7 @@ function Row({ cv }: { cv: Conversation }) {
         }
         title={
           <>
-            <span className="theme">Temática</span> {cv.theme}
+            <span className="theme">{cv.label ?? "Temática"}</span> {cv.theme}
           </>
         }
         sub={`${cv.members.map((m) => m.person.displayName).join(", ")} · ${last}`}
@@ -44,7 +44,9 @@ export default function ConversacionesPage() {
 
   // The log keeps every Conversación, whatever Distancia you have set today.
   const coins = encounters && DEMO ? coincidences({ ...s, radiusM: RANGE.max }, encounters) : [];
-  const all = allConversations(s.displayName, coins, byTopic(coins));
+  const contacts = encounters ? affinities(s, encounters) : [];
+  const mine = (s.initiatives ?? []).map((i) => buildInitiative(s.displayName, i, contacts));
+  const all = [...mine, ...allConversations(s.displayName, coins, byTopic(coins))];
   const grupos = all.filter((c) => c.kind === "grupo");
   const personas = all.filter((c) => c.kind === "persona").sort((a, b) => b.at.localeCompare(a.at));
 

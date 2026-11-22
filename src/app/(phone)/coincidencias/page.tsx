@@ -1,10 +1,15 @@
 "use client";
 
+import Link from "next/link";
+import type { PublicTopic } from "@/lib/types";
+import { AiCard, MoreTopics } from "../_components/ai-card";
 import { Avatar } from "../_components/avatar";
 import { Sheet, Splash, TabBar, useOnboardedPhone } from "../_components/chrome";
+import { Icon } from "../_components/icons";
 import { MatchGraph, setFocus } from "../_components/match-graph";
-import { ListRow, Mono, Tags } from "../_components/ui";
+import { ListRow, Mono } from "../_components/ui";
 import { COPY } from "../_lib/copy";
+import { recommend } from "../_lib/insight";
 import { matchPhrase } from "../_lib/matches";
 import {
   byTopic,
@@ -13,6 +18,7 @@ import {
   type Coincidence,
   coincidences,
   DEMO,
+  myInterests,
   RANGE,
   RELATION,
   relTime,
@@ -72,7 +78,7 @@ export default function CoincidenciasPage() {
 
       <Sheet open={!!selected || !!person} size={person ? "detail" : "list"} onClose={close} label={selected?.topic ?? ""}>
         {person ? (
-          <PersonSummary c={person} onBack={() => setFocus({ person: null })} />
+          <PersonSummary key={person.person.personId} c={person} myTopics={myInterests(s)} onBack={() => setFocus({ person: null })} />
         ) : (
           selected && (
             <>
@@ -110,7 +116,7 @@ function setRelation(personId: string, rel: "amigo" | "conocido" | null) {
 }
 
 /** Someone's public information, summarized, and the way to add them as Amigo or Conocido. */
-function PersonSummary({ c, onBack }: { c: Coincidence; onBack: () => void }) {
+function PersonSummary({ c, myTopics, onBack }: { c: Coincidence; myTopics: PublicTopic[]; onBack: () => void }) {
   const shared = new Set(c.items.map((i) => i.topic));
   const rest = c.person.topics.filter((t) => !shared.has(t.name));
   const mine = getPhone().relations?.[c.person.personId] ?? null;
@@ -135,20 +141,25 @@ function PersonSummary({ c, onBack }: { c: Coincidence; onBack: () => void }) {
         ))}
       </div>
 
+      <AiCard prompt={COPY.ai.coincidencias} insight={recommend(myTopics, { name: c.person.displayName, topics: c.person.topics, items: c.items })} />
+
       <div className="sec">{C.common}</div>
       <p style={{ margin: 0 }}>{c.items.map(matchPhrase).join(" · ")}</p>
 
       {rest.length > 0 && (
         <>
           <div className="sec">{C.rest}</div>
-          <Tags topics={rest.slice(0, 14).map((t) => ({ ...t, name: cap(t.name) }))} />
+          <MoreTopics topics={rest} />
         </>
       )}
 
-      <div className="rows" style={{ marginTop: 24 }}>
-        <ListRow title={C.conversation} href={`/conversaciones/${encodeURIComponent(c.person.personId)}`} chevron />
-        <ListRow title="Volver" onClick={onBack} className="off" />
-      </div>
+      <Link className="btn" href={`/conversaciones/${encodeURIComponent(c.person.personId)}`} style={{ marginTop: 32 }}>
+        <Icon name="chat" />
+        {COPY.startConversation}
+      </Link>
+      <button type="button" className="link" style={{ display: "block", margin: "16px auto 0" }} onClick={onBack}>
+        Volver
+      </button>
     </>
   );
 }

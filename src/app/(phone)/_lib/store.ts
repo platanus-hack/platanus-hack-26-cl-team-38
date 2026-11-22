@@ -8,6 +8,9 @@ import type { PersonalNode, Signal, Source, Topic } from "@/lib/types";
 
 export type OutboxEntry = { at: string; to: string; what: string };
 
+/** Something you set out to do from Inicio: who you asked, and what your Agente must keep in mind. */
+export type Initiative = { id: string; intent: string; members: string[]; restrictions: string[]; at: string };
+
 export type PhoneState = {
   personId: string;
   displayName: string;
@@ -30,6 +33,10 @@ export type PhoneState = {
   privacy: { visibility: "todos" | "conocidos" | "amigos"; discoverable: boolean; showPlace: boolean };
   /** People you added as Amigo or Conocido from Coincidencias (overrides what the network says). */
   relations: Record<string, "amigo" | "conocido">;
+  /** What you are looking for in Afinidades (shared with the desktop graph). */
+  affinityQuery: string;
+  /** Group Conversaciones you started from Inicio, newest first. */
+  initiatives: Initiative[];
 };
 
 const KEY = "nodo.phone.v1";
@@ -56,6 +63,8 @@ function fresh(): PhoneState {
     focus: { topic: null, person: null },
     privacy: { visibility: "conocidos", discoverable: true, showPlace: true },
     relations: {},
+    affinityQuery: "",
+    initiatives: [],
   };
 }
 
@@ -94,10 +103,56 @@ export function setPhone(patch: Partial<PhoneState> | ((s: PhoneState) => Partia
   listeners.forEach((l) => l());
 }
 
+/** Borrar mi Nodo: gone from this phone, saved session included. */
 export function resetPhone() {
-  state = fresh();
+  writeSaved(savedSessions().filter((x) => x.personId !== getPhone().personId));
+  replace(fresh());
+}
+
+function replace(next: PhoneState) {
+  state = next;
   persist(state);
   listeners.forEach((l) => l());
+}
+
+// Sessions you closed on this phone: your Nodo stays here, so you can come back without
+// starting over (and the demo can switch between profiles).
+const SAVED_KEY = "nodo.sessions.v1";
+
+export function savedSessions(): PhoneState[] {
+  try {
+    const raw = localStorage.getItem(SAVED_KEY);
+    return raw ? (JSON.parse(raw) as PhoneState[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeSaved(list: PhoneState[]) {
+  try {
+    localStorage.setItem(SAVED_KEY, JSON.stringify(list));
+  } catch {
+    // Storage full or blocked: the session is just not kept.
+  }
+}
+
+/** Cerrar sesión: keep this session on the phone and leave it empty for someone else. */
+export function signOut() {
+  const current = getPhone();
+  if (current.onboarded) {
+    writeSaved([{ ...current, focus: { topic: null, person: null } }, ...savedSessions().filter((x) => x.personId !== current.personId)].slice(0, 6));
+  }
+  replace(fresh());
+}
+
+/** Come back to a session closed on this phone. */
+export function resumeSession(personId: string): boolean {
+  const saved = savedSessions();
+  const found = saved.find((x) => x.personId === personId);
+  if (!found) return false;
+  writeSaved(saved.filter((x) => x.personId !== personId));
+  replace({ ...fresh(), ...found });
+  return true;
 }
 
 /** An edit to a topic (depth, public). Manual edits survive a resync: see buildNode. */

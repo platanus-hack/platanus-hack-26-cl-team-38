@@ -13,7 +13,7 @@ import { TopicItem } from "../_components/topic-item";
 import { Field, ListRow, Mono, Why } from "../_components/ui";
 import { COPY } from "../_lib/copy";
 import { buildNode, EXAMPLE_SIGNALS, isSensitive, parseAssistantAnswer, slug } from "../_lib/node";
-import { connectedSources, type PhoneState, setPhone, setTopic, usePhone } from "../_lib/store";
+import { connectedSources, type PhoneState, resumeSession, savedSessions, setPhone, setTopic, usePhone } from "../_lib/store";
 
 // Three steps, one sentence and one button each: your name, your Fuentes, what you share.
 
@@ -69,6 +69,12 @@ export function Onboarding({ prompt, team }: { prompt: string; team: TeamProfile
 function NameStep({ s, team, next }: { s: PhoneState; team: TeamProfile[]; next: () => void }) {
   const router = useRouter();
   const [name, setName] = useState(s.displayName);
+  // Sessions closed on this phone come first; a teammate already among them is not shown twice.
+  const [saved] = useState(savedSessions);
+  const others = team.filter((p) => !saved.some((x) => x.personId === `seed-${p.slug}`));
+  const enter = (personId: string) => {
+    if (resumeSession(personId)) router.replace("/");
+  };
   const save = () => {
     setPhone({ displayName: name.trim() });
     next();
@@ -77,11 +83,28 @@ function NameStep({ s, team, next }: { s: PhoneState; team: TeamProfile[]; next:
     <div className="content step">
       <h1 className="t-hero">{C.name}</h1>
       <Field label={C.name} value={name} placeholder={C.namePlaceholder} maxLength={24} onChange={setName} onSubmit={save} />
-      {team.length > 0 && (
+      {saved.length > 0 && (
+        <>
+          <div className="sec">{C.saved}</div>
+          <div className="rows">
+            {saved.map((x) => (
+              <ListRow
+                key={x.personId}
+                lead={<Avatar id={x.personId} />}
+                title={x.displayName}
+                data={x.node?.topics.length}
+                chevron
+                onClick={() => enter(x.personId)}
+              />
+            ))}
+          </div>
+        </>
+      )}
+      {others.length > 0 && (
         <>
           <div className="sec">{C.team}</div>
           <div className="rows">
-            {team.map((p) => (
+            {others.map((p) => (
               <ListRow
                 key={p.slug}
                 lead={<Avatar id={`seed-${p.slug}`} />}

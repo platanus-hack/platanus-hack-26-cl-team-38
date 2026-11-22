@@ -8,7 +8,8 @@ import { Splash, TabBar, useOnboardedPhone } from "./_components/chrome";
 import { setFocus } from "./_components/match-graph";
 import { MingaMark } from "./_components/minga-mark";
 import { Typewriter } from "./_components/typewriter";
-import { Field, Mono, Why } from "./_components/ui";
+import { Icon } from "./_components/icons";
+import { Field } from "./_components/ui";
 import { COPY } from "./_lib/copy";
 import { affinities, cap, type Coincidence, coincidences, RELATION, useEncounters } from "./_lib/people";
 import { setPhone } from "./_lib/store";
@@ -23,6 +24,7 @@ export default function Home() {
   const router = useRouter();
   const encounters = useEncounters();
   const [draft, setDraft] = useState<string | null>(null);
+  const [how, setHow] = useState(false);
 
   if (!s) return <Splash />;
   const coins = encounters ? coincidences(s, encounters) : undefined;
@@ -82,6 +84,7 @@ export default function Home() {
         <Field
           label={C.titles[0]}
           rows={2}
+          send
           maxLength={280}
           value={text}
           placeholder={C.placeholder}
@@ -90,18 +93,41 @@ export default function Home() {
           onSubmit={() => {
             setPhone({ intent: text.trim() });
             setDraft(null);
+            router.push("/iniciativa");
           }}
         />
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16 }}>
-          {saved && text && <Mono className="mute">{C.saved}</Mono>}
-          <span style={{ marginLeft: "auto" }}>
-            <Why text={C.intentHelp} />
-          </span>
+        <div className="pitch">
+          <p>{C.pitch}</p>
+          <button type="button" className="q" aria-expanded={how} aria-controls="how" aria-label={C.howTitle} onClick={() => setHow(!how)}>
+            i
+          </button>
+        </div>
+        <div id="how" className={`how${how ? " open" : ""}`} aria-hidden={!how}>
+          <div>
+            <div className="how-title">{C.howTitle}</div>
+            <ol>
+              {C.how.map((h, i) => (
+                <li key={h.title}>
+                  <span className="how-ic">
+                    <Icon name={h.icon} />
+                  </span>
+                  <span>
+                    <span className="how-step mono">0{i + 1}</span>
+                    <strong>{h.title}</strong>
+                    {h.text}
+                  </span>
+                </li>
+              ))}
+            </ol>
+            <button type="button" className="how-close" tabIndex={how ? 0 : -1} onClick={() => setHow(false)}>
+              {C.howMore}
+            </button>
+          </div>
         </div>
 
         <Link href="/afinidades" className="aff-entry">
           <span className="stack">
-            {contacts.slice(0, 4).map((c) => (
+            {contacts.slice(0, 3).map((c) => (
               <Avatar key={c.person.personId} id={c.person.personId} />
             ))}
           </span>

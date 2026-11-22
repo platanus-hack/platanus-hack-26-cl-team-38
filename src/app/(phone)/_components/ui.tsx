@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Topic } from "@/lib/types";
 import { Icon } from "./icons";
 
@@ -67,7 +67,8 @@ export function ListRow({
   return <div className={cls}>{body}</div>;
 }
 
-/** A line and an arrow. Multi-line when `rows` > 1. */
+/** A line and an arrow. Multi-line when `rows` > 1: it starts at one line, centered with the arrow,
+    and grows with the text (or a long placeholder) up to `rows` lines. */
 export function Field({
   value,
   onChange,
@@ -77,6 +78,7 @@ export function Field({
   done,
   label,
   maxLength,
+  send = false,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -86,14 +88,31 @@ export function Field({
   done?: boolean;
   label: string;
   maxLength?: number;
+  /** A send icon instead of the arrow, which stays after sending. */
+  send?: boolean;
 }) {
-  const ready = value.trim().length > 0 && !done;
+  // A send field can go again with the same text; the arrow only when something changed.
+  const ready = value.trim().length > 0 && (!done || send);
+  const area = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    const el = area.current;
+    if (!el) return;
+    const line = parseFloat(getComputedStyle(el).lineHeight) || 22;
+    const pad = el.offsetHeight - el.clientHeight + parseFloat(getComputedStyle(el).paddingTop) + parseFloat(getComputedStyle(el).paddingBottom);
+    el.style.height = "auto";
+    // An empty field measures its placeholder, so a long one gets its second line too.
+    const probe = !value && placeholder ? (el.value = placeholder) : null;
+    const h = el.scrollHeight;
+    if (probe !== null) el.value = "";
+    el.style.height = `${Math.min(h, line * rows + pad)}px`;
+  }, [value, placeholder, rows]);
   return (
     <form className="field" onSubmit={(e) => (e.preventDefault(), ready && onSubmit())}>
       {rows > 1 ? (
         <textarea
+          ref={area}
           aria-label={label}
-          rows={rows}
+          rows={1}
           value={value}
           placeholder={placeholder}
           maxLength={maxLength}
@@ -109,7 +128,7 @@ export function Field({
         <input aria-label={label} value={value} placeholder={placeholder} maxLength={maxLength} onChange={(e) => onChange(e.target.value)} />
       )}
       <button type="submit" className={`go${ready ? " on" : ""}${done ? " done" : ""}`} aria-label={done ? "Enviado" : "Enviar"} disabled={!ready}>
-        <Icon name={done ? "check" : "arrow"} />
+        <Icon name={send ? "send" : done ? "check" : "arrow"} />
       </button>
     </form>
   );
