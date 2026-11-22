@@ -5,7 +5,7 @@ import type { FeatureExtractionPipeline } from "@huggingface/transformers";
 // at ~0.75, which would merge every topic into one theme.
 export const EMBEDDING_MODEL = "Xenova/paraphrase-multilingual-MiniLM-L12-v2";
 // Seed embeddings were computed with q8; mixing dtypes shifts cosines slightly.
-export const EMBEDDING_DTYPE = "q8";
+const EMBEDDING_DTYPE = "q8";
 export const EMBEDDING_DIM = 384;
 
 // On globalThis: instrumentation.ts warms the model from its own bundle, and a second copy of

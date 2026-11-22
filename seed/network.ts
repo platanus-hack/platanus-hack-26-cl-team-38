@@ -58,7 +58,7 @@ const AgentOnlySchema = z.object({
 // the level comes from the local layers of the privacy filter (no judge).
 const SeedTopicSchema = TopicSchema.extend({ public: z.literal(true), privacy: TopicSchema.shape.privacy.unwrap() });
 
-export const PersonSchema = z.object({
+const PersonSchema = z.object({
   personId: PersonIdSchema,
   displayName: z.string().min(1),
   topics: z.array(SeedTopicSchema).min(1),
@@ -76,7 +76,7 @@ export const PersonSchema = z.object({
 
 const RelationSchema = z.enum(["pareja", "familia", "amistad", "trabajo", "estudios", "vecindad", "voluntariado", "conocido"]);
 
-export const SeedConnectionSchema = z.object({
+const SeedConnectionSchema = z.object({
   // Same order rule as the table: a < b.
   a: PersonIdSchema,
   b: PersonIdSchema,
@@ -110,7 +110,7 @@ const PurposeSchema = z.object({
   helpers: z.array(z.object({ personId: PersonIdSchema, degree: z.number().int().positive(), why: z.string().min(1) })),
 });
 
-export const NetworkV2Schema = z.object({
+const NetworkV2Schema = z.object({
   version: z.literal(2),
   description: z.string(),
   // Teammates live in seed/team/<slug>.json; here they appear in connections, rooms, roles and helpers.
@@ -125,9 +125,6 @@ export const NetworkV2Schema = z.object({
 
 export type NetworkV2 = z.infer<typeof NetworkV2Schema>;
 export type SeedNetworkPerson = z.infer<typeof PersonSchema>;
-export type SeedConnection = z.infer<typeof SeedConnectionSchema>;
-export type Purpose = z.infer<typeof PurposeSchema>;
-
 export const network: NetworkV2 = NetworkV2Schema.parse(JSON.parse(readFileSync(new URL("./network.v2.json", import.meta.url), "utf8")));
 
 export const slugOf = (personId: string) => personId.replace(/^seed-/, "");

@@ -7,7 +7,7 @@ import type { Initiative, PhoneState } from "./store";
 // writes these on the phone; with a backend an Iniciativa is a plan (plans.ts).
 
 /** `from` is "me" or the other person's id. */
-export type ConvMessage = { id: string; from: string; text: string; at: string };
+type ConvMessage = { id: string; from: string; text: string; at: string };
 export type Conversation = {
   id: string;
   /** What you set out to do, shortened. */

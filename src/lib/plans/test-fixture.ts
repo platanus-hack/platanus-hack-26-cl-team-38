@@ -14,7 +14,7 @@ import { createPlan, saveContext } from "./store";
 
 const AXES = ["gluten", "viña", "bus", "pesca"];
 // One axis per keyword, so a query about gluten is closest to the lines that mention it.
-export function vec(text: string): number[] {
+function vec(text: string): number[] {
   const v = new Array<number>(EMBEDDING_DIM).fill(0);
   const axis = AXES.findIndex((word) => text.toLowerCase().includes(word));
   v[axis < 0 ? 100 + (text.length % 50) : axis] = 1;

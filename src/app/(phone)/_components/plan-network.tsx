@@ -169,7 +169,7 @@ export function PlanStage({ id, me }: { id: string; me: string }) {
 }
 
 /** How to read the network, under it on the desktop panel. */
-export function PlanLegend() {
+function PlanLegend() {
   return (
     <ul className="pnet-legend">
       <li>

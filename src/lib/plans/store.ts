@@ -142,6 +142,3 @@ export async function claimPlan(db: Db, planId: string, staleSeconds?: number): 
   return (await call(db, "claim_plan", { p_plan: planId, ...(staleSeconds === undefined ? {} : { p_stale_seconds: staleSeconds }) })) === true;
 }
 
-export async function unclaimedPlans(db: Db): Promise<string[]> {
-  return ((await call(db, "unclaimed_plans", {})) as { id: string }[]).map((row) => row.id);
-}

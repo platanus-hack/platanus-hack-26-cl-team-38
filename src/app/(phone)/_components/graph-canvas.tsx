@@ -10,7 +10,7 @@ import { usePhone } from "../_lib/store";
 // Colors live in nodo.css (.gbox): the graph is drawn on slate, selection is white.
 
 export type Pose = { x: number; y: number; o: number; s: number };
-export type Person = {
+type Person = {
   kind: "person";
   name: string;
   /** The avatar's id (defaults to the entity id). */
@@ -23,7 +23,7 @@ export type Person = {
   tone?: string;
   onClick?: () => void;
 };
-export type Chip = { kind: "chip"; cls: string; icon?: ReactNode; label: string; n?: number; faces?: string[]; badge?: string; onClick?: () => void };
+type Chip = { kind: "chip"; cls: string; icon?: ReactNode; label: string; n?: number; faces?: string[]; badge?: string; onClick?: () => void };
 export type Entity = (Person | Chip) & { pose: Pose; from?: string };
 export type Edge = { a: string; b: string; kind: "soft" | "strong" | "focus"; w?: number; dash?: string; o?: number; pulse?: number };
 

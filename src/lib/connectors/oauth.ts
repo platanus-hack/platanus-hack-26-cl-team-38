@@ -12,9 +12,9 @@ import { APP_NAME } from "./assistant";
 // single use, so they stay in memory.
 // shortcut: no revocation. A token stays valid until it expires; rotating MCP_OAUTH_SECRET drops them all.
 
-export const ACCESS_TTL_S = 60 * 60;
+const ACCESS_TTL_S = 60 * 60;
 export const REFRESH_TTL_S = 60 * 24 * 60 * 60;
-export const PHONE_CODE_TTL_MS = 10 * 60_000;
+const PHONE_CODE_TTL_MS = 10 * 60_000;
 const AUTH_CODE_TTL_MS = 2 * 60_000;
 
 // Where an authorization code may be sent. Anything else could carry a person's code to a stranger.
@@ -244,7 +244,7 @@ export function publicOrigin(request: Request): string {
   return `${proto}://${host}`;
 }
 
-export const MCP_PATH = "/api/mcp";
+const MCP_PATH = "/api/mcp";
 export const resourceMetadataUrl = (origin: string) => `${origin}/.well-known/oauth-protected-resource${MCP_PATH}`;
 
 export function protectedResourceMetadata(origin: string) {

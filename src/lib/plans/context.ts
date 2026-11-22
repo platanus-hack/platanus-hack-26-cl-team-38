@@ -82,4 +82,3 @@ export function createContextBuilder(plan: Pick<PlanSnapshot, "id" | "intent">, 
   };
 }
 
-export type ContextBuilder = ReturnType<typeof createContextBuilder>;

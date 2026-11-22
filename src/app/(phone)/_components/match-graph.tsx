@@ -16,7 +16,7 @@ export function setFocus(focus: Partial<Focus>) {
   setPhone((p) => ({ focus: { ...p.focus, ...focus } }));
 }
 
-export function matchScene(W: number, H: number, me: Me, groups: TopicGroup[], focus: Focus, compact: boolean) {
+function matchScene(W: number, H: number, me: Me, groups: TopicGroup[], focus: Focus, compact: boolean) {
   const E: Record<string, Entity> = {};
   const edges: Edge[] = [];
   const cx = W / 2;

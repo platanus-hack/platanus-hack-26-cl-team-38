@@ -9,7 +9,7 @@ const NODE_KEY = "team38.node.v1";
 const PERSON_KEY = "team38.person.v1";
 const PROFILES_KEY = "team38.profiles.v1";
 // Same key as /grafo's "Soy": checking in as someone makes the other views open as them.
-export const ME_KEY = "team38.me";
+const ME_KEY = "team38.me";
 
 function read(key: string): string | null {
   try {

@@ -8,7 +8,7 @@ import { TOKEN_MINUTES } from "./assistant";
 // instance this has to move to a shared store.
 const GRACE_MS = 5 * 60_000; // the phone may still collect a little after the token expires
 // A connected assistant delivers whenever the person asks, and the phone may be closed then.
-export const OWNER_TTL_MS = 24 * 60 * 60_000;
+const OWNER_TTL_MS = 24 * 60 * 60_000;
 const ownerInbox = (owner: string) => `owner:${owner}`;
 
 export type OpenInbox = { token: string; inbox: string; expiresAt: number };

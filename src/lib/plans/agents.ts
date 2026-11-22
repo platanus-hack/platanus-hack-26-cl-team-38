@@ -7,10 +7,10 @@ import type { Agents, Measured, MemberTurn, OrchestratorTurn } from "./deliberat
 // The five agents of a plan: one per participant and the orchestrator. They only write; the loop
 // in deliberate.ts cuts, checks and stores what they say.
 
-export const MEMBER_MODEL = "claude-haiku-5-5";
-export const ORCHESTRATOR_MODEL = "claude-sonnet-5-5";
+const MEMBER_MODEL = "claude-haiku-5-5";
+const ORCHESTRATOR_MODEL = "claude-sonnet-5-5";
 // An experiment: the orchestrator searches the web for what is still open. Off unless set.
-export const WEB_SEARCH = process.env.PLANS_WEB_SEARCH === "1";
+const WEB_SEARCH = process.env.PLANS_WEB_SEARCH === "1";
 const WEB_SEARCH_TOOL: Anthropic.Beta.BetaWebSearchTool20260209 = {
   type: "web_search_20260209",
   name: "web_search",

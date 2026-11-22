@@ -3,8 +3,8 @@ import type { PublicProjection, PublicTopic, Role } from "@/lib/types";
 
 // Visual preview of layers 3–4 only. The real room engine (front C) lives in src/lib/room/.
 
-export type TopicNode = { name: string; embedding: number[]; personIds: string[] };
-export type Similarity = { a: string; b: string; score: number };
+type TopicNode = { name: string; embedding: number[]; personIds: string[] };
+type Similarity = { a: string; b: string; score: number };
 export type PreviewTheme = {
   id: string;
   name: string;
@@ -25,7 +25,7 @@ export function rolesOf(topic: Pick<PublicTopic, "kind" | "depth">): Role[] {
   return roles;
 }
 
-export function topicNodes(projections: PublicProjection[]): TopicNode[] {
+function topicNodes(projections: PublicProjection[]): TopicNode[] {
   const byName = new Map<string, TopicNode>();
   for (const person of projections) {
     for (const topic of person.topics) {
@@ -38,7 +38,7 @@ export function topicNodes(projections: PublicProjection[]): TopicNode[] {
   return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export function similarities(nodes: TopicNode[], threshold: number): Similarity[] {
+function similarities(nodes: TopicNode[], threshold: number): Similarity[] {
   const result: Similarity[] = [];
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {

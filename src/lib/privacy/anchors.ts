@@ -69,7 +69,7 @@ export const ANCHORS: Record<SensitiveCategory, string[]> = {
 
 // Calibrated on eval-set.ts: at 0.66 half of the subtle sensitive cases hit and, among safe topics
 // that are not expertise, only trade names next to a category do ("psicóloga").
-export const ANCHOR_THRESHOLD = 0.66;
+const ANCHOR_THRESHOLD = 0.66;
 const EXPERTISE: Kind[] = ["sabe", "ofrece"];
 
 const entries = Object.entries(ANCHORS).flatMap(([category, phrases]) =>
@@ -77,9 +77,9 @@ const entries = Object.entries(ANCHORS).flatMap(([category, phrases]) =>
 );
 let anchorVectors: Promise<number[][]> | undefined;
 
-export type AnchorHit = { category: SensitiveCategory; phrase: string; score: number };
+type AnchorHit = { category: SensitiveCategory; phrase: string; score: number };
 
-export async function nearestAnchors(names: string[], vectors?: number[][]): Promise<AnchorHit[]> {
+async function nearestAnchors(names: string[], vectors?: number[][]): Promise<AnchorHit[]> {
   anchorVectors ??= embed(entries.map((e) => e.phrase)).catch((error) => {
     // A failed model load must not be cached: the next call has to try again.
     anchorVectors = undefined;

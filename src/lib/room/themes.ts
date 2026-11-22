@@ -3,7 +3,7 @@ import type { PublicProjection, Theme } from "@/lib/types";
 
 export const THEME_THRESHOLD = 0.6;
 
-export function normalizeName(name: string): string {
+function normalizeName(name: string): string {
   return name.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim().replace(/\s+/g, " ");
 }
 

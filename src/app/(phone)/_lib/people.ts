@@ -206,11 +206,6 @@ export function fmtMeters(m: number): string {
   return m < 1000 ? `${m} m` : `${(m / 1000).toLocaleString("es-CL", { maximumFractionDigits: 1 })} km`;
 }
 
-/** A distance inside a sentence: "a 12 m", or "en el mismo lugar". */
-export function fmtDistance(m: number): string {
-  return m === 0 ? "en el mismo lugar" : `a ${fmtMeters(m)}`;
-}
-
 export function relTime(iso: string): string {
   const min = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
   if (min < 60) return min <= 1 ? "recién" : `hace ${min} min`;

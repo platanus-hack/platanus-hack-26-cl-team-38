@@ -30,7 +30,7 @@ export async function getUserInfo(db: Db, personId: string): Promise<UserInfo | 
 }
 
 // Strict, like the check-in. `displayName` is only used when the person does not exist yet.
-export const SaveUserInfoSchema = z
+const SaveUserInfoSchema = z
   .object({
     personId: z.string().min(1).max(80),
     displayName: z.string().min(1).max(40).optional(),

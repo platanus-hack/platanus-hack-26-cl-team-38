@@ -17,7 +17,7 @@ export type Measured<T> = { output: T; meta: CallMeta };
 
 // What the models return: no ids and no length limits. Everything is cut and checked here.
 type Cited = { cita: string; texto: string };
-export type MemberOpening = { postura: string; participa?: boolean; condiciones: { texto: string; dura: boolean }[]; aportes: Cited[] };
+type MemberOpening = { postura: string; participa?: boolean; condiciones: { texto: string; dura: boolean }[]; aportes: Cited[] };
 export type MemberResponse = { motivo: string; decision: "accept" | "adjust" | "block"; ajustes: { tema: string; pide: string }[]; aportes: Cited[] };
 export type OrchestratorPlan = {
   resumen: string;

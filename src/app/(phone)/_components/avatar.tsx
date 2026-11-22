@@ -29,10 +29,6 @@ function hash(text: string): number {
   return h >>> 0;
 }
 
-export function avatarColor(id: string): string {
-  return COLORS[hash(id) % COLORS.length];
-}
-
 /** Inner SVG markup (40×40 viewBox); the graph panel draws it inside its own <svg>. */
 export function avatarSvg(id: string): string {
   const h = hash(id);

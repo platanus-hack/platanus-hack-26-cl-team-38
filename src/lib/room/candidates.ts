@@ -4,7 +4,7 @@ import { scoreMesa } from "./score";
 // The themes a newcomer can join the mesa through: its anchor, and any theme where 2 or more members
 // already have a role. One member is not enough: people with many topics touch almost every theme,
 // and then anyone gets in.
-export function sharedThemes(anchorThemeId: string, members: Entry[], index: RoomIndex): Set<string> {
+function sharedThemes(anchorThemeId: string, members: Entry[], index: RoomIndex): Set<string> {
   const holders = new Map<string, number>();
   for (const personId of new Set(members.map((m) => m.personId))) {
     for (const themeId of new Set((index.entriesOf.get(personId) ?? []).map((e) => e.themeId))) {
@@ -29,7 +29,7 @@ export function bestSeat(members: Entry[], personId: string, index: RoomIndex, w
 // Adds, one at a time, whoever raises the score the most, while it keeps rising and the mesa has room.
 // A newcomer must join through a theme the group already shares (see sharedThemes): otherwise anyone
 // who brings their own aporta/busca pair raises the score, and mesas fill up with strangers.
-export function grow(anchorThemeId: string, members: Entry[], index: RoomIndex): Entry[] {
+function grow(anchorThemeId: string, members: Entry[], index: RoomIndex): Entry[] {
   let current = scoreMesa(members, index).total;
   while (members.length < MESA_MAX) {
     const within = sharedThemes(anchorThemeId, members, index);

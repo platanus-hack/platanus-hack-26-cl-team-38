@@ -29,7 +29,7 @@ export function paced(raw: PlanView, shown: number): PlanView {
   return { ...raw, status: "deliberando", round, messages, plan: proposal ? { version: proposal.version, content: proposal.content, decidedBy: null } : null };
 }
 
-export type NetStatus = "esperando" | "va" | "no_va";
+type NetStatus = "esperando" | "va" | "no_va";
 export type NetMember = {
   personId: string;
   name: string;

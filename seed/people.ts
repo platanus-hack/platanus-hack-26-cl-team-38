@@ -7,7 +7,7 @@ import { team } from "./team";
 // and depth 3 always has sabe/hace evidence.
 
 export type SeedTopic = [name: string, kind: Kind, depth: 1 | 2 | 3, sources: Source[]];
-export type SeedPerson = { slug: string; displayName: string; topics: SeedTopic[] };
+type SeedPerson = { slug: string; displayName: string; topics: SeedTopic[] };
 export type SeedRoom = { id: string; code: string; name: string; people: SeedPerson[] };
 
 const mut: SeedPerson[] = [

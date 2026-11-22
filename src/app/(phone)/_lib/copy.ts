@@ -405,5 +405,3 @@ export const COPY = {
   },
 } as const;
 
-/** Domain words that always go capitalized, for the copy check. */
-export const CONCEPTS = ["Minga", "Nodo", "Agente", "Coincidencia", "Iniciativa", "Chat", "Contacto", "Contactos", "Interés", "Intereses", "Perfil", "Fuente", "Ubicación", "Distancia"];

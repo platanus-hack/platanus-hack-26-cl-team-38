@@ -52,7 +52,7 @@ type Person<D> = {
 };
 
 /** Local plane in metres around `origin`; the error is negligible within tens of km. */
-export function toMeters(origin: { lat: number; lon: number }, lat: number, lon: number): [number, number] {
+function toMeters(origin: { lat: number; lon: number }, lat: number, lon: number): [number, number] {
   return [(lon - origin.lon) * RAD * EARTH_RADIUS_M * Math.cos(origin.lat * RAD), (lat - origin.lat) * RAD * EARTH_RADIUS_M];
 }
 

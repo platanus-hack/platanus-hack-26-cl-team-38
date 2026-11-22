@@ -7,7 +7,7 @@ import type { PersonalNode, Signal, Source, SynthesisSignal, Topic, UserInfo } f
 // Phone-local state. Stand-in for front B's IndexedDB store: same PersonalNode contract, kept in
 // localStorage so the flow works today.
 
-export type OutboxEntry = { at: string; to: string; what: string };
+type OutboxEntry = { at: string; to: string; what: string };
 
 /** Something you set out to do from Inicio: who you asked, and what your Agente must keep in mind. */
 export type Initiative = { id: string; intent: string; members: string[]; restrictions: string[]; at: string };

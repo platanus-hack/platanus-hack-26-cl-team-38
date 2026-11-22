@@ -6,7 +6,7 @@ import { cap } from "./people";
 // reads both public profiles. Deterministic, so the same two people always get the same reading.
 // When the backend is ready, recommend() and discover() are what a model call replaces.
 
-export type Verdict = "si" | "quizas" | "no";
+type Verdict = "si" | "quizas" | "no";
 export type Insight = { verdict?: Verdict; headline: string; reason?: string; points: string[]; opener?: string };
 
 type Profile = { name: string; topics: PublicTopic[]; items: MatchItem[] };

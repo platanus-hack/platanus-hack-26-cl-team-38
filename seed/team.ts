@@ -5,7 +5,7 @@ import { KindSchema, SourceSchema } from "@/lib/types";
 // Real teammates live in seed/team/<slug>.json (written by `pnpm seed:person`) so adding someone never
 // touches people.ts. Default room is the hack room; the synthetic MUT room must stay at 15–20 people.
 
-export const TeamPersonSchema = z.object({
+const TeamPersonSchema = z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/),
   displayName: z.string().min(1),
   rooms: z.array(z.enum(["seed-hack", "seed-mut"])).default(["seed-hack"]),
