@@ -231,7 +231,7 @@
     height: 24px;
   }
   .home .content {
-    padding-top: 56px;
+    padding-top: 16px;
   }
   .home-title {
     display: flex;
@@ -240,10 +240,11 @@
   }
   .home-title h1 {
     flex: 1;
+    font-size: 26px;
     text-wrap: balance;
   }
   .home-title .q {
-    margin-top: 8px;
+    margin-top: 0;
     font-family: var(--mono);
   }
   /* the question is a white box with room around the text, and the send button sits in it */
@@ -279,7 +280,29 @@
     color: #0f8f6c;
   }
   .home .sec {
-    margin-top: 40px;
+    margin-top: 32px;
+  }
+  .home .sec .mono {
+    font-weight: 400;
+    color: var(--mute);
+  }
+  /* Intereses en común: the topics graph, straight on the stone */
+  .home-graph {
+    position: relative;
+    height: 360px;
+  }
+  .home-graph .empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 32px;
+    text-align: center;
+    color: var(--mute);
+  }
+  .home-graph .empty p {
+    margin: 0;
   }
 
   /* LargeTitle: a big title that hands over to a compact bar on scroll */
@@ -1926,16 +1949,6 @@
     width: 20px;
     height: 20px;
   }
-  /* Explorar: Personas / Temas */
-  .graph-screen .segbar {
-    margin: 0;
-    background: rgba(242, 241, 238, 0.08);
-    pointer-events: auto;
-  }
-  .graph-screen .segbar button[aria-checked="true"] {
-    background: var(--on-slate);
-    color: var(--slate);
-  }
   .graph-screen .switch[aria-checked="true"] {
     background: var(--cercania);
   }
@@ -2311,6 +2324,37 @@
 }
 .nodo .gbox .ring.cercania {
   stroke: var(--cercania);
+}
+/* Inicio: the same graph in ink on stone */
+.nodo .home-graph .gbox {
+  --g-ink: var(--ink);
+  --g-mute: var(--mute);
+  --g-halo: rgba(231, 225, 215, 0.85);
+  --g-edge: rgba(27, 35, 38, 0.16);
+  --g-pulse: var(--ink);
+}
+.nodo .home-graph .gchip {
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(27, 35, 38, 0.08);
+}
+.nodo .home-graph .gchip .n {
+  color: var(--mute);
+}
+.nodo .home-graph .gchip .faces .av {
+  box-shadow: 0 0 0 2px #fff;
+}
+.nodo .home-graph .gchip.sel {
+  background: var(--slate);
+  color: var(--on-slate);
+}
+.nodo .home-graph .gchip.sel .faces .av {
+  box-shadow: 0 0 0 2px var(--slate);
+}
+.nodo .home-graph button.gchip.stacked:hover {
+  background: #f4f1ec;
+}
+.nodo .home-graph .gbox .disc {
+  fill: var(--paper);
 }
 /* a solid disc behind each face, so edges never show through the ring */
 .nodo .gbox .disc {

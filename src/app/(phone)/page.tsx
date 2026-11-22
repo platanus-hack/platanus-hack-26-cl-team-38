@@ -2,33 +2,44 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar } from "./_components/avatar";
 import { Sheet, Splash, TabBar, useOnboardedPhone } from "./_components/chrome";
+import { CoincidenceSheet } from "./_components/coincidence-sheet";
+import { MatchGraph, setFocus } from "./_components/match-graph";
 import { MingaMark } from "./_components/minga-mark";
 import { Icon } from "./_components/icons";
 import { Initiatives } from "./_components/initiatives";
 import { Field, Mono } from "./_components/ui";
 import { COPY } from "./_lib/copy";
-import { useEncounters } from "./_lib/people";
+import { byTopic, clampRadius, coincidences, fmtMeters, isVisible, useEncounters } from "./_lib/people";
+import { useNearby } from "./_lib/proximity";
 import { useContacts } from "./_lib/plans";
 import { setPhone } from "./_lib/store";
 
 const C = COPY.inicio;
+const X = COPY.coincidencias;
 
 export default function Home() {
   const s = useOnboardedPhone();
   const router = useRouter();
   const encounters = useEncounters();
+  // The Intereses graph shows the same people as Explorar: only who is in range.
+  const { encounters: near } = useNearby(s);
   const known = useContacts(s);
   const [draft, setDraft] = useState<string | null>(null);
   const [how, setHow] = useState(false);
+  // Explorar shares the focus: what was open there should not open here.
+  useEffect(() => setFocus({ topic: null, person: null }), []);
 
   if (!s) return <Splash />;
   const contacts = known ?? [];
   const invited = contacts.find((c) => c.person.personId === s.invite);
   const text = draft ?? s.intent;
   const saved = draft === null ? !!s.intent : draft.trim() === s.intent;
+  const visible = isVisible(s);
+  const coins = near && visible ? coincidences(s, near) : [];
+  const groups = byTopic(coins);
 
   return (
     <div className="app with-tabs home">
@@ -78,6 +89,30 @@ export default function Home() {
             </button>
           </p>
         )}
+        <div className="sec">
+          {C.interests}
+          {visible && <Mono>{fmtMeters(clampRadius(s.radiusM))}</Mono>}
+        </div>
+        <div className="home-graph">
+          {near === undefined ? (
+            <div className="empty">{X.loading}</div>
+          ) : !visible ? (
+            <div className="empty">
+              <div className="empty-state">
+                <p>{X.invisible}</p>
+                <button type="button" className="btn" onClick={() => setPhone({ privacy: { ...s.privacy, discoverable: true } })}>
+                  {X.turnVisible}
+                </button>
+              </div>
+            </div>
+          ) : groups.length === 0 ? (
+            <div className="empty">
+              <p>{X.nobody(clampRadius(s.radiusM))}</p>
+            </div>
+          ) : (
+            <MatchGraph W={360} H={360} compact me={{ id: s.personId, name: s.displayName }} groups={groups} focus={s.focus} />
+          )}
+        </div>
         <Initiatives s={s} encounters={encounters} max={3} head={<div className="sec">{C.initiatives}</div>} />
       </div>
 
@@ -102,6 +137,7 @@ export default function Home() {
           {C.howMore}
         </button>
       </Sheet>
+      <CoincidenceSheet s={s} coins={coins} />
       <TabBar />
     </div>
   );

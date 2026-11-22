@@ -100,7 +100,8 @@ export function GraphStage() {
   const phase = phaseOf(s, path);
   const visible = isVisible(s);
   const coins = encounters && visible ? coincidences(s, encounters) : [];
-  const people = (s.explore ?? "personas") === "personas";
+  // Inicio shows the Intereses you share; every other screen, the people around you.
+  const people = path !== "/";
   const groups = byTopic(coins);
   const topics = s.node?.topics ?? [];
   const shared = topics.filter((t) => isPublished(t)).length;

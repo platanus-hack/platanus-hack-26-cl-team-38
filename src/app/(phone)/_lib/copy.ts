@@ -39,6 +39,7 @@ export const COPY = {
     contacts: "Contactos",
     contactsHint: "Agrégalos desde Explorar",
     initiatives: "Iniciativas",
+    interests: "Intereses en común",
     with: (name: string) => `Con ${name}.`,
     withRemove: "Quitar",
   },
@@ -168,8 +169,6 @@ export const COPY = {
 
   coincidencias: {
     title: "Explorar",
-    people: "Personas",
-    topics: "Intereses",
     desc: "Personas con las que has coincidido según lo que te interesa o estás buscando.",
     loading: "Buscando…",
     common: "En común",
