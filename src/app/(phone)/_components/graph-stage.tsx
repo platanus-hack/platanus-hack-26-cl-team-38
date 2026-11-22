@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import type { Source } from "@/lib/types";
-import { BrandLogo, SOURCE_META } from "./brand";
+import { BrandLogo, SOON_META, SoonLogo, type SoonSource, SOURCE_META } from "./brand";
 import { type Edge, type Entity, GraphCanvas, onEllipse, pose } from "./graph-canvas";
 import { Icon } from "./icons";
 import { AffinityGraph } from "./affinity-graph";
@@ -17,7 +17,9 @@ import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 
 const W = 880;
 const H = 600;
-const SOURCES: Source[] = ["claude", "chatgpt", "gemini", "spotify", "github", "instagram"];
+const SOURCES: Source[] = ["claude", "chatgpt", "gemini", "spotify", "github"];
+/** Shown like in the onboarding: coming soon, never connected. */
+const SOON: SoonSource[] = ["strava", "letterboxd"];
 
 type Phase = "inicio" | "fuentes" | "compartir" | "coincidencias";
 
@@ -40,9 +42,18 @@ function nodeScene(phase: Phase, s: PhoneState) {
       cls: `ghost${on ? " on" : ""}`,
       icon: <BrandLogo source={src} />,
       label: SOURCE_META[src].label,
-      pose: pose({ x: 115 + i * 130, y: 48 }, on || phase !== "compartir" ? 1 : 0.35),
+      pose: pose({ x: 110 + i * 110, y: 48 }, on || phase !== "compartir" ? 1 : 0.35),
     };
     if (on) edges.push({ a: `src:${src}`, b: me, kind: "soft", pulse: phase === "fuentes" ? i : undefined });
+  });
+  SOON.forEach((src, i) => {
+    E[`soon:${src}`] = {
+      kind: "chip",
+      cls: "ghost",
+      icon: <SoonLogo source={src} />,
+      label: SOON_META[src].label,
+      pose: pose({ x: 110 + (SOURCES.length + i) * 110, y: 48 }, phase !== "compartir" ? 1 : 0.35),
+    };
   });
   if (phase === "compartir") {
     const list = (s.node?.topics ?? []).slice(0, 14);
