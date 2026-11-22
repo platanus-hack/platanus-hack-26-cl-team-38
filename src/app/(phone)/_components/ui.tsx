@@ -163,7 +163,12 @@ export function LargeTitle({ title, back, right, sub }: { title: string; back?: 
   useEffect(() => {
     const el = big.current;
     if (!el) return;
-    const io = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting), { rootMargin: "-48px 0px 0px 0px" });
+    // Stuck as soon as the title starts going under the bar: a two-line title would otherwise
+    // show half of itself under it before the small one appears.
+    const io = new IntersectionObserver(([e]) => setStuck(e.intersectionRatio < 1 && e.boundingClientRect.top < (e.rootBounds?.top ?? 48)), {
+      rootMargin: "-48px 0px 0px 0px",
+      threshold: 1,
+    });
     io.observe(el);
     return () => io.disconnect();
   }, []);

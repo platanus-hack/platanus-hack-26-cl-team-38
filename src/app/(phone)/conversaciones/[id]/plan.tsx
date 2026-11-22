@@ -19,6 +19,13 @@ import { writing } from "@/lib/plans/writing";
 const C = COPY.plan;
 const time = new Intl.DateTimeFormat("es-CL", { hour: "2-digit", minute: "2-digit" });
 const first = (name: string) => name.split(" ")[0];
+const hostOf = (url: string) => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+};
 
 function statusOf(plan: PlanView): string {
   if (plan.status === "consenso") return C.consensus;
@@ -121,6 +128,21 @@ function ThePlan({ plan, names, verdict }: { plan: NonNullable<PlanView["plan"]>
             {content.desacuerdos.map((d, i) => (
               <li key={i}>
                 <Mono className="mute">{first(names.get(d.personId) ?? "")}</Mono> {cap(d.tema)}: {d.detalle}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {content.fuentes && content.fuentes.length > 0 && (
+        <>
+          <div className="sec">{C.sources}</div>
+          <ul className="plan-sources">
+            {content.fuentes.map((f, i) => (
+              <li key={i}>
+                {f.dato}{" "}
+                <a href={f.url} target="_blank" rel="noopener noreferrer">
+                  <Mono>{hostOf(f.url)}</Mono>
+                </a>
               </li>
             ))}
           </ul>

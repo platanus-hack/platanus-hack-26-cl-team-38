@@ -9,6 +9,14 @@ import type { Agents, Measured, MemberTurn, OrchestratorTurn } from "./deliberat
 
 export const MEMBER_MODEL = "claude-haiku-5-5";
 export const ORCHESTRATOR_MODEL = "claude-sonnet-5-5";
+// An experiment: the orchestrator searches the web for what is still open. Off unless set.
+export const WEB_SEARCH = process.env.PLANS_WEB_SEARCH === "1";
+const WEB_SEARCH_TOOL: Anthropic.Beta.BetaWebSearchTool20260209 = {
+  type: "web_search_20260209",
+  name: "web_search",
+  max_uses: 3,
+  user_location: { type: "approximate", country: "CL", city: "Santiago", timezone: "America/Santiago" },
+};
 
 // Structured outputs do not take string lengths, and a line too long would cost the whole turn:
 // lengths are asked for in the prompt and cut by the loop.
@@ -33,6 +41,7 @@ const ProposalSchema = z.object({
   abiertos: z.array(z.string()),
   desacuerdos: z.array(z.object({ miembro: z.string(), tema: z.string(), detalle: z.string() })),
 });
+const ProposalWithSourcesSchema = ProposalSchema.extend({ fuentes: z.array(z.object({ dato: z.string(), url: z.string() })) });
 
 const first = (name: string) => name.split(" ")[0];
 const listOf = (items: string[]) => (items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} y ${items.at(-1)}`);
@@ -119,6 +128,10 @@ ${turn.proposal}
 Responde por ${n}: di el motivo en una frase y después decide. Si algo de lo abierto se resuelve con una línea de ${n} o de su red, apórtala.`;
 }
 
+const NO_INVENTING = WEB_SEARCH
+  ? '- No inventes precios, fechas, lugares ni disponibilidad: sale de un aporte o de lo que leíste en internet (y va en "fuentes"). Lo que no encuentres va en "abiertos".'
+  : '- No inventes precios, fechas, lugares ni disponibilidad que nadie aportó: lo que falte va en "abiertos".';
+
 const ORCHESTRATOR_SYSTEM = `Eres el orquestador de un plan en Minga. Un grupo de personas quiere hacer algo junto y cada una tiene un Agente que la representa. Tú no representas a nadie: redactas el plan que mejor resuelve lo que dijeron todos.
 
 En cada ronda lees la intención, las posturas, las condiciones, los aportes y las respuestas de los Agentes, y entregas una propuesta:
@@ -131,11 +144,18 @@ En cada ronda lees la intención, las posturas, las condiciones, los aportes y l
 Reglas:
 - Las condiciones duras se respetan. Las blandas se equilibran: que nadie cargue con todas las concesiones.
 - Usa los aportes. Si un dato resuelve algo, intégralo en la decisión. Si viene de un contacto de alguien, el paso es que esa persona le pregunte a su contacto, y ella es la responsable.
-- No inventes precios, fechas, lugares ni disponibilidad que nadie aportó: lo que falte va en "abiertos".
+${NO_INVENTING}
 - De una ronda a otra cambia solo lo que piden los ajustes. No reabras lo que ya aceptaron.
 - Cada texto en menos de 200 caracteres, en español. Sin datos de salud ni de plata personal: solo la condición que el plan tiene que cumplir.
 
 Cuando se te pida la decisión final, no hubo consenso y decides tú. Entrega siempre un plan completo y ejecutable, aunque no deje contentos a todos. Si dos condiciones duras chocan, elige la opción que deja participar a más personas y que respeta lo que pidió quien propuso el plan, y anota en "desacuerdos" quién queda sin lo que pidió (con su clave) y qué pidió. En la decisión final, "abiertos" lleva solo lo que de verdad nadie pudo responder.`;
+
+const WEB_RULES = `
+
+Búsqueda en internet:
+- Tienes búsqueda en internet (web_search). Antes de proponer, si el plan necesita un lugar, un precio, un horario o disponibilidad y nadie lo aportó, búscalo y propone un lugar concreto con su dato, en vez de dejarlo abierto. A lo más tres búsquedas.
+- En la búsqueda nunca pongas nombres ni datos de los participantes o de sus contactos: solo el lugar, la actividad, la fecha o la zona.
+- Lo que uses de internet va en "fuentes": el dato en una frase (menos de 140 caracteres, con la fecha o la cifra si la trae) y la dirección de la página donde lo leíste. Solo lo que leíste en un resultado; si no encontraste nada, deja "fuentes" vacío.`;
 
 function orchestratorMessage(turn: OrchestratorTurn): string {
   const members = turn.members.map((m) => `${m.key} = ${m.displayName}${m.owner ? " (propone el plan)" : ""}`).join("\n");
@@ -153,7 +173,7 @@ ${members}
 LA CONVERSACIÓN HASTA AHORA
 ${turn.transcript || "(nadie ha dicho nada)"}
 
-${turn.previous ? `ÚLTIMA PROPUESTA\n${turn.previous}\n\n` : ""}${task}`;
+${turn.previous ? `ÚLTIMA PROPUESTA\n${turn.previous}\n\n` : ""}${task}${WEB_SEARCH ? " Si falta un lugar, un precio o un horario, búscalo en internet antes de proponer." : ""}`;
 }
 
 const usage = (u: { input_tokens: number; output_tokens: number; cache_read_input_tokens?: number | null; cache_creation_input_tokens?: number | null }) => ({
@@ -186,22 +206,40 @@ export function createAnthropicAgents(options: { client?: Anthropic } = {}): Age
 
     async propose(turn) {
       const started = Date.now();
-      // If a safety classifier declines the request, the API retries it on another model instead
-      // of leaving the plan without a proposal.
-      const response = await client.beta.messages.parse(
-        {
-          model: ORCHESTRATOR_MODEL,
-          max_tokens: 16000,
-          betas: ["server-side-fallback-2026-07-01"],
-          fallbacks: "default",
-          output_config: { effort: turn.final ? "medium" : "low", format: zodOutputFormat(ProposalSchema) },
-          system: [{ type: "text", text: ORCHESTRATOR_SYSTEM, cache_control: { type: "ephemeral" } }],
-          messages: [{ role: "user", content: orchestratorMessage(turn) }],
-        },
-        { timeout: 120_000, maxRetries: 1 },
-      );
-      if (response.stop_reason !== "end_turn" || !response.parsed_output) throw new Error(`el orquestador se detuvo con ${response.stop_reason}`);
-      return { output: response.parsed_output, meta: { model: response.model, ms: Date.now() - started, ...usage(response.usage) } };
+      const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: "user", content: orchestratorMessage(turn) }];
+      let tokensIn = 0;
+      let tokensOut = 0;
+      let webSearches = 0;
+      // A turn with server tools can pause; sending it back as it is lets the server go on.
+      for (let attempt = 0; attempt < 3; attempt++) {
+        // If a safety classifier declines the request, the API retries it on another model instead
+        // of leaving the plan without a proposal.
+        const response = await client.beta.messages.parse(
+          {
+            model: ORCHESTRATOR_MODEL,
+            max_tokens: 16000,
+            betas: ["server-side-fallback-2026-07-01"],
+            fallbacks: "default",
+            // At low effort it proposed without searching, even when told to.
+            output_config: { effort: turn.final || WEB_SEARCH ? "medium" : "low", format: zodOutputFormat(WEB_SEARCH ? ProposalWithSourcesSchema : ProposalSchema) },
+            system: [{ type: "text", text: WEB_SEARCH ? ORCHESTRATOR_SYSTEM + WEB_RULES : ORCHESTRATOR_SYSTEM, cache_control: { type: "ephemeral" } }],
+            ...(WEB_SEARCH ? { tools: [WEB_SEARCH_TOOL] } : {}),
+            messages,
+          },
+          { timeout: 120_000, maxRetries: 1 },
+        );
+        const used = usage(response.usage);
+        tokensIn += used.tokensIn;
+        tokensOut += used.tokensOut;
+        webSearches += response.usage.server_tool_use?.web_search_requests ?? 0;
+        if (response.stop_reason === "pause_turn") {
+          messages.push({ role: "assistant", content: response.content as Anthropic.Beta.BetaContentBlockParam[] });
+          continue;
+        }
+        if (response.stop_reason !== "end_turn" || !response.parsed_output) throw new Error(`el orquestador se detuvo con ${response.stop_reason}`);
+        return { output: response.parsed_output, meta: { model: response.model, ms: Date.now() - started, tokensIn, tokensOut, ...(WEB_SEARCH ? { webSearches } : {}) } };
+      }
+      throw new Error("el orquestador siguió en pausa después de tres intentos");
     },
   };
 }

@@ -95,6 +95,7 @@ export const COPY = {
       legendDots: "Contacto de esa persona",
     },
     disagreements: "Quedó en desacuerdo",
+    sources: "Buscado en internet",
     yourContact: "de tu contacto",
     networkOf: "De la red de",
     yourNetwork: "De tu red",

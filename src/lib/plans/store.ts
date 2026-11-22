@@ -116,7 +116,7 @@ export async function saveContext(db: Db, userId: string, scope: "red" | "propio
   return (await call(db, "save_context", { p_user: userId, p_scope: scope, p_source: source, p_lines: lines })) as number;
 }
 
-export type CallMeta = { model?: string; ms?: number; tokensIn?: number; tokensOut?: number };
+export type CallMeta = { model?: string; ms?: number; tokensIn?: number; tokensOut?: number; webSearches?: number };
 
 export async function recordMessage(db: Db, planId: string, round: number, message: PlanMessage, meta: CallMeta = {}): Promise<void> {
   const parsed = PlanMessageSchema.parse(message);

@@ -26,6 +26,7 @@ export type OrchestratorPlan = {
   pasos: { que: string; responsable: string }[];
   abiertos: string[];
   desacuerdos: { miembro: string; tema: string; detalle: string }[];
+  fuentes?: { dato: string; url: string }[];
 };
 
 export type MemberTurn = {
@@ -65,6 +66,8 @@ const MAX_APORTES = 3;
 const MAX_ITEMS = 12;
 // The plan is read on a phone: only what has to be fixed.
 const MAX_DECISIONES = 5;
+const MAX_FUENTES = 4;
+const isWebUrl = (url: string) => /^https?:\/\/[^\s/]+\.[^\s]+$/i.test(url) && url.length <= 500;
 
 function clip(text: string, max = 240): string {
   const flat = text.replace(/\s+/g, " ").trim();
@@ -115,9 +118,15 @@ function keep<T>(items: T[], texts: (item: T) => string[], contactNames: string[
   });
 }
 
+const withFuentes = (fuentes: { dato: string; url: string }[]) => (fuentes.length ? { fuentes: fuentes.map((f) => ({ dato: clip(f.dato), url: f.url })) } : {});
+
 function toContent(raw: OrchestratorPlan, plan: PlanSnapshot, keys: Map<string, string>, final: boolean): PlanContent {
+  const names = (personId: string | undefined) => plan.members.find((m) => m.personId === personId)?.displayName.split(" ")[0];
   const drops: Drop[] = [];
   const idOf = (key: string) => keys.get(key.trim().toUpperCase()) ?? plan.members.find((m) => fold(m.displayName) === fold(key))?.personId;
+  // The orchestrator sometimes writes the member keys in prose; people read names.
+  const named = (text: string) => text.replace(/\bM(\d+)\b/g, (key) => names(keys.get(key)) ?? key);
+  raw = { ...raw, resumen: named(raw.resumen), decisiones: raw.decisiones.map((d) => ({ ...d, valor: named(d.valor) })), pasos: raw.pasos.map((p) => ({ ...p, que: named(p.que) })) };
   const resumen = publicLine(raw.resumen, [], 600);
   return {
     resumen: "text" in resumen ? resumen.text : clip(plan.intent, 600),
@@ -130,8 +139,10 @@ function toContent(raw: OrchestratorPlan, plan: PlanSnapshot, keys: Map<string, 
           return personId ? [{ personId, tema: clip(d.tema, 80), detalle: clip(d.detalle) }] : [];
         })
       : [],
+    ...withFuentes(keep((raw.fuentes ?? []).filter((f) => isWebUrl(f.url)), (f) => [f.dato], [], drops).slice(0, MAX_FUENTES)),
   };
 }
+
 
 const answeredIn = (plan: PlanSnapshot, round: number) =>
   new Set(
