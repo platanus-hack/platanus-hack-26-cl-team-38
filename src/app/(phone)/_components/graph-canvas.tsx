@@ -2,6 +2,7 @@
 
 import { type PointerEvent as ReactPointerEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { Avatar, avatarSvg } from "./avatar";
+import { usePhone } from "../_lib/store";
 
 // The graph engine shared by the phone (Coincidencias) and the desktop panel: people drawn in SVG,
 // topic chips as HTML on top, and every position tweened so one layout morphs into the next.
@@ -141,6 +142,8 @@ function useTween(targets: Record<string, Pose>, spawnFrom: Record<string, strin
 
 function PersonNode({ id, n, p, onGrab }: { id: string; n: Person; p: Pose; onGrab?: (e: ReactPointerEvent, id: string) => void }) {
   const r = n.focus ? 26 : 23;
+  const phone = usePhone();
+  const photo = n.me ? phone?.photo : null;
   return (
     <g
       transform={`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`}
@@ -159,7 +162,11 @@ function PersonNode({ id, n, p, onGrab }: { id: string; n: Person; p: Pose; onGr
           {n.silo && <circle r={56} fill="none" className="me-ring" strokeWidth={1.5} strokeDasharray="4 8" />}
           <circle r={r} className="disc" />
           <circle r={r} fill="none" className={n.focus ? "ring" : n.tone ? `ring ${n.tone}` : "me-ring"} strokeWidth={n.focus ? 2.5 : n.me ? 3 : n.tone ? 2.5 : 2} />
-          <svg x={-20} y={-20} width={40} height={40} viewBox="0 0 40 40" dangerouslySetInnerHTML={{ __html: avatarSvg(n.avatar ?? id) }} />
+          {photo ? (
+            <image href={photo} x={-20} y={-20} width={40} height={40} preserveAspectRatio="xMidYMid slice" clipPath="circle(50%)" />
+          ) : (
+            <svg x={-20} y={-20} width={40} height={40} viewBox="0 0 40 40" dangerouslySetInnerHTML={{ __html: avatarSvg(n.avatar ?? id) }} />
+          )}
         </g>
       </g>
     </g>

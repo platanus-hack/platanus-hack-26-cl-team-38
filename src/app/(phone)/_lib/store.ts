@@ -46,6 +46,8 @@ export type PhoneState = {
   initiatives: Initiative[];
   /** Perfil → Información. Owner-only: this copy, plus the server's `user_info` (POST /api/users/info). */
   info: UserInfo | null;
+  /** Your own photo, as a small JPEG data URL. Stays in this phone: nobody else sees it yet. */
+  photo: string | null;
   /** What you said in a Conversación, and your Agente's answer, by conversation id. */
   replies: Record<string, { id: string; from: string; text: string; at: string }[]>;
 };
@@ -96,6 +98,7 @@ function fresh(personId = `p-${randomHex(6)}`): PhoneState {
     affinityQuery: "",
     initiatives: [],
     info: null,
+    photo: null,
     replies: {},
   };
 }

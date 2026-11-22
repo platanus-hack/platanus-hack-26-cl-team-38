@@ -11,7 +11,7 @@ import { BackLink, Mono } from "../_components/ui";
 import { COPY } from "../_lib/copy";
 import { discover } from "../_lib/insight";
 import { matchPhrase } from "../_lib/matches";
-import { affinities, fmtDistance, myInterests, RELATION, relTime, searchTopics, useEncounters } from "../_lib/people";
+import { byTopic, cap, contactsOf, fmtDistance, myInterests, RELATION, relTime, searchTopics, useEncounters } from "../_lib/people";
 import { setPhone } from "../_lib/store";
 
 const C = COPY.afinidades;
@@ -21,12 +21,18 @@ export default function AfinidadesPage() {
   const encounters = useEncounters();
   if (!s) return <Splash />;
 
-  const contacts = encounters ? affinities(s, encounters) : [];
+  const contacts = encounters ? contactsOf(s, encounters) : [];
   const person = contacts.find((c) => c.person.personId === s.focus.person);
   const query = s.affinityQuery ?? "";
   const found = searchTopics(contacts, query);
   const search = (q: string) => setPhone({ affinityQuery: q });
   // Suggestions complete what you typed; once it is a whole topic, they step aside.
+  // Pre-filters: the topics you share with your contacts first, then what most of them have.
+  const count = new Map<string, number>();
+  for (const c of contacts) for (const t of c.person.topics) count.set(cap(t.name), (count.get(cap(t.name)) ?? 0) + 1);
+  const frequent = [...count].sort((a, b) => b[1] - a[1]).map(([t]) => t);
+  const common = [...new Set([...byTopic(contacts).map((g) => cap(g.topic)), ...frequent])].slice(0, 8);
+  const same = (t: string) => t.toLowerCase() === query.trim().toLowerCase();
   const suggestions = found?.topics.filter((t) => t.toLowerCase() !== query.trim().toLowerCase()).slice(0, 4) ?? [];
 
   return (
@@ -47,6 +53,15 @@ export default function AfinidadesPage() {
               </button>
             )}
           </div>
+          {common.length > 0 && (
+            <div className="gsearch-out" role="group" aria-label={C.common}>
+              {common.map((t) => (
+                <button key={t} type="button" className="gsuggest" aria-pressed={same(t)} onClick={() => search(same(t) ? "" : t)}>
+                  {t}
+                </button>
+              ))}
+            </div>
+          )}
           {found && (
             <div className="gsearch-out" aria-live="polite">
               <Mono className="mute">
