@@ -4,10 +4,10 @@ import { use } from "react";
 import { Avatar } from "../../_components/avatar";
 import { Splash, TabBar, useOnboardedPhone } from "../../_components/chrome";
 import { LargeTitle, Mono } from "../../_components/ui";
-import { allConversations } from "../../_lib/conversations";
+import { allConversations, buildConversation, buildInitiative } from "../../_lib/conversations";
 import { COPY } from "../../_lib/copy";
 import { matchPhrase } from "../../_lib/matches";
-import { byTopic, coincidences, DEMO, RANGE, useEncounters } from "../../_lib/people";
+import { affinities, byTopic, coincidences, DEMO, RANGE, useEncounters } from "../../_lib/people";
 
 const time = new Intl.DateTimeFormat("es-CL", { hour: "2-digit", minute: "2-digit" });
 
@@ -18,7 +18,12 @@ export function Conversation({ params }: { params: Promise<{ id: string }> }) {
   if (!s || !encounters) return <Splash />;
 
   const coins = DEMO ? coincidences({ ...s, radiusM: RANGE.max }, encounters) : [];
-  const cv = allConversations(s.displayName, coins, byTopic(coins)).find((c) => c.id === id);
+  // Someone from Afinidades you share nothing with yet still gets a Conversación when you start one.
+  const contact = DEMO ? affinities(s, encounters).find((c) => c.person.personId === id) : undefined;
+  const init = s.initiatives?.find((i) => i.id === id);
+  const cv = init
+    ? buildInitiative(s.displayName, init, affinities(s, encounters))
+    : (allConversations(s.displayName, coins, byTopic(coins)).find((c) => c.id === id) ?? (contact && buildConversation(s.displayName, contact)));
   const names = Object.fromEntries((cv?.members ?? []).map((m) => [m.person.personId, m.person.displayName]));
   const group = cv?.kind === "grupo";
 
@@ -31,8 +36,8 @@ export function Conversation({ params }: { params: Promise<{ id: string }> }) {
           cv && (
             <Mono className="mute">
               {group
-                ? `Temática · ${cv.members.length + 1} Agentes · ${cv.members.map((m) => m.person.displayName).join(", ")}`
-                : `${cv.members[0].distanceM} m · ${cv.members[0].place} · ${cv.members[0].items.map(matchPhrase).join(" · ")}`}
+                ? `${cv.label ?? "Temática"} · ${cv.members.length + 1} Agentes · ${cv.members.map((m) => m.person.displayName).join(", ")}`
+                : [`${cv.members[0].distanceM} m`, cv.members[0].place, ...cv.members[0].items.map(matchPhrase)].join(" · ")}
             </Mono>
           )
         }

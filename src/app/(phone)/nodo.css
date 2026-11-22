@@ -357,12 +357,41 @@
     --line: rgba(242, 241, 238, 0.1);
     --mute: var(--on-slate-mute);
   }
+  /* on Inicio the field is a box with room around the text, and the send button sits in it */
   .slate .field {
-    border-color: rgba(242, 241, 238, 0.3);
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 8px 8px 8px 16px;
+    border: 1px solid rgba(242, 241, 238, 0.18);
+    border-radius: 20px;
+    background: rgba(242, 241, 238, 0.05);
+  }
+  .slate .field:focus-within {
+    border-color: var(--accent);
+  }
+  .slate .field textarea {
+    padding: 4px 0;
+  }
+  .slate .field .go {
+    width: 44px;
+    height: 44px;
+    background: rgba(242, 241, 238, 0.08);
   }
   .slate .field .go.on {
     background: var(--accent);
     color: #fff;
+  }
+  /* the paper plane leans right: nudge it to look centered */
+  .slate .field .go .ic {
+    translate: -1px 1px;
+  }
+  .slate .field .go.done {
+    background: rgba(43, 212, 164, 0.16);
+    color: var(--cercania);
+  }
+  .slate .field + div {
+    padding: 0 4px;
   }
   .slate .q {
     border-color: rgba(242, 241, 238, 0.24);
@@ -465,6 +494,46 @@
   .btn:disabled {
     opacity: 0.3;
     cursor: default;
+  }
+  /* counts next to an underlined section name stay in plain mono */
+  .sec.u {
+    position: relative;
+  }
+  .sec.u .mono {
+    /* out of the flow, so the coral underline stops at the name */
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .btn.danger {
+    background: #a3322e;
+    color: #fff;
+  }
+  /* a confirmation: icon, question, what happens, and the two answers */
+  .confirm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding-top: 16px;
+    text-align: center;
+  }
+  .confirm p {
+    margin: 0 0 12px;
+    max-width: 300px;
+  }
+  .confirm-ic {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(163, 50, 46, 0.1);
+    color: #a3322e;
   }
   .btn.ghost {
     background: transparent;
@@ -950,23 +1019,155 @@
   }
 
   /* small, quiet entry to Afinidades inside the slate */
+  /* under the field: what Minga does, and an (i) that opens how it works */
+  .pitch {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-top: 16px;
+    padding: 0 4px;
+  }
+  .pitch p {
+    flex: 1;
+    margin: 0;
+    font-size: 13px;
+    color: var(--on-slate-mute);
+    text-wrap: pretty;
+  }
+  .pitch .q {
+    font-family: var(--mono);
+    transition:
+      background 0.2s,
+      color 0.2s;
+  }
+  .pitch .q[aria-expanded="true"] {
+    background: var(--on-slate);
+    border-color: var(--on-slate);
+    color: var(--slate);
+  }
+  /* the dropdown: grid rows from 0fr to 1fr, so it opens to its own height */
+  .how {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 0.25s;
+  }
+  .how.open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+  .how > div {
+    overflow: hidden;
+    min-height: 0;
+  }
+  .how.open > div {
+    margin-top: 16px;
+    padding: 20px;
+    border-radius: 24px;
+    background:
+      radial-gradient(120% 80% at 100% 0%, rgba(255, 90, 54, 0.18), transparent 60%),
+      rgba(242, 241, 238, 0.06);
+    border: 1px solid rgba(242, 241, 238, 0.12);
+  }
+  .how-title {
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .how ol {
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 16px;
+  }
+  .how li {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--on-slate-mute);
+  }
+  .how li strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--on-slate);
+  }
+  .how-ic {
+    width: 36px;
+    height: 36px;
+    flex: none;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 90, 54, 0.16);
+    color: var(--accent);
+  }
+  .how-ic .ic {
+    width: 18px;
+    height: 18px;
+  }
+  .how-step {
+    display: block;
+    font-size: 11px;
+    color: var(--accent);
+  }
+  .how-close {
+    margin-top: 20px;
+    width: 100%;
+    height: 44px;
+    border-radius: 16px;
+    background: var(--on-slate);
+    color: var(--slate);
+    font-weight: 500;
+    text-align: center;
+  }
+
+  /* Afinidades: its own card, well apart from the question */
   .aff-entry {
     display: flex;
     align-items: center;
     gap: 16px;
     width: 100%;
-    margin-top: 24px;
-    padding: 16px 0 0;
-    border-top: 1px solid var(--line);
+    margin-top: 40px;
+    padding: 20px;
+    border: 1px solid rgba(242, 241, 238, 0.12);
+    border-radius: 24px;
+    background: rgba(242, 241, 238, 0.06);
     text-align: left;
+    box-sizing: border-box;
+    transition: background 0.2s;
+  }
+  .aff-entry:hover {
+    background: rgba(242, 241, 238, 0.1);
   }
   .aff-entry .main {
     flex: 1;
     min-width: 0;
   }
+  .aff-entry .main > span:first-child {
+    font-size: 18px;
+    font-weight: 500;
+  }
   .aff-entry .sub {
+    display: block;
+    margin-top: 4px;
     font-size: 13px;
     color: var(--mute);
+  }
+  .aff-entry .stack .av {
+    width: 36px;
+    height: 36px;
+    margin-left: -12px;
+  }
+  .aff-entry .stack .av:first-child {
+    margin-left: 0;
+  }
+  .aff-entry > .ic {
+    flex: none;
   }
   .stack {
     display: inline-flex;
@@ -984,6 +1185,140 @@
   .rows .stack .av,
   .sheet .stack .av {
     box-shadow: 0 0 0 2px var(--paper);
+  }
+
+  /* Recomendación IA: the one card in the person sheet, so it reads as your Agent speaking */
+  .ai {
+    margin-top: 24px;
+    padding: 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid var(--line);
+  }
+  .ai-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+  }
+  .ai-head .ic {
+    width: 18px;
+    height: 18px;
+    color: var(--accent);
+  }
+  .ai-head .q {
+    margin-left: auto;
+    font-family: var(--mono);
+  }
+  .ai-head .q[aria-expanded="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .ai-prompt {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(27, 35, 38, 0.06);
+    font-size: 13px;
+    animation: nodo-fade 0.2s ease-out;
+  }
+  .ai-prompt .mono {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mute);
+  }
+  .ai-thinking {
+    padding-top: 4px;
+  }
+  .ai-thinking i {
+    display: block;
+    height: 12px;
+    margin-top: 10px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, rgba(27, 35, 38, 0.06) 0%, rgba(27, 35, 38, 0.14) 50%, rgba(27, 35, 38, 0.06) 100%);
+    background-size: 200% 100%;
+    animation: nodo-shimmer 1.2s linear infinite;
+  }
+  .ai-thinking i:nth-of-type(2) {
+    width: 86%;
+  }
+  .ai-thinking i:nth-of-type(3) {
+    width: 60%;
+  }
+  .ai-body {
+    animation: nodo-fade 0.3s ease-out;
+  }
+  .ai-body p {
+    margin: 4px 0 0;
+  }
+  .ai-verdict {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-weight: 500;
+  }
+  .ai-verdict.si,
+  .ai-verdict.quizas,
+  .ai-verdict.no {
+    &::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      flex: none;
+    }
+  }
+  .ai-verdict.si {
+    color: #0f8a68;
+  }
+  .ai-verdict.quizas {
+    color: #b36f00;
+  }
+  .ai-verdict.no {
+    color: var(--mute);
+  }
+  .ai-label {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--mute);
+  }
+  .ai ul {
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+  }
+  .ai li {
+    position: relative;
+    padding-left: 20px;
+  }
+  .ai li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+  .ai-opener {
+    font-style: italic;
+  }
+  .ai-note {
+    margin-top: 16px;
+    font-size: 11px;
+    color: var(--mute);
+  }
+  .more-btn {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--mute);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   /* Distancia slider */
@@ -1039,6 +1374,172 @@
     max-width: 300px;
     font-size: 13px;
     color: var(--on-slate-mute);
+  }
+
+  /* Afinidades search: a pill on slate, suggestions as small chips under it */
+  .gsearch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    margin-top: 24px;
+    padding: 0 6px 0 14px;
+    border-radius: 22px;
+    background: var(--slate-2);
+    color: var(--on-slate-mute);
+    transition: box-shadow 0.2s;
+  }
+  .gsearch:focus-within {
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+  .gsearch .ic {
+    width: 18px;
+    height: 18px;
+    flex: none;
+  }
+  .gsearch input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    outline: none;
+    color: var(--on-slate);
+    /* 16px or iOS zooms in on focus */
+    font-size: 16px;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .gsearch input::-webkit-search-cancel-button {
+    display: none;
+  }
+  .gsearch input::placeholder {
+    color: var(--on-slate-mute);
+  }
+  .gsearch button {
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--on-slate);
+  }
+  .gsearch-out {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+  .gsearch-out::-webkit-scrollbar {
+    display: none;
+  }
+  .gsuggest {
+    flex: none;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 14px;
+    background: rgba(242, 241, 238, 0.1);
+    color: var(--on-slate);
+    font-size: 13px;
+  }
+
+  /* Iniciativa: who, then what to consider */
+  .step.init {
+    padding-top: 16px;
+  }
+  .init-back {
+    width: 40px;
+    height: 40px;
+    margin-left: -8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scaleX(-1);
+  }
+  .init-intent {
+    margin: 16px 0 8px;
+    font-size: 15px;
+  }
+  .init-intent .mono {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .gsearch.light {
+    margin-top: 0;
+    background: rgba(27, 35, 38, 0.06);
+    color: var(--mute);
+  }
+  .gsearch.light input {
+    color: var(--ink);
+  }
+  .gsearch.light input::placeholder {
+    color: var(--mute);
+  }
+  .gsearch.light button {
+    color: var(--ink);
+  }
+  .limits-text {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+    border: 1px solid rgba(27, 35, 38, 0.18);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.4);
+    font: inherit;
+    /* 16px or iOS zooms in on focus */
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .limits-text:focus {
+    border-color: var(--accent);
+  }
+  .limits-text::placeholder {
+    color: var(--mute);
+  }
+  .check {
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: 8px;
+    border: 1.5px solid rgba(27, 35, 38, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      background 0.2s,
+      border-color 0.2s;
+  }
+  .check.on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .check .ic {
+    width: 16px;
+    height: 16px;
+  }
+  .init-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+  .init-foot .btn {
+    flex: 1 0 100%;
   }
 
   /* Privacidad */
@@ -1418,6 +1919,11 @@ html:has(.nodo .graph-screen) body {
 @keyframes nodo-fade {
   from {
     opacity: 0;
+  }
+}
+@keyframes nodo-shimmer {
+  to {
+    background-position: -200% 0;
   }
 }
 @keyframes nodo-up {

@@ -9,7 +9,7 @@ import { AffinityGraph } from "./affinity-graph";
 import { MatchGraph } from "./match-graph";
 import { COPY } from "../_lib/copy";
 import { isPublished } from "../_lib/node";
-import { affinities, byTopic, cap, clampRadius, coincidences, useEncounters } from "../_lib/people";
+import { affinities, byTopic, cap, clampRadius, coincidences, searchTopics, useEncounters } from "../_lib/people";
 import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 
 // The graph behind the phone, on slate: your Fuentes and topics while you build your Nodo, then
@@ -87,7 +87,14 @@ export function GraphStage() {
     <section className="stage" aria-label="Grafo">
       <div className="gwrap">
         {path.startsWith("/afinidades") && phase === "coincidencias" ? (
-          <AffinityGraph W={W} H={H} me={{ id: s.personId }} contacts={encounters ? affinities(s, encounters) : []} focus={s.focus.person} />
+          <AffinityGraph
+            W={W}
+            H={H}
+            me={{ id: s.personId }}
+            contacts={encounters ? affinities(s, encounters) : []}
+            focus={s.focus.person}
+            match={encounters ? (searchTopics(affinities(s, encounters), s.affinityQuery ?? "")?.ids ?? null) : null}
+          />
         ) : phase === "coincidencias" ? (
           <MatchGraph W={W} H={H} me={{ id: s.personId, name: s.displayName }} groups={groups} focus={s.focus} />
         ) : (

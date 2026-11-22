@@ -153,6 +153,31 @@ export function byTopic(coins: Coincidence[]): TopicGroup[] {
 }
 
 /** Every topic shows with a capital first letter, wherever it appears. */
+const fold = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+/** Afinidades search: who has a public topic with these letters, and which topics they are. */
+export function searchTopics(contacts: Coincidence[], query: string): { ids: Set<string>; topics: string[] } | null {
+  const q = fold(query);
+  if (!q) return null;
+  const ids = new Set<string>();
+  const count = new Map<string, number>();
+  for (const c of contacts) {
+    for (const t of c.person.topics) {
+      if (!fold(t.name).includes(q)) continue;
+      ids.add(c.person.personId);
+      const name = cap(t.name);
+      count.set(name, (count.get(name) ?? 0) + 1);
+    }
+  }
+  const topics = [...count.entries()].sort((a, b) => b[1] - a[1] || a[0].length - b[0].length).map(([name]) => name);
+  return { ids, topics };
+}
+
 export function cap(s: string): string {
   return s ? s[0].toLocaleUpperCase("es-CL") + s.slice(1) : s;
 }

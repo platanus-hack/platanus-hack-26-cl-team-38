@@ -8,7 +8,7 @@ import { admitSignals, IncomingSignalsSchema, parsePastedSignals } from "@/lib/c
 import { setShared, shareRecommended } from "@/lib/node/node";
 import type { Kind, PersonalNode, Signal, Source } from "@/lib/types";
 import { Avatar } from "../_components/avatar";
-import { BrandLogo, SOURCE_META } from "../_components/brand";
+import { BrandLogo, SOON_META, SoonLogo, type SoonSource, SOURCE_META } from "../_components/brand";
 import { Sheet, Splash } from "../_components/chrome";
 import { Icon } from "../_components/icons";
 import { MingaMark } from "../_components/minga-mark";
@@ -18,7 +18,7 @@ import { checkIn, DEFAULT_ROOM } from "../_lib/api";
 import { COPY } from "../_lib/copy";
 import { EXAMPLE_SIGNALS, isLocked, isPublished } from "../_lib/node";
 import { type NodeSync, useNodeSync } from "../_lib/node-sync";
-import { connectedSources, logOutbox, mergeSignals, type PhoneState, setPhone, usePhone } from "../_lib/store";
+import { connectedSources, logOutbox, mergeSignals, type PhoneState, resumeSession, savedSessions, setPhone, usePhone } from "../_lib/store";
 import { type AssistantInbox, classifyOnApi, type InboxSink, useAssistantInbox, useCopy } from "../onboarding/connect-assistant";
 import { addProfiles } from "../onboarding/store";
 
@@ -53,7 +53,8 @@ function shareEverything(node: PersonalNode): PersonalNode {
 const roomFromLink = () => new URLSearchParams(window.location.search).get("sala")?.trim().toUpperCase() || DEFAULT_ROOM;
 
 const AGENTS: Source[] = ["claude", "chatgpt", "gemini"];
-const APPS: Source[] = ["spotify", "github", "instagram"];
+const APPS: Source[] = ["spotify", "github"];
+const SOON: SoonSource[] = ["strava", "letterboxd"];
 
 export function Onboarding({ team }: { team: TeamProfile[] }) {
   const s = usePhone();
@@ -93,7 +94,14 @@ export function Onboarding({ team }: { team: TeamProfile[] }) {
 /* ---------- 1 · nombre ---------- */
 
 function NameStep({ s, team, next, asTeammate }: { s: PhoneState; team: TeamProfile[]; next: () => void; asTeammate: (p: TeamProfile) => void }) {
+  const router = useRouter();
   const [name, setName] = useState(s.displayName);
+  // Sessions closed on this phone come first; a teammate already among them is not shown twice.
+  const [saved] = useState(savedSessions);
+  const others = team.filter((p) => !saved.some((x) => x.personId === `seed-${p.slug}`));
+  const enter = (personId: string) => {
+    if (resumeSession(personId)) router.replace("/");
+  };
   const save = () => {
     if (!name.trim()) return;
     setPhone({ displayName: name.trim() });
@@ -103,11 +111,28 @@ function NameStep({ s, team, next, asTeammate }: { s: PhoneState; team: TeamProf
     <div className="content step">
       <h1 className="t-hero">{C.name}</h1>
       <Field label={C.name} value={name} placeholder={C.namePlaceholder} maxLength={24} onChange={setName} onSubmit={save} />
-      {team.length > 0 && (
+      {saved.length > 0 && (
+        <>
+          <div className="sec">{C.saved}</div>
+          <div className="rows">
+            {saved.map((x) => (
+              <ListRow
+                key={x.personId}
+                lead={<Avatar id={x.personId} />}
+                title={x.displayName}
+                data={x.node?.topics.length}
+                chevron
+                onClick={() => enter(x.personId)}
+              />
+            ))}
+          </div>
+        </>
+      )}
+      {others.length > 0 && (
         <>
           <div className="sec">{C.team}</div>
           <div className="rows">
-            {team.map((p) => (
+            {others.map((p) => (
               <ListRow key={p.slug} lead={<Avatar id={`seed-${p.slug}`} />} title={p.displayName} data={p.topics.length} chevron onClick={() => asTeammate(p)} />
             ))}
           </div>
@@ -142,6 +167,9 @@ function SourcesStep({ s, inbox, next }: { s: PhoneState; inbox: AssistantInbox;
           ))}
           {APPS.map((src) => (
             <ListRow key={src} className="off" lead={<BrandLogo source={src} />} title={SOURCE_META[src].label} data={C.soon} />
+          ))}
+          {SOON.map((src) => (
+            <ListRow key={src} className="off" lead={<SoonLogo source={src} />} title={SOON_META[src].label} data={C.soon} />
           ))}
         </div>
         {connected.length === 0 && (
