@@ -7,7 +7,7 @@ import { admitSignals, IncomingSignalsSchema, parsePastedSignals } from "@/lib/c
 import { setShared, shareRecommended } from "@/lib/node/node";
 import type { Kind, PersonalNode, Signal, Source } from "@/lib/types";
 import { Avatar } from "../_components/avatar";
-import { BrandLogo, SOURCE_META } from "../_components/brand";
+import { BrandLogo, SOON_META, SoonLogo, type SoonSource, SOURCE_META } from "../_components/brand";
 import { Sheet, Splash } from "../_components/chrome";
 import { Icon } from "../_components/icons";
 import { MingaMark } from "../_components/minga-mark";
@@ -52,7 +52,8 @@ function shareEverything(node: PersonalNode): PersonalNode {
 const roomFromLink = () => new URLSearchParams(window.location.search).get("sala")?.trim().toUpperCase() || DEFAULT_ROOM;
 
 const AGENTS: Source[] = ["claude", "chatgpt", "gemini"];
-const APPS: Source[] = ["spotify", "github", "instagram"];
+const APPS: Source[] = ["spotify", "github"];
+const SOON: SoonSource[] = ["strava", "letterboxd"];
 
 export function Onboarding({ team }: { team: TeamProfile[] }) {
   const s = usePhone();
@@ -165,6 +166,9 @@ function SourcesStep({ s, inbox, next }: { s: PhoneState; inbox: AssistantInbox;
           ))}
           {APPS.map((src) => (
             <ListRow key={src} className="off" lead={<BrandLogo source={src} />} title={SOURCE_META[src].label} data={C.soon} />
+          ))}
+          {SOON.map((src) => (
+            <ListRow key={src} className="off" lead={<SoonLogo source={src} />} title={SOON_META[src].label} data={C.soon} />
           ))}
         </div>
         {connected.length === 0 && (

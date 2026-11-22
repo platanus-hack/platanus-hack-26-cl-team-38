@@ -33,6 +33,31 @@ export const SOURCE_META: Record<Source, { label: string; reads: string; kind: "
   instagram: { label: "Instagram", reads: "Tus Intereses, desde el export de tus datos", kind: "app" },
 };
 
+/** Fuentes shown as "pronto" in the onboarding. Not in the Source contract until they can connect. */
+export type SoonSource = "strava" | "letterboxd";
+export const SOON_META: Record<SoonSource, { label: string }> = {
+  strava: { label: "Strava" },
+  letterboxd: { label: "Letterboxd" },
+};
+
+/** Strava from Simple Icons (CC0); Letterboxd as its three dots. */
+export function SoonLogo({ source }: { source: SoonSource }) {
+  if (source === "strava")
+    return (
+      <svg className="lg" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#FC4C02" d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+      </svg>
+    );
+  return (
+    <svg className="lg" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="0.5" y="3.5" width="23" height="17" rx="5" fill="#202830" />
+      <circle cx="6.6" cy="12" r="3.4" fill="#FF8000" />
+      <circle cx="12" cy="12" r="3.4" fill="#00E054" fillOpacity="0.9" />
+      <circle cx="17.4" cy="12" r="3.4" fill="#40BCF4" fillOpacity="0.9" />
+    </svg>
+  );
+}
+
 /** size: needed when drawn inside another <svg>, where CSS width does not apply. */
 export function BrandLogo({ source, size }: { source: Source; size?: number }) {
   if (source === "instagram") {
