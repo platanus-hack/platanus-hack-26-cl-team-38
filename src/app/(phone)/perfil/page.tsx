@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { shareRecommended } from "@/lib/node/node";
 import { useState } from "react";
@@ -17,6 +18,8 @@ import { useLocation } from "../_lib/location";
 import { cap, DEMO, myInterests } from "../_lib/people";
 import { connectedSources, type PhoneState, resetPhone, setPhone, signOut } from "../_lib/store";
 import { toast } from "../_lib/toast";
+import { AddTopic } from "./add-topic";
+import { useNodeSync } from "../_lib/node-sync";
 
 const C = COPY.perfil;
 
@@ -43,6 +46,8 @@ export default function PerfilPage() {
   const [outbox, setOutbox] = useState(false);
   const [config, setConfig] = useState(false);
   const [confirmWipe, setConfirmWipe] = useState(false);
+  // Topics you add by hand go through the same review as the ones your Fuentes bring.
+  const sync = useNodeSync(s);
   if (!s) return <Splash />;
   const interests = myInterests(s);
   const privacy = s.privacy ?? { visibility: "conocidos" as const, discoverable: true, showPlace: true };
@@ -97,8 +102,9 @@ export default function PerfilPage() {
           ))}
         </div>
 
+        {/* Your Nodo and its privacy are one thing: each topic, public or only yours */}
         <div className="sec u">
-          {C.privacy}
+          {C.nodeTitle}
           <Mono className="mute">
             {interests.length} {COPY.nodo.shared} · {kept} {COPY.nodo.kept}
           </Mono>
@@ -111,16 +117,18 @@ export default function PerfilPage() {
             <TopicItem key={t.id} topic={t} />
           ))}
         </div>
-        <button type="button" className="btn ghost" style={{ marginTop: 16 }} onClick={() => setConfig(true)}>
-          <Icon name="shield" />
-          {C.configure}
-          {topics.length > 4 && <Mono className="mute">+{topics.length - 4}</Mono>}
-        </button>
+        <div className="btn-pair">
+          <AddTopic s={s} sync={sync} />
+          <button type="button" className="btn ghost" onClick={() => setConfig(true)}>
+            <Icon name="shield" />
+            {C.configure}
+            {topics.length > 4 && <Mono className="mute">+{topics.length - 4}</Mono>}
+          </button>
+        </div>
 
         <div className="sec u">{C.account}</div>
         <div className="rows">
           <ListRow title={C.outbox} data={s.outbox.length} onClick={() => setOutbox(true)} chevron />
-          <ListRow title={C.myNode} data={`${interests.length} · ${kept}`} href="/nodo" chevron />
           <ListRow title={COPY.conectar.row} href="/conectar" chevron />
           <ListRow title={C.signOut} onClick={leave} />
           <ListRow title={C.wipe} onClick={() => setConfirmWipe(true)} className="danger" />
@@ -132,8 +140,8 @@ export default function PerfilPage() {
         )}
       </div>
 
-      <Sheet open={config} size="detail" onClose={() => setConfig(false)} label={C.privacy}>
-        <h2 className="t-title">{C.privacy}</h2>
+      <Sheet open={config} size="detail" onClose={() => setConfig(false)} label={C.nodeTitle}>
+        <h2 className="t-title">{C.nodeTitle}</h2>
         <div className="sec">
           {C.byTopic}
           <Mono className="mute">
@@ -147,9 +155,12 @@ export default function PerfilPage() {
         )}
         <div className="rows">
           {topics.map((t) => (
-            <TopicItem key={t.id} topic={t} />
+            <TopicItem key={t.id} topic={t} editDepth />
           ))}
         </div>
+        <Link href="/bienvenida" className="btn ghost" style={{ marginTop: 16 }}>
+          {COPY.nodo.addSource}
+        </Link>
 
         <div className="sec">{C.general}</div>
         <div className="t-data mute">{C.visibility}</div>

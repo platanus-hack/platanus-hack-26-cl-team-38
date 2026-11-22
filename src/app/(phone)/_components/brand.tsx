@@ -37,6 +37,7 @@ export const SOURCE_META: Record<Source, { label: string; reads: string; kind: "
   github: { label: "GitHub", reads: "Lenguajes y temas de tus repos públicos", kind: "app" },
   instagram: { label: "Instagram", reads: "Tus Intereses, desde el export de tus datos", kind: "app" },
   google: { label: "Google", reads: "Los canales de YouTube que sigues y ves, y lo que se repite en tu calendario", kind: "app" },
+  manual: { label: "Tú", reads: "Lo que escribiste tú en Perfil", kind: "app" },
 };
 
 /** Fuentes shown as "pronto" in the onboarding. Not in the Source contract until they can connect. */
@@ -66,6 +67,16 @@ export function SoonLogo({ source }: { source: SoonSource }) {
 
 /** size: needed when drawn inside another <svg>, where CSS width does not apply. */
 export function BrandLogo({ source, size }: { source: Source; size?: number }) {
+  // A topic you wrote yourself: a pencil.
+  if (source === "manual") {
+    return (
+      <svg className="lg" viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
+        <rect x="1.5" y="1.5" width="21" height="21" rx="6" fill="#1F3138" />
+        <path d="M7 17l1-3.6 6.9-6.9a1.6 1.6 0 0 1 2.3 0l.3.3a1.6 1.6 0 0 1 0 2.3L10.6 16z" fill="#F2F1EE" />
+        <path d="M7 17l1-3.6 2.6 2.6z" fill="#FF5A36" />
+      </svg>
+    );
+  }
   if (source === "instagram") {
     return (
       <svg className="lg" viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">

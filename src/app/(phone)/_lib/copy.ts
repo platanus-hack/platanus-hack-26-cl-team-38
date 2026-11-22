@@ -166,6 +166,7 @@ export const COPY = {
     outbox: "Qué salió de tu teléfono",
     account: "Cuenta",
     privacy: "Privacidad",
+    nodeTitle: "Nodo y Privacidad",
     saved: "Privacidad guardada",
     privacyHelp: "Cada tema decide si se comparte. Lo que no, se queda en tu teléfono.",
     configure: "Configurar",
@@ -209,6 +210,35 @@ export const COPY = {
     choose: "Elige",
     save: "Guardar",
     infoSaved: "Guardado",
+  },
+
+  /** Perfil → Nodo y Privacidad → "Agregar un tema": something about you no Fuente brought. */
+  addTopic: {
+    button: "Agregar un tema",
+    title: "Agregar un tema",
+    help: "Algo tuyo que tus Fuentes no trajeron. Pasa por el mismo filtro de privacidad que el resto.",
+    kind: "Yo…",
+    name: "Tema",
+    placeholder: {
+      es: "Ej: ingeniera civil",
+      sabe: "Ej: carpintería",
+      hace: "Ej: trekking",
+      le_gusta: "Ej: cine coreano",
+      quiere_ser: "Ej: profesora de yoga",
+      busca: "Ej: socio para un podcast",
+      ofrece: "Ej: clases de guitarra",
+    },
+    depth: "Cuánto",
+    depths: { 1: "Algo", 2: "Bastante", 3: "Mucho" },
+    share: "Compartirlo",
+    shareHelp: "Si el filtro lo deja, entra a tus Intereses públicos. Si no, queda solo para ti.",
+    submit: "Agregar a mi Nodo",
+    reviewing: "Revisando el tema…",
+    added: (n: string) => `${n} quedó en tu Nodo, solo para ti`,
+    addedShared: (n: string) => `${n} quedó en tu Nodo y se comparte`,
+    held: (n: string) => `${n} no se comparte nunca: no entra a tu Nodo`,
+    errorLength: "Entre 2 y 60 caracteres.",
+    errorExists: "Ya tienes ese tema en tu Nodo.",
   },
 
   nodo: {

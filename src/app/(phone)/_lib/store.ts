@@ -44,6 +44,8 @@ export type PhoneState = {
   affinityQuery: string;
   /** Group Conversaciones you started from Inicio, newest first. */
   initiatives: Initiative[];
+  /** A topic you added by hand, waiting for the privacy filter; `held` is the filter's count before. */
+  pendingTopic: { id: string; name: string; share: boolean; held: number } | null;
   /** Perfil → Información. Owner-only: this copy, plus the server's `user_info` (POST /api/users/info). */
   info: UserInfo | null;
   /** Your own photo, as a small JPEG data URL. Stays in this phone: nobody else sees it yet. */
@@ -100,6 +102,7 @@ function fresh(personId = `p-${randomHex(6)}`): PhoneState {
     info: null,
     photo: null,
     replies: {},
+    pendingTopic: null,
   };
 }
 
