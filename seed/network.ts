@@ -154,6 +154,24 @@ export function renderProfile(person: SeedNetworkPerson): string {
     .join("\n\n");
 }
 
+// What goes to `user_context` for each person: the profile, which the agents of their connections
+// can also read ("red"), and what only their own agent reads ("propio").
+export function contextOf(person: SeedNetworkPerson): { red: { section: string; text: string }[]; propio: { section: string; text: string }[] } {
+  let section = "";
+  const red: { section: string; text: string }[] = [];
+  for (const line of renderProfile(person).split("\n")) {
+    if (line.startsWith("## ")) section = line.slice(3);
+    else if (line.startsWith("- ")) red.push({ section, text: line.slice(2) });
+  }
+  return {
+    red,
+    propio: [
+      ...(person.agentOnly.allergies ?? []).map((allergy) => ({ section: "Condición dura", text: `Alergia: ${allergy}` })),
+      ...person.agentOnly.constraints.map((c) => ({ section: c.hard ? "Condición dura" : "Preferencia", text: c.detail })),
+    ],
+  };
+}
+
 // Undirected connection graph over people and teammates.
 export function connectionGraph(net: NetworkV2 = network): Map<string, Set<string>> {
   const graph = new Map<string, Set<string>>([...net.team, ...net.people.map((p) => p.personId)].map((id) => [id, new Set()]));

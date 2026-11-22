@@ -8,7 +8,8 @@ import { Icon } from "../_components/icons";
 import { Mono, Why } from "../_components/ui";
 import { intentWords, relevantTopic } from "../_lib/conversations";
 import { COPY } from "../_lib/copy";
-import { affinities, cap, type Coincidence, RELATION, useEncounters } from "../_lib/people";
+import { affinities, cap, type Coincidence, DEMO, RELATION, useEncounters } from "../_lib/people";
+import { connectionEncounters, createPlan, usePlanGraph } from "../_lib/plans";
 import { type Initiative, setPhone } from "../_lib/store";
 import { toast } from "../_lib/toast";
 
@@ -39,6 +40,10 @@ export default function IniciativaPage() {
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState<Set<string> | null>(null);
   const [note, setNote] = useState("");
+  // With a backend, an Iniciativa is a plan among your accepted connections.
+  const graph = usePlanGraph();
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string>();
   // Free text: each line (or sentence ended in a period) is one thing to consider.
   const limits = note
     .split(/\n+|(?<=\.)\s+/)
@@ -49,10 +54,11 @@ export default function IniciativaPage() {
   useEffect(() => {
     if (s && !intent) router.replace("/");
   }, [s, intent, router]);
-  if (!s || !intent || encounters === undefined) return <Splash />;
+  if (!s || !intent || encounters === undefined || graph === undefined) return <Splash />;
 
   const words = intentWords(intent);
-  const contacts = affinities(s, encounters).sort((a, b) => RANK[a.relation] - RANK[b.relation]);
+  const network = new Map(graph?.connections.map((c) => [c.personId, c.contacts]));
+  const contacts = affinities(s, graph ? connectionEncounters(graph, encounters) : encounters).sort((a, b) => RANK[a.relation] - RANK[b.relation]);
   // Your Agente's picks: first who knows about it, then close people you already share topics with.
   const withReason = contacts.map((c) => {
     const topic = relevantTopic(c, words);
@@ -82,7 +88,22 @@ export default function IniciativaPage() {
   const rest = withReason.filter((x) => !picks.has(x.c.person.personId) && matches(x.c));
   const people = contacts.filter((c) => chosen.has(c.person.personId));
 
-  function create() {
+  // Whose Agente can also draw on contacts of their own, said under their name.
+  const reach = (c: Coincidence) => {
+    const n = network.get(c.person.personId) ?? 0;
+    return n > 0 ? `${n} ${n === 1 ? COPY.plan.oneContact : COPY.plan.contacts}` : undefined;
+  };
+  const tooMany = !DEMO && people.length > 5;
+
+  async function create() {
+    if (!DEMO) {
+      setCreating(true);
+      setError(undefined);
+      const created = await createPlan(intent, people.map((c) => c.person.personId), limits);
+      if (created.ok) return router.replace(`/conversaciones/${created.planId}`);
+      setCreating(false);
+      return setError(created.error);
+    }
     const init = newInitiative(
       intent,
       people.map((c) => c.person.personId),
@@ -129,7 +150,7 @@ export default function IniciativaPage() {
                 </div>
                 <div className="rows">
                   {shownSuggested.map(({ c, why }) => (
-                    <PersonCheck key={c.person.personId} c={c} sub={hit(c) ?? why ?? undefined} on={chosen.has(c.person.personId)} onToggle={toggle} />
+                    <PersonCheck key={c.person.personId} c={c} sub={[hit(c) ?? why, reach(c)].filter(Boolean).join(" · ") || undefined} on={chosen.has(c.person.personId)} onToggle={toggle} />
                   ))}
                 </div>
               </>
@@ -139,12 +160,13 @@ export default function IniciativaPage() {
                 <div className="sec">{C.everyone}</div>
                 <div className="rows">
                   {rest.map(({ c }) => (
-                    <PersonCheck key={c.person.personId} c={c} sub={hit(c)} on={chosen.has(c.person.personId)} onToggle={toggle} />
+                    <PersonCheck key={c.person.personId} c={c} sub={[hit(c), reach(c)].filter(Boolean).join(" · ") || undefined} on={chosen.has(c.person.personId)} onToggle={toggle} />
                   ))}
                 </div>
               </>
             )}
-            {shownSuggested.length + rest.length === 0 && <p className="mute">{C.none}</p>}
+            {shownSuggested.length + rest.length === 0 && <p className="mute">{graph && contacts.length === 0 ? COPY.plan.noConnections : C.none}</p>}
+            {tooMany && <p className="mute">{COPY.plan.tooMany}</p>}
           </>
         ) : (
           <>
@@ -162,6 +184,11 @@ export default function IniciativaPage() {
               autoFocus
               onChange={(e) => setNote(e.target.value)}
             />
+            {error && (
+              <p role="alert" className="mute" style={{ marginTop: 12 }}>
+                {error}
+              </p>
+            )}
           </>
         )}
       </div>
@@ -176,13 +203,13 @@ export default function IniciativaPage() {
           {people.length} {people.length === 1 ? C.one : C.many}
         </Mono>
         {step === "who" ? (
-          <button className="btn" disabled={people.length === 0} onClick={() => setStep("limits")}>
+          <button className="btn" disabled={people.length === 0 || tooMany} onClick={() => setStep("limits")}>
             {C.next}
           </button>
         ) : (
-          <button className="btn" onClick={create}>
+          <button className="btn" disabled={creating} onClick={create}>
             <Icon name="chat" />
-            {limits.length ? C.create : `${C.create} · ${C.skip.toLowerCase()}`}
+            {creating ? COPY.plan.creating : limits.length ? C.create : `${C.create} · ${C.skip.toLowerCase()}`}
           </button>
         )}
       </div>
