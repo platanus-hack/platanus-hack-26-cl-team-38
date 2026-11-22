@@ -78,7 +78,7 @@ export default function Home() {
             </button>
           </p>
         )}
-        <Initiatives s={s} encounters={encounters} page={3} head={<div className="sec">{C.initiatives}</div>} />
+        <Initiatives s={s} encounters={encounters} max={3} head={<div className="sec">{C.initiatives}</div>} />
       </div>
 
       {/* A sheet opens over the tab bar, so the whole explanation fits on screen. */}

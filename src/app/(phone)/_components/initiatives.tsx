@@ -13,6 +13,8 @@ import type { PhoneState } from "../_lib/store";
 // Your Iniciativas, newest first and a page at a time: the same list in Inicio and in Chats.
 // With a backend they are plans; demo mode keeps them on the phone.
 
+const PAGE = 5;
+
 function Row({ cv, replies }: { cv: Conversation; replies?: { text: string }[] }) {
   // The most useful line: what you or your Agente said last.
   const last = (replies?.length ? replies[replies.length - 1] : cv.messages[cv.messages.length - 1])?.text ?? "";
@@ -62,10 +64,10 @@ function PlanRow({ plan, me }: { plan: PlanSummary; me: string }) {
   );
 }
 
-/** `head` goes above the list when there is one; `empty` shows once we know there is none. */
-export function Initiatives({ s, encounters, page = 5, head, empty }: { s: PhoneState; encounters: Encounter[] | undefined; page?: number; head: ReactNode; empty?: ReactNode }) {
+/** `head` goes above the list when there is one; `empty` shows once we know there is none. With `max`, only the newest ones and no more pages. */
+export function Initiatives({ s, encounters, max, head, empty }: { s: PhoneState; encounters: Encounter[] | undefined; max?: number; head: ReactNode; empty?: ReactNode }) {
   const plans = usePlans();
-  const [shown, setShown] = useState(page);
+  const [shown, setShown] = useState(max ?? PAGE);
   const people = encounters ? affinities(s, encounters) : [];
   const mine = DEMO && encounters ? localInitiatives(s, encounters).map((i) => buildInitiative(s.displayName, i, people)) : [];
   const rows = [
@@ -77,8 +79,8 @@ export function Initiatives({ s, encounters, page = 5, head, empty }: { s: Phone
     <>
       {head}
       <div className="rows">{rows.slice(0, shown)}</div>
-      {rows.length > shown && (
-        <button type="button" className="more-btn" onClick={() => setShown(shown + page)}>
+      {!max && rows.length > shown && (
+        <button type="button" className="more-btn" onClick={() => setShown(shown + PAGE)}>
           {COPY.more} ({rows.length - shown})
         </button>
       )}
