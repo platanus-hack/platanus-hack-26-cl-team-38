@@ -4,7 +4,9 @@ import { createAdminClient } from "@/lib/supabase/create-admin-client";
 import { PublicProjectionSchema, type PublicProjection } from "@/lib/types";
 import { runConnectionAction } from "@/lib/users/connections";
 import { saveProfile } from "@/lib/users/profile";
-import { network } from "../seed/network";
+import { embed } from "@/lib/embeddings";
+import { saveContext } from "@/lib/plans/store";
+import { contextOf, network } from "../seed/network";
 
 config({ path: process.env.ENV_FILE ?? ".env.local" });
 const db = createAdminClient();
@@ -44,3 +46,14 @@ for (const { a, b, origin } of network.connections) {
   if (accepted.status !== 200) throw new Error(`conexión ${a} ↔ ${b}: ${JSON.stringify(accepted)}`);
 }
 console.log(`${network.connections.length} conexiones aceptadas`);
+
+// What each person's agent reads when planning: the profile ("red") and what is only for their own
+// agent ("propio"). Saving replaces what the seed had left there.
+let contextLines = 0;
+for (const person of network.people) {
+  for (const [scope, lines] of Object.entries(contextOf(person)) as ["red" | "propio", { section: string; text: string }[]][]) {
+    const vectors = await embed(lines.map((line) => line.text));
+    contextLines += await saveContext(db, person.personId, scope, "seed", lines.map((line, i) => ({ lineId: `seed-${scope}-${i + 1}`, ...line, embedding: vectors[i] })));
+  }
+}
+console.log(`${contextLines} líneas de contexto para los agentes`);

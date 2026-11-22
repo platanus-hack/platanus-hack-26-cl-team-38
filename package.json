@@ -13,6 +13,7 @@
     "seed:person": "tsx scripts/add-person.mts",
     "seed:graphs": "tsx scripts/build-network-graphs.mts",
     "privacy:eval": "tsx scripts/privacy-eval.mts",
+    "plan:eval": "tsx scripts/plan-eval.mts",
     "test": "vitest run",
     "typecheck": "next typegen && tsc --noEmit",
     "db:start": "supabase start -x storage-api,imgproxy,edge-runtime,logflare,vector,mailpit,supavisor",
