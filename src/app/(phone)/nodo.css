@@ -1821,15 +1821,13 @@
 /* ============ desktop: framed phone on the left, the graph on the dark right ============ */
 @media (min-width: 1024px) {
   .nodo {
-    height: 100dvh;
-    overflow: hidden;
     background: var(--desk);
 
     .shell {
       display: grid;
       grid-template-columns: auto minmax(0, 1fr);
       column-gap: clamp(32px, 5vw, 80px);
-      height: 100dvh;
+      min-height: 100dvh;
       max-width: 1680px;
       margin: 0 auto;
       padding: 32px clamp(24px, 4vw, 56px);
@@ -1838,8 +1836,9 @@
     .device {
       display: block;
       align-self: center;
-      height: min(844px, calc(100dvh - 64px));
-      aspect-ratio: 414 / 868;
+      /* fixed size: the phone never follows the window; a shorter window scrolls the page */
+      width: 402px;
+      height: 844px;
       padding: 12px;
       box-sizing: border-box;
       border-radius: 56px;
