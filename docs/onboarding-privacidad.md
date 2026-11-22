@@ -152,7 +152,7 @@ El mismo tema puede ser un oficio o una confidencia. Por eso se clasifica el par
 
 | Fuente | Qué suele traer de delicado | Regla |
 |---|---|---|
-| Claude, ChatGPT, Gemini | Lo más delicado de todo: salud, plata, trabajo, pareja, problemas legales | El prompt ya los excluye ([mcp-ingestion](mcp-ingestion.md)), pero no se confía en eso: todo pasa por los verificadores |
+| Claude, ChatGPT, Gemini | Lo más delicado de todo: salud, plata, trabajo, pareja, problemas legales | El prompt ya los excluye ([mcp-ingestion](archivo/mcp-ingestion.md)), pero no se confía en eso: todo pasa por los verificadores |
 | Spotify | Podcasts (política, religión, salud mental, crianza), música religiosa | Se publican géneros, no podcasts sueltos. Un tópico que solo viene de Spotify nunca se recomienda si roza una categoría sensible |
 | Instagram | Cuentas seguidas, intereses publicitarios inferidos por Meta, lugares etiquetados, nombres de amigos | Los intereses inferidos y los lugares entran como `personal`. Los nombres de terceros nunca se vuelven tópico |
 | GitHub | Nombre del empleador o de clientes en repos y organizaciones | Se publican lenguajes y temas, no nombres de repos |

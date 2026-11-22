@@ -14,7 +14,7 @@ El plan con que se pidió este documento decía "sin pgvector" y "sin migracione
 |---|---|---|---|---|---|---|
 | F1 | Check-in con proyección pública | `CLAUDE.md:58`, `src/app/api/checkin/route.ts` | Proyección filtrada por sala | Servidor | Todos los de la sala | Lo que dure la sala |
 | F2 | Una persona es la misma entre salas | Encargo de Benjamín; hoy no existe (`docs/arquitectura-por-capas.md:295`) | Identidad y tópicos públicos | Servidor, en el check-in | Servidor | Persistente |
-| F3 | Cruce de dos personas sin recalcular todo | Encargo de Benjamín; `CLAUDE.md` (Coincidencia, en Decisiones) | Qué nombres de tópico calzan. El resultado por pareja no se guarda | Servidor | Las dos personas | Calce de nombres: persistente |
+| F3 | Cruce de dos personas sin recalcular todo | Encargo de Benjamín; `docs/decisiones.md` (Coincidencia) | Qué nombres de tópico calzan. El resultado por pareja no se guarda | Servidor | Las dos personas | Calce de nombres: persistente |
 | F4 | Conexión aceptada por ambas partes | Encargo; `docs/casos-de-uso.md:17` y `:97` | Pareja, quién aceptó y cuándo, origen, lo común | Servidor | Solo sus dos partes | Hasta que una se retira |
 | F5 | Mesas candidatas de 3 a 5 | `docs/arquitectura-por-capas.md:20`, `:274` | Miembros, rol, tema, puntaje | Motor de sala | Toda la sala (D6) | Lo que dure la sala |
 | F6 | Plan de la mesa con aceptaciones | `docs/arquitectura-por-capas.md:241`, `CLAUDE.md:18` | Plan, punto de encuentro, citas, quién aceptó | Deliberación; el teléfono acepta | Toda la sala (D6) | Lo que dure la sala |

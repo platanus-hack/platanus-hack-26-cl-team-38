@@ -2,14 +2,14 @@
 
 *Carga inicial del perfil vía un conector MCP — Claude arma el nodo personal (tópicos con profundidad 1–3, busca, ofrece) a partir de lo que sabe del usuario y lo envía con una sola herramienta.*
 
-> **Estado: en el hack es el paso A5 de [plan-de-construccion](plan-de-construccion.md)**, el primero que se corta si falta tiempo. Donde se contradice, manda [arquitectura-por-capas](arquitectura-por-capas.md):
+> **Estado: en el hack es el paso A5 de [plan-de-construccion](../plan-de-construccion.md)**, el primero que se corta si falta tiempo. Donde se contradice, manda [arquitectura-por-capas](../arquitectura-por-capas.md):
 > - `submit_profile` entrega señales (`Signal[]`) a la capa 2, que pasan por el sintetizador como las de cualquier otra fuente. `busca` y `ofrece` son `kind` de tópico, y hay que pedir también `quiere_ser`, que este formato no tiene.
 > - El servidor es un **buzón efímero**: el teléfono retira el perfil y se borra. El nodo personal vive en el teléfono (IndexedDB), no en nuestro backend.
-> - En el hack no hay OAuth ni cuentas: se usa un token o código de desarrollo (ver I8 en [infra-propuestas](infra-propuestas.md)).
+> - En el hack no hay OAuth ni cuentas: se usa un token o código de desarrollo (ver I8 en [infra-propuestas](../infra-propuestas.md)).
 > - El archivo `.md` con `public: [...]` lo reemplaza el campo `public` de cada `Topic`.
 
 ## Objetivo
-Obtener el **nodo personal** de cada usuario a partir de su actividad en Claude: una lista de tópicos con peso, más lo que busca y lo que ofrece. Es una de las entradas de la capa 2 de [arquitectura-por-capas](arquitectura-por-capas.md); la versión anterior de este diseño partía de [modelo-tecnico](modelo-tecnico.md).
+Obtener el **nodo personal** de cada usuario a partir de su actividad en Claude: una lista de tópicos con peso, más lo que busca y lo que ofrece. Es una de las entradas de la capa 2 de [arquitectura-por-capas](../arquitectura-por-capas.md); la versión anterior de este diseño partía de [modelo-tecnico](modelo-tecnico.md).
 
 No guardamos conversaciones. Solo el perfil resultante.
 
@@ -137,4 +137,4 @@ El **índice** que sale hacia el cálculo de gravedad contiene solo los tópicos
 - ¿La rúbrica de profundidad 1–3 es la correcta? Validarla con los perfiles del equipo.
 - ¿La marca público/privado se hace solo en la app o también en el chat, antes de enviar?
 - ¿Cada cuánto se actualiza el perfil? ¿Solo a pedido del usuario o con un recordatorio?
-- ~~¿Dónde vive el nodo personal en el hack?~~ En el teléfono; el servidor solo es buzón ([arquitectura-por-capas](arquitectura-por-capas.md)).
+- ~~¿Dónde vive el nodo personal en el hack?~~ En el teléfono; el servidor solo es buzón ([arquitectura-por-capas](../arquitectura-por-capas.md)).

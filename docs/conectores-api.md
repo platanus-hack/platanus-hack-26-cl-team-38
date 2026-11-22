@@ -2,7 +2,7 @@
 
 *Investigación del 21-11-2026 sobre los tres conectores de API (pasos A2 y A3 del plan, más Strava, que no estaba): qué se puede usar hoy, cómo se autentica, cómo se traduce a `Signal[]`, qué riesgo de términos tiene cada uno y en qué orden construirlos.*
 
-**Estado:** investigación. Nada de esto está implementado. Lo que cambia contratos o variables de entorno está en [Decisiones pendientes](#decisiones-pendientes) y, al aceptarse, va a `CLAUDE.md` · Decisiones. Los hechos sobre las APIs se revisaron el 21-11-2026 y cambian seguido: las fuentes están al final de cada sección.
+**Estado:** investigación. Nada de esto está implementado. Lo que cambia contratos o variables de entorno está en [Decisiones pendientes](#decisiones-pendientes) y, al aceptarse, va a [decisiones](decisiones.md). Los hechos sobre las APIs se revisaron el 21-11-2026 y cambian seguido: las fuentes están al final de cada sección.
 
 ## Resumen
 
@@ -199,7 +199,7 @@ Cada integrante pide su archivo (Settings → My Account → Download or Delete 
 - `src/app/explorar/palette.ts`: `SOURCE_LABEL` es `Record<Source, string>`, así que typecheck falla hasta agregarlo. Lo usan `explorar/explorer.tsx` y `grafo/graph-explorer.tsx`.
 - `docs/arquitectura-por-capas.md`: el tipo `Source` y la tabla de Capas 1–2.
 - `seed/team.ts` lo hereda vía `SourceSchema`. Opcional: tópicos de Strava en `seed/people.ts` y `pnpm seed:build`.
-- `CLAUDE.md` · Decisiones. La base no cambia: las fuentes viajan en jsonb.
+- [decisiones](decisiones.md). La base no cambia: las fuentes viajan en jsonb.
 
 Fuentes: [primeros pasos](https://developers.strava.com/docs/getting-started/), [límites](https://developers.strava.com/docs/rate-limits/), [autenticación](https://developers.strava.com/docs/authentication/), [changelog](https://developers.strava.com/docs/changelog/), [actualización del programa](https://communityhub.strava.com/insider-journal-9/an-update-to-our-developer-program-13428), [sin PKCE (sep-2026)](https://github.com/openzigs/onyourleft/issues/462), [resumen de cambios 2026 (tercero)](https://appsforstrava.com/blog/strava-developer-program-changes-2026).
 

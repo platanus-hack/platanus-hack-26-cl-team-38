@@ -118,7 +118,7 @@ Respuestas del equipo, para alinear el pitch. Las marcadas **por definir** no ti
 
 Para el hack, [arquitectura-por-capas](arquitectura-por-capas.md) propone respuestas para la proximidad (check-in por QR o código de sala), el conector (prompt para copiar y pegar, MCP y conectores por fuente), el formato del resumen (`Signal` → `Topic`), dónde corre el agente y el escalado a N personas. El transporte entre agentes, la asignación de círculos y la seguridad entre capas no aplican mientras haya solo capa pública. El orden de construcción está en [plan-de-construccion](plan-de-construccion.md).
 
-Notas anteriores, reemplazadas por la arquitectura donde se contradicen: [modelo-tecnico](modelo-tecnico.md) (gravedad y nodos de pareja) y [mcp-ingestion](mcp-ingestion.md) (conector MCP). El propósito de la idea, sin detalle técnico, está en [solucion-core](solucion-core.md).
+Notas anteriores, reemplazadas por la arquitectura donde se contradicen: [modelo-tecnico](archivo/modelo-tecnico.md) (gravedad y nodos de pareja) y [mcp-ingestion](archivo/mcp-ingestion.md) (conector MCP). El propósito de la idea, sin detalle técnico, está en [solucion-core](solucion-core.md).
 
 ## Alcance para el hack
 
@@ -142,7 +142,7 @@ Notas anteriores, reemplazadas por la arquitectura donde se contradicen: [modelo
 
 ## Ejemplo: la animación
 
-Recurso: [master-idea-animacion.html](master-idea-animacion.html), animación HTML de ~80 s con controles de reproducción. Personas, gustos y lugares **ficticios**.
+Recurso: [master-idea-animacion.html](archivo/master-idea-animacion.html), animación HTML de ~80 s con controles de reproducción. Personas, gustos y lugares **ficticios**.
 
 > **Desactualizada respecto de este documento:** muestra solo coincidencias y dos capas (privada y pública). No muestra complementos, aspiraciones, oportunidades, capas por círculo, datos peer-to-peer ni el onboarding.
 
