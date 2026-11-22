@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { PublicProjection, PublicTopic, Source } from "@/lib/types";
-import { isSensitive } from "./node";
+import { isPublished } from "./node";
 import { type MatchItem, matchTopics } from "./matches";
 import type { PhoneState } from "./store";
 
@@ -124,7 +124,7 @@ export function useEncounters(): Encounter[] | undefined {
 /** What you want to connect on. By default, everything you made public. */
 export function myInterests(s: PhoneState): PublicTopic[] {
   return (s.node?.topics ?? [])
-    .filter((t) => t.public && !isSensitive(t))
+    .filter((t) => isPublished(t))
     .map(({ id, name, kind, depth, sources }) => ({ id, name, kind, depth, sources }));
 }
 

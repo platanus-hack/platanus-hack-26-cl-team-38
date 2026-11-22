@@ -8,7 +8,7 @@ import { Icon } from "./icons";
 import { AffinityGraph } from "./affinity-graph";
 import { MatchGraph } from "./match-graph";
 import { COPY } from "../_lib/copy";
-import { isSensitive } from "../_lib/node";
+import { isPublished } from "../_lib/node";
 import { affinities, byTopic, cap, clampRadius, coincidences, useEncounters } from "../_lib/people";
 import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 
@@ -48,7 +48,7 @@ function nodeScene(phase: Phase, s: PhoneState) {
     const list = (s.node?.topics ?? []).slice(0, 14);
     list.forEach((t, i) => {
       const k = i % 2 ? 0.74 : 1;
-      const shared = t.public && !isSensitive(t);
+      const shared = isPublished(t);
       E[`t:${t.id}`] = {
         kind: "chip",
         cls: shared ? "" : "off",
@@ -72,7 +72,7 @@ export function GraphStage() {
   const coins = encounters ? coincidences(s, encounters) : [];
   const groups = byTopic(coins);
   const topics = s.node?.topics ?? [];
-  const shared = topics.filter((t) => t.public && !isSensitive(t)).length;
+  const shared = topics.filter((t) => isPublished(t)).length;
   const n = connectedSources(s).length;
   const selected = groups.find((g) => g.topic === s.focus.topic);
 

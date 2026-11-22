@@ -5,9 +5,6 @@ import { Onboarding, type TeamProfile } from "./onboarding";
 
 export const metadata: Metadata = { title: "Bienvenida · Minga" };
 
-// The same prompt the team uses for the seed (A1): one source of truth.
-const PROFILE_PROMPT = readFileSync(path.join(process.cwd(), "seed/prompt-perfil.md"), "utf8").trim();
-
 // Teammates' seed profiles (seed/team/*.json), offered as ready-made profiles for the demo.
 const TEAM: TeamProfile[] = readdirSync(path.join(process.cwd(), "seed/team"))
   .filter((f) => f.endsWith(".json"))
@@ -18,5 +15,5 @@ const TEAM: TeamProfile[] = readdirSync(path.join(process.cwd(), "seed/team"))
   });
 
 export default function BienvenidaPage() {
-  return <Onboarding prompt={PROFILE_PROMPT} team={TEAM} />;
+  return <Onboarding team={TEAM} />;
 }

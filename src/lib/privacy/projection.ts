@@ -4,7 +4,8 @@ import { fingerprint } from "./taxonomy";
 
 export type WithheldReason = "no_publicado" | "sin_revisar" | "revision_vencida" | "sin_decision" | "sensible";
 
-function withheld(topic: Topic): WithheldReason | null {
+// Why a topic stays out of the projection, or null when it would be published.
+export function withheld(topic: Topic): WithheldReason | null {
   if (!topic.public) return "no_publicado";
   if (!topic.privacy) return "sin_revisar";
   if (topic.privacy.checkedFor !== fingerprint(topic)) return "revision_vencida";
