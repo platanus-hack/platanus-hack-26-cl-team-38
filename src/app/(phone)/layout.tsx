@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { ConnectorInbox } from "./_components/connector-inbox";
 import { DesktopShell } from "./_components/desktop-shell";
 import { IconSprite } from "./_components/icons";
 import { COPY } from "./_lib/copy";
@@ -20,6 +21,7 @@ export default function PhoneLayout({ children }: { children: ReactNode }) {
   return (
     <div className="nodo">
       <IconSprite />
+      <ConnectorInbox />
       <DesktopShell>{children}</DesktopShell>
     </div>
   );
