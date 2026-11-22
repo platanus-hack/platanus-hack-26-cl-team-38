@@ -130,7 +130,11 @@ describe("deliberación", () => {
     expect(plan.status).toBe("decidido");
     expect(plan.versions.at(-1)).toMatchObject({ version: 6, decidedBy: "orquestador", content: { resumen: "Se hace el sábado", desacuerdos: [{ personId: "beto", tema: "fecha", detalle: "Pedía domingo" }] } });
     expect(plan.versions.slice(0, 5).every((v) => v.decidedBy === null && v.content.desacuerdos.length === 0)).toBe(true);
-    expect(viewPlan(plan, "yo")).toMatchObject({ round: 5, maxRounds: 5, plan: { version: 6, decidedBy: "orquestador" } });
+    const view = viewPlan(plan, "yo")!;
+    expect(view).toMatchObject({ round: 5, maxRounds: 5, plan: { version: 6, decidedBy: "orquestador" } });
+    // Each orchestrator message carries the version it published, so the thread shows it in place.
+    expect(view.messages.filter((m) => m.agent === "orquestador").map((m) => [m.proposal?.version, m.proposal?.final])).toEqual([[1, false], [2, false], [3, false], [4, false], [5, false], [6, true]]);
+    expect(view.messages.at(-1)!.proposal!.content.resumen).toBe("Se hace el sábado");
   });
 
   it("un aporte cita una línea que el agente leyó, y el contacto solo se le nombra a su conexión", async () => {

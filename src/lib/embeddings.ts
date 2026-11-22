@@ -8,14 +8,16 @@ export const EMBEDDING_MODEL = "Xenova/paraphrase-multilingual-MiniLM-L12-v2";
 export const EMBEDDING_DTYPE = "q8";
 export const EMBEDDING_DIM = 384;
 
-let extractor: Promise<FeatureExtractionPipeline> | undefined;
+// On globalThis: instrumentation.ts warms the model from its own bundle, and a second copy of
+// ~710 MB would not fit in the instance.
+const shared = globalThis as { embeddingExtractor?: Promise<FeatureExtractionPipeline> };
 
 function getExtractor(): Promise<FeatureExtractionPipeline> {
-  extractor ??= import("@huggingface/transformers").then(
+  shared.embeddingExtractor ??= import("@huggingface/transformers").then(
     ({ pipeline }) =>
       pipeline("feature-extraction", EMBEDDING_MODEL, { dtype: EMBEDDING_DTYPE }) as Promise<FeatureExtractionPipeline>,
   );
-  return extractor;
+  return shared.embeddingExtractor;
 }
 
 export async function embed(texts: string[]): Promise<number[][]> {

@@ -19,14 +19,14 @@ export function going(plan: PlanView): string[] {
 
 /**
  * The plan with only its first `shown` messages. Until the last one is out it still reads as
- * deliberating, and no proposal shows before the orchestrator's first message does.
+ * deliberating, and the plan in force is the last proposal already shown, not the newest stored.
  */
 export function paced(raw: PlanView, shown: number): PlanView {
   if (shown >= raw.messages.length) return raw;
   const messages = raw.messages.slice(0, shown);
-  const proposed = messages.some((m) => m.agent === "orquestador");
+  const proposal = messages.findLast((m) => m.proposal)?.proposal;
   const round = messages.reduce((max, m) => Math.max(max, m.round), 0);
-  return { ...raw, status: "deliberando", round, messages, plan: proposed && raw.plan ? { ...raw.plan, decidedBy: null } : null };
+  return { ...raw, status: "deliberando", round, messages, plan: proposal ? { version: proposal.version, content: proposal.content, decidedBy: null } : null };
 }
 
 export type NetStatus = "esperando" | "va" | "no_va";
