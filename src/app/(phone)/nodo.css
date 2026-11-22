@@ -64,6 +64,7 @@
     radial-gradient(45% 55% at 10% 90%, rgba(43, 212, 164, 0.2), transparent 70%),
     radial-gradient(80% 70% at 45% 40%, #d6d0c5 0%, #c7c0b4 60%, #bbb4a8 100%);
 
+  min-height: 100vh;
   min-height: 100dvh;
   font-family: var(--sans);
   font-size: 16px;
@@ -73,10 +74,14 @@
   background: var(--paper);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  touch-action: manipulation;
 
   .app {
     position: relative;
     max-width: 440px;
+    min-height: 100vh;
     min-height: 100dvh;
     margin: 0 auto;
     background: var(--paper);
@@ -526,6 +531,7 @@
     padding: 0 24px;
     font-size: 13px;
     color: var(--mute);
+    text-wrap: balance;
   }
   .near-wrap {
     padding: 0 24px 20px;
@@ -561,6 +567,9 @@
     margin: 0 -24px;
     padding: 8px 24px 4px;
     scrollbar-width: none;
+    /* the last face fades out at the edge of the screen instead of being cut */
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
   }
   .near::-webkit-scrollbar {
     display: none;
@@ -692,6 +701,22 @@
     width: 22px;
     height: 22px;
   }
+  /* "Conversaciones" is the longest label: it shrinks a little on narrow phones before it would cut */
+  .tb span {
+    max-width: 100%;
+    padding: 0 2px;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: clamp(9px, 2.8vw, 10.5px);
+  }
+  @media (max-width: 359px) {
+    .tabbar {
+      width: calc(100% - 24px);
+      padding: 4px;
+      gap: 4px;
+    }
+  }
   .tb.cur {
     background: var(--on-slate);
     color: var(--slate);
@@ -713,6 +738,7 @@
   .graph-screen {
     position: relative;
     flex: 1;
+    min-height: 100vh;
     min-height: 100dvh;
     background: var(--slate);
     color: var(--on-slate);
@@ -1109,6 +1135,8 @@
   margin: auto;
   max-width: 100%;
   max-height: 100%;
+  /* so a chip can measure the graph's width (cqw) and stay inside it */
+  container-type: inline-size;
   --g-ink: var(--on-slate);
   --g-mute: var(--on-slate-mute);
   --g-halo: rgba(44, 52, 55, 0.85);
@@ -1156,6 +1184,9 @@
 .nodo .gchip {
   position: absolute;
   translate: -50% -50%;
+  /* centered on its point, but pushed back in when a long label would cross the edge of a
+     narrow phone (--x is the point, 0 to 1 across the graph) */
+  translate: clamp(calc(8px - var(--x, 0.5) * 100cqw), -50%, calc((1 - var(--x, 0.5)) * 100cqw - 8px - 100%)) -50%;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1335,6 +1366,44 @@
 @media (min-width: 1024px) {
   .nodo .shell .stage {
     display: flex;
+  }
+}
+
+/* Behind the app. Browsers paint this color under their own bars (Safari 26 floats its toolbar
+   over the page), in the overscroll bounce and around the notch: paper by default, slate where
+   the screen ends in slate (Inicio) or is all slate (the graphs). */
+html:has(.nodo .app),
+html:has(.nodo .app) body {
+  background: #e7e1d7;
+}
+html:has(.nodo .slate),
+html:has(.nodo .slate) body,
+html:has(.nodo .graph-screen),
+html:has(.nodo .graph-screen) body {
+  background: #1f3138;
+}
+/* Safari takes the color of its top bar from a fixed element at the top edge, if there is one */
+.nodo .app::before {
+  content: "";
+  position: fixed;
+  z-index: 30;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: max(1px, env(safe-area-inset-top, 0px));
+  background: var(--paper);
+  pointer-events: none;
+}
+.nodo .app:has(> .graph-screen)::before {
+  background: var(--slate);
+}
+@media (min-width: 1024px) {
+  html:has(.nodo .app),
+  html:has(.nodo .app) body {
+    background: #c7c0b4;
+  }
+  .nodo .app::before {
+    display: none;
   }
 }
 
