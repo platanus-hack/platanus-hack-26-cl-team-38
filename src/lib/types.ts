@@ -248,6 +248,8 @@ export const PlanContentSchema = z.object({
   abiertos: z.array(PlanLine),
   // Who did not get what they asked for. Only a decided plan has them.
   desacuerdos: z.array(z.object({ personId: z.string().min(1), tema: z.string().min(1).max(80), detalle: PlanLine }).strict()),
+  // What the orchestrator found on the web, with where. Only when PLANS_WEB_SEARCH is on.
+  fuentes: z.array(z.object({ dato: PlanLine, url: z.string().url().max(500) }).strict()).optional(),
 }).strict();
 
 // Something an agent brought to the table, citing the line it comes from. `contactId` is who of

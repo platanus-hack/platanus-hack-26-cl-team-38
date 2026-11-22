@@ -51,6 +51,26 @@ function fakeAgents(script: Script = {}) {
 const kinds = (plan: Awaited<ReturnType<typeof loadPlan>>) => plan!.messages.map(({ round, message }) => `${round}:${message.agent}${"personId" in message && message.personId ? `:${message.personId}` : ""}`);
 
 describe("deliberación", () => {
+  it("lo que el orquestador trae de internet queda con su dirección, y lo que no es una página se descarta", async () => {
+    const id = await newPlan();
+    const { agents, seen } = fakeAgents({
+      propose: () =>
+        proposal({
+          fuentes: [
+            { dato: "La terraza de la viña abre los sábados desde las 12:00", url: "https://vina.example.cl/terraza" },
+            { dato: "Un dato sin página", url: "no es una dirección" },
+          ],
+          decisiones: [{ tema: "quiénes", valor: "M1, M2 y M3", porque: "" }],
+        }),
+    });
+    await deliberate(id, { db, agents, embed });
+    const plan = (await loadPlan(db, id))!;
+    expect(plan.versions[0].content.fuentes).toEqual([{ dato: "La terraza de la viña abre los sábados desde las 12:00", url: "https://vina.example.cl/terraza" }]);
+    expect(plan.versions[0].content.decisiones[0].valor).toBe("Oscar, Ana y Beto");
+    // The members read it with the proposal.
+    expect(seen.respond[0].proposal).toContain("En internet: La terraza de la viña abre los sábados desde las 12:00 (https://vina.example.cl/terraza)");
+  });
+
   it("cierra por consenso cuando los cuatro aceptan", async () => {
     const id = await newPlan();
     const { agents, seen } = fakeAgents();
