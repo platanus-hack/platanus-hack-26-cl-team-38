@@ -1,6 +1,6 @@
-import type { Coincidence } from "./people";
-import type { Initiative } from "./store";
-import { cap } from "./people";
+import { slug } from "./node";
+import { byTopic, cap, type Coincidence, coincidences, DEMO, type Encounter, RANGE } from "./people";
+import type { Initiative, PhoneState } from "./store";
 
 // An Iniciativa is the only kind of Chat: what your Agente said to the Agentes of the people you
 // invited, even when it is just one person. Agentes only talk about public topics. Demo mode
@@ -98,4 +98,30 @@ export function buildInitiative(myName: string, init: Initiative, contacts: Coin
 
   const messages = stamp(lines, new Date(init.at).getTime(), init.id);
   return { id: init.id, theme, members: people, at: messages[messages.length - 1].at, messages };
+}
+
+const EXAMPLES = 3;
+
+/**
+ * Your Iniciativas on this phone. In demo mode your Agente also starts one around each topic you
+ * share with two or more people near you, so Chats shows how an Iniciativa reads before you make
+ * your own.
+ */
+export function localInitiatives(s: PhoneState, encounters: Encounter[]): Initiative[] {
+  const mine = s.initiatives ?? [];
+  if (!DEMO) return mine;
+  const examples = byTopic(coincidences({ ...s, radiusM: RANGE.max }, encounters))
+    .filter((g) => g.people.length >= 2)
+    .slice(0, EXAMPLES)
+    .map((g): Initiative => {
+      const people = g.people.slice(0, 5);
+      return {
+        id: `i-tema-${slug(g.topic)}`,
+        intent: `Juntarse por ${cap(g.topic)}`,
+        members: people.map((p) => p.person.personId),
+        restrictions: [],
+        at: new Date(Math.max(...people.map((p) => new Date(p.at).getTime()))).toISOString(),
+      };
+    });
+  return [...mine, ...examples];
 }

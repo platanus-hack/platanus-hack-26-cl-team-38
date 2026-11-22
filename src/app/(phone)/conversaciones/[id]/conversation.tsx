@@ -5,7 +5,7 @@ import { Avatar } from "../../_components/avatar";
 import { Splash, TabBar, useOnboardedPhone } from "../../_components/chrome";
 import { Icon } from "../../_components/icons";
 import { LargeTitle, Mono } from "../../_components/ui";
-import { buildInitiative } from "../../_lib/conversations";
+import { buildInitiative, localInitiatives } from "../../_lib/conversations";
 import { COPY } from "../../_lib/copy";
 import { affinities, DEMO, useEncounters } from "../../_lib/people";
 import { isPlanId } from "../../_lib/plans";
@@ -33,7 +33,7 @@ export function Conversation({ params }: { params: Promise<{ id: string }> }) {
   if (s && !DEMO && isPlanId(id)) return <PlanConversation id={id} me={s.personId} />;
   if (!s || !encounters) return <Splash />;
 
-  const init = s.initiatives?.find((i) => i.id === id);
+  const init = localInitiatives(s, encounters).find((i) => i.id === id);
   const cv = init && buildInitiative(s.displayName, init, affinities(s, encounters));
   const names = Object.fromEntries((cv?.members ?? []).map((m) => [m.person.personId, m.person.displayName]));
   const messages = cv ? [...cv.messages, ...(s.replies?.[cv.id] ?? [])] : [];

@@ -5,7 +5,7 @@ import { Avatar } from "../_components/avatar";
 import { Splash, TabBar, useOnboardedPhone } from "../_components/chrome";
 import { Requests } from "../_components/requests";
 import { LargeTitle, ListRow } from "../_components/ui";
-import { buildInitiative, type Conversation } from "../_lib/conversations";
+import { buildInitiative, type Conversation, localInitiatives } from "../_lib/conversations";
 import { COPY } from "../_lib/copy";
 import { affinities, cap, DEMO, relTime, useEncounters } from "../_lib/people";
 import { usePlans } from "../_lib/plans";
@@ -70,7 +70,7 @@ export default function ConversacionesPage() {
 
   // Demo mode keeps your Iniciativas on the phone; with a backend they are plans.
   const contacts = encounters ? affinities(s, encounters) : [];
-  const mine = DEMO ? (s.initiatives ?? []).map((i) => buildInitiative(s.displayName, i, contacts)) : [];
+  const mine = DEMO && encounters ? localInitiatives(s, encounters).map((i) => buildInitiative(s.displayName, i, contacts)) : [];
 
   return (
     <div className="app with-tabs">
