@@ -314,6 +314,8 @@ export const PlanMessageViewSchema = z.object({
   // Only on an opening: whether the person can be part of the plan.
   participa: z.boolean().optional(),
   aportes: z.array(PlanAporteViewSchema),
+  // Only on the orchestrator's: the version it published, so the thread shows each proposal where it was made.
+  proposal: z.object({ version: z.number().int().positive(), final: z.boolean(), content: PlanContentSchema }).strict().optional(),
   createdAt: z.string(),
 }).strict();
 

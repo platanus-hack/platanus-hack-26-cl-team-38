@@ -59,6 +59,13 @@ function sourcesOf(plan: PlanSnapshot): Sources {
   return sources;
 }
 
+function proposalOf(message: PlanMessage, plan: PlanSnapshot): Pick<PlanMessageView, "proposal"> {
+  if (message.agent !== "orquestador") return {};
+  const { version, final } = message.content;
+  const content = plan.versions.find((v) => v.version === version)?.content;
+  return content ? { proposal: { version, final, content } } : {};
+}
+
 function toView(stored: StoredMessage, plan: PlanSnapshot, names: Names, reader: string | null, contacts: Names, sources: Sources = new Map()): PlanMessageView | null {
   const { message } = stored;
   const text = textOf(message, plan, names);
@@ -81,6 +88,7 @@ function toView(stored: StoredMessage, plan: PlanSnapshot, names: Names, reader:
             ...(a.contactId && sources.get(message.personId)?.has(a.contactId) ? { fuente: sources.get(message.personId)!.get(a.contactId) } : {}),
           }))
         : [],
+    ...proposalOf(message, plan),
     createdAt: stored.createdAt,
   };
 }

@@ -26,7 +26,7 @@ const plan: PlanView = {
     message(2, 0, { personId: "ana", participa: true, aportes: [red(1), red(9), { texto: "Algo suyo", origen: "propio" }] }),
     message(3, 0, { personId: "beto", participa: false }),
     message(4, 0, { personId: "carla" }),
-    message(5, 1, { agent: "orquestador" }),
+    message(5, 1, { agent: "orquestador", proposal: { version: 1, final: false, content } }),
     message(6, 1, { personId: "ana", decision: "accept", aportes: [red(1)] }),
     message(7, 1, { personId: "carla", decision: "adjust" }),
   ],
