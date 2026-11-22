@@ -1,7 +1,8 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import type { PersonalNode, Signal, Source, Topic } from "@/lib/types";
+import { setShared } from "@/lib/node/node";
+import type { PersonalNode, Signal, Source, SynthesisSignal, Topic } from "@/lib/types";
 
 // Phone-local state. Stand-in for front B's IndexedDB store: same PersonalNode contract, kept in
 // localStorage so the flow works today.
@@ -10,6 +11,10 @@ export type OutboxEntry = { at: string; to: string; what: string };
 
 export type PhoneState = {
   personId: string;
+  /** Proves to the backend that this phone is `personId` (sent as `Authorization: Bearer`). Never shown. */
+  deviceKey: string;
+  /** The room you checked in to. Proximity and the backend routes need it. */
+  room: { code: string; id: string; at: string } | null;
   displayName: string;
   /** Owner-only: evidence included. Never sent anywhere. */
   signals: Signal[];
@@ -33,17 +38,35 @@ export type PhoneState = {
 };
 
 const KEY = "nodo.phone.v1";
+// One identity for the whole app: /onboarding and /mi-nodo read team38.person.v1, /grafo and
+// /explorar open as team38.me. Minga owns the personId and mirrors it there.
+const PERSON_KEY = "team38.person.v1";
+const ME_KEY = "team38.me";
 
-function randomId(): string {
+function randomHex(bytes: number): string {
   // crypto.randomUUID needs a secure context; phones on the LAN over http don't have one.
-  const bytes = new Uint8Array(6);
-  crypto.getRandomValues(bytes);
-  return `p-${[...bytes].map((b) => b.toString(16).padStart(2, "0")).join("")}`;
+  const buffer = new Uint8Array(bytes);
+  crypto.getRandomValues(buffer);
+  return [...buffer].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function fresh(): PhoneState {
+/** Someone who started in /onboarding keeps their personId here. */
+function knownPersonId(): string | undefined {
+  try {
+    const raw = localStorage.getItem(PERSON_KEY);
+    const id = raw ? (JSON.parse(raw) as { personId?: unknown }).personId : undefined;
+    return typeof id === "string" && id ? id : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function fresh(personId = `p-${randomHex(6)}`): PhoneState {
   return {
-    personId: randomId(),
+    personId,
+    // 32 random bytes: far above the backend's 32-character minimum, and not guessable.
+    deviceKey: randomHex(32),
+    room: null,
     displayName: "",
     signals: [],
     node: null,
@@ -62,14 +85,23 @@ function fresh(): PhoneState {
 let state: PhoneState | undefined;
 const listeners = new Set<() => void>();
 
+// A node built before the privacy filter has topics without a verdict, which can never be
+// published: those phones go back through the onboarding, keeping their signals.
+function migrate(s: PhoneState): PhoneState {
+  if (!s.node || s.node.topics.every((t) => t.privacy)) return s;
+  return { ...s, node: null, onboarded: false, room: null };
+}
+
 function load(): PhoneState {
+  let next: PhoneState | undefined;
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return { ...fresh(), ...(JSON.parse(raw) as Partial<PhoneState>) };
+    // Older states lack deviceKey and room: fresh() fills them, and persisting keeps them.
+    if (raw) next = migrate({ ...fresh(), ...(JSON.parse(raw) as Partial<PhoneState>) });
   } catch {
     // Private mode or corrupted data: start over.
   }
-  const next = fresh();
+  next ??= fresh(knownPersonId());
   persist(next);
   return next;
 }
@@ -77,6 +109,8 @@ function load(): PhoneState {
 function persist(next: PhoneState) {
   try {
     localStorage.setItem(KEY, JSON.stringify(next));
+    localStorage.setItem(PERSON_KEY, JSON.stringify({ personId: next.personId, displayName: next.displayName }));
+    localStorage.setItem(ME_KEY, next.personId);
   } catch {
     // Storage full or blocked: the session still works in memory.
   }
@@ -100,9 +134,25 @@ export function resetPhone() {
   listeners.forEach((l) => l());
 }
 
-/** An edit to a topic (depth, public). Manual edits survive a resync: see buildNode. */
-export function setTopic(id: string, patch: Partial<Topic>) {
-  setPhone((p) => (p.node ? { node: { ...p.node, topics: p.node.topics.map((t) => (t.id === id ? { ...t, ...patch } : t)) } } : {}));
+/** Your depth for a topic. Survives a resync: see useNodeSync. */
+export function setDepth(id: string, depth: Topic["depth"]) {
+  setPhone((p) => (p.node ? { node: { ...p.node, topics: p.node.topics.map((t) => (t.id === id ? { ...t, depth } : t)) } } : {}));
+}
+
+/** Public or private, decided by you: only a topic you decided on can be published. */
+export function setPublic(id: string, shared: boolean) {
+  setPhone((p) => (p.node ? { node: setShared(p.node, id, shared) } : {}));
+}
+
+const signalKey = (x: Pick<Signal, "source" | "kind" | "label">) => `${x.source}:${x.kind}:${x.label}`;
+
+/** Signals an assistant delivered (already through the privacy filter), merged with what you had. */
+export function mergeSignals(arrived: SynthesisSignal[]) {
+  setPhone((p) => {
+    const merged = new Map(p.signals.map((x) => [signalKey(x), x]));
+    for (const x of arrived) merged.set(signalKey(x), { ...x, evidence: "" });
+    return { signals: [...merged.values()] };
+  });
 }
 
 export function logOutbox(to: string, what: string) {

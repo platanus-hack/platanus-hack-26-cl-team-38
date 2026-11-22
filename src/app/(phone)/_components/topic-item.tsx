@@ -4,15 +4,17 @@ import type { Topic } from "@/lib/types";
 import { BrandLogo, SOURCE_META } from "./brand";
 import { Icon } from "./icons";
 import { Toggle } from "./ui";
-import { isSensitive, KIND_LABEL } from "../_lib/node";
+import { scheduleCheckIn } from "../_lib/api";
+import { COPY } from "../_lib/copy";
+import { isLocked, KIND_LABEL } from "../_lib/node";
 import { cap } from "../_lib/people";
-import { setTopic } from "../_lib/store";
+import { setDepth, setPublic } from "../_lib/store";
 
 const DOTS = ["", "●○○", "●●○", "●●●"];
 
 /** One topic of your Nodo: its Fuente, what it is, how deep, and the eye that makes it public. */
 export function TopicItem({ topic, editDepth }: { topic: Topic; editDepth?: boolean }) {
-  const locked = isSensitive(topic);
+  const locked = isLocked(topic);
   const meta = `${KIND_LABEL[topic.kind]} · ${topic.sources.map((s) => SOURCE_META[s].label).join(", ")}`;
   return (
     <div className="row">
@@ -25,6 +27,7 @@ export function TopicItem({ topic, editDepth }: { topic: Topic; editDepth?: bool
         </span>
         <span className="sub" style={{ display: "block" }}>
           {meta}
+          {topic.privacy?.level === "personal" && <span className="warn"> · {COPY.bienvenida.personal}</span>}
           {editDepth && (
             <>
               {" · "}
@@ -32,7 +35,7 @@ export function TopicItem({ topic, editDepth }: { topic: Topic; editDepth?: bool
                 type="button"
                 className="mono"
                 aria-label={`Profundidad ${topic.depth} de 3. Toca para cambiar`}
-                onClick={() => setTopic(topic.id, { depth: ((topic.depth % 3) + 1) as 1 | 2 | 3 })}
+                onClick={() => (setDepth(topic.id, ((topic.depth % 3) + 1) as 1 | 2 | 3), scheduleCheckIn())}
               >
                 {DOTS[topic.depth]}
               </button>
@@ -45,7 +48,7 @@ export function TopicItem({ topic, editDepth }: { topic: Topic; editDepth?: bool
           <Icon name="lock" />
         </span>
       ) : (
-        <Toggle on={topic.public} label={topic.name} onChange={(v) => setTopic(topic.id, { public: v })} />
+        <Toggle on={topic.public} label={topic.name} onChange={(v) => (setPublic(topic.id, v), scheduleCheckIn())} />
       )}
     </div>
   );
