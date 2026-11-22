@@ -7,7 +7,7 @@ import { Avatar } from "../_components/avatar";
 import { Sheet, Splash, TabBar, useOnboardedPhone } from "../_components/chrome";
 import { Icon } from "../_components/icons";
 import { setFocus } from "../_components/match-graph";
-import { Mono } from "../_components/ui";
+import { BackLink, Mono } from "../_components/ui";
 import { COPY } from "../_lib/copy";
 import { discover } from "../_lib/insight";
 import { matchPhrase } from "../_lib/matches";
@@ -34,9 +34,7 @@ export default function AfinidadesPage() {
       <div className="graph-screen">
         <div className="head" style={{ pointerEvents: "auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Link href="/" aria-label="Volver" style={{ display: "inline-flex", transform: "scaleX(-1)" }}>
-              <Icon name="arrow" />
-            </Link>
+            <BackLink fallback="/" style={{ display: "inline-flex", transform: "scaleX(-1)", padding: 8, margin: -8 }} />
             <h1 className="t-title">{C.title}</h1>
           </div>
           <p className="desc">{C.desc}</p>
@@ -65,7 +63,7 @@ export default function AfinidadesPage() {
         {encounters === undefined ? (
           <div className="empty">{COPY.coincidencias.loading}</div>
         ) : (
-          <div className="gwrap" style={{ inset: "212px 0 104px" }}>
+          <div className="gwrap">
             <AffinityGraph W={360} H={460} me={{ id: s.personId }} contacts={contacts} focus={s.focus.person} match={found?.ids ?? null} />
           </div>
         )}

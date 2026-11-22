@@ -14,6 +14,7 @@ import { COPY } from "../_lib/copy";
 import { useLocation } from "../_lib/location";
 import { DEMO, myInterests } from "../_lib/people";
 import { connectedSources, resetPhone, setPhone, signOut } from "../_lib/store";
+import { toast } from "../_lib/toast";
 
 const C = COPY.perfil;
 const time = new Intl.DateTimeFormat("es-CL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" });
@@ -28,7 +29,10 @@ export default function PerfilPage() {
   if (!s) return <Splash />;
   const interests = myInterests(s);
   const privacy = s.privacy ?? { visibility: "conocidos" as const, discoverable: true, showPlace: true };
-  const setPrivacy = (patch: Partial<typeof privacy>) => setPhone({ privacy: { ...privacy, ...patch } });
+  const setPrivacy = (patch: Partial<typeof privacy>) => {
+    setPhone({ privacy: { ...privacy, ...patch } });
+    toast(C.saved);
+  };
   const topics = s.node?.topics ?? [];
   const kept = topics.length - interests.length;
   // "Lo recomendado": what the privacy filter found safe and you haven't decided on yet.

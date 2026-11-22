@@ -302,6 +302,15 @@
   .row .sub.wrap {
     white-space: normal;
   }
+  /* a topic and its warning are read in full: up to two lines each */
+  .topic-row .title,
+  .topic-row .sub {
+    white-space: normal;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
   .row .data {
     flex: none;
     color: var(--mute);
@@ -342,6 +351,28 @@
     font-size: 13px;
     font-weight: 400;
     color: var(--mute);
+  }
+  /* small controls get a 44px touch area around them, without changing how they look */
+  .sec .more,
+  .q,
+  .more-btn,
+  .link,
+  .switch,
+  .init-back {
+    position: relative;
+  }
+  .sec .more::before,
+  .q::before,
+  .more-btn::before,
+  .link::before,
+  .switch::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    translate: -50% -50%;
   }
 
   /* the slate panel: rounded on top, it runs to the bottom of the screen */
@@ -507,6 +538,31 @@
     text-transform: none;
     letter-spacing: 0;
     font-weight: 400;
+  }
+  /* an empty screen says why, and offers the way out */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+    padding: 24px 0;
+  }
+  .empty-state p {
+    margin: 0;
+    max-width: 280px;
+  }
+  .empty-state .btn {
+    width: auto;
+    padding: 0 24px;
+    margin-top: 8px;
+  }
+  .graph-screen .empty {
+    pointer-events: auto;
+  }
+  .btn.light {
+    background: var(--on-slate);
+    color: var(--slate);
   }
   .btn.danger {
     background: #a3322e;
@@ -682,11 +738,12 @@
     width: 100%;
     max-width: 440px;
     height: 52%;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     background: var(--paper);
     border-radius: 28px 28px 0 0;
     box-shadow: 0 -16px 48px rgba(30, 36, 38, 0.2);
-    padding: 8px 24px calc(24px + env(safe-area-inset-bottom, 0px));
     box-sizing: border-box;
     animation: nodo-up 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
     transition: height 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -698,12 +755,49 @@
     height: auto;
     max-height: 88%;
   }
+  /* the top of the sheet stays put: the handle, and the close button in the corner */
+  .sheet-top {
+    position: relative;
+    flex: none;
+    height: 52px;
+    /* the handle: pull it down to close */
+    touch-action: none;
+    cursor: grab;
+  }
   .sheet .grab {
     width: 40px;
     height: 4px;
     border-radius: 2px;
     background: rgba(12, 27, 33, 0.16);
-    margin: 0 auto 16px;
+    margin: 8px auto 0;
+  }
+  .sheet-x {
+    position: absolute;
+    top: 6px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(27, 35, 38, 0.07);
+    color: var(--ink);
+    transition: background 0.2s;
+  }
+  .sheet-x:hover {
+    background: rgba(27, 35, 38, 0.14);
+  }
+  .sheet-x .ic {
+    width: 18px;
+    height: 18px;
+  }
+  .sheet-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 24px calc(24px + env(safe-area-inset-bottom, 0px));
   }
   .sheet .t-title {
     margin-bottom: 8px;
@@ -773,20 +867,37 @@
     width: 22px;
     height: 22px;
   }
-  /* "Conversaciones" is the longest label: it shrinks a little on narrow phones before it would cut */
+  /* Labels never go below 11px: the bar tightens on narrow phones and, under 360px, shows only
+     the icons (the label stays for screen readers). */
   .tb span {
     max-width: 100%;
     padding: 0 2px;
     box-sizing: border-box;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: clamp(9px, 2.8vw, 10.5px);
+    font-size: 11px;
   }
-  @media (max-width: 359px) {
+  @media (max-width: 399px) {
     .tabbar {
       width: calc(100% - 24px);
       padding: 4px;
       gap: 4px;
+    }
+  }
+  @media (max-width: 359px) {
+    .tb {
+      height: 52px;
+    }
+    .tb span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    .tb .ic {
+      width: 24px;
+      height: 24px;
     }
   }
   .tb.cur {
@@ -807,27 +918,37 @@
   }
 
   /* Coincidencias: the graph is the screen */
+  /* A column: the head takes what it needs and the graph gets the rest, on any screen height */
   .graph-screen {
     position: relative;
     flex: 1;
-    min-height: 100vh;
-    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
     background: var(--slate);
     color: var(--on-slate);
     overflow: hidden;
     --mute: var(--on-slate-mute);
   }
   .graph-screen .head {
-    position: absolute;
+    position: relative;
     z-index: 2;
-    left: 24px;
-    top: calc(16px + env(safe-area-inset-top, 0px));
-    right: 24px;
+    flex: none;
+    margin: calc(16px + env(safe-area-inset-top, 0px)) 24px 0;
     pointer-events: none;
   }
   .graph-screen .gwrap {
-    position: absolute;
-    inset: 104px 0 168px;
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    margin: 8px 0 calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+  /* short screens (small phones, landscape): the description goes, the graph keeps the room */
+  @media (max-height: 640px) {
+    .graph-screen .desc {
+      display: none;
+    }
   }
   .graph-screen .empty {
     position: absolute;
@@ -888,6 +1009,138 @@
     background: var(--slate);
     color: var(--on-slate);
     border-color: var(--slate);
+  }
+  /* what you said yourself, not your Agente */
+  .bubble.yo {
+    align-self: flex-end;
+    background: #fff;
+    border-color: var(--accent);
+  }
+  .bubble.yo .who {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 12px;
+    color: var(--accent);
+  }
+  /* a Conversación ends in what you can do: two quick answers and a line to your Agente */
+  .app:has(.conv-actions) .thread {
+    padding-bottom: calc(220px + env(safe-area-inset-bottom, 0px));
+  }
+  .conv-actions {
+    position: fixed;
+    z-index: 15;
+    left: 50%;
+    translate: -50% 0;
+    bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+    width: calc(100% - 32px);
+    max-width: 408px;
+    padding: 12px;
+    border-radius: 24px;
+    background: rgba(231, 225, 215, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--line);
+    box-sizing: border-box;
+  }
+  .conv-quick {
+    display: flex;
+    gap: 8px;
+  }
+  .conv-quick button {
+    flex: 1;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--slate);
+    color: var(--on-slate);
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .conv-quick button + button {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid rgba(27, 35, 38, 0.2);
+  }
+  .conv-quick .ic {
+    width: 18px;
+    height: 18px;
+  }
+  .conv-say {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 4px 4px 4px 14px;
+    border-radius: 14px;
+    background: #fff;
+    border: 1px solid var(--line);
+  }
+  .conv-say:focus-within {
+    border-color: var(--accent);
+  }
+  .conv-say input {
+    flex: 1;
+    min-width: 0;
+    height: 36px;
+    border: 0;
+    outline: none;
+    background: transparent;
+    font-size: 16px;
+  }
+  .conv-say button {
+    width: 36px;
+    height: 36px;
+    flex: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: #fff;
+    transition: opacity 0.2s;
+  }
+  .conv-say button:disabled {
+    opacity: 0.3;
+  }
+  .conv-say .ic {
+    width: 18px;
+    height: 18px;
+  }
+  /* the short note after an action */
+  .toast-wrap {
+    position: fixed;
+    z-index: 60;
+    left: 0;
+    right: 0;
+    bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+  }
+  /* in a Conversación the note sits above the answers bar */
+  .nodo:has(.conv-actions) .toast-wrap {
+    bottom: calc(236px + env(safe-area-inset-bottom, 0px));
+  }
+  .toast {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: calc(100% - 48px);
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 15px;
+    animation: nodo-toast 2.4s ease both;
+  }
+  .toast .ic {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    color: var(--cercania);
   }
   .bubble + .stamp,
   .stamp {
@@ -1005,7 +1258,7 @@
     height: 6px;
   }
   .face .topic {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--mute);
   }
   .face .av.amigo {
@@ -1112,7 +1365,7 @@
   }
   .how-step {
     display: block;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--accent);
   }
   .how-close {
@@ -1124,6 +1377,16 @@
     color: var(--slate);
     font-weight: 500;
     text-align: center;
+  }
+
+  .near-rows {
+    margin-top: 4px;
+  }
+  .slate .rows .row {
+    border-color: rgba(242, 241, 238, 0.1);
+  }
+  .slate .stack .av {
+    box-shadow: 0 0 0 2px var(--slate);
   }
 
   /* Afinidades: its own card, well apart from the question */
@@ -1226,7 +1489,7 @@
   .ai-prompt .mono {
     display: block;
     margin-bottom: 4px;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--mute);
@@ -1310,7 +1573,7 @@
   }
   .ai-note {
     margin-top: 16px;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--mute);
   }
   .more-btn {
@@ -1473,6 +1736,26 @@
     text-transform: uppercase;
     color: var(--accent);
   }
+  /* short screens: a smaller title and less air, so the list shows more people */
+  @media (max-height: 700px) {
+    .step.init {
+      padding-top: 8px;
+    }
+    .step.init .t-hero {
+      font-size: 26px;
+      margin-bottom: 16px;
+    }
+    .init-intent {
+      margin: 8px 0 4px;
+    }
+    .init-foot {
+      padding-top: 12px;
+      padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+    .init-foot .btn {
+      height: 48px;
+    }
+  }
   .gsearch.light {
     margin-top: 0;
     background: rgba(27, 35, 38, 0.06);
@@ -1592,6 +1875,33 @@
   .switch[aria-checked="true"]::after {
     transform: translateX(20px);
   }
+  /* Coincidencias: the count on the left, the Cercanía switch on the right */
+  .near-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    pointer-events: auto;
+  }
+  .near-row .mono {
+    flex: 1;
+    min-width: 0;
+  }
+  .near-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+    font-size: 13px;
+    color: var(--on-slate);
+    cursor: pointer;
+  }
+  .graph-screen .switch {
+    background: rgba(242, 241, 238, 0.18);
+  }
+  .graph-screen .switch[aria-checked="true"] {
+    background: var(--cercania);
+  }
 
   /* group threads: the other Agentes carry their face */
   .msg {
@@ -1611,7 +1921,7 @@
   }
   .msg .who {
     display: block;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--mute);
     margin-bottom: 2px;
   }
@@ -1739,9 +2049,42 @@
   border-color: rgba(242, 241, 238, 0.5);
   color: var(--g-ink);
 }
+.nodo .gchip-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 .nodo .gchip .faces {
   display: inline-flex;
+  align-items: center;
   margin-left: 2px;
+}
+/* a topic with people: its name, and their faces under it; it floats a little */
+.nodo .gchip.stacked {
+  flex-direction: column;
+  gap: 6px;
+  height: auto;
+  padding: 8px 14px 9px;
+  border-radius: 20px;
+  animation: nodo-float 4.2s ease-in-out var(--d, 0s) infinite;
+}
+.nodo .gchip.stacked .faces {
+  margin-left: 0;
+}
+.nodo .gchip.stacked .faces .av {
+  width: 22px;
+  height: 22px;
+}
+.nodo .gchip .faces .n {
+  margin-left: 6px;
+  font-size: 12px;
+}
+.nodo button.gchip.stacked:hover {
+  background: #36505a;
+}
+/* the open topic glows softly */
+.nodo .gchip.sel {
+  animation: nodo-glow 2.6s ease-in-out infinite;
 }
 .nodo .gchip .faces .av {
   width: 20px;
@@ -1839,7 +2182,9 @@
       display: block;
       align-self: center;
       height: min(844px, calc(100dvh - 64px));
-      aspect-ratio: 414 / 868;
+      /* width from the height, never from the content (a long line used to stretch the phone) */
+      width: calc(min(844px, calc(100dvh - 64px)) * 414 / 868);
+      min-width: 0;
       padding: 12px;
       box-sizing: border-box;
       border-radius: 56px;
@@ -1867,13 +2212,14 @@
       display: none;
     }
     .graph-screen {
-      min-height: 100%;
+      height: 100%;
     }
     .sheet {
       height: 52%;
     }
+    /* in the desktop frame the detail sheet leaves the screen behind it in view */
     .sheet.detail {
-      height: 88%;
+      height: 72%;
     }
     .stage {
       position: relative;
@@ -1892,6 +2238,63 @@
       position: relative;
       flex: 1;
       min-height: 0;
+    }
+    .stage .legend {
+      position: absolute;
+      z-index: 2;
+      top: 24px;
+      left: 28px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--on-slate);
+      pointer-events: none;
+    }
+    .stage .legend li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stage .legend .mute {
+      color: var(--on-slate-mute);
+    }
+    .stage .legend .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid;
+    }
+    .stage .legend .dot.amigo {
+      border-color: var(--amigo);
+    }
+    .stage .legend .dot.conocido {
+      border-color: var(--conocido);
+    }
+    .stage .legend .dot.cercania {
+      border-color: var(--cercania);
+    }
+    .stage .stage-empty {
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+      color: var(--on-slate);
+      pointer-events: none;
+    }
+    .stage .stage-empty p {
+      margin: 0;
+    }
+    .stage .stage-empty .mute {
+      color: var(--on-slate-mute);
+      font-size: 13px;
     }
     .stage .status {
       font-family: var(--mono);
@@ -1967,6 +2370,38 @@ html:has(.nodo .graph-screen) body {
 @keyframes nodo-up {
   from {
     transform: translateY(100%);
+  }
+}
+@keyframes nodo-toast {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  10%,
+  85% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes nodo-float {
+  0%,
+  100% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+@keyframes nodo-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(242, 241, 238, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(242, 241, 238, 0);
   }
 }
 @keyframes nodo-breathe {

@@ -29,6 +29,8 @@ export type PhoneState = {
   outbox: OutboxEntry[];
   /** Coincidences count only within the smaller of your radius and theirs. */
   radiusM: number;
+  /** Coincidencias: only people who were near (within radiusM), or everyone you crossed paths with. */
+  nearOnly: boolean;
   /** Location is opt-in; we keep the place name, never the coordinates. */
   locationOn: boolean;
   place: { label: string; at: string } | null;
@@ -42,6 +44,8 @@ export type PhoneState = {
   affinityQuery: string;
   /** Group Conversaciones you started from Inicio, newest first. */
   initiatives: Initiative[];
+  /** What you said in a Conversación, and your Agente's answer, by conversation id. */
+  replies: Record<string, { id: string; from: string; text: string; at: string }[]>;
 };
 
 const KEY = "nodo.phone.v1";
@@ -81,6 +85,7 @@ function fresh(personId = `p-${randomHex(6)}`): PhoneState {
     intent: "",
     outbox: [],
     radiusM: 25,
+    nearOnly: true,
     locationOn: false,
     place: null,
     focus: { topic: null, person: null },
@@ -88,6 +93,7 @@ function fresh(personId = `p-${randomHex(6)}`): PhoneState {
     relations: {},
     affinityQuery: "",
     initiatives: [],
+    replies: {},
   };
 }
 

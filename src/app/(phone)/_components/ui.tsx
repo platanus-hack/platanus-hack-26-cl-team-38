@@ -1,9 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { type CSSProperties, type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Topic } from "@/lib/types";
 import { Icon } from "./icons";
+
+/** Back arrow: returns to the screen you came from; opened from a link, it goes to `fallback`. */
+export function BackLink({ fallback, className, style }: { fallback: string; className?: string; style?: CSSProperties }) {
+  const router = useRouter();
+  return (
+    <Link
+      href={fallback}
+      className={className}
+      style={style}
+      aria-label="Volver"
+      onClick={(e) => {
+        if (window.history.length > 1) {
+          e.preventDefault();
+          router.back();
+        }
+      }}
+    >
+      <Icon name="arrow" />
+    </Link>
+  );
+}
 
 /** Distances, times and counts. */
 export function Mono({ children, className }: { children: ReactNode; className?: string }) {
@@ -150,9 +172,7 @@ export function LargeTitle({ title, back, right, sub }: { title: string; back?: 
       <div className={`lt-bar${stuck ? " stuck" : ""}`}>
         <span className="slot">
           {back && (
-            <Link href={back} className="back slot" aria-label="Volver">
-              <Icon name="arrow" />
-            </Link>
+            <BackLink fallback={back} className="back slot" />
           )}
         </span>
         <span className="small-title" aria-hidden={!stuck}>
