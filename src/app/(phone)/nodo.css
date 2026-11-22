@@ -1764,16 +1764,54 @@
 .nodo .gbox .ring.cercania {
   stroke: var(--cercania);
 }
+/* each orbit in its relation's color, faint, so the rings read at a glance */
 .nodo .gbox .orbit {
   fill: none;
-  stroke: rgba(242, 241, 238, 0.1);
-  stroke-dasharray: 3 7;
+  stroke: rgba(242, 241, 238, 0.16);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 6;
+  stroke-linecap: round;
 }
+.nodo .gbox .orbit.amigo {
+  fill: rgba(255, 176, 32, 0.05);
+  stroke: rgba(255, 176, 32, 0.45);
+}
+.nodo .gbox .orbit.conocido {
+  stroke: rgba(140, 155, 255, 0.4);
+}
+.nodo .gbox .orbit.cercania {
+  stroke: rgba(43, 212, 164, 0.35);
+}
+/* the name sits on its orbit, with a slate halo that cuts the line */
 .nodo .gbox .orbit-lbl {
-  fill: rgba(242, 241, 238, 0.55);
+  fill: rgba(242, 241, 238, 0.7);
+  stroke: var(--slate);
+  stroke-width: 6px;
+  paint-order: stroke;
   font-size: 11px;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  pointer-events: none;
+}
+.nodo .gbox .orbit-lbl.amigo {
+  fill: var(--amigo);
+}
+.nodo .gbox .orbit-lbl.conocido {
+  fill: var(--conocido);
+}
+.nodo .gbox .orbit-lbl.cercania {
+  fill: var(--cercania);
+}
+/* a solid disc behind each face, so edges never show through the ring */
+.nodo .gbox .disc {
+  fill: var(--slate);
+}
+.nodo .gbox .drag {
+  touch-action: none;
+}
+.nodo .gbox .drag:active {
+  cursor: grabbing;
 }
 .nodo .gchip .lg {
   width: 16px;
