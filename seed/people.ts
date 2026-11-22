@@ -45,7 +45,8 @@ const mut: SeedPerson[] = [
       ["jazz", "le_gusta", 2, ["spotify"]],
     ],
   },
-  // Pure affinity: four people who only share (le_gusta at depth 2 is never aporta or busca).
+  // Pure affinity: four people who only share (le_gusta at depth 2 is never aporta or busca). Elena's
+  // ilustración learner is Nico, outside this group, so the affinity mesa does not overlap hers.
   {
     slug: "diego",
     displayName: "Diego",
@@ -67,7 +68,7 @@ const mut: SeedPerson[] = [
     displayName: "Fernanda",
     topics: [
       ["juegos de mesa", "le_gusta", 2, ["instagram"]],
-      ["ilustración", "quiere_ser", 1, ["claude"]],
+      ["teatro", "le_gusta", 2, ["instagram"]],
     ],
   },
   {
@@ -135,6 +136,7 @@ const mut: SeedPerson[] = [
     displayName: "Nico",
     topics: [
       ["surf", "quiere_ser", 1, ["chatgpt"]],
+      ["ilustración", "quiere_ser", 1, ["claude"]],
       ["podcasts de historia", "le_gusta", 2, ["spotify"]],
     ],
   },
