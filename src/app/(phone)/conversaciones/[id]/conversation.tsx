@@ -12,6 +12,7 @@ import { isPlanId } from "../../_lib/plans";
 import { PlanConversation } from "./plan";
 import { setPhone } from "../../_lib/store";
 import { toast } from "../../_lib/toast";
+import { cx } from "../../_lib/cx";
 
 const time = new Intl.DateTimeFormat("es-CL", { hour: "2-digit", minute: "2-digit" });
 const C = COPY.conversaciones;
@@ -79,7 +80,7 @@ export function Conversation({ params }: { params: Promise<{ id: string }> }) {
                     </div>
                   </div>
                 )}
-                {last && <Mono className={`stamp${mine ? "me" : ""}`}>{time.format(new Date(m.at))}</Mono>}
+                {last && <Mono className={cx("stamp", mine && "me")}>{time.format(new Date(m.at))}</Mono>}
               </div>
             );
           })}

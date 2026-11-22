@@ -6,6 +6,7 @@ import { avatarSvg } from "./avatar";
 import { COPY } from "../_lib/copy";
 import { layout, type NetMember, networkOf, type Point } from "../_lib/plan-network";
 import { usePlan } from "../_lib/plans";
+import { cx } from "../_lib/cx";
 
 // The network of a plan, on slate: who made it in the middle, who is in it around, and behind each
 // one the contacts their Agente can read (dots, never names). A dot runs along a line every time
@@ -116,7 +117,7 @@ export function PlanNetwork({
       : `${C.round} ${plan.round} ${C.of} ${plan.maxRounds}${net.fromNetwork ? ` · ${net.fromNetwork} ${net.fromNetwork === 1 ? C.oneFromNetwork : C.manyFromNetwork}` : ""}`;
 
   return (
-    <div className={`pnet${compact ? "compact" : ""}`}>
+    <div className={cx("pnet", compact && "compact")}>
       <div className="pnet-graph">
         <div className="gbox" style={{ aspectRatio: `${W} / ${H}` }}>
           <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${C.label}: ${status}`}>
@@ -127,7 +128,7 @@ export function PlanNetwork({
                 const asking = net.consulting && m.status === "esperando";
                 const from = at[m.personId].at;
                 return (
-                  <g key={`${m.personId}:${i}`} className={`contact${lit ? "lit" : ""}`}>
+                  <g key={`${m.personId}:${i}`} className={cx("contact", lit && "lit")}>
                     <line x1={from.x} y1={from.y} x2={dot.x} y2={dot.y} />
                     {asking && (
                       <circle r={2.5} className="ask">
@@ -152,7 +153,7 @@ export function PlanNetwork({
                 .map((m) => (
                   <line
                     key={m.personId}
-                    className={`edge${m.status === "va" ? "strong" : ""}`}
+                    className={cx("edge", m.status === "va" && "strong")}
                     x1={at[owner.personId].at.x}
                     y1={at[owner.personId].at.y}
                     x2={at[m.personId].at.x}
@@ -175,7 +176,7 @@ export function PlanNetwork({
                 <g
                   key={m.personId}
                   transform={`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`}
-                  className={`who ${m.status}${m.confirmed ? "confirmed" : ""}`}
+                  className={cx("who", m.status, m.confirmed && "confirmed")}
                 >
                   <circle r={r} className="disc" />
                   <svg

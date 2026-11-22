@@ -13,6 +13,7 @@ import { going } from "../../_lib/plan-network";
 import { changes, threadOf, type Step, type Tally } from "../../_lib/plan-thread";
 import { usePlan } from "../../_lib/plans";
 import { useStickToBottom } from "../../_lib/stick-to-bottom";
+import { cx } from "../../_lib/cx";
 
 // An Iniciativa on the backend: the Agentes of everyone in it, round by round, and the plan they
 // reach. The phone only watches; every line here was written and filtered on the server.
@@ -280,7 +281,7 @@ function Message({ m, me, names }: { m: PlanMessageView; me: string; names: Map<
   return mine ? (
     <div className="bubble me">{body}</div>
   ) : (
-    <div className={`msg${m.participa === false ? "nova" : ""}`}>
+    <div className={cx("msg", m.participa === false && "nova")}>
       <Avatar id={m.personId ?? ""} />
       <div className="bubble">{body}</div>
     </div>
@@ -324,7 +325,7 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
         <div className="plan-net">
           <PlanNetwork plan={plan} me={me} confirmed={confirmed} W={340} H={300} compact />
         </div>
-        <Mono className={`plan-status${closed ? "done" : ""}`}>{statusOf(plan)}</Mono>
+        <Mono className={cx("plan-status", closed && "done")}>{statusOf(plan)}</Mono>
         {thread.steps.map((step, i) => (
           <Fragment key={step.kind === "opening" ? "opening" : `v${step.proposal.version}`}>
             {step.kind === "opening" ? (

@@ -12,6 +12,7 @@ import { cap, type Coincidence, DEMO, RELATION, useEncounters } from "../_lib/pe
 import { connectionsOf, createPlan, usePlanGraph } from "../_lib/plans";
 import { type Initiative, setPhone } from "../_lib/store";
 import { toast } from "../_lib/toast";
+import { cx } from "../_lib/cx";
 
 // From Inicio: what you want to do → who you want with you → what your Agente must consider →
 // the group Conversación, where the Agentes start coordinating.
@@ -273,7 +274,7 @@ function PersonCheck({
           {sub && ` · ${sub}`}
         </span>
       </span>
-      <span className={`check${on ? "on" : ""}`} aria-hidden="true">
+      <span className={cx("check", on && "on")} aria-hidden="true">
         {on && <Icon name="check" />}
       </span>
     </button>
