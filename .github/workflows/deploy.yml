@@ -1,0 +1,45 @@
+name: Deploy
+
+# Render deploys from the mirror's main. A PR merged on GitHub leaves its merge commit only in the
+# org repo, and we can't store a secret there to push from it, so the mirror pulls instead.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+
+jobs:
+  sync:
+    if: github.repository == 'oerlandsen/platanus-hack-26-cl-team-38'
+    runs-on: ubuntu-latest
+    env:
+      ORG: platanus-hack/platanus-hack-26-cl-team-38
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Bring the org's main once its CI passed
+        env:
+          DEPLOY_KEY: ${{ secrets.MIRROR_DEPLOY_KEY }}
+        run: |
+          git fetch "https://github.com/$ORG.git" main
+          sha=$(git rev-parse FETCH_HEAD)
+          if git merge-base --is-ancestor "$sha" HEAD; then
+            echo "main ya tiene $sha"
+            exit 0
+          fi
+          ci=$(gh api "repos/$ORG/commits/$sha/check-runs?check_name=check" -q '.check_runs[0].conclusion // "pending"')
+          if [ "$ci" != "success" ]; then
+            [ "$ci" = "pending" ] && echo "CI de $sha todavía corre" || echo "::warning::CI de $sha: $ci, no se despliega"
+            exit 0
+          fi
+          # A deploy key, not GITHUB_TOKEN: that one can't push commits that touch .github/workflows.
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          # The mirror is a copy: whatever only it has (a merge made there by hand) gives way.
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/deploy" git push --force "git@github.com:${GITHUB_REPOSITORY}.git" "$sha:refs/heads/main"
+          echo "main → $sha"
