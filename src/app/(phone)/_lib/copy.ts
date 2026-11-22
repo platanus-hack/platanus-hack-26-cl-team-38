@@ -55,6 +55,7 @@ export const COPY = {
     contacts: "Contactos",
     contactsHint: "Agrégalos desde Explorar",
     initiatives: "Iniciativas",
+    interests: "Intereses en común",
     with: (name: string) => `Con ${name}.`,
     withRemove: "Quitar",
   },
@@ -186,8 +187,7 @@ export const COPY = {
 
   coincidencias: {
     title: "Explorar",
-    people: "Personas",
-    topics: "Intereses",
+    filters: "Filtros",
     desc: "Personas con las que has coincidido según lo que te interesa o estás buscando.",
     loading: "Buscando…",
     common: "En común",
@@ -197,8 +197,15 @@ export const COPY = {
     invisible: "Activa el modo Visible para conectar con otros usuarios cerca tuyo.",
     turnVisible: "Activar modo Visible",
     range: "Rango de distancia",
+    rangeNote: "Solo verás personas dentro de tu rango",
     nobody: (m: number) => `Nadie a ${m} m todavía.`,
-    widenHint: "Sube el rango para ver más lejos.",
+    widenHint: "Sube el rango en los filtros para ver más lejos.",
+    here: "Aquí",
+    needLocation: "Activa tu Ubicación para ver quién está cerca tuyo.",
+    turnLocation: "Activar Ubicación",
+    locationDenied: "El navegador no deja usar tu Ubicación. Permítela en sus ajustes para ver quién está cerca.",
+    noRoom: "Entra a la sala del evento para ver quién está cerca.",
+    proximityFailed: "No pudimos conectar con quienes están cerca. Reintentando…",
     request: "Enviar solicitud",
     requestSent: "Solicitud enviada",
     requestHint: "Será tu Contacto cuando acepte. Toca para cancelar.",
@@ -404,6 +411,8 @@ export const COPY = {
     published: (n: number) => `Tu nombre y ${n} ${n === 1 ? "Interés público" : "Intereses públicos"}`,
     map: "Mapa de OpenStreetMap",
     location: "Tu Ubicación aproximada (±100 m), para saber el nombre del lugar",
+    proximity:
+      "Tu posición mientras Explorar está abierto, para saber quién está cerca. Nadie más la ve y se olvida al minuto",
   },
 
   desktop: {

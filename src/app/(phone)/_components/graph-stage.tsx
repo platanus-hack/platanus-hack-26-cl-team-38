@@ -9,17 +9,8 @@ import { MatchGraph } from "./match-graph";
 import { PlanStage } from "./plan-network";
 import { COPY } from "../_lib/copy";
 import { isPublished } from "../_lib/node";
-import {
-  byTopic,
-  cap,
-  clampRadius,
-  coincidences,
-  DEMO,
-  fmtMeters,
-  isVisible,
-  searchTopics,
-  useEncounters,
-} from "../_lib/people";
+import { byTopic, cap, clampRadius, coincidences, DEMO, fmtMeters, isVisible, searchTopics } from "../_lib/people";
+import { useNearby } from "../_lib/proximity";
 import { isPlanId, useContacts } from "../_lib/plans";
 import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 
@@ -107,7 +98,7 @@ function nodeScene(phase: Phase, s: PhoneState) {
 export function GraphStage() {
   const s = usePhone();
   const path = usePathname();
-  const encounters = useEncounters();
+  const { encounters } = useNearby(s);
   const contacts = useContacts(s);
   if (!s) return null;
 
@@ -118,7 +109,8 @@ export function GraphStage() {
   const phase = phaseOf(s, path);
   const visible = isVisible(s);
   const coins = encounters && visible ? coincidences(s, encounters) : [];
-  const people = (s.explore ?? "personas") === "personas";
+  // Inicio shows the Intereses you share; every other screen, the people around you.
+  const people = path !== "/";
   const groups = byTopic(coins);
   const topics = s.node?.topics ?? [];
   const shared = topics.filter((t) => isPublished(t)).length;

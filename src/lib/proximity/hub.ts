@@ -18,6 +18,7 @@ export type HubOptions = {
 type Session = {
   roomId: string;
   personId: string;
+  displayName: string;
   anchor: number;
   lastSeenAt: number;
   send: ((update: ProximityUpdate) => void) | null;
@@ -78,7 +79,7 @@ export function createProximityHub({
       rooms.set(roomId, room);
       room.join(personId, { radius, data: displayName });
       const key = crypto.randomUUID().replaceAll("-", "");
-      sessions.set(key, { roomId, personId, anchor: 0, lastSeenAt: now(), send: null });
+      sessions.set(key, { roomId, personId, displayName, anchor: 0, lastSeenAt: now(), send: null });
       byPerson.set(personKey(roomId, personId), key);
       return { session: key };
     },
@@ -91,6 +92,16 @@ export function createProximityHub({
       session.anchor = parsed.data.stamp;
       session.lastSeenAt = now();
       rooms.get(session.roomId)?.update(session.personId, parsed.data.lat, parsed.data.lon, parsed.data.accuracy);
+      return true;
+    },
+
+    /** A new Distancia, keeping the session and the position: who is in range is recomputed now. */
+    setRadius(key: string, radius: unknown): boolean {
+      const session = sessions.get(key);
+      const parsed = ProximityJoinSchema.shape.radius.safeParse(radius);
+      if (!session || !parsed.success) return false;
+      session.lastSeenAt = now();
+      rooms.get(session.roomId)?.join(session.personId, { radius: parsed.data, data: session.displayName });
       return true;
     },
 
