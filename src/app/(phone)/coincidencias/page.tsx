@@ -10,7 +10,7 @@ import { Mono } from "../_components/ui";
 import { COPY } from "../_lib/copy";
 import { useLocation } from "../_lib/location";
 import { clampRadius, coincidences, DEMO, fmtMeters, isVisible, RANGE } from "../_lib/people";
-import { type ProximityStatus, useNearby } from "../_lib/proximity";
+import { PROXIMITY, type ProximityStatus, useNearby } from "../_lib/proximity";
 import { setPhone } from "../_lib/store";
 
 const C = COPY.coincidencias;
@@ -53,7 +53,7 @@ export default function CoincidenciasPage() {
               </button>
             </div>
           </div>
-        ) : !DEMO && status !== "on" ? (
+        ) : !DEMO && PROXIMITY && status !== "on" ? (
           <NotNear status={status} s={{ located: s.locationOn, room: !!s.room }} location={location} />
         ) : coins.length === 0 ? (
           <div className="empty">

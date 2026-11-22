@@ -13,6 +13,10 @@ import { getPhone, logOutbox, type PhoneState } from "./store";
 // coordinates. One connection per phone, shared by every screen that asks, and only while you
 // are Visible, have Ubicación on and checked in to a room.
 
+// Off unless NEXT_PUBLIC_PROXIMITY=1: indoors the GPS never put anyone in range, so Explorar showed
+// nobody. Off, everyone checked in to a room counts as near, as before the engine.
+export const PROXIMITY = process.env.NEXT_PUBLIC_PROXIMITY === "1";
+
 export type ProximityStatus = "off" | "connecting" | "on" | "denied" | "error";
 type Proximity = { status: ProximityStatus; near: ReadonlyMap<string, ProximityNeighbor> };
 
@@ -178,7 +182,7 @@ function acquire(personId: string, roomId: string, radius: number): () => void {
 function useProximity(s: PhoneState | null | undefined): Proximity {
   const personId = s?.personId;
   const roomId = s?.room?.id;
-  const on = !!s && !DEMO && !!roomId && s.locationOn && isVisible(s);
+  const on = !!s && PROXIMITY && !DEMO && !!roomId && s.locationOn && isVisible(s);
   const radius = clampRadius(s?.radiusM ?? 0);
   useEffect(() => {
     if (!on || !personId || !roomId) return;
@@ -204,5 +208,5 @@ export function useNearby(s: PhoneState | null | undefined): {
 } {
   const encounters = useEncounters();
   const { status, near } = useProximity(s);
-  return { encounters: encounters && (DEMO ? encounters : nearby(encounters, near)), status };
+  return { encounters: encounters && (DEMO || !PROXIMITY ? encounters : nearby(encounters, near)), status };
 }
