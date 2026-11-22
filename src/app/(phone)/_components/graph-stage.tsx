@@ -7,10 +7,11 @@ import { type Edge, type Entity, GraphCanvas, onEllipse, pose } from "./graph-ca
 import { Icon } from "./icons";
 import { AffinityGraph } from "./affinity-graph";
 import { MatchGraph } from "./match-graph";
+import { PlanStage } from "./plan-network";
 import { COPY } from "../_lib/copy";
 import { isPublished } from "../_lib/node";
-import { byTopic, cap, clampRadius, coincidences, isVisible, searchTopics, useEncounters } from "../_lib/people";
-import { useContacts } from "../_lib/plans";
+import { byTopic, cap, clampRadius, coincidences, DEMO, isVisible, searchTopics, useEncounters } from "../_lib/people";
+import { isPlanId, useContacts } from "../_lib/plans";
 import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 
 // The graph behind the phone, on slate: your Fuentes and topics while you build your Nodo, then
@@ -81,6 +82,10 @@ export function GraphStage() {
   const encounters = useEncounters();
   const contacts = useContacts(s);
   if (!s) return null;
+
+  // An Iniciativa on screen: the panel shows its network instead of your Coincidencias.
+  const open = decodeURIComponent(path.match(/^\/conversaciones\/([^/]+)/)?.[1] ?? "");
+  if (!DEMO && s.onboarded && isPlanId(open)) return <PlanStage id={open} me={s.personId} />;
 
   const phase = phaseOf(s, path);
   const visible = isVisible(s);

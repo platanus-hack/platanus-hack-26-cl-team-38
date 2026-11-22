@@ -13,8 +13,11 @@ export async function GET(request: Request, ctx: RouteContext<"/api/plans/[id]">
   if (!me) return Response.json({ error: "Falta la clave del dispositivo, o no es la de esa persona" }, { status: 401 });
 
   const plan = await loadPlan(supabaseAdmin, id);
-  const contacts = plan ? await neighbourhood(supabaseAdmin, id, me) : [];
-  const view = plan && viewPlan(plan, me, new Map(contacts.map((c) => [c.contactId, c.contactName])));
+  // Everyone's neighbourhood: the reader's by name, the rest only as a count (the network view draws it).
+  const around = plan ? await Promise.all(plan.members.map(async (m) => [m.personId, await neighbourhood(supabaseAdmin, id, m.personId)] as const)) : [];
+  const contacts = around.find(([personId]) => personId === me)?.[1] ?? [];
+  const reach = new Map(around.map(([personId, list]) => [personId, list.length]));
+  const view = plan && viewPlan(plan, me, new Map(contacts.map((c) => [c.contactId, c.contactName])), reach);
   if (!view) return Response.json({ error: "No existe ese plan, o no participas en él" }, { status: 404 });
 
   // A deliberation whose process died is taken again by whoever is watching it.
