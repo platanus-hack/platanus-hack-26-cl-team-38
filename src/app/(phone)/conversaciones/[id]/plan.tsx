@@ -213,7 +213,7 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
         back="/conversaciones"
         sub={
           <Mono className="mute">
-            {C.label} · {plan.members.length + 1} Agentes · {others.map((m) => first(m.displayName)).join(", ")}
+            {C.label} · {COPY.agents(plan.members.length)} · {others.map((m) => first(m.displayName)).join(", ")}
           </Mono>
         }
       />
@@ -236,7 +236,7 @@ export function PlanConversation({ id, me }: { id: string; me: string }) {
           const body = (
             <>
               <span className="who">
-                {mine ? C.you : `Agente de ${author}`}
+                {mine ? C.you : COPY.agentOf(author)}
                 {m.decision && ` · ${decision[m.decision]}`}
                 {m.participa !== undefined && <span className={`pchip ${m.participa ? "va" : "nova"}`}>{m.participa ? C.going : C.notGoing}</span>}
               </span>

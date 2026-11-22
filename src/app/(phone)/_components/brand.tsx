@@ -30,7 +30,7 @@ const PATHS: Partial<Record<Source, { d: string; fill: string }>> = {
 };
 
 export const SOURCE_META: Record<Source, { label: string; reads: string; kind: "agent" | "app" }> = {
-  claude: { label: "Claude", reads: "Lo que sabe de ti por tus Conversaciones", kind: "agent" },
+  claude: { label: "Claude", reads: "Lo que sabe de ti por tus conversaciones", kind: "agent" },
   chatgpt: { label: "ChatGPT", reads: "Su memoria sobre ti", kind: "agent" },
   gemini: { label: "Gemini", reads: "Lo que sabe de ti", kind: "agent" },
   spotify: { label: "Spotify", reads: "Tus artistas y géneros, no tus playlists privadas", kind: "app" },

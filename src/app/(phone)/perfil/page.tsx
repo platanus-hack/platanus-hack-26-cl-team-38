@@ -11,7 +11,7 @@ import { Sheet, Splash, TabBar, useOnboardedPhone } from "../_components/chrome"
 import { Icon } from "../_components/icons";
 import { TopicItem } from "../_components/topic-item";
 import { ListRow, Mono } from "../_components/ui";
-import { api } from "../_lib/api";
+import { api, scheduleCheckIn } from "../_lib/api";
 import { COPY } from "../_lib/copy";
 import { FORMAT, type InfoField, parseInfo } from "../_lib/info";
 import { useLocation } from "../_lib/location";
@@ -106,7 +106,7 @@ export default function PerfilPage() {
         <div className="sec u">
           {C.nodeTitle}
           <Mono className="mute">
-            {interests.length} {COPY.nodo.shared} · {kept} {COPY.nodo.kept}
+            {COPY.nodo.count(interests.length, kept)}
           </Mono>
         </div>
         <p className="mute" style={{ margin: 0, fontSize: 13 }}>
@@ -145,11 +145,18 @@ export default function PerfilPage() {
         <div className="sec">
           {C.byTopic}
           <Mono className="mute">
-            {interests.length} {COPY.nodo.shared} · {kept} {COPY.nodo.kept}
+            {COPY.nodo.count(interests.length, kept)}
           </Mono>
         </div>
         {recommended > 0 && (
-          <button type="button" className="link" onClick={() => setPhone((p) => (p.node ? { node: shareRecommended(p.node) } : {}))}>
+          <button
+            type="button"
+            className="link"
+            onClick={() => {
+              setPhone((p) => (p.node ? { node: shareRecommended(p.node) } : {}));
+              scheduleCheckIn();
+            }}
+          >
             {COPY.bienvenida.shareAll}
           </button>
         )}

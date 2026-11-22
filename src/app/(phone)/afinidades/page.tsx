@@ -11,7 +11,7 @@ import { BackLink, Mono } from "../_components/ui";
 import { COPY } from "../_lib/copy";
 import { discover } from "../_lib/insight";
 import { matchPhrase } from "../_lib/matches";
-import { byTopic, cap, fmtDistance, myInterests, RELATION, relTime, searchTopics } from "../_lib/people";
+import { byTopic, cap, fmtMeters, myInterests, RELATION, relTime, searchTopics } from "../_lib/people";
 import { useContacts } from "../_lib/plans";
 import { setPhone } from "../_lib/store";
 
@@ -95,7 +95,7 @@ export default function AfinidadesPage() {
                 <h2 className="t-title">{person.person.displayName}</h2>
                 <span className={`rel ${person.relation}`}>{RELATION[person.relation].label}</span>{" "}
                 <Mono className="mute">
-                  · {fmtDistance(person.distanceM).replace(/^a /, "")} · {relTime(person.at)}
+                  · {fmtMeters(person.distanceM)} · {relTime(person.at)}
                 </Mono>
               </div>
             </div>

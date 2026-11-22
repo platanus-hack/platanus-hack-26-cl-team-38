@@ -201,13 +201,14 @@ export function contactsOf(s: PhoneState, encounters: Encounter[]): Coincidence[
   return affinities(s, encounters).filter((c) => c.relation !== "cercania");
 }
 
-export function fmtDistance(m: number): string {
-  if (m === 0) return "en el mismo lugar";
-  return m < 1000 ? `a ${m} m` : `a ${(m / 1000).toLocaleString("es-CL", { maximumFractionDigits: 1 })} km`;
+/** A distance on its own, wherever it shows next to a name: "12 m", "1,2 km". */
+export function fmtMeters(m: number): string {
+  return m < 1000 ? `${m} m` : `${(m / 1000).toLocaleString("es-CL", { maximumFractionDigits: 1 })} km`;
 }
 
-export function fmtRadius(m: number): string {
-  return m < 1000 ? `${m} m` : `${m / 1000} km`;
+/** A distance inside a sentence: "a 12 m", or "en el mismo lugar". */
+export function fmtDistance(m: number): string {
+  return m === 0 ? "en el mismo lugar" : `a ${fmtMeters(m)}`;
 }
 
 export function relTime(iso: string): string {

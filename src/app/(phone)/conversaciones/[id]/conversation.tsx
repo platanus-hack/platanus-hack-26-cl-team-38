@@ -46,7 +46,7 @@ export function Conversation({ params }: { params: Promise<{ id: string }> }) {
         sub={
           cv && (
             <Mono className="mute">
-              {COPY.plan.label} · {cv.members.length + 1} Agentes · {cv.members.map((m) => m.person.displayName).join(", ")}
+              {COPY.plan.label} · {COPY.agents(cv.members.length + 1)} · {cv.members.map((m) => m.person.displayName).join(", ")}
             </Mono>
           )
         }
@@ -73,7 +73,7 @@ export function Conversation({ params }: { params: Promise<{ id: string }> }) {
                   <div className="msg">
                     <Avatar id={m.from} />
                     <div className="bubble">
-                      <span className="who">Agente de {names[m.from]}</span>
+                      <span className="who">{COPY.agentOf(names[m.from])}</span>
                       {m.text}
                     </div>
                   </div>
@@ -106,7 +106,7 @@ function Actions({ convId, name, count }: { convId: string; name: string; count:
   const send = () => {
     const t = text.trim();
     if (!t) return;
-    say(convId, t, `Entendido. Lo llevo a la Conversación: «${t}».`);
+    say(convId, t, `Entendido. Lo llevo al Chat: «${t}».`);
     setText("");
   };
   return (
@@ -135,7 +135,7 @@ function Actions({ convId, name, count }: { convId: string; name: string; count:
         }}
       >
         <input value={text} placeholder={C.tellAgent} aria-label={C.tellAgent} maxLength={280} onChange={(e) => setText(e.target.value)} enterKeyHint="send" />
-        <button type="submit" aria-label="Enviar" disabled={!text.trim()}>
+        <button type="submit" aria-label={COPY.send} disabled={!text.trim()}>
           <Icon name="send" />
         </button>
       </form>

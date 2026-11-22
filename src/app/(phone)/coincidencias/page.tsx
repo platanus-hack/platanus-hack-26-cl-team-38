@@ -20,6 +20,7 @@ import {
   type Coincidence,
   coincidences,
   DEMO,
+  fmtMeters,
   isVisible,
   myInterests,
   RANGE,
@@ -63,7 +64,7 @@ export default function CoincidenciasPage() {
           </div>
           <div className="near-row">
             <Mono className="mute">
-              {visible ? `${coins.length} · ${radius} m` : "—"}
+              {visible ? `${coins.length} · ${fmtMeters(radius)}` : "—"}
               {DEMO && !s.locationOn ? ` · ${C.demoShort}` : ""}
             </Mono>
             <label className="near-switch">
@@ -141,7 +142,7 @@ export default function CoincidenciasPage() {
                         <span className={`rel ${c.relation}`}>{RELATION[c.relation].label}</span> · {c.items.map(matchPhrase).join(" · ")}
                       </>
                     }
-                    data={`${c.distanceM} m`}
+                    data={fmtMeters(c.distanceM)}
                     onClick={() => setFocus({ person: c.person.personId })}
                   />
                 ))}
@@ -184,7 +185,7 @@ function PersonSummary({ c, myTopics, state }: { c: Coincidence; myTopics: Publi
           <h2 className="t-title">{c.person.displayName}</h2>
           <span className={`rel ${c.relation}`}>{RELATION[c.relation].label}</span>{" "}
           <Mono className="mute">
-            · {c.distanceM} m · {c.place} · {relTime(c.at)}
+            · {fmtMeters(c.distanceM)} · {c.place} · {relTime(c.at)}
           </Mono>
         </div>
       </div>

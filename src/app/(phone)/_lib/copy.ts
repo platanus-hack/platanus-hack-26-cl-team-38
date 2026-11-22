@@ -1,18 +1,32 @@
 // Every visible text of the phone, in one place, so it stays short.
 // Rules: titles of three words or fewer; no explanatory subtitles (explain once, behind a "?");
-// domain concepts capitalized: Minga, Nodo, Agente, Coincidencia, Conversación, Interés, Perfil,
-// Fuente, Ubicación, Distancia. Everything else in normal sentence case.
+// domain concepts capitalized: Minga, Nodo, Agente, Coincidencia, Iniciativa, Chat, Contacto,
+// Interés, Perfil, Fuente, Ubicación, Distancia. Everything else in normal sentence case.
+// Words: an Interés is a topic you share; a tema is any topic of your Nodo, public or not. An
+// Iniciativa is a group your Agente coordinates, and it lives in Chats. Contactos are the people
+// you can plan with ("conexión" is the backend's word, never the UI's).
 
 export const COPY = {
   app: "Minga",
   description: "Tu Agente te presenta a quienes coinciden contigo cerca tuyo.",
 
+  agents: (n: number) => (n === 1 ? "1 Agente" : `${n} Agentes`),
+  agentOf: (name: string) => `Agente de ${name}`,
+  isPublic: "público",
+  onlyYou: "solo tú",
+  back: "Volver",
+  close: "Cerrar",
+  send: "Enviar",
+  sent: "Enviado",
+  clearSearch: "Borrar búsqueda",
+  whatIsThis: "¿Qué es esto?",
+  sections: "Secciones",
+
   tabs: { inicio: "Inicio", coincidencias: "Explorar", conversaciones: "Chats", perfil: "Perfil" },
 
   inicio: {
     titles: ["¿Qué quieres lograr?", "Apóyate en tu gente"],
-    placeholder: "Resuelve y coordina con tu red de contactos",
-    intentHelp: "Solo la ve tu Agente. La usa para elegir con quién conectarte.",
+    placeholder: "Resuelve y coordina con tus Contactos",
     saved: "Tu Agente lo sabe",
     howTitle: "Cómo funciona Minga",
     how: [
@@ -22,10 +36,6 @@ export const COPY = {
       { icon: "check", title: "Ustedes deciden", text: "Eliges con quién y qué considerar. Los Agentes proponen el primer paso; ustedes lo hacen realidad." },
     ],
     howMore: "Entendido",
-    coincidence: "Coincidencia",
-    locationOff: "Activar Ubicación",
-    locating: "Buscando…",
-    locationDenied: "Ubicación bloqueada en el navegador",
     contacts: "Contactos",
     contactsHint: "Agrégalos desde Explorar",
     initiatives: "Iniciativas",
@@ -33,15 +43,16 @@ export const COPY = {
     withRemove: "Quitar",
   },
 
-  /** Iniciativa: from what you want to do on Inicio to a group Conversación. */
+  /** Iniciativa: from what you want to do on Inicio to a group Chat. */
   iniciativa: {
     label: "Iniciativa",
     created: "Iniciativa creada: tu Agente ya escribió al grupo",
     who: "¿Con quién?",
-    search: "Buscar Contactos por nombre o tema",
+    search: "Buscar Contactos por nombre o Interés",
     suggested: "Sugeridos",
+    suggestedWhy: "Tu Agente los sugiere porque saben de lo que quieres hacer o ya comparten algo contigo.",
     everyone: "Tus Contactos",
-    none: "Ningún Contacto con ese nombre o tema.",
+    none: "Ningún Contacto con ese nombre o Interés.",
     noContacts: "Todavía no tienes Contactos. Agrégalos desde Explorar.",
     one: "persona",
     many: "personas",
@@ -49,7 +60,7 @@ export const COPY = {
     limits: "¿Qué considerar?",
     limitsHelp: "Solo las lee tu Agente. Al grupo le dice la condición, no el motivo.",
     limitsPlaceholder: "Por ejemplo: presupuesto acotado, solo fines de semana, volver antes del lunes. Soy vegetariana.",
-    create: "Crear Conversación",
+    create: "Crear Iniciativa",
     skip: "Sin restricciones",
     back: "Volver",
   },
@@ -91,7 +102,7 @@ export const COPY = {
       manyConfirmed: "confirmaron",
       oneFromNetwork: "dato de la red",
       manyFromNetwork: "datos de la red",
-      legendSource: "Dato de un contacto",
+      legendSource: "Dato de un Contacto",
       legendDots: "Contacto de esa persona",
     },
     disagreements: "Quedó en desacuerdo",
@@ -99,14 +110,14 @@ export const COPY = {
     yourContact: "de tu contacto",
     networkOf: "De la red de",
     yourNetwork: "De tu red",
-    contacts: "contactos en su red",
-    oneContact: "contacto en su red",
-    noConnections: "Una Iniciativa se arma con tus conexiones. Todavía no tienes ninguna.",
-    otherDevice: "Este perfil ya se abrió en otro dispositivo, y tus conexiones solo se leen desde ese.",
-    graphFailed: "No pudimos cargar tus conexiones. Intenta de nuevo.",
+    contacts: "Contactos en su red",
+    oneContact: "Contacto en su red",
+    noConnections: "Una Iniciativa se arma con tus Contactos. Todavía no tienes ninguno.",
+    otherDevice: "Este perfil ya se abrió en otro dispositivo, y tus Contactos solo se leen desde ese.",
+    graphFailed: "No pudimos cargar tus Contactos. Intenta de nuevo.",
     tooMany: "Hasta 5 personas por Iniciativa.",
-    onlyConnections: "Una Iniciativa se arma solo con tus conexiones aceptadas.",
-    noUser: "Entra a una sala antes de crear una Iniciativa.",
+    onlyConnections: "Una Iniciativa se arma solo con tus Contactos.",
+    noUser: "Termina de armar tu Nodo antes de crear una Iniciativa.",
     failed: "No pudimos crear la Iniciativa. Intenta de nuevo.",
     creating: "Creando…",
   },
@@ -134,26 +145,21 @@ export const COPY = {
     common: "En común",
     nothing: "Sin Intereses en común todavía.",
     rest: "También",
-    search: "Buscar por tema",
+    search: "Buscar por Interés",
     clear: "Borrar búsqueda",
     one: "persona",
     many: "personas",
-    noOne: "Nadie con ese tema todavía.",
+    noOne: "Nadie con ese Interés todavía.",
   },
 
   coincidencias: {
     title: "Explorar",
     people: "Personas",
-    topics: "Temas",
+    topics: "Intereses",
     desc: "Personas con las que has coincidido según lo que te interesa o estás buscando.",
     loading: "Buscando…",
-    closer: "Menos Distancia",
-    farther: "Más Distancia",
-    met: "Se cruzaron",
     common: "En común",
     rest: "También",
-    conversation: "Ver Conversación",
-    demo: "Coincidencias de ejemplo",
     demoShort: "ejemplo",
     visible: "Visible",
     invisible: "Activa el modo Visible para conectar con otros usuarios cerca tuyo.",
@@ -190,7 +196,7 @@ export const COPY = {
     initiatives: "Iniciativas",
     you: "Tu Agente",
     empty: "Todavía no hay Iniciativas.",
-    notFound: "No encontramos esta Conversación.",
+    notFound: "No encontramos este Chat.",
     yourself: "Tú",
     confirm: "Confirmo",
     confirmed: "Confirmaste",
@@ -204,14 +210,13 @@ export const COPY = {
   perfil: {
     interests: "Intereses",
     sources: "Fuentes",
-    myNode: "Mi Nodo",
     location: "Ubicación",
     outbox: "Qué salió de tu teléfono",
     account: "Cuenta",
     privacy: "Privacidad",
     nodeTitle: "Nodo y Privacidad",
     saved: "Privacidad guardada",
-    privacyHelp: "Cada tema decide si se comparte. Lo que no, se queda en tu teléfono.",
+    privacyHelp: "Tú decides qué temas compartes. Lo que no, se queda en tu teléfono.",
     configure: "Configurar",
     byTopic: "Por tema",
     general: "General",
@@ -225,8 +230,6 @@ export const COPY = {
     wipeText: "Se borra de este teléfono con tus temas, Fuentes y Chats. No se puede deshacer.",
     wipeYes: "Borrar mi Nodo",
     cancel: "Cancelar",
-    on: "activada",
-    off: "apagada",
     none: "Nada todavía.",
     noInterests: "Sin Intereses públicos.",
     photo: "Cambiar foto",
@@ -286,8 +289,7 @@ export const COPY = {
 
   nodo: {
     title: "Mi Nodo",
-    shared: "públicos",
-    kept: "contigo",
+    count: (shared: number, kept: number) => `${shared} públicos · ${kept} contigo`,
     sensitive: "Nunca se comparte",
     addSource: "Agregar Fuente",
   },
@@ -299,6 +301,7 @@ export const COPY = {
     saved: "En este teléfono",
     sources: "Conecta tus Fuentes",
     building: "Armando tu Nodo",
+    topicCount: (n: number) => `${n} ${n === 1 ? "tema" : "temas"}`,
     share: "¿Qué compartes?",
     shareAll: "Compartir lo recomendado",
     selectAll: "Seleccionar todos",
@@ -317,12 +320,12 @@ export const COPY = {
     read: "Leer respuesta",
     reading: "Revisando…",
     unreadable: "No pude leer ese texto. Copia el bloque completo, desde [ hasta ].",
-    arrived: (n: number) => `Llegaron ${n} ${n === 1 ? "Interés" : "Intereses"}.`,
+    arrived: (n: number) => `Llegaron ${n} ${n === 1 ? "tema" : "temas"}.`,
     held: (n: number) => `Dejé fuera ${n} por ser ${n === 1 ? "un dato sensible" : "datos sensibles"}.`,
     filterDown: "No pudimos revisar la privacidad ahora, así que no cargué nada. Intenta de nuevo.",
     retry: "Intentar de nuevo",
     entering: "Entrando…",
-    rejected: (n: number) => `El servidor dejó ${n === 1 ? "un Interés" : `${n} Intereses`} en privado.`,
+    rejected: (n: number) => `El servidor dejó ${n === 1 ? "un tema" : `${n} temas`} en privado.`,
     personal: "Ojo: podría decir de más sobre ti",
     toHome: "Seguir",
     googleHint: "Trae los canales de YouTube que sigues y más ves, y lo que se repite en tu calendario. Llega como borrador y tú decides qué compartes.",
@@ -342,6 +345,7 @@ export const COPY = {
     loading: "Pidiendo código…",
     failed: "No pudimos pedir el código. Revisa tu conexión.",
     again: "Otro código",
+    expired: "Este código venció. Pide otro.",
     expires: (min: number) => `Vence en ${min} min`,
     then: "Después pídele a tu asistente: “Sube mi perfil a Minga”. Llega a tu teléfono como borrador y tú decides qué compartes.",
     setupTitle: "¿Cómo lo agrego?",
@@ -356,16 +360,31 @@ export const COPY = {
     retry: "Intenta de nuevo.",
   },
 
+  /** "Qué salió de tu teléfono": where each upload went, and what it carried. */
+  outbox: {
+    filter: "Filtro de privacidad de Minga",
+    filtered: (n: number) => `El nombre y el tipo de ${n} ${n === 1 ? "tema" : "temas"}, sin tu nombre`,
+    server: "Servidor de Minga",
+    published: (n: number) => `Tu nombre y ${n} ${n === 1 ? "Interés público" : "Intereses públicos"}`,
+    map: "Mapa de OpenStreetMap",
+    location: "Tu Ubicación aproximada (±100 m), para saber el nombre del lugar",
+  },
+
   desktop: {
     building: "Armando tu Nodo",
+    graph: "Grafo",
+    sources: (n: number) => `${n} ${n === 1 ? "Fuente" : "Fuentes"}`,
+    coincidences: (n: number) => `${n} ${n === 1 ? "Coincidencia" : "Coincidencias"}`,
+    invisible: "Visible: no",
+    contacts: "Contactos · Amigos y Conocidos",
     legend: {
       amigos: "Amigos",
       conocidos: "Conocidos",
       close: "Más cerca, relación más fuerte",
       size: "Más grande, más en común",
       drag: "Arrastra un círculo para moverlo",
-      topics: "Temas que compartes; las caras son quienes los tienen",
-      tap: "Toca un tema para ver a esas personas",
+      topics: "Intereses que compartes; las caras son quienes los tienen",
+      tap: "Toca un Interés para ver a esas personas",
       empty: "Cuando coincidas con alguien, aparece aquí.",
       emptyHint: "Sube el rango para ver más lejos.",
     },
@@ -373,4 +392,4 @@ export const COPY = {
 } as const;
 
 /** Domain words that always go capitalized, for the copy check. */
-export const CONCEPTS = ["Minga", "Nodo", "Agente", "Coincidencia", "Conversación", "Interés", "Intereses", "Perfil", "Fuente", "Ubicación", "Distancia"];
+export const CONCEPTS = ["Minga", "Nodo", "Agente", "Coincidencia", "Iniciativa", "Chat", "Contacto", "Contactos", "Interés", "Intereses", "Perfil", "Fuente", "Ubicación", "Distancia"];

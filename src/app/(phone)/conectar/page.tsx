@@ -58,7 +58,7 @@ export default function ConectarPage() {
             <Mono className="t-hero">{ticket.code}</Mono>
           ) : (
             <span className="mute" role="status">
-              {error ? C.failed : ticket ? "" : C.loading}
+              {error ? C.failed : ticket ? C.expired : C.loading}
             </span>
           )}
         </div>

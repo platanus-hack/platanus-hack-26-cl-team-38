@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { COPY } from "./copy";
 import { getPhone, logOutbox, setPhone } from "./store";
 
 // Where you are, as a place name. Opt-in: the browser asks for permission the first time.
@@ -30,7 +31,7 @@ export function useLocation() {
           const { label } = (await response.json()) as { label: string };
           const first = !getPhone().locationOn;
           setPhone({ locationOn: true, place: { label, at: new Date().toISOString() } });
-          if (first) logOutbox("Mapa de OpenStreetMap", "Tu Ubicación aproximada (±100 m), para saber el nombre del lugar");
+          if (first) logOutbox(COPY.outbox.map, COPY.outbox.location);
           setStatus("idle");
         } catch {
           setStatus("error");

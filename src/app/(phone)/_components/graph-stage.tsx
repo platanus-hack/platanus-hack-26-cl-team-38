@@ -10,7 +10,7 @@ import { MatchGraph } from "./match-graph";
 import { PlanStage } from "./plan-network";
 import { COPY } from "../_lib/copy";
 import { isPublished } from "../_lib/node";
-import { byTopic, cap, clampRadius, coincidences, DEMO, isVisible, searchTopics, useEncounters } from "../_lib/people";
+import { byTopic, cap, clampRadius, coincidences, DEMO, fmtMeters, isVisible, searchTopics, useEncounters } from "../_lib/people";
 import { isPlanId, useContacts } from "../_lib/plans";
 import { connectedSources, type PhoneState, usePhone } from "../_lib/store";
 
@@ -97,20 +97,21 @@ export function GraphStage() {
   const n = connectedSources(s).length;
   const selected = groups.find((g) => g.topic === s.focus.topic);
 
+  const D = COPY.desktop;
   const status = {
-    inicio: COPY.desktop.building,
-    fuentes: `${n} ${n === 1 ? "Fuente" : "Fuentes"}`,
-    compartir: `${shared} públicos · ${topics.length - shared} contigo`,
+    inicio: D.building,
+    fuentes: D.sources(n),
+    compartir: COPY.nodo.count(shared, topics.length - shared),
     coincidencias: visible
-      ? `${coins.length} ${coins.length === 1 ? "Coincidencia" : "Coincidencias"} · ${clampRadius(s.radiusM)} m${selected && !people ? ` · ${cap(selected.topic)}` : ""}`
-      : COPY.coincidencias.visible + ": no",
+      ? `${D.coincidences(coins.length)} · ${fmtMeters(clampRadius(s.radiusM))}${selected && !people ? ` · ${cap(selected.topic)}` : ""}`
+      : D.invisible,
   }[phase];
 
   const affinity = path.startsWith("/afinidades") && phase === "coincidencias";
   const L = COPY.desktop.legend;
 
   return (
-    <section className="stage" aria-label="Grafo">
+    <section className="stage" aria-label={D.graph}>
       {/* how to read the graph, in the corner */}
       {affinity ? (
         <ul className="legend">
@@ -162,7 +163,7 @@ export function GraphStage() {
         )}
       </div>
       <p className="status" role="status">
-        {affinity ? "Contactos · Amigos y Conocidos" : status}
+        {affinity ? D.contacts : status}
       </p>
     </section>
   );

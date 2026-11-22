@@ -55,7 +55,7 @@ export function useNodeSync(s: PhoneState | undefined): NodeSync {
     if (!personId) return;
     if (missing.length === 0) return apply(personId, drafts, []);
     let cancelled = false;
-    logOutbox("Filtro de privacidad de Minga", `El nombre y el tipo de ${missing.length} temas, sin tu nombre`);
+    logOutbox(COPY.outbox.filter, COPY.outbox.filtered(missing.length));
     fetchVerdicts(missing)
       .then((verdicts) => {
         if (cancelled) return;
