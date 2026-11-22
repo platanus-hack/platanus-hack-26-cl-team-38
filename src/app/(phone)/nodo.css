@@ -1799,6 +1799,23 @@
   .graph-screen .switch {
     background: rgba(242, 241, 238, 0.18);
   }
+  /* Explorar, in someone's sheet: they already are your Contacto */
+  .connect-state {
+    margin: 24px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    border-radius: 16px;
+    background: rgba(43, 212, 164, 0.14);
+    color: #0f7a5c;
+    font-weight: 500;
+  }
+  .connect-state .ic {
+    width: 20px;
+    height: 20px;
+  }
   /* Explorar: Personas / Temas */
   .graph-screen .segbar {
     margin: 0;
@@ -1808,16 +1825,6 @@
   .graph-screen .segbar button[aria-checked="true"] {
     background: var(--on-slate);
     color: var(--slate);
-  }
-  .graph-screen .glist {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 8px 24px calc(96px + env(safe-area-inset-bottom, 0px));
-    scrollbar-width: none;
-  }
-  .graph-screen .glist .row {
-    border-color: rgba(242, 241, 238, 0.1);
   }
   .graph-screen .switch[aria-checked="true"] {
     background: var(--cercania);

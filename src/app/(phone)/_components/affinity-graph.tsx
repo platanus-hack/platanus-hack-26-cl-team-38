@@ -56,7 +56,7 @@ export function AffinityGraph({
     const rel = c.relation;
     // By rank, not by raw strength: many contacts tie, and a spiral keeps them apart while the
     // stronger one still sits closer.
-    const r = unit * (0.36 + 0.61 * Math.sqrt(list.length > 1 ? i / (list.length - 1) : 0));
+    const r = unit * (0.48 + 0.49 * Math.sqrt(list.length > 1 ? i / (list.length - 1) : 0));
     const deg = -90 + i * TURN;
     const at = onEllipse(0, 1, r * stretch, r, cx, cy, deg, deg);
     const lv = level(c);
