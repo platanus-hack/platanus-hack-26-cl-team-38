@@ -73,7 +73,7 @@ export const COPY = {
 
   afinidades: {
     title: "Afinidades",
-    desc: "Tus contactos por cercanía: Amigos al centro, luego Conocidos y quienes estuvieron cerca.",
+    desc: "Tus contactos por cercanía: Amigos al centro, luego Conocidos y quienes estuvieron cerca. Más grande, más en común.",
     common: "En común",
     nothing: "Sin Intereses en común todavía.",
     rest: "También",
