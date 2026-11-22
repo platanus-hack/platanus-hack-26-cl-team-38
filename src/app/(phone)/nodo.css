@@ -956,7 +956,8 @@
     max-width: 320px;
     padding: 4px 8px;
     border-radius: 26px;
-    background: rgba(31, 49, 56, 0.92);
+    /* darker than slate, so the bar stands out on the slate screens too */
+    background: rgba(17, 28, 33, 0.94);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     display: flex;
